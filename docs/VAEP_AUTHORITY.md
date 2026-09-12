@@ -26,6 +26,8 @@ TASK_SCOPE_LEASE_REQUIRED=TRUE
 TASK_SCOPE_LEASE_SINGLE_WRITER=TRUE
 TASK_SCOPE_LEASE_TTL_MINUTES=10
 STALE_LEASE_TAKEOVER_AFTER_MINUTES=10
+LEASE_FRESH_REQUIRES_LIVE_MATERIAL_PROGRESS=TRUE
+ENDED_INVOCATION_RELEASES_LEASE_IMMEDIATELY=TRUE
 DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_CLOSE_SLA_ROLLING_24H=72
@@ -38,6 +40,13 @@ MAX_VOLUNTARY_IDLE=0
 GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY
 GLOBAL_FROZEN_PROHIBITED=TRUE
 CAUSAL_HOLD_SCOPE=TASK_OR_EXECUTION_ONLY
+CAUSAL_GATE_MATRIX_REQUIRED=TRUE
+UNRELATED_WORKFLOW_BLOCKING_PROHIBITED=TRUE
+REVIEW_BEFORE_EXPENSIVE_CI=TRUE
+CLOSURE_CANDIDATE_HEAD_FREEZE=TRUE
+LOGICAL_CLOSER_CONTINUITY=TRUE
+SPLIT_BEFORE_WRITE_OVER_20M=TRUE
+CYCLE_TIME_TELEMETRY_REQUIRED=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
 PREARM_BEFORE_CAUSAL_CI=TRUE
 VAEP_CHECKPOINTS=:00,:12,:24,:36,:48
@@ -103,6 +112,12 @@ Reglas absolutas:
 
 El minuto programado es un disparador, no una precondición. Una ejecución tardía hace catch-up de la obligación material vencida sin duplicar ownership.
 
+### Continuidad del closer lógico
+
+Mientras una invocación física siga realmente viva y produzca progreso material útil sobre el `CURRENT_PARENT`, conserva ownership lógico del parent. Un checkpoint posterior no fuerza handoff ni cambio de writer por sí mismo: actúa como verifier/read-only sobre ese scope y sólo puede escribir un scope independiente no solapado.
+
+El handoff del mismo parent ocurre únicamente cuando el writer físico termina, se bloquea causalmente, deja de producir progreso o cierra el parent. La frontera horaria/minuto nunca es razón suficiente para partir trabajo material en curso.
+
 ## 3. Ownership y lease de scope
 
 Todo write-scope material directo requiere lease lógico antes de escribir.
@@ -125,12 +140,13 @@ Contrato:
 1. Un solo writer autoritativo por scope.
 2. Antes de adquirir lease: releer `Desarrollo` HEAD y estado operativo fresco.
 3. El lease debe identificar parent + faceta/scope material; un nombre de slot no basta.
-4. Mientras `LEASE_STATUS=ACTIVE` y `LEASE_HEARTBEAT_AT` tenga <=10 minutos con progreso material verificable, otra automatización no escribe ese scope.
-5. Un lease sin progreso material verificable durante >=10 minutos es `STALE` y puede ser tomado por el siguiente ejecutor, registrando owner anterior, causa y nuevo token.
-6. Google Sheets no ofrece CAS de celda: toda adquisición/takeover requiere **read-before-write + write + immediate readback**. Si el readback muestra carrera, no escribir producto; reconciliar ownership primero.
-7. El lease no se almacena mediante commits Git para evitar HEAD churn.
-8. Finalizado el scope, marcar `RELEASED`, `COMPLETED` o `SUPERSEDED` con evidencia exacta. No dejar leases fantasmas.
-9. Cambiar de ejecutor no reinicia identidad ni intentos de una tarea Jules ya existente.
+4. `LEASE_STATUS=ACTIVE` o un heartbeat reciente **no bastan** para considerar fresco un owner. La frescura exige una invocación física realmente viva y progreso material verificable reciente sobre el scope.
+5. Si la invocación propietaria terminó, debe dejar `RELEASED`, `COMPLETED`, `HANDOFF_RELEASED` o equivalente inmediatamente. El sucesor no espera artificialmente el TTL de un proceso que ya terminó.
+6. El umbral de >=10 minutos sin progreso material se conserva como backstop para writers cuyo estado físico no pueda determinarse o que estén realmente stalled; tras reread/readback se permite takeover seguro.
+7. Google Sheets no ofrece CAS de celda: toda adquisición/takeover requiere **read-before-write + write + immediate readback**. Si el readback muestra carrera, no escribir producto; reconciliar ownership primero.
+8. El lease no se almacena mediante commits Git para evitar HEAD churn.
+9. Finalizado el scope, marcar `RELEASED`, `COMPLETED`, `HANDOFF_RELEASED` o `SUPERSEDED` con evidencia exacta. No dejar leases fantasmas.
+10. Cambiar de ejecutor no reinicia identidad ni intentos de una tarea Jules ya existente.
 
 ## 4. Jules J1–J6: capacidad auxiliar, nunca cuello de botella
 
@@ -202,6 +218,25 @@ Objetivo contractual:
 
 La producción se mide por padres certificados `LISTO_REAL`, no por triggers, commits de control-plane, tareas Jules, manifests, sesiones ni workflows verdes.
 
+El objetivo de 3/h **nunca** autoriza filler, falso `LISTO_REAL`, reducción de gates aplicables, cierre con P0/P1 abiertos, skip de dependencias ni dos writers sobre el mismo scope. La aceleración debe venir de eliminar espera no causal, churn y handoffs ociosos.
+
+### REVIEW_BEFORE_EXPENSIVE_CI_HARD
+
+Antes de esperar una cohorte amplia/cara de CI, el closer debe agotar la inspección de aceptación y REVIEW_FIRST disponible, llevar P0/P1 accionables a cero y ejecutar las pruebas dirigidas relevantes que puedan descubrir defectos localmente. No lanzar o reiniciar CI costoso para descubrir defectos que una revisión/prueba dirigida razonable podía detectar antes.
+
+### CLOSURE_CANDIDATE_HEAD_HARD
+
+Cuando el parent alcanza P0=0/P1=0 y sus pruebas dirigidas relevantes pasan, se declara un **functional closure candidate head**. Desde ese momento:
+
+1. no hacer commits funcionales gratuitos, evidencia redundante ni cleanup no causal sobre ese candidato;
+2. una corrección causal real puede supersederlo, pero debe registrarse el supersession y rerun sólo de gates afectados/aplicables;
+3. commits exclusivamente de evidencia/control-plane no invalidan el functional candidate si se demuestra equivalencia funcional exacta;
+4. gates y receipt deben referenciar el candidato funcional o una equivalencia demostrada, nunca un código distinto sin prueba.
+
+### SPLIT_BEFORE_WRITE_HARD
+
+Antes del primer write material, si la unidad razonablemente excede 20 minutos o contiene varios cambios coherentes e independientes que pueden certificarse por separado, debe subdividirse **usando únicamente el mecanismo de planificación/hijos ya aprobado y existente**. Prohibido inventar hijos, anexar/insertar filas nuevas en `COLA`, fragmentar nominalmente o fabricar filler. Si no existe un mecanismo aprobado para ese caso, se conserva el parent y se registra la necesidad de planificación sin alterar artificialmente la cola.
+
 ### CLOSURE_DEBT_FASTPATH
 
 Si `ROLLING60<3`:
@@ -211,7 +246,8 @@ Si `ROLLING60<3`:
 3. si falta un único gap material, ejecutar **sólo ese gap** directamente;
 4. prohibido crear evidencia redundante o offload que alargue el camino;
 5. al cerrar, promover el siguiente dependency-valid y evaluarlo en la misma corrida;
-6. con `CLOSURE_CHAIN_SAME_RUN=TRUE`, encadenar cierres mientras sea seguro hasta recuperar el SLA o encontrar blocker externo causal exacto.
+6. si el siguiente parent está dependency-valid y no existe writer fresco material, tomarlo y producir trabajo material same-run, no dejar un vacío administrativo;
+7. con `CLOSURE_CHAIN_SAME_RUN=TRUE`, encadenar cierres mientras sea seguro hasta recuperar el SLA o encontrar blocker externo causal exacto.
 
 `DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE` significa prearmar lectura/plan/scope del próximo trabajo seguro sin escribirlo prematuramente. No requiere Jules ni manifest.
 
@@ -247,11 +283,34 @@ Sólo un blocker externo causal realmente irresoluble con las herramientas/autor
 
 `HEAD_FREEZE_CAUSAL` existe sólo cuando un gate crítico aplicable al functional/exact head está `queued`/`in_progress`. Un workflow legacy/no relacionado, deploy/Vercel no aplicable o CI de puro control-plane no congela la fábrica.
 
+Sólo los gates **aplicables y causales** al parent pueden bloquear `LISTO_REAL`. Que un workflow exista sobre el mismo SHA no lo vuelve gate del parent. Sin embargo, cualquier failure fuera de la matriz que se demuestre causado por el delta actual se vuelve causal inmediatamente y debe bloquear/corregirse.
+
+#### CAUSAL_GATE_MATRIX_HARD
+
+La etapa canónica se toma de `COLA` y define el mínimo de gates obligatorios, sin excluir gates adicionales realmente causales:
+
+- **PRE**: consistencia de autoridad/contrato/aceptación, preflight/static/lightweight checks aplicables. CI funcional amplia sólo si el preflight tocó comportamiento que la requiera.
+- **DOMAIN**: build del proyecto/dominio afectado + unit/domain/contract tests dirigidos aplicables.
+- **DB_MIG**: backend build + migración/snapshot/model integrity + pruebas DB/migration relevantes al cambio.
+- **BACKEND_API**: backend build/tests + contratos HTTP/ProblemDetails/concurrencia/seguridad que el cambio toque.
+- **FRONTEND_UX**: frontend lint/build + pruebas dirigidas/component/E2E/a11y relevantes; backend adicional sólo cuando el contrato API/backend haya cambiado o exista causalidad demostrada.
+- **SEC_AUDIT**: build relevante + pruebas RBAC/autorización/auditoría/seguridad/observabilidad aplicables al scope. Migraciones legacy o suites funcionales no relacionadas no bloquean por coincidir en el SHA.
+- **TEST_CI**: las suites unit/integration/contract/E2E/security/migration/performance explícitamente aplicables al parent; esta etapa puede requerir cohorte amplia cuando su aceptación así lo define.
+
+Reglas de clasificación:
+
+1. cada gate esperado debe estar ligado a un criterio de aceptación, archivo/componente tocado o riesgo causal demostrable;
+2. workflow no causal `queued/in_progress` no impide cierre cuando todos los gates requeridos del parent ya son terminales PASS;
+3. workflow no causal `failure` se registra e investiga, pero sólo bloquea este parent si se demuestra causalidad con su delta;
+4. nunca reclasificar un gate realmente requerido como “no causal” sólo para cumplir SLA;
+5. la evidencia de causalidad/no causalidad forma parte del receipt/review cuando exista ambigüedad.
+
 Durante un hold causal:
 
 - no mover el functional head de la unidad afectada con manifest/control-plane si invalida la evidencia;
 - sí ejecutar QA, review, prearm y scopes compatibles;
-- al terminalizar el gate, recalcular desde cero y continuar inmediatamente.
+- al terminalizar el gate, recalcular desde cero y continuar inmediatamente;
+- si ya están verdes los gates causales y P0/P1=0, completar DoD/receipt/cierre en la misma invocación sin esperar un checkpoint futuro.
 
 Fallo causal interno se corrige; ruido externo/no causal se registra sin crear blocker falso.
 
@@ -276,18 +335,19 @@ SUPERVISORAS / VERIFIER-RECOVERY-SECONDARY-BUILDER
 Orden mínimo de **cualquiera** de las diez:
 
 1. releer MAESTRO, HEAD/FUNCTIONAL_HEAD, CURRENT_PARENT, `ROLLING60/DEFICIT`, Sheet fresco, leases y deuda terminal;
-2. reconciliar lease: respetar owner fresco o adquirir/tomar scope stale;
+2. reconciliar lease: respetar sólo owner físicamente vivo + materialmente fresco, o adquirir/tomar scope liberado/stale;
 3. cerrar de inmediato parent ya certificable;
 4. si falta trabajo material, ejecutar directamente el gap más corto al cierre;
-5. probar y hacer REVIEW_FIRST; corregir same-run lo corregible;
-6. resolver recovery accionable antes de terminar;
-7. integrar sólo delta aprobado sobre HEAD vigente y verificar gates causales;
-8. certificar `LISTO_REAL` sólo con evidencia completa;
-9. promover/evaluar siguiente parent y aplicar chain same-run si corresponde;
-10. prearmar NEXT_SAFE directo;
-11. sólo después evaluar si un offload Jules independiente reduce camino crítico;
-12. sincronizar CONFIG/COLA/WORKERS/BITACORA y liberar/actualizar lease con readback;
-13. registrar PROOF_OF_RUN material por `AUTOMATION_ID`.
+5. aplicar REVIEW_FIRST/aceptación y pruebas dirigidas antes de esperar CI amplio;
+6. corregir same-run P0/P1 y recovery accionable;
+7. estabilizar el functional closure candidate head y evitar churn gratuito;
+8. verificar exclusivamente gates requeridos/aplicables según matriz causal y causalidad demostrada;
+9. certificar `LISTO_REAL` sólo con evidencia completa;
+10. promover/evaluar siguiente parent y aplicar chain same-run si corresponde;
+11. prearmar NEXT_SAFE directo;
+12. sólo después evaluar si un offload Jules independiente reduce camino crítico;
+13. sincronizar CONFIG/COLA/WORKERS/BITACORA, telemetría de ciclo y liberar/actualizar lease con readback;
+14. registrar PROOF_OF_RUN material por `AUTOMATION_ID`.
 
 Una lane Jules libre ya **no obliga dispatch**. Una automatización directa con trabajo material seguro sí debe ejecutarlo o documentar blocker externo exacto.
 
@@ -307,6 +367,18 @@ Relojes separados:
 - `LAST_MATERIAL_ACTION`: última acción material comprobada.
 - `LAST_TELEMETRY_SYNC`: última reconciliación externa confirmada.
 - `LAST_SUPERVISION_AT`: supervisión material, no mera consulta de runtime.
+
+### CYCLE_TIME_TELEMETRY_HARD
+
+Cada parent debe dejar, usando los campos de telemetría/resultado ya existentes y sin inventar una autoridad paralela, timestamps o duraciones suficientes para reconstruir:
+
+1. cierre anterior -> primer delta material del nuevo parent;
+2. primer delta material -> REVIEW_FIRST P0=0/P1=0;
+3. P0/P1=0 -> todos los gates causales requeridos verdes;
+4. gates causales verdes -> receipt `LISTO_REAL` persistido/readback;
+5. número de veces que el functional closure candidate head fue supersedido y causa de cada supersession.
+
+Si el ciclo supera 20 minutos, el proof final debe identificar cuál reloj consumió el exceso. Telemetría nunca sustituye resultado material ni autoriza cierre falso.
 
 `state_sync.py` es verificador/generador; no prueba por sí solo que Sheets fue escrito. Toda escritura externa requiere readback. Si falla, registrar `SYNC_PENDING/FAILED`; nunca declarar `SYNCED` sin confirmación.
 
