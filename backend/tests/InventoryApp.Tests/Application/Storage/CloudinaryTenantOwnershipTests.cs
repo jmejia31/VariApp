@@ -34,16 +34,18 @@ public class CloudinaryTenantOwnershipTests
         var exception = await Assert.ThrowsAsync<BusinessRuleException>(() =>
             storage.DownloadAsync(
                 tenant,
-                "https://res.cloudinary.com/test/image/upload/v1/inventoryapp/productos/empresas/32/producto.jpg",
+                "https://res.cloudinary.com/unit-test/image/upload/v1/inventoryapp/productos/empresas/32/producto.jpg",
                 CancellationToken.None));
 
         Assert.Contains("no pertenece", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
-    [InlineData("http://res.cloudinary.com/test/image/upload/v1/inventoryapp/productos/empresas/31/a.jpg")]
+    [InlineData("http://res.cloudinary.com/unit-test/image/upload/v1/inventoryapp/productos/empresas/31/a.jpg")]
     [InlineData("not-a-url")]
-    public async Task DownloadAsync_LocatorNoHttpsOMalformado_FallaCerrado(string locator)
+    [InlineData("https://example.test/unit-test/image/upload/v1/inventoryapp/productos/empresas/31/a.jpg")]
+    [InlineData("https://res.cloudinary.com/otra-cuenta/image/upload/v1/inventoryapp/productos/empresas/31/a.jpg")]
+    public async Task DownloadAsync_LocatorNoAutorizado_FallaCerrado(string locator)
     {
         var storage = CrearStorage();
         var tenant = CrearScope(usuarioId: 7, empresaId: 31, rolId: 4);
