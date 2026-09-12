@@ -242,12 +242,13 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         CancellationToken cancellationToken = default)
     {
         var (empresaRepository, scopeService) = TenantDependencies();
-        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        var tenantScope = await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        var storageTenant = StorageTenantContext.Desde(tenantScope);
         ValidarLogo(logo);
 
         var empresa = await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
         var publicIdAnterior = empresa.LogoPublicId;
-        var (url, publicId) = await _imageStorage.UploadAsync(logo);
+        var (url, publicId) = await _imageStorage.UploadAsync(storageTenant, logo, cancellationToken);
 
         empresa.ActualizarIdentidadLegal(empresa.Rtn, empresa.Direccion, url, publicId);
         empresaRepository.Update(empresa);
@@ -255,7 +256,7 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
             throw new BusinessRuleException("No se pudo guardar el logo tenant.");
 
         if (!string.IsNullOrWhiteSpace(publicIdAnterior))
-            await _imageStorage.DeleteAsync(publicIdAnterior);
+            await _imageStorage.DeleteAsync(storageTenant, publicIdAnterior, cancellationToken);
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Configuracion,
@@ -272,7 +273,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         CancellationToken cancellationToken = default)
     {
         var (empresaRepository, scopeService) = TenantDependencies();
-        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        var tenantScope = await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        var storageTenant = StorageTenantContext.Desde(tenantScope);
 
         var empresa = await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
         var publicIdAnterior = empresa.LogoPublicId;
@@ -282,7 +284,7 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
             throw new BusinessRuleException("No se pudo restaurar el logo tenant.");
 
         if (!string.IsNullOrWhiteSpace(publicIdAnterior))
-            await _imageStorage.DeleteAsync(publicIdAnterior);
+            await _imageStorage.DeleteAsync(storageTenant, publicIdAnterior, cancellationToken);
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Configuracion,
@@ -466,7 +468,7 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         await empresaRepository.GetByIdAsync(empresaId, cancellationToken)
         ?? throw new ResourceNotFoundException("La empresa solicitada no existe.");
 
-    private static async Task EnsureTenantAccessAsync(
+    private static async Task<UsuarioTenantScopeActual> EnsureTenantAccessAsync(
         IUsuarioScopeService scopeService,
         int empresaId,
         CancellationToken cancellationToken)
@@ -477,6 +479,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         var scope = await scopeService.ObtenerActualAsync(empresaId, cancellationToken);
         if (scope is null)
             throw new ForbiddenAccessException("No existe una membresía activa para la empresa solicitada.");
+
+        return scope;
     }
 
     private (IEmpresaRepository EmpresaRepository, IUsuarioScopeService ScopeService) TenantDependencies()
