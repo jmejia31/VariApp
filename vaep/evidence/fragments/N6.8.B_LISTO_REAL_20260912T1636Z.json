@@ -1,7 +1,7 @@
 {
   "schema": "VAEP_LISTO_REAL_RECEIPT_V1",
   "parent": "N6.8.B",
-  "title": "N6.8 — Contexto tenant — Frontend/UX",
+  "title": "N6.8 — Storage aislado — Dominio y contratos",
   "branch": "Desarrollo",
   "authority": "docs/VAEP_AUTHORITY.md",
   "closed_at": "2026-09-12T16:36:12Z",
