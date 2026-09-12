@@ -17,6 +17,7 @@ import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.mo
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
 import { EmpresaAdministracionCardComponent } from './empresa-administracion-card.component';
+import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.component';
 
 @Component({
   selector: 'app-configuracion',
@@ -24,7 +25,7 @@ import { EmpresaAdministracionCardComponent } from './empresa-administracion-car
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
-    EmpresaAdministracionCardComponent
+    EmpresaAdministracionCardComponent, SecuenciaDocumentoCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
