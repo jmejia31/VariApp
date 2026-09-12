@@ -1,9 +1,12 @@
+using System.Security.Cryptography;
+using System.Text;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryApp.Infrastructure.Services;
 
@@ -15,12 +18,15 @@ public class CloudinaryImageStorageService : IImageStorageService
     private readonly string? _environmentPrefix;
     private readonly IHttpContextAccessor? _httpContextAccessor;
     private readonly IUsuarioScopeService? _usuarioScopeService;
+    private readonly ILogger<CloudinaryImageStorageService>? _logger;
     private const string BaseFolder = "inventoryapp/productos";
+    private const string TenantAuditMarker = "TENANT_STORAGE_AUDIT";
 
     public CloudinaryImageStorageService(
         IConfiguration configuration,
         IHttpContextAccessor? httpContextAccessor = null,
-        IUsuarioScopeService? usuarioScopeService = null)
+        IUsuarioScopeService? usuarioScopeService = null,
+        ILogger<CloudinaryImageStorageService>? logger = null)
     {
         var cloudName = configuration["Cloudinary:CloudName"];
         var apiKey = configuration["Cloudinary:ApiKey"];
@@ -45,6 +51,7 @@ public class CloudinaryImageStorageService : IImageStorageService
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
         _httpContextAccessor = httpContextAccessor;
         _usuarioScopeService = usuarioScopeService;
+        _logger = logger;
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
@@ -53,14 +60,16 @@ public class CloudinaryImageStorageService : IImageStorageService
         return await UploadAsync(tenant, file, RequestAborted);
     }
 
-    public Task<(string Url, string PublicId)> UploadAsync(
+    public async Task<(string Url, string PublicId)> UploadAsync(
         StorageTenantContext tenant,
         IFormFile file,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
         ArgumentNullException.ThrowIfNull(file);
-        return UploadInternalAsync(file, TenantFolder(tenant), cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "upload", "TENANT_SCOPE_VERIFIED");
+        return await UploadInternalAsync(file, TenantFolder(tenant), cancellationToken);
     }
 
     private async Task<(string Url, string PublicId)> UploadInternalAsync(
@@ -130,8 +139,9 @@ public class CloudinaryImageStorageService : IImageStorageService
         if (string.IsNullOrWhiteSpace(publicId))
             throw new ArgumentException("El publicId es obligatorio.", nameof(publicId));
 
-        ExigirLocatorTenant(tenant, publicId, esUrl: false);
+        ExigirLocatorTenant(tenant, publicId, esUrl: false, operation: "delete");
         cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "delete", "TENANT_LOCATOR_VERIFIED");
         await DeleteInternalAsync(publicId);
     }
 
@@ -162,7 +172,9 @@ public class CloudinaryImageStorageService : IImageStorageService
         if (string.IsNullOrWhiteSpace(url))
             throw new ArgumentException("La URL de almacenamiento es obligatoria.", nameof(url));
 
-        ExigirLocatorTenant(tenant, url, esUrl: true);
+        ExigirLocatorTenant(tenant, url, esUrl: true, operation: "download");
+        cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "download", "TENANT_LOCATOR_VERIFIED");
         return DownloadInternalAsync(url, cancellationToken);
     }
 
@@ -207,7 +219,11 @@ public class CloudinaryImageStorageService : IImageStorageService
     private string TenantFolder(StorageTenantContext tenant) =>
         $"{_folder.TrimEnd('/')}/{tenant.TenantPrefix}";
 
-    private void ExigirLocatorTenant(StorageTenantContext tenant, string locator, bool esUrl)
+    private void ExigirLocatorTenant(
+        StorageTenantContext tenant,
+        string locator,
+        bool esUrl,
+        string operation)
     {
         var tenantFolder = TenantFolder(tenant).Trim('/');
 
@@ -216,7 +232,10 @@ public class CloudinaryImageStorageService : IImageStorageService
             var normalizado = locator.Trim().Trim('/');
             if (!normalizado.StartsWith($"{tenantFolder}/", StringComparison.Ordinal))
             {
-                throw new BusinessRuleException(
+                Denegar(
+                    tenant,
+                    operation,
+                    "TENANT_LOCATOR_MISMATCH",
                     "El recurso solicitado no pertenece al contexto tenant verificado.");
             }
 
@@ -229,26 +248,79 @@ public class CloudinaryImageStorageService : IImageStorageService
             !uri.IsDefaultPort ||
             !string.IsNullOrEmpty(uri.UserInfo))
         {
-            throw new BusinessRuleException(
+            Denegar(
+                tenant,
+                operation,
+                "LOCATOR_ORIGIN_INVALID",
                 "La URL de almacenamiento no es un locator seguro para este tenant.");
         }
 
-        var segments = uri.AbsolutePath
+        var segments = uri!.AbsolutePath
             .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (segments.Length < 4 ||
             !string.Equals(Uri.UnescapeDataString(segments[0]), _cloudName, StringComparison.Ordinal) ||
             !string.Equals(segments[1], "image", StringComparison.Ordinal) ||
             !string.Equals(segments[2], "upload", StringComparison.Ordinal))
         {
-            throw new BusinessRuleException(
+            Denegar(
+                tenant,
+                operation,
+                "CLOUD_ACCOUNT_MISMATCH",
                 "La URL de almacenamiento no pertenece al origen Cloudinary configurado.");
         }
 
         var marker = $"/{tenantFolder}/";
         if (!uri.AbsolutePath.Contains(marker, StringComparison.Ordinal))
         {
-            throw new BusinessRuleException(
+            Denegar(
+                tenant,
+                operation,
+                "TENANT_LOCATOR_MISMATCH",
                 "El recurso solicitado no pertenece al contexto tenant verificado.");
         }
+    }
+
+    private void RegistrarPermitido(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode)
+    {
+        _logger?.LogInformation(
+            "{AuditMarker} operation={Operation} outcome={Outcome} reason={ReasonCode} tenant_ref={TenantRef}",
+            TenantAuditMarker,
+            operation,
+            "SCOPE_ALLOW",
+            reasonCode,
+            TenantReference(tenant));
+    }
+
+    private void RegistrarDenegado(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode)
+    {
+        _logger?.LogWarning(
+            "{AuditMarker} operation={Operation} outcome={Outcome} reason={ReasonCode} tenant_ref={TenantRef}",
+            TenantAuditMarker,
+            operation,
+            "DENY_SAFE",
+            reasonCode,
+            TenantReference(tenant));
+    }
+
+    private void Denegar(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode,
+        string safeMessage)
+    {
+        RegistrarDenegado(tenant, operation, reasonCode);
+        throw new BusinessRuleException(safeMessage);
+    }
+
+    private static string TenantReference(StorageTenantContext tenant)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"empresa:{tenant.EmpresaId}"));
+        return Convert.ToHexString(bytes.AsSpan(0, 6));
     }
 }
