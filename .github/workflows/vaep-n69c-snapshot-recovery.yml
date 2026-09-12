@@ -1,0 +1,52 @@
+name: VAEP N6.9.C snapshot recovery
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - '.github/workflows/vaep-n69c-snapshot-recovery.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    if: github.event.head_commit.message == 'chore(vaep): arm N6.9.C snapshot recovery'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Apply canonical N6.9.C snapshot overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show cdfb45fa79b9bd78795d0ece4fd89bd40377bfe6:backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N69C.cs > backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N69C.cs
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs')
+          text = p.read_text()
+          needle = '#pragma warning restore 612, 618'
+          call = '            ApplyN69CModel(modelBuilder);\n'
+          if call not in text:
+              if text.count(needle) != 1:
+                  raise SystemExit(f'expected exactly one snapshot pragma marker, found {text.count(needle)}')
+              text = text.replace(needle, call + needle)
+              p.write_text(text)
+          PY
+          rm .github/workflows/vaep-n69c-snapshot-recovery.yml
+
+      - name: Commit direct fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vaep-supervision-48'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N69C.cs .github/workflows/vaep-n69c-snapshot-recovery.yml
+          git diff --cached --check
+          git commit -m 'fix(n6.9.c): apply SaaS overlay to canonical EF snapshot'
+          git push origin HEAD:Desarrollo
