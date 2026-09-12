@@ -2,6 +2,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Security;
 using Microsoft.AspNetCore.Http;
+using Xunit;
 
 namespace InventoryApp.Tests.Application.Storage;
 
