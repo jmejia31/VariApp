@@ -1,7 +1,11 @@
 import { defineConfig } from '@playwright/test';
 
+const baseURL = process.env['PLAYWRIGHT_TEST_BASE_URL'] ?? 'http://127.0.0.1:4200';
+const tenantId = process.env['E2E_TENANT_ID'] ?? '1';
+
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.ts',
   timeout: 45_000,
   expect: {
     timeout: 10_000
@@ -16,7 +20,21 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }]
   ],
   use: {
-    baseURL: process.env['PLAYWRIGHT_TEST_BASE_URL'] ?? 'http://127.0.0.1:4200',
+    baseURL,
+    extraHTTPHeaders: {
+      'X-Empresa-Id': tenantId
+    },
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: new URL(baseURL).origin,
+          localStorage: [
+            { name: 'inventoryapp_empresa_solicitada_id', value: tenantId }
+          ]
+        }
+      ]
+    },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
