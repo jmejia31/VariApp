@@ -124,7 +124,7 @@ test.describe('VariStoreHn Fase 7 — home comercial', () => {
     await expect(page.getByRole('button', { name: 'Explorar Hogar real' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Explorar Oficina real' })).toBeVisible();
     await expect(page.locator('.featured-card')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Aún no hay productos marcados como destacados' })).toBeVisible();
+    await expect(page.getByText('Aún no hay productos marcados como destacados', { exact: true })).toBeVisible();
     await expect(page.getByText('El home no elige productos arbitrarios', { exact: false })).toBeVisible();
     await expect.poll(() => solicitudesProductos).toBe(0);
   });
