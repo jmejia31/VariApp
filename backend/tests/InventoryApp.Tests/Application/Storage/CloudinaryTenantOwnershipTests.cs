@@ -5,6 +5,7 @@ using InventoryApp.Domain.Security;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -25,6 +26,26 @@ public class CloudinaryTenantOwnershipTests
                 CancellationToken.None));
 
         Assert.Contains("no pertenece", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_CrossTenant_RegistraDenySafeSinLocatorNiSecretos()
+    {
+        var logger = new CapturingLogger<CloudinaryImageStorageService>();
+        var storage = CrearStorage(logger);
+        var tenant = CrearScope(usuarioId: 7, empresaId: 31, rolId: 4);
+        const string locatorAjeno = "inventoryapp/productos/empresas/32/producto-otro-tenant";
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            storage.DeleteAsync(tenant, locatorAjeno, CancellationToken.None));
+
+        var audit = Assert.Single(logger.Messages);
+        Assert.Contains("TENANT_STORAGE_AUDIT", audit, StringComparison.Ordinal);
+        Assert.Contains("DENY_SAFE", audit, StringComparison.Ordinal);
+        Assert.Contains("TENANT_LOCATOR_MISMATCH", audit, StringComparison.Ordinal);
+        Assert.DoesNotContain(locatorAjeno, audit, StringComparison.Ordinal);
+        Assert.DoesNotContain("unit-test-secret", audit, StringComparison.Ordinal);
+        Assert.DoesNotContain("empresas/32", audit, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -128,8 +149,9 @@ public class CloudinaryTenantOwnershipTests
         Assert.Equal("empresas/31", tenant.TenantPrefix);
     }
 
-    private static CloudinaryImageStorageService CrearStorage() =>
-        new(CrearConfiguracion());
+    private static CloudinaryImageStorageService CrearStorage(
+        ILogger<CloudinaryImageStorageService>? logger = null) =>
+        new(CrearConfiguracion(), logger: logger);
 
     private static CloudinaryCompraDocumentoStorageService CrearCompraStorage() =>
         new(CrearConfiguracion());
@@ -149,5 +171,24 @@ public class CloudinaryTenantOwnershipTests
         var membresia = new UsuarioEmpresa(usuarioId, empresaId, rolId);
         var tenant = ContextoTenantActual.DesdeMembresia(membresia, usuarioId, empresaId);
         return StorageTenantContext.Desde(tenant);
+    }
+
+    private sealed class CapturingLogger<T> : ILogger<T>
+    {
+        public List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Messages.Add(formatter(state, exception));
+        }
     }
 }
