@@ -15,6 +15,11 @@ import { test as base } from '@playwright/test';
 export const test = base.extend({
   page: async ({ page }, use) => {
     await page.route('**/tenant-context/*', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.continue();
+        return;
+      }
+
       const authorization = route.request().headers()['authorization'] ?? '';
       const token = authorization.replace(/^Bearer\s+/i, '').trim();
       const isSyntheticToken = token.length > 0 && token.split('.').length !== 3;
