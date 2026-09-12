@@ -3,7 +3,14 @@ import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, expand, map, reduce, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../core/models/api-response.model';
-import { CategoriaCatalogoPublico, ProductoCatalogoPublico } from './varistorehn.models';
+import {
+  CategoriaCatalogoPublico,
+  CheckoutItemRequest,
+  CheckoutTarjetaRequest,
+  CheckoutTarjetaResponse,
+  CheckoutValidado,
+  ProductoCatalogoPublico
+} from './varistorehn.models';
 
 export type {
   CategoriaCatalogoPublico,
@@ -14,8 +21,10 @@ export type {
 @Injectable({ providedIn: 'root' })
 export class VaristorehnService {
   private readonly http = inject(HttpClient);
-  private readonly urlProductos = `${environment.apiUrl}/tienda/productos`;
-  private readonly urlCategorias = `${environment.apiUrl}/tienda/categorias`;
+  private readonly urlTienda = `${environment.apiUrl}/tienda`;
+  private readonly urlProductos = `${this.urlTienda}/productos`;
+  private readonly urlCategorias = `${this.urlTienda}/categorias`;
+  private readonly urlValidarCheckout = `${this.urlTienda}/checkout/validar`;
 
   obtenerProductos(page = 1, pageSize = 48): Observable<ApiResponse<PagedResult<ProductoCatalogoPublico>>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
@@ -71,6 +80,64 @@ export class VaristorehnService {
         return res.data;
       })
     );
+  }
+
+  validarCheckout(items: CheckoutItemRequest[]): Observable<CheckoutValidado> {
+    const referencias = items.map(item => ({
+      productoId: item.productoId,
+      modeloId: item.modeloId,
+      modeloNombre: item.modeloNombre,
+      marcaNombre: item.marcaNombre,
+      unidades: item.unidades
+    }));
+    return this.http.post<ApiResponse<CheckoutValidado>>(this.urlValidarCheckout, { items: referencias }).pipe(
+      map(res => {
+        const data = res.data;
+        if (!res.success || !data || !this.checkoutValidado(data)) {
+          throw new Error(res.message || 'No pudimos validar el carrito.');
+        }
+        return data;
+      })
+    );
+  }
+
+  crearCheckoutTarjeta(endpoint: string, request: CheckoutTarjetaRequest): Observable<CheckoutTarjetaResponse> {
+    const ruta = endpoint.trim().replace(/^\/+/, '');
+    if (!ruta || /^https?:/i.test(ruta) || ruta.includes('..')) {
+      return throwError(() => new Error('El endpoint de pago seguro no es válido.'));
+    }
+    return this.http.post<ApiResponse<CheckoutTarjetaResponse>>(`${environment.apiUrl}/${ruta}`, request).pipe(
+      map(res => {
+        if (!res.success || !res.data?.checkoutUrl) {
+          throw new Error(res.message || 'El proveedor de pago no devolvió una sesión válida.');
+        }
+        return res.data;
+      })
+    );
+  }
+
+  private checkoutValidado(data: CheckoutValidado): boolean {
+    return typeof data.validacionId === 'string'
+      && /^[a-f0-9]{32}$/i.test(data.validacionId)
+      && typeof data.expiraUtc === 'string'
+      && Number.isFinite(Date.parse(data.expiraUtc))
+      && Number.isFinite(data.subtotal)
+      && data.subtotal >= 0
+      && Number.isFinite(data.total)
+      && data.total >= 0
+      && Array.isArray(data.lineas)
+      && data.lineas.length > 0
+      && data.lineas.every(linea => Number.isSafeInteger(linea.productoId)
+        && linea.productoId > 0
+        && (linea.modeloId === null || (Number.isSafeInteger(linea.modeloId) && linea.modeloId > 0))
+        && Number.isSafeInteger(linea.unidades)
+        && linea.unidades > 0
+        && Number.isSafeInteger(linea.stockDisponible)
+        && linea.stockDisponible >= linea.unidades
+        && Number.isFinite(linea.precioUnitario)
+        && linea.precioUnitario > 0
+        && Number.isFinite(linea.total)
+        && linea.total >= 0);
   }
 
   private slugSeguro(slug: string): string {

@@ -116,6 +116,75 @@ export interface ReferenciaCarrito {
   unidades: number;
 }
 
+/**
+ * Identidad mínima de la selección. Modelo/marca no son autoridad comercial:
+ * solo desambiguan la misma agrupación que publicó el servidor.
+ */
+export interface CheckoutItemRequest {
+  productoId: number;
+  modeloId: number | null;
+  modeloNombre: string | null;
+  marcaNombre: string | null;
+  unidades: number;
+}
+
+export interface CheckoutValidarRequest {
+  items: CheckoutItemRequest[];
+}
+
+export interface CheckoutLineaValidada {
+  productoId: number;
+  modeloId: number | null;
+  nombre: string;
+  modelo?: string | null;
+  sku?: string | null;
+  unidades: number;
+  stockDisponible: number;
+  precioUnitario: number;
+  total: number;
+}
+
+/** Snapshot calculado por el servidor. No equivale a reserva ni a pedido ERP. */
+export interface CheckoutValidado {
+  validacionId: string;
+  expiraUtc: string;
+  subtotal: number;
+  total: number;
+  lineas: CheckoutLineaValidada[];
+}
+
+export interface DatosCompradorCheckout {
+  nombre: string;
+  telefono: string;
+  correo?: string;
+  notas?: string;
+}
+
+export interface CheckoutTarjetaRequest {
+  validacionId: string;
+  items: CheckoutItemRequest[];
+  comprador: DatosCompradorCheckout;
+  idempotencyKey: string;
+}
+
+export interface CheckoutTarjetaResponse {
+  checkoutUrl: string;
+  referencia?: string;
+}
+
+export type EstadoPedidoPublico = 'whatsapp-preparado' | 'tarjeta-redirigida' | 'demo';
+
+/** Recibo local no sensible: sirve para UX, nunca como autoridad transaccional. */
+export interface ReciboPedidoPublico {
+  referencia: string;
+  estado: EstadoPedidoPublico;
+  creadoUtc: string;
+  expiraUtc: string;
+  total: number;
+  moneda: string;
+  lineas: CheckoutLineaValidada[];
+}
+
 export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
 
 export interface FiltrosCatalogo {

@@ -12,6 +12,8 @@ export const routes: Routes = [
   { path: 'varistorehn/categorias', loadComponent: () => import('./features/varistorehn/varistorehn-categorias.component').then(m => m.VaristorehnCategoriasComponent) },
   { path: 'varistorehn/categoria/:slug', loadComponent: () => import('./features/varistorehn/varistorehn-categoria.component').then(m => m.VaristorehnCategoriaComponent) },
   { path: 'varistorehn/carrito', loadComponent: () => import('./features/varistorehn/varistorehn-carrito.component').then(m => m.VaristorehnCarritoComponent) },
+  { path: 'varistorehn/checkout', loadComponent: () => import('./features/varistorehn/varistorehn-checkout.component').then(m => m.VaristorehnCheckoutComponent) },
+  { path: 'varistorehn/pedido/:id', loadComponent: () => import('./features/varistorehn/varistorehn-pedido.component').then(m => m.VaristorehnPedidoComponent) },
   { path: 'varistorehn', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },
   { path: 'login', loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent) },
   { path: 'dashboard', canActivate: [authGuard, permisoGuard], data: { modulo: 'Dashboard', accion: 'Ver' }, loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },

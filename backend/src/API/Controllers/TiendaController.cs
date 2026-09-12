@@ -11,6 +11,11 @@ namespace InventoryApp.API.Controllers;
 [Route("tienda")]
 public sealed class TiendaController : ControllerBase
 {
+    private const int MaxLineasCheckout = 50;
+    private const int MaxUnidadesPorLinea = 999;
+    private const int MaxLongitudIdentidadVariante = 200;
+    private static readonly TimeSpan VigenciaValidacionCheckout = TimeSpan.FromMinutes(10);
+
     private readonly IProductoService _productoService;
     private readonly ICategoriaService _categoriaService;
 
@@ -78,6 +83,131 @@ public sealed class TiendaController : ControllerBase
             return NotFound(ApiResponse<CategoriaCatalogoPublicoDto>.Fail("Categoria no encontrada."));
 
         return Ok(ApiResponse<CategoriaCatalogoPublicoDto>.Ok(MapearCategoria(categoria)));
+    }
+
+    /// <summary>
+    /// Recalcula precio, variante y stock exclusivamente desde el catálogo vigente.
+    /// El cliente nunca envía importes y esta validación no reserva inventario ni crea un pedido ERP.
+    /// </summary>
+    [HttpPost("checkout/validar")]
+    public async Task<IActionResult> ValidarCheckout([FromBody] ValidarCheckoutTiendaDto dto)
+    {
+        if (dto?.Items is null || dto.Items.Count == 0)
+            return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("El carrito está vacío."));
+
+        if (dto.Items.Count > MaxLineasCheckout)
+            return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("El carrito supera el máximo de líneas permitido."));
+
+        if (dto.Items.Any(item =>
+                item.ProductoId <= 0
+                || item.Unidades <= 0
+                || item.Unidades > MaxUnidadesPorLinea
+                || (item.ModeloNombre?.Length ?? 0) > MaxLongitudIdentidadVariante
+                || (item.MarcaNombre?.Length ?? 0) > MaxLongitudIdentidadVariante))
+        {
+            return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("El carrito contiene una referencia o cantidad no válida."));
+        }
+
+        var agrupadas = dto.Items
+            .GroupBy(item => new
+            {
+                item.ProductoId,
+                item.ModeloId,
+                ModeloNombre = string.IsNullOrEmpty(item.ModeloNombre) ? null : item.ModeloNombre,
+                MarcaNombre = string.IsNullOrEmpty(item.MarcaNombre) ? null : item.MarcaNombre
+            })
+            .Select(grupo => new CheckoutTiendaItemRequestDto
+            {
+                ProductoId = grupo.Key.ProductoId,
+                ModeloId = grupo.Key.ModeloId,
+                ModeloNombre = grupo.Key.ModeloNombre,
+                MarcaNombre = grupo.Key.MarcaNombre,
+                Unidades = grupo.Sum(item => item.Unidades)
+            })
+            .ToList();
+
+        if (agrupadas.Any(item => item.Unidades > MaxUnidadesPorLinea))
+            return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La cantidad acumulada de un producto supera el máximo permitido."));
+
+        var lineas = new List<CheckoutTiendaLineaDto>(agrupadas.Count);
+
+        foreach (var solicitud in agrupadas)
+        {
+            var producto = await _productoService.GetByIdAsync(solicitud.ProductoId);
+            if (producto is null || !producto.Activo)
+                return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Uno de los productos ya no está disponible. Actualiza el carrito antes de continuar."));
+
+            var variantesActivas = producto.Variantes.Where(variante => variante.Activo).ToList();
+            int stock;
+            decimal precio;
+            string? modelo;
+            string? sku;
+
+            if (variantesActivas.Count > 0)
+            {
+                var variantesModelo = variantesActivas
+                    .Where(variante =>
+                        variante.ModeloId == solicitud.ModeloId
+                        && string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)
+                        && string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal))
+                    .ToList();
+
+                if (variantesModelo.Count == 0)
+                    return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Una variante seleccionada ya no está disponible. Actualiza el carrito antes de continuar."));
+
+                stock = variantesModelo.Sum(variante => Math.Max(0, variante.Cantidad));
+                precio = variantesModelo
+                    .Where(variante => variante.Precio > 0)
+                    .Select(variante => variante.Precio)
+                    .DefaultIfEmpty(0)
+                    .Min();
+                modelo = variantesModelo.Select(variante => variante.ModeloNombre).FirstOrDefault(nombre => !string.IsNullOrWhiteSpace(nombre));
+                var skus = variantesModelo.Select(variante => variante.Sku).Where(valor => !string.IsNullOrWhiteSpace(valor)).Distinct().ToList();
+                sku = skus.Count == 1 ? skus[0] : null;
+            }
+            else
+            {
+                if (solicitud.ModeloId is not null || solicitud.ModeloNombre is not null || solicitud.MarcaNombre is not null)
+                    return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La variante seleccionada ya no existe. Actualiza el carrito antes de continuar."));
+
+                stock = Math.Max(0, producto.Cantidad);
+                precio = producto.PrecioMinimo > 0 ? producto.PrecioMinimo : producto.Precio;
+                modelo = producto.ModeloNombre ?? producto.Modelo;
+                sku = null;
+            }
+
+            precio = Math.Max(0, precio);
+            if (precio <= 0)
+                return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Uno de los productos no tiene un precio público válido. Intenta nuevamente más tarde."));
+
+            if (stock < solicitud.Unidades)
+                return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Cambió la existencia disponible de uno de los productos. Actualiza el carrito antes de continuar."));
+
+            lineas.Add(new CheckoutTiendaLineaDto
+            {
+                ProductoId = producto.Id,
+                ModeloId = solicitud.ModeloId,
+                Nombre = producto.Nombre,
+                Modelo = modelo,
+                Sku = sku,
+                Unidades = solicitud.Unidades,
+                StockDisponible = stock,
+                PrecioUnitario = precio,
+                Total = precio * solicitud.Unidades
+            });
+        }
+
+        var subtotal = lineas.Sum(linea => linea.Total);
+        var validado = new CheckoutTiendaValidadoDto
+        {
+            ValidacionId = Guid.NewGuid().ToString("N"),
+            ExpiraUtc = DateTime.UtcNow.Add(VigenciaValidacionCheckout),
+            Subtotal = subtotal,
+            Total = subtotal,
+            Lineas = lineas
+        };
+
+        return Ok(ApiResponse<CheckoutTiendaValidadoDto>.Ok(validado, "Carrito validado contra el catálogo vigente."));
     }
 
     private static CategoriaCatalogoPublicoDto MapearCategoria(CategoriaDto categoria) => new()
