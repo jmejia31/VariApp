@@ -3,7 +3,9 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Security;
 using InventoryApp.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Moq;
 using Xunit;
 
 namespace InventoryApp.Tests.Application.Storage;
@@ -54,9 +56,86 @@ public class CloudinaryTenantOwnershipTests
             storage.DownloadAsync(tenant, locator, CancellationToken.None));
     }
 
-    private static CloudinaryImageStorageService CrearStorage()
+    [Fact]
+    public async Task CompraDeleteAsync_PublicIdDeOtraEmpresa_FallaCerradoAntesDelProveedor()
     {
-        var configuration = new ConfigurationBuilder()
+        var storage = CrearCompraStorage();
+        var tenant = CrearScope(usuarioId: 7, empresaId: 31, rolId: 4);
+
+        var exception = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            storage.DeleteAsync(
+                tenant,
+                "inventoryapp/compras/empresas/32/comprobante-otro-tenant",
+                "raw",
+                CancellationToken.None));
+
+        Assert.Contains("no pertenece", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task CompraDownloadAsync_UrlDeOtraEmpresa_FallaCerradoAntesDeHttp()
+    {
+        var storage = CrearCompraStorage();
+        var tenant = CrearScope(usuarioId: 7, empresaId: 31, rolId: 4);
+
+        var exception = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            storage.DownloadAsync(
+                tenant,
+                "https://res.cloudinary.com/unit-test/raw/upload/v1/inventoryapp/compras/empresas/32/factura.pdf",
+                CancellationToken.None));
+
+        Assert.Contains("no pertenece", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ResolverStorageTenant_ContextoSolicitadoSinMembresia_FallaCerrado()
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers[StorageTenantContextResolver.EmpresaHeader] = "31";
+        var accessor = new HttpContextAccessor { HttpContext = httpContext };
+        var scopes = new Mock<IUsuarioScopeService>();
+        scopes
+            .Setup(x => x.ObtenerActualAsync(31, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((UsuarioTenantScopeActual?)null);
+
+        var exception = await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
+            StorageTenantContextResolver.ResolverRequeridoAsync(
+                accessor,
+                scopes.Object,
+                CancellationToken.None));
+
+        Assert.Contains("membresía activa", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ResolverStorageTenant_MembresiaActiva_UsaEmpresaYUsuarioVerificados()
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers[StorageTenantContextResolver.EmpresaHeader] = "31";
+        var accessor = new HttpContextAccessor { HttpContext = httpContext };
+        var scopes = new Mock<IUsuarioScopeService>();
+        scopes
+            .Setup(x => x.ObtenerActualAsync(31, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UsuarioTenantScopeActual(7, 31, 4, "Operador", false));
+
+        var tenant = await StorageTenantContextResolver.ResolverRequeridoAsync(
+            accessor,
+            scopes.Object,
+            CancellationToken.None);
+
+        Assert.Equal(31, tenant.EmpresaId);
+        Assert.Equal(7, tenant.UsuarioId);
+        Assert.Equal("empresas/31", tenant.TenantPrefix);
+    }
+
+    private static CloudinaryImageStorageService CrearStorage() =>
+        new(CrearConfiguracion());
+
+    private static CloudinaryCompraDocumentoStorageService CrearCompraStorage() =>
+        new(CrearConfiguracion());
+
+    private static IConfiguration CrearConfiguracion() =>
+        new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Cloudinary:CloudName"] = "unit-test",
@@ -64,9 +143,6 @@ public class CloudinaryTenantOwnershipTests
                 ["Cloudinary:ApiSecret"] = "unit-test-secret"
             })
             .Build();
-
-        return new CloudinaryImageStorageService(configuration);
-    }
 
     private static StorageTenantContext CrearScope(int usuarioId, int empresaId, int rolId)
     {
