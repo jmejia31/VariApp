@@ -220,7 +220,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
 
         empresaRepository.Update(empresa);
         _repository.UpdateTenant(config);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo guardar la configuración tenant.");
 
         var nueva = await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, empresa, config);
         await _auditoria.RegistrarAsync(
@@ -250,7 +251,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
 
         empresa.ActualizarIdentidadLegal(empresa.Rtn, empresa.Direccion, url, publicId);
         empresaRepository.Update(empresa);
-        await empresaRepository.SaveChangesAsync(cancellationToken);
+        if (!await empresaRepository.SaveChangesAsync(cancellationToken))
+            throw new BusinessRuleException("No se pudo guardar el logo tenant.");
 
         if (!string.IsNullOrWhiteSpace(publicIdAnterior))
             await _imageStorage.DeleteAsync(publicIdAnterior);
@@ -276,7 +278,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         var publicIdAnterior = empresa.LogoPublicId;
         empresa.ActualizarIdentidadLegal(empresa.Rtn, empresa.Direccion, null, null);
         empresaRepository.Update(empresa);
-        await empresaRepository.SaveChangesAsync(cancellationToken);
+        if (!await empresaRepository.SaveChangesAsync(cancellationToken))
+            throw new BusinessRuleException("No se pudo restaurar el logo tenant.");
 
         if (!string.IsNullOrWhiteSpace(publicIdAnterior))
             await _imageStorage.DeleteAsync(publicIdAnterior);
@@ -325,7 +328,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
 
         config.Version++;
         _repository.UpdateTenant(config);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo guardar la plantilla tenant.");
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Configuracion,
@@ -359,7 +363,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         _repository.UpdatePlantilla(plantilla);
         config.Version++;
         _repository.UpdateTenant(config);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo desactivar la plantilla tenant.");
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Configuracion,
@@ -389,7 +394,8 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
 
         config = new ConfigEmpresa(empresaId);
         await _repository.AddTenantAsync(config, cancellationToken);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo inicializar la configuración tenant.");
         return config;
     }
 
