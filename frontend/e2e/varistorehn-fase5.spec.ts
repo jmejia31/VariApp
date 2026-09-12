@@ -124,7 +124,8 @@ test.describe('VariStoreHn Fase 5 — carrito global y persistente', () => {
     await expect(page.locator('article.product-card')).toHaveCount(0);
 
     const homeHeader = page.locator('app-varistorehn-header');
-    await expect(homeHeader.getByRole('button', { name: 'Ver carrito' })).toBeVisible();
+    await expect(homeHeader.getByRole('button', { name: 'Abrir carrito' })).toBeVisible();
+    await expect(homeHeader.locator('.cart-copy small')).toHaveText('Ver carrito');
     await homeHeader.getByRole('link', { name: 'Productos', exact: true }).click();
     await expect(page).toHaveURL(/\/varistorehn\/productos$/);
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
