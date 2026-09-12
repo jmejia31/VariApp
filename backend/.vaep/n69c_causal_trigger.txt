@@ -1,2 +1,0 @@
-VAEP N6.9.C causal-gate trigger.
-Reason: functional fix 3cec12951ddeb4a68a2aa689783402d7a3f5ac31 was committed by GitHub Actions and did not emit a downstream push workflow. This marker exists only to trigger the canonical Desarrollo CI over the unchanged functional candidate and must be removed after causal verification.
