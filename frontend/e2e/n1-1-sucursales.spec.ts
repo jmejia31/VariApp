@@ -3,7 +3,6 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
-const EMPRESA_ID = process.env['PHASE7_EMPRESA_ID'];
 
 let adminToken = '';
 let empresaId = 0;
@@ -32,11 +31,41 @@ async function loginApi(request: APIRequestContext): Promise<string> {
   return data.token;
 }
 
+async function prepararTenantAdmin(request: APIRequestContext): Promise<number> {
+  const crearEmpresa = await request.post(`${API_URL}/empresas`, {
+    headers: authHeaders(adminToken),
+    data: { nombre: `Empresa E2E Sucursales ${suffix}` }
+  });
+  expect(crearEmpresa.status(), await crearEmpresa.text()).toBe(201);
+  const empresa = await dataOf(crearEmpresa);
+  expect(empresa?.id).toBeGreaterThan(0);
+
+  const listarUsuarios = await request.get(`${API_URL}/usuarios`, {
+    headers: authHeaders(adminToken)
+  });
+  expect(listarUsuarios.status(), await listarUsuarios.text()).toBe(200);
+  const usuarios = await dataOf(listarUsuarios);
+  const admin = usuarios.find((usuario: any) => usuario.nombreUsuario === ADMIN_USERNAME);
+  expect(admin?.id).toBeGreaterThan(0);
+  expect(admin?.rolId).toBeGreaterThan(0);
+
+  const asignar = await request.post(`${API_URL}/usuarios/${admin.id}/empresas`, {
+    headers: authHeaders(adminToken),
+    data: { empresaId: empresa.id, rolId: admin.rolId }
+  });
+  expect(asignar.status(), await asignar.text()).toBe(200);
+  const membresia = await dataOf(asignar);
+  expect(membresia?.empresaId).toBe(empresa.id);
+  expect(membresia?.usuarioId).toBe(admin.id);
+  expect(membresia?.activa).toBe(true);
+
+  return empresa.id;
+}
+
 async function completarSeleccionTenant(page: Page): Promise<void> {
   const selector = page.getByLabel('ID de empresa');
   await selector.waitFor({ state: 'visible', timeout: 5_000 });
-  if (!EMPRESA_ID) throw new Error('PHASE7_EMPRESA_ID es obligatorio para Sucursales E2E.');
-  await selector.fill(EMPRESA_ID);
+  await selector.fill(String(empresaId));
   await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
 }
 
@@ -67,10 +96,9 @@ test.describe('ERP-N1.1 — Sucursales', () => {
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginApi(request);
-    if (!EMPRESA_ID || !/^[1-9][0-9]*$/.test(EMPRESA_ID)) {
-      throw new Error('PHASE7_EMPRESA_ID debe identificar la membresía tenant E2E preparada por CI.');
-    }
-    empresaId = Number(EMPRESA_ID);
+    // N6.5 exige una membresía UsuarioEmpresa real para materializar el tenant.
+    // El fixture usa únicamente APIs públicas y evita depender de secretos/IDs hard-coded.
+    empresaId = await prepararTenantAdmin(request);
   });
 
   test('rechaza acceso anónimo y emite correlation ID', async ({ request }) => {
