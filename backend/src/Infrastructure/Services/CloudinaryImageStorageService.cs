@@ -13,9 +13,14 @@ public class CloudinaryImageStorageService : IImageStorageService
     private readonly string _cloudName;
     private readonly string _folder;
     private readonly string? _environmentPrefix;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
     private const string BaseFolder = "inventoryapp/productos";
 
-    public CloudinaryImageStorageService(IConfiguration configuration)
+    public CloudinaryImageStorageService(
+        IConfiguration configuration,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IUsuarioScopeService? usuarioScopeService = null)
     {
         var cloudName = configuration["Cloudinary:CloudName"];
         var apiKey = configuration["Cloudinary:ApiKey"];
@@ -38,10 +43,15 @@ public class CloudinaryImageStorageService : IImageStorageService
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
+        _httpContextAccessor = httpContextAccessor;
+        _usuarioScopeService = usuarioScopeService;
     }
 
-    public Task<(string Url, string PublicId)> UploadAsync(IFormFile file) =>
-        UploadInternalAsync(file, _folder, CancellationToken.None);
+    public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
+    {
+        var tenant = await ResolverTenantActualAsync();
+        return await UploadAsync(tenant, file, RequestAborted);
+    }
 
     public Task<(string Url, string PublicId)> UploadAsync(
         StorageTenantContext tenant,
@@ -101,7 +111,14 @@ public class CloudinaryImageStorageService : IImageStorageService
 
     public async Task DeleteAsync(string publicId)
     {
-        await DeleteInternalAsync(publicId);
+        if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
+        {
+            throw new BusinessRuleException(
+                "El entorno de Desarrollo no puede eliminar una imagen que pertenece a Producción.");
+        }
+
+        var tenant = await ResolverTenantActualAsync();
+        await DeleteAsync(tenant, publicId, RequestAborted);
     }
 
     public async Task DeleteAsync(
@@ -130,8 +147,11 @@ public class CloudinaryImageStorageService : IImageStorageService
         await _cloudinary.DestroyAsync(deleteParams);
     }
 
-    public Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url) =>
-        DownloadInternalAsync(url, CancellationToken.None);
+    public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
+    {
+        var tenant = await ResolverTenantActualAsync();
+        return await DownloadAsync(tenant, url, RequestAborted);
+    }
 
     public Task<(Stream Contenido, string ContentType)?> DownloadAsync(
         StorageTenantContext tenant,
@@ -174,6 +194,15 @@ public class CloudinaryImageStorageService : IImageStorageService
             return null;
         }
     }
+
+    private CancellationToken RequestAborted =>
+        _httpContextAccessor?.HttpContext?.RequestAborted ?? default;
+
+    private Task<StorageTenantContext> ResolverTenantActualAsync() =>
+        StorageTenantContextResolver.ResolverRequeridoAsync(
+            _httpContextAccessor,
+            _usuarioScopeService,
+            RequestAborted);
 
     private string TenantFolder(StorageTenantContext tenant) =>
         $"{_folder.TrimEnd('/')}/{tenant.TenantPrefix}";
