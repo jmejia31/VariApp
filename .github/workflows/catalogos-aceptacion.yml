@@ -87,6 +87,7 @@ jobs:
       PHASE7_API_URL: 'http://127.0.0.1:5005'
       PHASE7_ADMIN_USERNAME: 'e2e_admin'
       PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
+      E2E_TENANT_ID: '1'
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
@@ -152,6 +153,40 @@ jobs:
           done
           cat catalogos-api.log >&2 || true
           exit 1
+
+      - name: Preparar tenant E2E para SeedAdmin
+        shell: bash
+        run: |
+          set -euo pipefail
+          mysql_container="$(docker ps --filter 'ancestor=mysql:8.4' --format '{{.ID}}' | head -n 1)"
+          if [[ -z "$mysql_container" ]]; then
+            echo 'No se encontró el contenedor MySQL 8.4 de la suite de aceptación.' >&2
+            exit 1
+          fi
+
+          docker exec -i "$mysql_container" mysql -uroot -proot inventoryapp_catalogos_e2e <<'SQL'
+          INSERT INTO `Empresas` (`Id`,`Nombre`,`Activa`,`FechaCreacion`,`FechaActualizacion`)
+          VALUES (1,'Empresa E2E Acceptance',TRUE,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6))
+          ON DUPLICATE KEY UPDATE
+            `Activa`=TRUE,
+            `FechaActualizacion`=UTC_TIMESTAMP(6);
+
+          INSERT INTO `UsuarioEmpresas` (`UsuarioId`,`EmpresaId`,`RolId`,`Activa`,`FechaCreacion`,`FechaActualizacion`)
+          SELECT u.`Id`,1,u.`RolId`,TRUE,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)
+          FROM `Usuarios` u
+          WHERE u.`NombreUsuario`='e2e_admin'
+            AND NOT EXISTS (
+              SELECT 1
+              FROM `UsuarioEmpresas` ue
+              WHERE ue.`UsuarioId`=u.`Id` AND ue.`EmpresaId`=1
+            );
+          SQL
+
+          membership_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_catalogos_e2e -Nse "SELECT COUNT(*) FROM UsuarioEmpresas ue INNER JOIN Usuarios u ON u.Id=ue.UsuarioId INNER JOIN Empresas e ON e.Id=ue.EmpresaId WHERE u.NombreUsuario='e2e_admin' AND e.Id=1 AND e.Activa=TRUE AND ue.Activa=TRUE;")"
+          if [[ "$membership_count" != '1' ]]; then
+            echo "La membresía tenant E2E del SeedAdmin no quedó materializada: count=$membership_count" >&2
+            exit 1
+          fi
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
