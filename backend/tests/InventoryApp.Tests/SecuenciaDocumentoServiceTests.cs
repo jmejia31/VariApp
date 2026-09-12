@@ -87,6 +87,7 @@ public sealed class SecuenciaDocumentoServiceTests
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
+        connection.CreateFunction<string?, int?>("CHAR_LENGTH", value => value?.Length);
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(connection)
