@@ -15,8 +15,13 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
     private readonly string _cloudName;
     private readonly string _folder;
     private readonly string? _environmentPrefix;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
 
-    public CloudinaryCompraDocumentoStorageService(IConfiguration configuration)
+    public CloudinaryCompraDocumentoStorageService(
+        IConfiguration configuration,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IUsuarioScopeService? usuarioScopeService = null)
     {
         var cloudName = configuration["Cloudinary:CloudName"];
         var apiKey = configuration["Cloudinary:ApiKey"];
@@ -38,10 +43,33 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
+        _httpContextAccessor = httpContextAccessor;
+        _usuarioScopeService = usuarioScopeService;
     }
 
     public async Task<DocumentoAlmacenado> UploadAsync(IFormFile archivo)
     {
+        var tenant = await ResolverTenantActualAsync();
+        return await UploadAsync(tenant, archivo, RequestAborted);
+    }
+
+    public Task<DocumentoAlmacenado> UploadAsync(
+        StorageTenantContext tenant,
+        IFormFile archivo,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        ArgumentNullException.ThrowIfNull(archivo);
+        return UploadInternalAsync(archivo, TenantFolder(tenant), cancellationToken);
+    }
+
+    private async Task<DocumentoAlmacenado> UploadInternalAsync(
+        IFormFile archivo,
+        string folder,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             await using var stream = archivo.OpenReadStream();
@@ -52,12 +80,13 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                 var parametros = new RawUploadParams
                 {
                     File = new FileDescription(archivo.FileName, stream),
-                    Folder = _folder,
+                    Folder = folder,
                     UseFilename = true,
                     UniqueFilename = true
                 };
 
                 var resultado = await _cloudinary.UploadAsync(parametros);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (resultado.Error is not null)
                     throw new BusinessRuleException($"Cloudinary rechazó el PDF: {resultado.Error.Message}");
 
@@ -72,12 +101,13 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
             var parametrosImagen = new ImageUploadParams
             {
                 File = new FileDescription(archivo.FileName, stream),
-                Folder = _folder,
+                Folder = folder,
                 UseFilename = true,
                 UniqueFilename = true
             };
 
             var resultadoImagen = await _cloudinary.UploadAsync(parametrosImagen);
+            cancellationToken.ThrowIfCancellationRequested();
             if (resultadoImagen.Error is not null)
                 throw new BusinessRuleException($"Cloudinary rechazó la imagen: {resultadoImagen.Error.Message}");
 
@@ -87,6 +117,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                 "image",
                 archivo.ContentType,
                 archivo.Length);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (BusinessRuleException)
         {
@@ -100,6 +134,35 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
     }
 
     public async Task DeleteAsync(string publicId, string resourceType)
+    {
+        if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
+        {
+            throw new BusinessRuleException(
+                "El entorno de Desarrollo no puede eliminar un comprobante que pertenece a Producción.");
+        }
+
+        var tenant = await ResolverTenantActualAsync();
+        await DeleteAsync(tenant, publicId, resourceType, RequestAborted);
+    }
+
+    public async Task DeleteAsync(
+        StorageTenantContext tenant,
+        string publicId,
+        string resourceType,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        if (string.IsNullOrWhiteSpace(publicId))
+            throw new ArgumentException("El publicId es obligatorio.", nameof(publicId));
+        if (string.IsNullOrWhiteSpace(resourceType))
+            throw new ArgumentException("El resourceType es obligatorio.", nameof(resourceType));
+
+        ExigirLocatorTenant(tenant, publicId, esUrl: false);
+        cancellationToken.ThrowIfCancellationRequested();
+        await DeleteInternalAsync(publicId, resourceType);
+    }
+
+    private async Task DeleteInternalAsync(string publicId, string resourceType)
     {
         if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
         {
@@ -122,6 +185,27 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
     public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
     {
+        var tenant = await ResolverTenantActualAsync();
+        return await DownloadAsync(tenant, url, RequestAborted);
+    }
+
+    public Task<(Stream Contenido, string ContentType)?> DownloadAsync(
+        StorageTenantContext tenant,
+        string url,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("La URL de almacenamiento es obligatoria.", nameof(url));
+
+        ExigirLocatorTenant(tenant, url, esUrl: true);
+        return DownloadInternalAsync(url, cancellationToken);
+    }
+
+    private async Task<(Stream Contenido, string ContentType)?> DownloadInternalAsync(
+        string url,
+        CancellationToken cancellationToken)
+    {
         if (!EsUrlCloudinaryPermitida(url))
             return null;
 
@@ -129,7 +213,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         using var httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
         try
         {
-            using var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await httpClient.GetAsync(
+                url,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
             if (!response.IsSuccessStatusCode)
                 return null;
 
@@ -141,13 +228,13 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
             var contentType = response.Content.Headers.ContentType?.MediaType
                 ?? "application/octet-stream";
-            await using var remote = await response.Content.ReadAsStreamAsync();
+            await using var remote = await response.Content.ReadAsStreamAsync(cancellationToken);
             var contenido = new MemoryStream();
             var buffer = new byte[81920];
             long total = 0;
             while (true)
             {
-                var read = await remote.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                var read = await remote.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
                 if (read == 0)
                     break;
 
@@ -158,15 +245,61 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                     return null;
                 }
 
-                await contenido.WriteAsync(buffer.AsMemory(0, read));
+                await contenido.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
             }
 
             contenido.Position = 0;
             return (contenido, contentType);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch
         {
             return null;
+        }
+    }
+
+    private CancellationToken RequestAborted =>
+        _httpContextAccessor?.HttpContext?.RequestAborted ?? default;
+
+    private Task<StorageTenantContext> ResolverTenantActualAsync() =>
+        StorageTenantContextResolver.ResolverRequeridoAsync(
+            _httpContextAccessor,
+            _usuarioScopeService,
+            RequestAborted);
+
+    private string TenantFolder(StorageTenantContext tenant) =>
+        $"{_folder.TrimEnd('/')}/{tenant.TenantPrefix}";
+
+    private void ExigirLocatorTenant(StorageTenantContext tenant, string locator, bool esUrl)
+    {
+        var tenantFolder = TenantFolder(tenant).Trim('/');
+        if (!esUrl)
+        {
+            var normalizado = locator.Trim().Trim('/');
+            if (!normalizado.StartsWith($"{tenantFolder}/", StringComparison.Ordinal))
+            {
+                throw new BusinessRuleException(
+                    "El comprobante solicitado no pertenece al contexto tenant verificado.");
+            }
+
+            return;
+        }
+
+        if (!EsUrlCloudinaryPermitida(locator))
+        {
+            throw new BusinessRuleException(
+                "La URL del comprobante no pertenece al origen Cloudinary configurado.");
+        }
+
+        var uri = new Uri(locator, UriKind.Absolute);
+        var marker = $"/{tenantFolder}/";
+        if (!uri.AbsolutePath.Contains(marker, StringComparison.Ordinal))
+        {
+            throw new BusinessRuleException(
+                "El comprobante solicitado no pertenece al contexto tenant verificado.");
         }
     }
 
