@@ -40,22 +40,27 @@ jobs:
               Path('backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'),
               Path('backend/src/Infrastructure/Migrations/20260912041136_N66CNumeracionPersistence.Designer.cs'),
           ]
-          before = '''                    b.Property<long>("UltimoValor")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L);'''
-          after = '''                    b.Property<long>("UltimoValor")
-                        .ValueGeneratedOnAdd()
-                        .IsConcurrencyToken()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L);'''
+          entity_marker = 'modelBuilder.Entity("InventoryApp.Domain.Entities.SecuenciaDocumento", b =>'
+          next_marker = 'modelBuilder.Entity("InventoryApp.Domain.Entities.SerieInventario", b =>'
+          property_marker = 'b.Property<long>("UltimoValor")'
+          old_chain = '.ValueGeneratedOnAdd()\n                        .HasColumnType("bigint")'
+          new_chain = '.ValueGeneratedOnAdd()\n                        .IsConcurrencyToken()\n                        .HasColumnType("bigint")'
 
           for path in files:
               text = path.read_text(encoding='utf-8-sig')
-              count = text.count(before)
-              if count != 1:
-                  raise SystemExit(f'{path}: expected exactly one SecuenciaDocumento UltimoValor model block, found {count}')
-              path.write_text(text.replace(before, after, 1), encoding='utf-8')
+              start = text.find(entity_marker)
+              end = text.find(next_marker, start + 1)
+              if start < 0 or end < 0:
+                  raise SystemExit(f'{path}: SecuenciaDocumento model boundaries not found')
+              block = text[start:end]
+              if block.count(property_marker) != 1:
+                  raise SystemExit(f'{path}: expected one UltimoValor property in SecuenciaDocumento block')
+              if '.IsConcurrencyToken()' in block:
+                  continue
+              if old_chain not in block:
+                  raise SystemExit(f'{path}: UltimoValor chain not found')
+              block = block.replace(old_chain, new_chain, 1)
+              path.write_text(text[:start] + block + text[end:], encoding='utf-8')
           PY
 
       - name: Verify EF snapshot has no pending model changes
