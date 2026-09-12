@@ -51,7 +51,7 @@ public class SuscripcionesSaaSDomainTests
     public void Suscripcion_VigenciaRespetaTenantPlanPeriodoYEstado()
     {
         var inicio = new DateTime(2026, 9, 12, 0, 0, 0, DateTimeKind.Utc);
-        var suscripcion = new Suscripcion(empresaId: 7, planId: 3, inicio, inicio.AddDays(30));
+        var suscripcion = new Suscripcion(7, 3, inicio, inicio.AddDays(30));
 
         Assert.Equal(7, suscripcion.EmpresaId);
         Assert.Equal(3, suscripcion.PlanId);
