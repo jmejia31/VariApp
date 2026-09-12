@@ -34,7 +34,7 @@ public sealed class SuscripcionesSaaSController : ControllerBase
         {
             return BadRequest(ApiResponse<string>.Fail(
                 SuscripcionSaaSErrorCodes.IdempotencyKeyRequerida,
-                "Idempotency-Key es obligatorio para onboarding."));
+                new List<string> { "Idempotency-Key es obligatorio para onboarding." }));
         }
 
         var suscripcion = await _service.OnboardingAsync(
