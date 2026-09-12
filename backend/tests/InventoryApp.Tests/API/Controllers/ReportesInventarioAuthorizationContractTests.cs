@@ -53,6 +53,7 @@ public sealed class ReportesInventarioAuthorizationContractTests
     [Fact]
     public async Task Reportes_SinPermiso_FallanCerradoAntesDeEjecutarAccion()
     {
+        const int empresaId = 31;
         var matrix = new (Type Controller, string Method, ModuloSistema Module, AccionPermiso Action)[]
         {
             (typeof(ReportesInventarioValorizacionController), nameof(ReportesInventarioValorizacionController.GetResumen), ModuloSistema.Inventario, AccionPermiso.Ver),
@@ -70,13 +71,14 @@ public sealed class ReportesInventarioAuthorizationContractTests
 
             var permisos = new Mock<IPermisoService>(MockBehavior.Strict);
             permisos
-                .Setup(service => service.VerificarPermisoAsync(entry.Module, entry.Action))
+                .Setup(service => service.VerificarPermisoAsync(empresaId, entry.Module, entry.Action))
                 .ThrowsAsync(new ForbiddenAccessException("denegado"));
 
             using var services = new ServiceCollection()
                 .AddSingleton(permisos.Object)
                 .BuildServiceProvider();
             var httpContext = new DefaultHttpContext { RequestServices = services };
+            httpContext.Request.Headers["X-Empresa-Id"] = empresaId.ToString();
             var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
             var executingContext = new ActionExecutingContext(
                 actionContext,
