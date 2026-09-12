@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
@@ -53,5 +54,30 @@ public sealed class SecuenciaDocumentoServiceTests
             () => service.ObtenerAsync(2, null, "FACTURA"));
 
         Assert.Contains("no tiene acceso", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task ReservarSiguienteAsync_FallaCerradoSinMembresiaTenantActiva()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase($"n66f-reserve-denied-{Guid.NewGuid():N}")
+            .Options;
+
+        await using var db = new AppDbContext(options);
+        var scope = new Mock<IUsuarioScopeService>();
+        scope.Setup(x => x.ObtenerActualAsync(2, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((UsuarioTenantScopeActual?)null);
+
+        var service = new SecuenciaDocumentoService(db, scope.Object);
+        var request = new ReservarSecuenciaDocumentoRequest(2, null, "FACTURA");
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => service.ReservarSiguienteAsync(request));
+
+        Assert.Contains("no tiene acceso", error.Message, StringComparison.OrdinalIgnoreCase);
+        scope.Verify(
+            x => x.ObtenerActualAsync(2, It.IsAny<CancellationToken>()),
+            Times.Once);
+        Assert.Empty(db.RegistrosAuditoria);
     }
 }
