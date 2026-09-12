@@ -1,0 +1,91 @@
+name: VAEP N6.6.C Snapshot Concurrency Once
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - '.github/workflows/vaep-n66c-snapshot-concurrency-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile-snapshot:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore backend
+        run: dotnet restore backend/InventoryApp.sln
+
+      - name: Reconcile generated migration metadata with concurrency token
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path('backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'),
+              Path('backend/src/Infrastructure/Migrations/20260912041136_N66CNumeracionPersistence.Designer.cs'),
+          ]
+          before = '''                    b.Property<long>("UltimoValor")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L);'''
+          after = '''                    b.Property<long>("UltimoValor")
+                        .ValueGeneratedOnAdd()
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L);'''
+
+          for path in files:
+              text = path.read_text(encoding='utf-8-sig')
+              count = text.count(before)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one SecuenciaDocumento UltimoValor model block, found {count}')
+              path.write_text(text.replace(before, after, 1), encoding='utf-8')
+          PY
+
+      - name: Verify EF snapshot has no pending model changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet tool install --global dotnet-ef --version 8.0.2
+          dotnet ef migrations has-pending-model-changes \
+            --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project backend/src/API/InventoryApp.API.csproj
+
+      - name: Build and test numbering scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet build backend/InventoryApp.sln --no-restore
+          dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj \
+            --no-build --no-restore \
+            --filter 'FullyQualifiedName~NumeracionDocumento'
+
+      - name: Commit reconciliation and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git rm .github/workflows/vaep-n66c-snapshot-concurrency-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs \
+                  backend/src/Infrastructure/Migrations/20260912041136_N66CNumeracionPersistence.Designer.cs
+          git diff --cached --stat
+          git commit -m 'fix(n6.6.c): align EF snapshot with concurrency token'
+          git push origin HEAD:Desarrollo
