@@ -51,8 +51,28 @@ async function completarSeleccionTenantSiAplica(page: Page): Promise<void> {
   }
 
   if (!EMPRESA_ID) throw new Error('E2E_TENANT_ID o PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
-  await selector.fill(EMPRESA_ID);
-  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+
+  try {
+    await selector.fill(EMPRESA_ID, { timeout: 5_000 });
+  } catch (error) {
+    try {
+      await page.waitForURL((url) => url.pathname !== '/login', { timeout: 5_000 });
+      return;
+    } catch {
+      throw error;
+    }
+  }
+
+  try {
+    await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click({ timeout: 5_000 });
+  } catch (error) {
+    try {
+      await page.waitForURL((url) => url.pathname !== '/login', { timeout: 5_000 });
+      return;
+    } catch {
+      throw error;
+    }
+  }
 }
 
 async function loginUi(page: Page): Promise<void> {
