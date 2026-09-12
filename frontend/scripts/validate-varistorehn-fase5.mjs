@@ -97,7 +97,7 @@ for (const source of [productsTs, productTs, categoriesTs, categoryTs]) {
 }
 
 expect(homeTs.includes('navigateByUrl(VARISTOREHN_PATHS.carrito'), 'El home debe abrir la ruta canónica del carrito, no una segunda superficie.');
-expect(homeTs.includes("queryParamMap.get('carrito') === '1'"), 'El puente legado ?carrito=1 debe migrar a la ruta canónica.');
+expect(homeTs.includes("query.get('carrito') === '1'"), 'El puente legado ?carrito=1 debe migrar a la ruta canónica.');
 expect(homeTs.includes('{ replaceUrl: true }'), 'La migración del puente legado debe reemplazar la URL temporal.');
 for (const forbidden of [
   "@ViewChild('carritoDialog')",
