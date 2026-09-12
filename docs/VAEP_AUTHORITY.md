@@ -27,6 +27,17 @@ TASK_SCOPE_LEASE_SINGLE_WRITER=TRUE
 TASK_SCOPE_LEASE_TTL_MINUTES=10
 STALE_LEASE_TAKEOVER_AFTER_MINUTES=10
 DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE
+LOGICAL_TASK_SESSION_CONTINUES_UNTIL_LISTO_REAL=TRUE
+RUN_BOUNDARY_DOES_NOT_COMPLETE_PARENT=TRUE
+USER_FACING_NONTERMINAL_COMPLETION_PROHIBITED=TRUE
+NONTERMINAL_INTERNAL_HANDOFF_REQUIRED=TRUE
+NEXT_AUTOMATION_RESUMES_CURRENT_PARENT=TRUE
+STATE_FLOW=PENDIENTE>EN_PROGRESO>VALIDANDO>LISTO
+NEXT_PARENT_PREARM_MODE=READ_ONLY
+NEXT_PARENT_ACTIVE_BEFORE_PREREQUISITE_LISTO_REAL=FALSE
+NEXT_PARENT_PROMOTE_AFTER_LISTO_REAL_SAME_RUN=TRUE
+USE_EXECUTION_BUDGET_WHILE_PRODUCTIVE=TRUE
+HUMAN_ACTION_REQUIRED_ONLY_FOR_EXTERNAL_IRRESOLVABLE_BLOCKER=TRUE
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_CLOSE_SLA_ROLLING_24H=72
 PARENT_MAX_DWELL_MINUTES=20
@@ -88,6 +99,23 @@ Reglas absolutas:
 - Cero Jules activos puede ser estado sano si no existe offload materialmente ventajoso.
 - Está prohibido fabricar trabajo, subdivisiones nominales, evidencia redundante o backlog artificial para mantener Jules ocupados.
 - Un slot no termina en `REPORT_ONLY`, `HANDOFF_ONLY`, `PENDING_REVIEW`, `WAIT_FOR_JULES` o equivalente si existe acción material segura que el ejecutor actual puede realizar.
+
+### Contrato de continuidad hasta LISTO_REAL
+
+`LISTO_REAL_CONTINUITY_HARD` es obligatorio para las diez Tasks:
+
+1. Cada activación se adjunta al `CURRENT_PARENT` y trabaja materialmente hacia `LISTO_REAL`; una corrida de status no satisface la obligación si existe acción segura ejecutable.
+2. El fin físico de una invocación **no** completa la tarea lógica. Mientras el parent no sea `LISTO_REAL`, la sesión lógica sigue abierta entre checkpoints.
+3. Si runtime, gate nonterminal o dependencia externa impide certificar en esa invocación, se persiste `HANDOFF_CONTINUITY` interno con exact HEAD, owner/lease, evidencia, RCA, progreso útil y `NEXT_ACTION`; la siguiente Task reanuda exactamente el mismo `CURRENT_PARENT`.
+4. Está prohibida una notificación user-facing de “terminado”, “cerrado”, “éxito” o status terminal normal si el `CURRENT_PARENT` no es `LISTO_REAL`. Sólo un bloqueo externo causal realmente irresoluble que requiera intervención humana puede notificarse como `HUMAN_ACTION_REQUIRED`, nunca como cierre.
+5. La máquina de estados es estricta: `PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO`, y `LISTO_REAL` vive en evidencia/receipt, no en `COLA.ESTADO`.
+6. `EN_PROGRESO` exige lease válido y actividad material real. `VALIDANDO` exige delta material completo y `REVIEW_FIRST`/gates causales en curso. `LISTO` exige receipt `LISTO_REAL`, DoD y P0/P1=0.
+7. `NEXT_PARENT` permanece `PENDIENTE` y como máximo `PREARM_READ_ONLY` mientras el prerequisito no sea `LISTO_REAL`; queda prohibido marcarlo `EN_PROGRESO` o `VALIDANDO` anticipadamente.
+8. Al cerrar el parent actual se materializa receipt/evidencia, se sincroniza `LAST_CLOSED_PARENT/CURRENT_PARENT` y se deja el siguiente dependency-valid, unblocked y prearmed en la misma cadena lógica. Sólo un lease nuevo + trabajo material real puede activarlo.
+9. Lease fresco ajeno + progreso material <=10m implica no competir: el siguiente slot actúa como verifier/read-only del mismo parent y puede clasificar gates/preparar prearm seguro. Sin owner o con stale/no-progress >=10m, debe ejecutar takeover con read-before-write + write + readback y continuar recuperación causal.
+10. Cada Task utiliza su presupuesto de ejecución mientras exista trabajo material seguro. No existe corte voluntario por conveniencia; tampoco se permite filler, busywork o actividad para aparentar utilización.
+11. `FIRST_DETECTOR_OWNS_RECOVERY`: defecto o review debt accionable se corrige y revalida same-run cuando sea seguro; no se crea una cola de rechazo para trabajo que el detector puede resolver.
+12. El SLA `3 LISTO_REAL/60m` acelera prioridad mediante `CLOSURE_DEBT_FASTPATH`, pero jamás autoriza false PASS, false ACTIVE_REAL, cierre falso o salto de dependencias.
 
 ### Primarias
 
@@ -192,6 +220,14 @@ No son `ACTIVE_REAL`: tarea habilitada, trigger, planner, dispatch, workflow sin
 
 Nunca fingir sesión, actividad, PASS, CI, evidencia o LISTO.
 
+### Transiciones de estado obligatorias
+
+- `PENDIENTE -> EN_PROGRESO`: sólo después de ownership/lease válido y primera actividad material verificable.
+- `EN_PROGRESO -> VALIDANDO`: sólo cuando el delta material requerido está implementado y la unidad entra realmente a REVIEW_FIRST/tests/gates causales.
+- `VALIDANDO -> LISTO`: sólo cuando existe receipt/evidencia `LISTO_REAL`, con DoD completo y P0/P1=0.
+- `LISTO_REAL` nunca se escribe como valor de `COLA.ESTADO`.
+- El siguiente parent no hereda `EN_PROGRESO/VALIDANDO` por anticipación; antes del cierre del prerequisito sólo admite `PENDIENTE + PREARM_READ_ONLY`.
+
 ## 6. Parent-close, throughput y continuidad
 
 Objetivo contractual:
@@ -213,7 +249,9 @@ Si `ROLLING60<3`:
 5. al cerrar, promover el siguiente dependency-valid y evaluarlo en la misma corrida;
 6. con `CLOSURE_CHAIN_SAME_RUN=TRUE`, encadenar cierres mientras sea seguro hasta recuperar el SLA o encontrar blocker externo causal exacto.
 
-`DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE` significa prearmar lectura/plan/scope del próximo trabajo seguro sin escribirlo prematuramente. No requiere Jules ni manifest.
+`DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE` significa prearmar lectura/plan/scope del próximo trabajo seguro sin escribirlo prematuramente. Antes de `LISTO_REAL` del prerequisito, el siguiente parent permanece `PENDIENTE` y el prearm es read-only. No requiere Jules ni manifest.
+
+`CLOSURE_CHAIN_SAME_RUN=TRUE` no autoriza dos writers solapados ni estados activos anticipados: significa cerrar el parent vigente, dejar receipt y sincronización coherente, promover el siguiente dependency-valid y sólo entonces adquirir un nuevo lease para trabajo material del siguiente.
 
 ## 7. Recovery sin espera administrativa
 
@@ -277,19 +315,22 @@ Orden mínimo de **cualquiera** de las diez:
 
 1. releer MAESTRO, HEAD/FUNCTIONAL_HEAD, CURRENT_PARENT, `ROLLING60/DEFICIT`, Sheet fresco, leases y deuda terminal;
 2. reconciliar lease: respetar owner fresco o adquirir/tomar scope stale;
-3. cerrar de inmediato parent ya certificable;
+3. si el `CURRENT_PARENT` ya es certificable, cerrarlo de inmediato; si no, continuar el mismo parent, no seleccionar otro por conveniencia;
 4. si falta trabajo material, ejecutar directamente el gap más corto al cierre;
 5. probar y hacer REVIEW_FIRST; corregir same-run lo corregible;
 6. resolver recovery accionable antes de terminar;
 7. integrar sólo delta aprobado sobre HEAD vigente y verificar gates causales;
 8. certificar `LISTO_REAL` sólo con evidencia completa;
-9. promover/evaluar siguiente parent y aplicar chain same-run si corresponde;
-10. prearmar NEXT_SAFE directo;
+9. al cierre, sincronizar receipt/estado y promover/dejar dependency-valid, unblocked y prearmed el siguiente parent; antes de ese cierre el siguiente sigue `PENDIENTE/PREARM_READ_ONLY`;
+10. si queda presupuesto y no existe writer fresco, puede adquirirse un nuevo lease y comenzar materialmente el siguiente parent;
 11. sólo después evaluar si un offload Jules independiente reduce camino crítico;
-12. sincronizar CONFIG/COLA/WORKERS/BITACORA y liberar/actualizar lease con readback;
-13. registrar PROOF_OF_RUN material por `AUTOMATION_ID`.
+12. si la invocación física termina antes de `LISTO_REAL`, persistir `HANDOFF_CONTINUITY` interno con exact HEAD/lease/evidencia/RCA/NEXT_ACTION para que el siguiente slot reanude el mismo parent;
+13. sincronizar CONFIG/COLA/WORKERS/BITACORA y liberar/actualizar lease con readback;
+14. registrar PROOF_OF_RUN material por `AUTOMATION_ID`.
 
 Una lane Jules libre ya **no obliga dispatch**. Una automatización directa con trabajo material seguro sí debe ejecutarlo o documentar blocker externo exacto.
+
+Ninguna de las diez Tasks puede declarar su obligación lógica terminada porque finalice su invocación física. El terminal normal de la sesión lógica es `LISTO_REAL`; la única excepción de mensajería es `HUMAN_ACTION_REQUIRED` por blocker externo causal realmente irresoluble.
 
 ## 10. Telemetría y Sheet
 
@@ -340,4 +381,4 @@ Toda modificación futura de regla debe:
 4. conservar evidencia histórica inmutable sin permitir que se ejecute;
 5. no crear otra fuente de autoridad.
 
-**Regla final:** las diez tareas programadas producen y cierran directamente. Jules acelera sólo cuando conviene. Ningún componente auxiliar puede convertirse otra vez en requisito implícito para que VAEP avance.
+**Regla final:** las diez tareas programadas mantienen continuidad lógica del `CURRENT_PARENT` hasta `LISTO_REAL`, producen/corrigen/revisan/cierran directamente según su rol, y sólo tras un cierre real dejan el siguiente parent dependency-valid/unblocked/prearmed. Jules acelera únicamente cuando conviene. Ningún componente auxiliar puede convertirse otra vez en requisito implícito para que VAEP avance.
