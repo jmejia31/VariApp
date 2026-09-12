@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
 
@@ -130,5 +131,60 @@ public class EmpresaConfiguracionTenantServiceTests
         empresaRepository.Verify(repository => repository.Update(It.IsAny<Empresa>()), Times.Never);
         repository.Verify(repository => repository.UpdateTenant(It.IsAny<ConfigEmpresa>()), Times.Never);
         repository.Verify(repository => repository.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateTenantLogoAsync_UsaStorageTenantAwareDerivadoDeMembresiaVerificada()
+    {
+        var repository = new Mock<IEmpresaConfiguracionRepository>();
+        var imageStorage = new Mock<IImageStorageService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var empresaRepository = new Mock<IEmpresaRepository>();
+        var scope = new Mock<IUsuarioScopeService>();
+
+        var empresa = new Empresa("Acme Honduras") { Id = 23 };
+        var config = new ConfigEmpresa(23) { Version = 1 };
+        var tenantScope = new UsuarioTenantScopeActual(9, 23, 4, "Administrador", true);
+
+        scope.Setup(service => service.ObtenerActualAsync(23, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(tenantScope);
+        empresaRepository.Setup(repository => repository.GetByIdAsync(23, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(empresa);
+        empresaRepository.Setup(repository => repository.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        repository.Setup(repository => repository.GetTenantAsync(23, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+        repository.Setup(repository => repository.ListPlantillasAsync(23, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<PlantillaCorreoEmpresa>());
+        imageStorage.Setup(storage => storage.UploadAsync(
+                It.Is<StorageTenantContext>(tenant => tenant.EmpresaId == 23 && tenant.UsuarioId == 9),
+                It.IsAny<IFormFile>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(("https://res.cloudinary.com/test/image/upload/v1/inventoryapp/productos/empresas/23/logo.png",
+                "inventoryapp/productos/empresas/23/logo"));
+
+        var service = new EmpresaConfiguracionService(
+            repository.Object,
+            imageStorage.Object,
+            auditoria.Object,
+            empresaRepository.Object,
+            scope.Object);
+
+        await using var stream = new MemoryStream(new byte[] { 0x89, 0x50, 0x4E, 0x47 });
+        IFormFile logo = new FormFile(stream, 0, stream.Length, "logo", "logo.png")
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "image/png"
+        };
+
+        var result = await service.UpdateTenantLogoAsync(23, logo);
+
+        Assert.Equal(23, result.EmpresaId);
+        Assert.Equal("inventoryapp/productos/empresas/23/logo", empresa.LogoPublicId);
+        imageStorage.Verify(storage => storage.UploadAsync(
+            It.Is<StorageTenantContext>(tenant => tenant.EmpresaId == 23 && tenant.UsuarioId == 9),
+            logo,
+            It.IsAny<CancellationToken>()), Times.Once);
+        imageStorage.Verify(storage => storage.UploadAsync(It.IsAny<IFormFile>()), Times.Never);
     }
 }
