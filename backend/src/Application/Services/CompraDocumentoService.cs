@@ -30,23 +30,30 @@ public class CompraDocumentoService : ICompraDocumentoService
     private readonly ICompraDocumentoStorageService _storage;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
 
     public CompraDocumentoService(
         ICompraRepository compraRepository,
         ICompraDocumentoRepository documentoRepository,
         ICompraDocumentoStorageService storage,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IUsuarioScopeService? usuarioScopeService = null)
     {
         _compraRepository = compraRepository;
         _documentoRepository = documentoRepository;
         _storage = storage;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _httpContextAccessor = httpContextAccessor;
+        _usuarioScopeService = usuarioScopeService;
     }
 
     public async Task<List<CompraDocumentoDto>> GetByCompraAsync(int compraId)
     {
+        _ = await ResolverStorageTenantAsync();
         await ObtenerCompraAutorizadaAsync(compraId);
         var documentos = await _documentoRepository.GetByCompraIdAsync(compraId);
         return documentos.Select(ToDto).ToList();
@@ -54,6 +61,8 @@ public class CompraDocumentoService : ICompraDocumentoService
 
     public async Task<CompraDocumentoDto> UploadAsync(int compraId, IFormFile archivo)
     {
+        var tenant = await ResolverStorageTenantAsync();
+        var cancellationToken = RequestAborted;
         var compra = await ObtenerCompraAutorizadaAsync(compraId);
         await ValidarArchivoAsync(archivo);
 
@@ -61,7 +70,7 @@ public class CompraDocumentoService : ICompraDocumentoService
         if (cantidad >= MaxDocumentosPorCompra)
             throw new BusinessRuleException($"Una compra puede tener como máximo {MaxDocumentosPorCompra} comprobantes adjuntos.");
 
-        var almacenado = await _storage.UploadAsync(archivo);
+        var almacenado = await _storage.UploadAsync(tenant, archivo, cancellationToken);
         var documento = new CompraDocumento
         {
             CompraId = compraId,
@@ -82,7 +91,11 @@ public class CompraDocumentoService : ICompraDocumentoService
         }
         catch
         {
-            await _storage.DeleteAsync(almacenado.PublicId, almacenado.ResourceType);
+            await _storage.DeleteAsync(
+                tenant,
+                almacenado.PublicId,
+                almacenado.ResourceType,
+                cancellationToken);
             throw;
         }
 
@@ -107,11 +120,12 @@ public class CompraDocumentoService : ICompraDocumentoService
         int compraId,
         int documentoId)
     {
+        var tenant = await ResolverStorageTenantAsync();
         var compra = await ObtenerCompraAutorizadaAsync(compraId);
         var documento = await _documentoRepository.GetByIdAsync(compraId, documentoId);
         if (documento is null) return null;
 
-        var descarga = await _storage.DownloadAsync(documento.Url);
+        var descarga = await _storage.DownloadAsync(tenant, documento.Url, RequestAborted);
         if (descarga is null) return null;
 
         await _auditoria.RegistrarAsync(
@@ -127,11 +141,16 @@ public class CompraDocumentoService : ICompraDocumentoService
 
     public async Task<bool> DeleteAsync(int compraId, int documentoId)
     {
+        var tenant = await ResolverStorageTenantAsync();
         var compra = await ObtenerCompraAutorizadaAsync(compraId);
         var documento = await _documentoRepository.GetByIdAsync(compraId, documentoId);
         if (documento is null) return false;
 
-        await _storage.DeleteAsync(documento.PublicId, documento.ResourceType);
+        await _storage.DeleteAsync(
+            tenant,
+            documento.PublicId,
+            documento.ResourceType,
+            RequestAborted);
 
         documento.Eliminado = true;
         documento.FechaEliminacion = DateTime.UtcNow;
@@ -156,6 +175,15 @@ public class CompraDocumentoService : ICompraDocumentoService
 
         return true;
     }
+
+    private CancellationToken RequestAborted =>
+        _httpContextAccessor?.HttpContext?.RequestAborted ?? default;
+
+    private Task<StorageTenantContext> ResolverStorageTenantAsync() =>
+        StorageTenantContextResolver.ResolverRequeridoAsync(
+            _httpContextAccessor,
+            _usuarioScopeService,
+            RequestAborted);
 
     private async Task<Compra> ObtenerCompraAutorizadaAsync(int compraId)
     {
