@@ -5,11 +5,14 @@ import { ensureSeedAdminTenantMembershipForCi } from './e2e/tenant-bootstrap';
 
 const baseURL = process.env['PLAYWRIGHT_TEST_BASE_URL'] ?? 'http://127.0.0.1:4200';
 const tenantId = process.env['E2E_TENANT_ID'] ?? '1';
+const connectionString = process.env['ConnectionStrings__DefaultConnection'] ?? '';
 const hasTenantBootstrapContext = Boolean(
   process.env['E2E_TENANT_ID'] &&
   process.env['PHASE7_ADMIN_USERNAME'] &&
   process.env['PHASE7_ADMIN_PASSWORD']
 );
+const requiresExplicitTenantSelection =
+  process.env['CI'] === 'true' && connectionString.includes('Database=inventoryapp_n11_sucursales;');
 
 function enableTenantAwareFixtureForCi(): void {
   if (!process.env['CI']) return;
@@ -55,17 +58,19 @@ export default defineConfig({
     extraHTTPHeaders: {
       'X-Empresa-Id': tenantId
     },
-    storageState: {
-      cookies: [],
-      origins: [
-        {
-          origin: new URL(baseURL).origin,
-          localStorage: [
-            { name: 'inventoryapp_empresa_solicitada_id', value: tenantId }
+    storageState: requiresExplicitTenantSelection
+      ? undefined
+      : {
+          cookies: [],
+          origins: [
+            {
+              origin: new URL(baseURL).origin,
+              localStorage: [
+                { name: 'inventoryapp_empresa_solicitada_id', value: tenantId }
+              ]
+            }
           ]
-        }
-      ]
-    },
+        },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
