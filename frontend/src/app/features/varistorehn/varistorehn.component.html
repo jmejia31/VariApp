@@ -144,7 +144,7 @@
         <div class="empty" role="alert"><app-store-icon nombre="envio" /><h3>No pudimos cargar los destacados</h3><p>{{ errorDestacados() }}</p><button type="button" class="button primary" (click)="cargarDestacados()">Intentar de nuevo</button></div>
       } @else if (estadoDestacados() === 'empty') {
         <div class="featured-empty">
-          <div><app-store-icon nombre="estrella" /><span><strong>Aún no hay productos marcados como destacados</strong><small>El home no elige productos arbitrarios ni convierte datos reales en ejemplos.</small></span></div>
+          <div><app-store-icon nombre="sol" /><span><strong>Aún no hay productos marcados como destacados</strong><small>El home no elige productos arbitrarios ni convierte datos reales en ejemplos.</small></span></div>
           <a class="button primary" [href]="enlaces.productos">Explorar todos los productos</a>
         </div>
       } @else {
