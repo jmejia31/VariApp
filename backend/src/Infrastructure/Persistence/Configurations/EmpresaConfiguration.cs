@@ -21,6 +21,19 @@ public sealed class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(x => x.Rtn)
+            .HasColumnName("RTN")
+            .HasMaxLength(50);
+
+        builder.Property(x => x.Direccion)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.LogoUrl)
+            .HasMaxLength(1000);
+
+        builder.Property(x => x.LogoPublicId)
+            .HasMaxLength(250);
+
         builder.Property(x => x.Activa)
             .HasDefaultValue(true);
 
@@ -32,5 +45,9 @@ public sealed class EmpresaConfiguration : IEntityTypeConfiguration<Empresa>
 
         builder.HasIndex(x => new { x.Activa, x.Nombre })
             .HasDatabaseName("IX_Empresas_Activa_Nombre");
+
+        builder.HasIndex(x => x.Rtn)
+            .IsUnique()
+            .HasDatabaseName("UX_Empresas_RTN");
     }
 }
