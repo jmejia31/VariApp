@@ -1,5 +1,8 @@
+using InventoryApp.API.Controllers;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -55,5 +58,23 @@ public class SuscripcionesSaaSBackendApiContractTests
         Assert.NotNull(idempotencia);
         Assert.Equal("empresaId", vigente!.GetParameters()[0].Name);
         Assert.Equal("empresaId", idempotencia!.GetParameters()[0].Name);
+    }
+
+    [Fact]
+    public async Task Onboarding_SinIdempotencyKey_DevuelveProblemDetailsEstable()
+    {
+        var service = new Mock<ISuscripcionesSaaSService>(MockBehavior.Strict);
+        var controller = new SuscripcionesSaaSController(service.Object);
+        var request = new OnboardingSuscripcionSaaSRequest("BASIC", DateTime.UtcNow);
+
+        var result = await controller.Onboarding(1, null, request, CancellationToken.None);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        var problem = Assert.IsType<ProblemDetails>(badRequest.Value);
+        Assert.Equal(400, problem.Status);
+        Assert.Equal("Idempotency-Key requerida", problem.Title);
+        Assert.Equal("Idempotency-Key es obligatorio para onboarding.", problem.Detail);
+        Assert.Equal(SuscripcionSaaSErrorCodes.IdempotencyKeyRequerida, problem.Extensions["code"]);
+        service.VerifyNoOtherCalls();
     }
 }
