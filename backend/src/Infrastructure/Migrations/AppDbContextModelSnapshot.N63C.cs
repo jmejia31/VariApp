@@ -22,6 +22,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         "IF(Eliminado = 0, CONCAT(IF(EmpresaId IS NULL, 'LEGACY', CONCAT('E:', EmpresaId)), ':', UPPER(TRIM(Codigo))), NULL)",
                         true);
             });
+
+            // Continúa el encadenamiento aditivo del snapshot efectivo con N6.7.C.
+            ApplyN67CModel(modelBuilder);
         }
     }
 }
