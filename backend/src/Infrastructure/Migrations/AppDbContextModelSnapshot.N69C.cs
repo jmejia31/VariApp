@@ -9,6 +9,19 @@ namespace InventoryApp.Infrastructure.Migrations
 {
     partial class AppDbContextModelSnapshot
     {
+        private IModel _n69cModel;
+
+        public override IModel Model
+            => _n69cModel ??= CreateN69CModel();
+
+        private IModel CreateN69CModel()
+        {
+            var modelBuilder = new ModelBuilder();
+            BuildModel(modelBuilder);
+            ApplyN69CModel(modelBuilder);
+            return (IModel)modelBuilder.Model;
+        }
+
         /// <summary>
         /// N6.9.C — overlay de snapshot para Plan, PlanLimite y Suscripcion.
         /// Conserva el snapshot canonico historico y deja verificable el modelo
