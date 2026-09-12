@@ -6,6 +6,7 @@ using InventoryApp.Application.Mappings;
 using InventoryApp.Application.Validators;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace InventoryApp.Application.Services;
 
@@ -19,6 +20,8 @@ public class ProductoService : IProductoService
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
     private readonly ICatalogoProductoService? _catalogoService;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
 
     public ProductoService(
         IProductoRepository repository,
@@ -26,7 +29,9 @@ public class ProductoService : IProductoService
         IImageStorageService imageStorage,
         ICurrentUserService currentUser,
         IAuditoriaService auditoria,
-        ICatalogoProductoService? catalogoService = null)
+        ICatalogoProductoService? catalogoService = null,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IUsuarioScopeService? usuarioScopeService = null)
     {
         _repository = repository;
         _categoriaRepository = categoriaRepository;
@@ -34,6 +39,8 @@ public class ProductoService : IProductoService
         _currentUser = currentUser;
         _auditoria = auditoria;
         _catalogoService = catalogoService;
+        _httpContextAccessor = httpContextAccessor;
+        _usuarioScopeService = usuarioScopeService;
     }
 
     public async Task<ProductoDto?> GetByIdAsync(int id)
@@ -57,7 +64,7 @@ public class ProductoService : IProductoService
     public async Task<ProductoDto> CreateAsync(CreateProductoDto dto)
     {
         ValidarTipoInventario(dto.TipoInventario);
-        var imagenes = dto.Imagenes ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
+        var imagenes = dto.Imagenes ?? new List<IFormFile>();
         if (imagenes.Count > MaxImagenes)
             throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos generales.");
         ValidarImagenes(imagenes);
@@ -76,9 +83,16 @@ public class ProductoService : IProductoService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
+        StorageTenantContext? storageTenant = null;
+        if (imagenes.Count > 0)
+            storageTenant = await ResolverStorageTenantAsync();
+
         for (var i = 0; i < imagenes.Count; i++)
         {
-            var (url, publicId) = await _imageStorage.UploadAsync(imagenes[i]);
+            var (url, publicId) = await _imageStorage.UploadAsync(
+                storageTenant!,
+                imagenes[i],
+                _httpContextAccessor?.HttpContext?.RequestAborted ?? default);
             producto.Imagenes.Add(new ProductoImagen
             {
                 ProductoVarianteId = null,
@@ -116,6 +130,7 @@ public class ProductoService : IProductoService
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return null;
         var imagenesGenerales = producto.Imagenes.Where(i => i.ProductoVarianteId == null).ToList();
+        StorageTenantContext? storageTenant = null;
 
         var valoresAnteriores = new
         {
@@ -146,15 +161,21 @@ public class ProductoService : IProductoService
             var aEliminar = imagenesGenerales
                 .Where(i => dto.ImagenesAEliminarIds.Contains(i.Id))
                 .ToList();
+            if (aEliminar.Count > 0)
+                storageTenant = await ResolverStorageTenantAsync();
+
             foreach (var imagen in aEliminar)
             {
-                await _imageStorage.DeleteAsync(imagen.PublicId);
+                await _imageStorage.DeleteAsync(
+                    storageTenant!,
+                    imagen.PublicId,
+                    _httpContextAccessor?.HttpContext?.RequestAborted ?? default);
                 producto.Imagenes.Remove(imagen);
                 imagenesGenerales.Remove(imagen);
             }
         }
 
-        var nuevas = dto.ImagenesNuevas ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
+        var nuevas = dto.ImagenesNuevas ?? new List<IFormFile>();
         if (imagenesGenerales.Count + nuevas.Count > MaxImagenes)
             throw new BusinessRuleException(
                 $"Un producto puede tener máximo {MaxImagenes} fotos generales ({imagenesGenerales.Count} existentes + {nuevas.Count} nuevas excede el límite).");
@@ -165,9 +186,15 @@ public class ProductoService : IProductoService
             : imagenesGenerales.Max(i => i.Orden) + 1;
         var yaTienePrincipal = imagenesGenerales.Any(i => i.EsPrincipal);
 
+        if (nuevas.Count > 0 && storageTenant is null)
+            storageTenant = await ResolverStorageTenantAsync();
+
         foreach (var archivo in nuevas)
         {
-            var (url, publicId) = await _imageStorage.UploadAsync(archivo);
+            var (url, publicId) = await _imageStorage.UploadAsync(
+                storageTenant!,
+                archivo,
+                _httpContextAccessor?.HttpContext?.RequestAborted ?? default);
             var imagen = new ProductoImagen
             {
                 ProductoVarianteId = null,
@@ -292,6 +319,12 @@ public class ProductoService : IProductoService
         return guardado;
     }
 
+    private Task<StorageTenantContext> ResolverStorageTenantAsync() =>
+        StorageTenantContextResolver.ResolverRequeridoAsync(
+            _httpContextAccessor,
+            _usuarioScopeService,
+            _httpContextAccessor?.HttpContext?.RequestAborted ?? default);
+
     private async Task ValidarCategoriaAsync(int? categoriaId, bool exigirActiva)
     {
         if (!categoriaId.HasValue) return;
@@ -338,7 +371,7 @@ public class ProductoService : IProductoService
             throw new BusinessRuleException("El tipo de inventario indicado no es válido.");
     }
 
-    private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)
+    private static void ValidarImagenes(IEnumerable<IFormFile> imagenes)
     {
         if (imagenes.Any(imagen => !ImagenValidationHelper.EsImagenValida(imagen)))
             throw new BusinessRuleException("Solo se permiten imágenes JPG, PNG o WebP de hasta 5 MB.");
