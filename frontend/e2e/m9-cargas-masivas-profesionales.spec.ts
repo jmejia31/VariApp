@@ -31,15 +31,33 @@ async function loginApi(request: APIRequestContext): Promise<string> {
 
 async function completarSeleccionTenantSiAplica(page: Page): Promise<void> {
   const selector = page.getByLabel('ID de empresa');
+  const resultado = await Promise.race([
+    page.waitForURL((url) => url.pathname !== '/login', { timeout: 5_000 })
+      .then(() => 'redirected' as const)
+      .catch(() => null),
+    selector.waitFor({ state: 'visible', timeout: 5_000 })
+      .then(() => 'selector' as const)
+      .catch(() => null)
+  ]);
+
+  if (resultado !== 'selector') return;
+  if (new URL(page.url()).pathname !== '/login' || !(await selector.isVisible())) return;
+  if (!EMPRESA_ID) throw new Error('E2E_TENANT_ID o PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
+
   try {
-    await selector.waitFor({ state: 'visible', timeout: 5_000 });
-  } catch {
-    return;
+    await selector.fill(EMPRESA_ID, { timeout: 5_000 });
+  } catch (error) {
+    if (new URL(page.url()).pathname !== '/login') return;
+    throw error;
   }
 
-  if (!EMPRESA_ID) throw new Error('E2E_TENANT_ID o PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
-  await selector.fill(EMPRESA_ID);
-  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+  const entrar = page.getByRole('button', { name: 'Entrar a la empresa', exact: true });
+  try {
+    await entrar.click({ timeout: 5_000 });
+  } catch (error) {
+    if (new URL(page.url()).pathname !== '/login') return;
+    throw error;
+  }
 }
 
 async function loginUi(page: Page): Promise<void> {
