@@ -5,6 +5,43 @@ import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
 import { ActualizarEmpresaConfiguracionValue, EmpresaConfiguracion } from '../core/models/empresa-configuracion.model';
 
+export interface PlantillaCorreoEmpresa {
+  tipoPlantilla: string;
+  asunto: string;
+  cuerpo: string;
+  activa: boolean;
+}
+
+export interface ConfigEmpresaTenant {
+  empresaId: number;
+  nombre: string;
+  rtn?: string | null;
+  direccion?: string | null;
+  logoUrl?: string | null;
+  moneda: string;
+  zonaHoraria: string;
+  impuestosJson: string;
+  emisionJson: string;
+  correoRemitente?: string | null;
+  correoNombreRemitente?: string | null;
+  correoConfigurado: boolean;
+  version: number;
+  plantillasCorreo: PlantillaCorreoEmpresa[];
+}
+
+export interface ActualizarConfigEmpresaTenant {
+  nombre: string;
+  rtn?: string | null;
+  direccion?: string | null;
+  moneda: string;
+  zonaHoraria: string;
+  impuestosJson: string;
+  emisionJson: string;
+  correoRemitente?: string | null;
+  correoNombreRemitente?: string | null;
+  version: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmpresaConfiguracionService {
   private readonly apiUrl = `${environment.apiUrl}/empresa-configuracion`;
@@ -31,5 +68,23 @@ export class EmpresaConfiguracionService {
 
   restaurarLogo(): Observable<ApiResponse<EmpresaConfiguracion>> {
     return this.http.delete<ApiResponse<EmpresaConfiguracion>>(`${this.apiUrl}/logo`);
+  }
+
+  getTenant(empresaId: number): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    return this.http.get<ApiResponse<ConfigEmpresaTenant>>(`${this.apiUrl}/tenant/${empresaId}`);
+  }
+
+  updateTenant(empresaId: number, valor: ActualizarConfigEmpresaTenant): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    return this.http.put<ApiResponse<ConfigEmpresaTenant>>(`${this.apiUrl}/tenant/${empresaId}`, valor);
+  }
+
+  updateTenantLogo(empresaId: number, file: File): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return this.http.post<ApiResponse<ConfigEmpresaTenant>>(`${this.apiUrl}/tenant/${empresaId}/logo`, formData);
+  }
+
+  restaurarTenantLogo(empresaId: number): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    return this.http.delete<ApiResponse<ConfigEmpresaTenant>>(`${this.apiUrl}/tenant/${empresaId}/logo`);
   }
 }
