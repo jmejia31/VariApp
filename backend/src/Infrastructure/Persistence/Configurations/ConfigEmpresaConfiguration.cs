@@ -20,6 +20,12 @@ public sealed class ConfigEmpresaConfiguration : IEntityTypeConfiguration<Config
 
         builder.HasKey(x => x.Id);
 
+        // PlantillaCorreoEmpresa is owned by the tenant Empresa through EmpresaId.
+        // Ignoring this convenience collection prevents EF conventions from creating
+        // a second shadow relationship/FK (ConfigEmpresaId) that is not part of the
+        // N6.7.C migration or the canonical tenant persistence contract.
+        builder.Ignore(x => x.PlantillasCorreo);
+
         builder.Property(x => x.Moneda)
             .IsRequired()
             .HasMaxLength(3)
