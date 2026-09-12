@@ -23,12 +23,23 @@ public sealed class Priority3FileSecurityTests
         var storage = new Mock<ICompraDocumentoStorageService>();
         var currentUser = new Mock<ICurrentUserService>();
         var auditoria = new Mock<IAuditoriaService>();
+        var httpContextAccessor = new HttpContextAccessor
+        {
+            HttpContext = new DefaultHttpContext()
+        };
+        httpContextAccessor.HttpContext.Request.Headers[StorageTenantContextResolver.EmpresaHeader] = "3";
+        var usuarioScope = new Mock<IUsuarioScopeService>();
+        usuarioScope
+            .Setup(x => x.ObtenerActualAsync(3, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UsuarioTenantScopeActual(5, 3, 1, "Admin", true));
         var service = new CompraDocumentoService(
             compraRepository.Object,
             documentoRepository.Object,
             storage.Object,
             currentUser.Object,
-            auditoria.Object);
+            auditoria.Object,
+            httpContextAccessor,
+            usuarioScope.Object);
 
         var bytes = "<html>not-a-pdf</html>"u8.ToArray();
         await using var stream = new MemoryStream(bytes);
@@ -40,7 +51,12 @@ public sealed class Priority3FileSecurityTests
 
         var error = await Assert.ThrowsAsync<BusinessRuleException>(() => service.UploadAsync(7, archivo));
         Assert.Contains("contenido real", error.Message, StringComparison.OrdinalIgnoreCase);
-        storage.Verify(x => x.UploadAsync(It.IsAny<IFormFile>()), Times.Never);
+        storage.Verify(
+            x => x.UploadAsync(
+                It.IsAny<StorageTenantContext>(),
+                It.IsAny<IFormFile>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Theory]
