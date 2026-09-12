@@ -45,9 +45,8 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         var especificas = producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId).ToList();
         if (especificas.Count > 0) return Map(especificas);
 
-        // Fallback explícito: si la variante no tiene galería propia se usan
-        // únicamente las imágenes generales del producto. El DTO conserva
-        // ProductoVarianteId = null para que el frontend pueda mostrar que es fallback.
+        // Las imágenes de catálogo son lectura pública autenticada; la mutación
+        // (upload/principal/delete) sí queda ligada al tenant server-side.
         return Map(producto.Imagenes.Where(x => x.ProductoVarianteId == null));
     }
 
@@ -108,7 +107,7 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
             $"Se agregaron {subidas.Count} imagen(es) a una variante exacta.",
             varianteId,
             entidad: "ProductoVarianteImagen",
-            valoresNuevos: new { productoId, varianteId, imagenes = subidas.Select(x => x.Id).ToArray() });
+            valoresNuevos: new { productoId, varianteId, imagenes = subidas.Select(x => x.Id).ToArray(), tenant.EmpresaId });
 
         return Map(producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId));
     }
@@ -122,6 +121,10 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         var imagenes = producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId).ToList();
         var seleccionada = imagenes.FirstOrDefault(x => x.Id == imagenId);
         if (seleccionada is null) return false;
+
+        var tenant = await ResolverStorageTenantAsync();
+        ExigirImagenDelTenant(tenant, seleccionada);
+
         foreach (var imagen in imagenes) imagen.EsPrincipal = imagen.Id == imagenId;
         await _productoRepository.SaveChangesAsync();
 
@@ -131,7 +134,7 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
             "Se cambió la imagen principal de una variante.",
             imagenId,
             entidad: "ProductoVarianteImagen",
-            valoresNuevos: new { productoId, varianteId, imagenId });
+            valoresNuevos: new { productoId, varianteId, imagenId, tenant.EmpresaId });
         return true;
     }
 
@@ -144,6 +147,12 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         var imagenes = producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId).OrderBy(x => x.Orden).ToList();
         var imagen = imagenes.FirstOrDefault(x => x.Id == imagenId);
         if (imagen is null) return false;
+
+        // Autorizar el tenant y el locator antes de cualquier mutación de metadata.
+        var tenant = await ResolverStorageTenantAsync();
+        ExigirImagenDelTenant(tenant, imagen);
+        await _storage.DeleteAsync(tenant, imagen.PublicId, RequestAborted);
+
         var eraPrincipal = imagen.EsPrincipal;
         producto.Imagenes.Remove(imagen);
         if (eraPrincipal)
@@ -153,15 +162,13 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         }
         await _productoRepository.SaveChangesAsync();
 
-        var tenant = await ResolverStorageTenantAsync();
-        try { await _storage.DeleteAsync(tenant, imagen.PublicId, RequestAborted); } catch { }
         await _auditoria.RegistrarAsync(
             ModuloSistema.Productos,
             AccionPermiso.Editar,
             "Se eliminó una imagen de una variante exacta.",
             imagenId,
             entidad: "ProductoVarianteImagen",
-            valoresNuevos: new { productoId, varianteId, imagenId });
+            valoresNuevos: new { productoId, varianteId, imagenId, tenant.EmpresaId });
         return true;
     }
 
@@ -173,6 +180,17 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
             _httpContextAccessor,
             _usuarioScopeService,
             RequestAborted);
+
+    private static void ExigirImagenDelTenant(StorageTenantContext tenant, ProductoImagen imagen)
+    {
+        var marker = $"/empresas/{tenant.EmpresaId}/";
+        var publicId = $"/{imagen.PublicId.Trim().Trim('/')}";
+        if (!publicId.Contains(marker, StringComparison.Ordinal))
+        {
+            throw new ForbiddenAccessException(
+                "La imagen seleccionada no pertenece al contexto tenant verificado.");
+        }
+    }
 
     private static IReadOnlyList<ProductoImagenDto> Map(IEnumerable<ProductoImagen> imagenes) =>
         imagenes.OrderBy(x => x.Orden).Select(x => new ProductoImagenDto
