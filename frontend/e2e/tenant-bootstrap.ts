@@ -79,21 +79,41 @@ export function ensureSeedAdminTenantMembershipForCi(tenantId: string): void {
       );
   `;
 
-  execFileSync(
+  const mysqlArgs = [
+    '--protocol=tcp',
+    '-h', host,
+    '-P', port,
+    '-u', user,
+    database,
+    '--batch',
+    '--skip-column-names'
+  ];
+  const mysqlEnv = { ...process.env, MYSQL_PWD: password };
+
+  execFileSync('mysql', [...mysqlArgs, '-e', sql], {
+    stdio: 'inherit',
+    env: mysqlEnv
+  });
+
+  const verificationSql = `
+    SELECT COUNT(*)
+    FROM UsuarioEmpresas ue
+    INNER JOIN Usuarios u ON u.Id = ue.UsuarioId
+    INNER JOIN Empresas e ON e.Id = ue.EmpresaId
+    WHERE u.NombreUsuario = '${safeUsername}'
+      AND ue.EmpresaId = ${requestedTenantId}
+      AND ue.Activa = 1
+      AND e.Activa = 1;
+  `;
+  const membershipCount = execFileSync(
     'mysql',
-    [
-      '--protocol=tcp',
-      '-h', host,
-      '-P', port,
-      '-u', user,
-      database,
-      '--batch',
-      '--skip-column-names',
-      '-e', sql
-    ],
-    {
-      stdio: 'inherit',
-      env: { ...process.env, MYSQL_PWD: password }
-    }
-  );
+    [...mysqlArgs, '-e', verificationSql],
+    { encoding: 'utf8', env: mysqlEnv }
+  ).trim();
+
+  if (membershipCount !== '1') {
+    throw new Error(
+      `Bootstrap tenant E2E inválido para ${username}: membresías activas=${membershipCount || '0'}.`
+    );
+  }
 }
