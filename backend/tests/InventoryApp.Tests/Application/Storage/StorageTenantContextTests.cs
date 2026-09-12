@@ -22,7 +22,7 @@ public class StorageTenantContextTests
     [Fact]
     public void Desde_SinContexto_FallaCerrado()
     {
-        var exception = Assert.Throws<InvalidOperationException>(() => StorageTenantContext.Desde(null));
+        var exception = Assert.Throws<InvalidOperationException>(() => StorageTenantContext.Desde((ContextoTenantActual?)null));
 
         Assert.Contains("contexto tenant verificado", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
