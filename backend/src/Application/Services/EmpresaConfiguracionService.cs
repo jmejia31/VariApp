@@ -1,3 +1,4 @@
+using System.Text.Json;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
@@ -24,7 +25,10 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
     private readonly IEmpresaConfiguracionRepository _repository;
     private readonly IImageStorageService _imageStorage;
     private readonly IAuditoriaService _auditoria;
+    private readonly IEmpresaRepository? _empresaRepository;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
 
+    // Constructor histórico conservado para compatibilidad con pruebas y consumidores legacy.
     public EmpresaConfiguracionService(
         IEmpresaConfiguracionRepository repository,
         IImageStorageService imageStorage,
@@ -33,6 +37,19 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         _repository = repository;
         _imageStorage = imageStorage;
         _auditoria = auditoria;
+    }
+
+    // ASP.NET Core selecciona este constructor cuando todas las dependencias tenant-first están registradas.
+    public EmpresaConfiguracionService(
+        IEmpresaConfiguracionRepository repository,
+        IImageStorageService imageStorage,
+        IAuditoriaService auditoria,
+        IEmpresaRepository empresaRepository,
+        IUsuarioScopeService usuarioScopeService)
+        : this(repository, imageStorage, auditoria)
+    {
+        _empresaRepository = empresaRepository;
+        _usuarioScopeService = usuarioScopeService;
     }
 
     public async Task<EmpresaConfiguracionDto> GetActivaAsync()
@@ -168,6 +185,192 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         return nueva;
     }
 
+    public async Task<ConfigEmpresaTenantDto> GetTenantAsync(int empresaId, CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        return await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken);
+    }
+
+    public async Task<ConfigEmpresaTenantDto> UpdateTenantAsync(
+        int empresaId,
+        UpdateConfigEmpresaTenantDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        ValidarTenant(dto);
+
+        var empresa = await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+        var config = await GetOrCreateTenantConfigAsync(empresaId, cancellationToken);
+        if (dto.Version != config.Version)
+            throw new ConflictException("La configuración cambió desde la última lectura. Recarga e intenta nuevamente.");
+
+        var anterior = await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, empresa, config);
+
+        empresa.CambiarNombre(dto.Nombre);
+        empresa.ActualizarIdentidadLegal(dto.Rtn, dto.Direccion, empresa.LogoUrl, empresa.LogoPublicId);
+        config.Moneda = dto.Moneda.Trim().ToUpperInvariant();
+        config.ZonaHoraria = dto.ZonaHoraria.Trim();
+        config.ImpuestosJson = dto.ImpuestosJson.Trim();
+        config.EmisionJson = dto.EmisionJson.Trim();
+        config.CorreoRemitente = Limpiar(dto.CorreoRemitente);
+        config.CorreoNombreRemitente = Limpiar(dto.CorreoNombreRemitente);
+        config.Version++;
+
+        empresaRepository.Update(empresa);
+        _repository.UpdateTenant(config);
+        await _repository.SaveChangesAsync();
+
+        var nueva = await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, empresa, config);
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Configuración tenant de empresa {empresaId} actualizada.",
+            empresaId,
+            entidad: "ConfigEmpresa",
+            valoresAnteriores: anterior,
+            valoresNuevos: nueva);
+
+        return nueva;
+    }
+
+    public async Task<ConfigEmpresaTenantDto> UpdateTenantLogoAsync(
+        int empresaId,
+        IFormFile logo,
+        CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        ValidarLogo(logo);
+
+        var empresa = await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+        var publicIdAnterior = empresa.LogoPublicId;
+        var (url, publicId) = await _imageStorage.UploadAsync(logo);
+
+        empresa.ActualizarIdentidadLegal(empresa.Rtn, empresa.Direccion, url, publicId);
+        empresaRepository.Update(empresa);
+        await empresaRepository.SaveChangesAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(publicIdAnterior))
+            await _imageStorage.DeleteAsync(publicIdAnterior);
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Logo tenant de empresa {empresaId} actualizado.",
+            empresaId,
+            entidad: "Empresa");
+
+        return await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, empresa);
+    }
+
+    public async Task<ConfigEmpresaTenantDto> RestaurarTenantLogoAsync(
+        int empresaId,
+        CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+
+        var empresa = await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+        var publicIdAnterior = empresa.LogoPublicId;
+        empresa.ActualizarIdentidadLegal(empresa.Rtn, empresa.Direccion, null, null);
+        empresaRepository.Update(empresa);
+        await empresaRepository.SaveChangesAsync(cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(publicIdAnterior))
+            await _imageStorage.DeleteAsync(publicIdAnterior);
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Logo tenant de empresa {empresaId} restaurado.",
+            empresaId,
+            entidad: "Empresa");
+
+        return await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, empresa);
+    }
+
+    public async Task<ConfigEmpresaTenantDto> UpsertPlantillaTenantAsync(
+        int empresaId,
+        string tipoPlantilla,
+        UpdatePlantillaCorreoEmpresaDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+
+        var tipo = ValidarPlantilla(tipoPlantilla, dto);
+        var config = await GetOrCreateTenantConfigAsync(empresaId, cancellationToken);
+        if (dto.Version != config.Version)
+            throw new ConflictException("La configuración cambió desde la última lectura. Recarga e intenta nuevamente.");
+
+        var plantilla = await _repository.GetPlantillaAsync(empresaId, tipo, cancellationToken);
+        if (plantilla is null)
+        {
+            plantilla = new PlantillaCorreoEmpresa(empresaId, tipo, dto.Asunto, dto.Cuerpo)
+            {
+                Activa = dto.Activa
+            };
+            await _repository.AddPlantillaAsync(plantilla, cancellationToken);
+        }
+        else
+        {
+            plantilla.Asunto = dto.Asunto.Trim();
+            plantilla.Cuerpo = dto.Cuerpo.Trim();
+            plantilla.Activa = dto.Activa;
+            _repository.UpdatePlantilla(plantilla);
+        }
+
+        config.Version++;
+        _repository.UpdateTenant(config);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Plantilla de correo '{tipo}' de empresa {empresaId} actualizada.",
+            empresaId,
+            entidad: "PlantillaCorreoEmpresa");
+
+        return await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, config: config);
+    }
+
+    public async Task<ConfigEmpresaTenantDto> DesactivarPlantillaTenantAsync(
+        int empresaId,
+        string tipoPlantilla,
+        long version,
+        CancellationToken cancellationToken = default)
+    {
+        var (empresaRepository, scopeService) = TenantDependencies();
+        await EnsureTenantAccessAsync(scopeService, empresaId, cancellationToken);
+        await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+
+        var tipo = NormalizarRequerido(tipoPlantilla, "El tipo de plantilla es obligatorio.", 80);
+        var config = await GetOrCreateTenantConfigAsync(empresaId, cancellationToken);
+        if (version != config.Version)
+            throw new ConflictException("La configuración cambió desde la última lectura. Recarga e intenta nuevamente.");
+
+        var plantilla = await _repository.GetPlantillaAsync(empresaId, tipo, cancellationToken)
+            ?? throw new ResourceNotFoundException("La plantilla de correo no existe para esta empresa.");
+
+        plantilla.Activa = false;
+        _repository.UpdatePlantilla(plantilla);
+        config.Version++;
+        _repository.UpdateTenant(config);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Plantilla de correo '{tipo}' de empresa {empresaId} desactivada.",
+            empresaId,
+            entidad: "PlantillaCorreoEmpresa");
+
+        return await BuildTenantDtoAsync(empresaRepository, empresaId, cancellationToken, config: config);
+    }
+
     private async Task<EmpresaConfiguracion> GetOrCreateAsync()
     {
         var config = await _repository.GetActivaAsync();
@@ -177,6 +380,139 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         await _repository.AddAsync(config);
         await _repository.SaveChangesAsync();
         return config;
+    }
+
+    private async Task<ConfigEmpresa> GetOrCreateTenantConfigAsync(int empresaId, CancellationToken cancellationToken)
+    {
+        var config = await _repository.GetTenantAsync(empresaId, cancellationToken);
+        if (config is not null) return config;
+
+        config = new ConfigEmpresa(empresaId);
+        await _repository.AddTenantAsync(config, cancellationToken);
+        await _repository.SaveChangesAsync();
+        return config;
+    }
+
+    private async Task<ConfigEmpresaTenantDto> BuildTenantDtoAsync(
+        IEmpresaRepository empresaRepository,
+        int empresaId,
+        CancellationToken cancellationToken,
+        Empresa? empresa = null,
+        ConfigEmpresa? config = null)
+    {
+        empresa ??= await GetEmpresaAsync(empresaRepository, empresaId, cancellationToken);
+        config ??= await GetOrCreateTenantConfigAsync(empresaId, cancellationToken);
+        var plantillas = await _repository.ListPlantillasAsync(empresaId, cancellationToken);
+
+        return new ConfigEmpresaTenantDto
+        {
+            EmpresaId = empresaId,
+            Nombre = empresa.Nombre,
+            Rtn = empresa.Rtn,
+            Direccion = empresa.Direccion,
+            LogoUrl = empresa.LogoUrl,
+            Moneda = config.Moneda,
+            ZonaHoraria = config.ZonaHoraria,
+            ImpuestosJson = config.ImpuestosJson,
+            EmisionJson = config.EmisionJson,
+            CorreoRemitente = config.CorreoRemitente,
+            CorreoNombreRemitente = config.CorreoNombreRemitente,
+            CorreoConfigurado = config.CorreoConfigurado,
+            Version = config.Version,
+            PlantillasCorreo = plantillas.Select(ToTenantPlantillaDto).ToArray()
+        };
+    }
+
+    private static PlantillaCorreoEmpresaDto ToTenantPlantillaDto(PlantillaCorreoEmpresa plantilla) => new()
+    {
+        TipoPlantilla = plantilla.TipoPlantilla,
+        Asunto = plantilla.Asunto,
+        Cuerpo = plantilla.Cuerpo,
+        Activa = plantilla.Activa
+    };
+
+    private static async Task<Empresa> GetEmpresaAsync(
+        IEmpresaRepository empresaRepository,
+        int empresaId,
+        CancellationToken cancellationToken) =>
+        await empresaRepository.GetByIdAsync(empresaId, cancellationToken)
+        ?? throw new ResourceNotFoundException("La empresa solicitada no existe.");
+
+    private static async Task EnsureTenantAccessAsync(
+        IUsuarioScopeService scopeService,
+        int empresaId,
+        CancellationToken cancellationToken)
+    {
+        if (empresaId <= 0)
+            throw new BusinessRuleException("La empresa es obligatoria.");
+
+        var scope = await scopeService.ObtenerActualAsync(empresaId, cancellationToken);
+        if (scope is null)
+            throw new ForbiddenAccessException("No existe una membresía activa para la empresa solicitada.");
+    }
+
+    private (IEmpresaRepository EmpresaRepository, IUsuarioScopeService ScopeService) TenantDependencies()
+    {
+        if (_empresaRepository is null || _usuarioScopeService is null)
+            throw new InvalidOperationException("Las dependencias tenant-first de configuración no están disponibles.");
+
+        return (_empresaRepository, _usuarioScopeService);
+    }
+
+    private static void ValidarTenant(UpdateConfigEmpresaTenantDto dto)
+    {
+        NormalizarRequerido(dto.Nombre, "El nombre de la empresa es obligatorio.", 200);
+        var moneda = NormalizarRequerido(dto.Moneda, "La moneda es obligatoria.", 3);
+        if (moneda.Length != 3 || moneda.Any(c => !char.IsLetter(c)))
+            throw new BusinessRuleException("La moneda debe usar un código alfabético de 3 caracteres.");
+
+        NormalizarRequerido(dto.ZonaHoraria, "La zona horaria es obligatoria.", 100);
+        ValidarJsonObject(dto.ImpuestosJson, "La configuración de impuestos debe ser un objeto JSON válido.");
+        ValidarJsonObject(dto.EmisionJson, "La configuración de emisión debe ser un objeto JSON válido.");
+
+        if (Limpiar(dto.CorreoRemitente)?.Length > 254)
+            throw new BusinessRuleException("El correo remitente no puede exceder 254 caracteres.");
+        if (Limpiar(dto.CorreoNombreRemitente)?.Length > 200)
+            throw new BusinessRuleException("El nombre del remitente no puede exceder 200 caracteres.");
+        if (dto.Version <= 0)
+            throw new BusinessRuleException("La versión de configuración es obligatoria.");
+    }
+
+    private static string ValidarPlantilla(string tipoPlantilla, UpdatePlantillaCorreoEmpresaDto dto)
+    {
+        var tipo = NormalizarRequerido(tipoPlantilla, "El tipo de plantilla es obligatorio.", 80);
+        NormalizarRequerido(dto.Asunto, "El asunto de la plantilla es obligatorio.", 250);
+        NormalizarRequerido(dto.Cuerpo, "El cuerpo de la plantilla es obligatorio.", int.MaxValue);
+        if (dto.Version <= 0)
+            throw new BusinessRuleException("La versión de configuración es obligatoria.");
+        return tipo;
+    }
+
+    private static string NormalizarRequerido(string? value, string error, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new BusinessRuleException(error);
+        var normalized = value.Trim();
+        if (normalized.Length > maxLength)
+            throw new BusinessRuleException($"{error} Máximo permitido: {maxLength} caracteres.");
+        return normalized;
+    }
+
+    private static void ValidarJsonObject(string? json, string error)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            throw new BusinessRuleException(error);
+
+        try
+        {
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+                throw new BusinessRuleException(error);
+        }
+        catch (JsonException)
+        {
+            throw new BusinessRuleException(error);
+        }
     }
 
     private static void ValidarLogo(IFormFile logo)
