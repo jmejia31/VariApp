@@ -10,6 +10,7 @@ namespace InventoryApp.Infrastructure.Services;
 public class CloudinaryImageStorageService : IImageStorageService
 {
     private readonly Cloudinary _cloudinary;
+    private readonly string _cloudName;
     private readonly string _folder;
     private readonly string? _environmentPrefix;
     private const string BaseFolder = "inventoryapp/productos";
@@ -31,7 +32,8 @@ public class CloudinaryImageStorageService : IImageStorageService
                 "Cloudinary no está configurado. Revisa Cloudinary:CloudName, Cloudinary:ApiKey y Cloudinary:ApiSecret.");
         }
 
-        var account = new Account(cloudName, apiKey, apiSecret);
+        _cloudName = cloudName.Trim();
+        var account = new Account(_cloudName, apiKey, apiSecret);
         _cloudinary = new Cloudinary(account);
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
@@ -193,10 +195,24 @@ public class CloudinaryImageStorageService : IImageStorageService
         }
 
         if (!Uri.TryCreate(locator, UriKind.Absolute, out var uri) ||
-            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(uri.Host, "res.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.IsDefaultPort ||
+            !string.IsNullOrEmpty(uri.UserInfo))
         {
             throw new BusinessRuleException(
                 "La URL de almacenamiento no es un locator seguro para este tenant.");
+        }
+
+        var segments = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length < 4 ||
+            !string.Equals(Uri.UnescapeDataString(segments[0]), _cloudName, StringComparison.Ordinal) ||
+            !string.Equals(segments[1], "image", StringComparison.Ordinal) ||
+            !string.Equals(segments[2], "upload", StringComparison.Ordinal))
+        {
+            throw new BusinessRuleException(
+                "La URL de almacenamiento no pertenece al origen Cloudinary configurado.");
         }
 
         var marker = $"/{tenantFolder}/";
