@@ -1,9 +1,12 @@
+using System.Security.Cryptography;
+using System.Text;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryApp.Infrastructure.Services;
 
@@ -11,17 +14,20 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 {
     private const string BaseFolder = "inventoryapp/compras";
     private const long MaxDownloadBytes = 10 * 1024 * 1024;
+    private const string TenantAuditMarker = "TENANT_STORAGE_AUDIT";
     private readonly Cloudinary _cloudinary;
     private readonly string _cloudName;
     private readonly string _folder;
     private readonly string? _environmentPrefix;
     private readonly IHttpContextAccessor? _httpContextAccessor;
     private readonly IUsuarioScopeService? _usuarioScopeService;
+    private readonly ILogger<CloudinaryCompraDocumentoStorageService>? _logger;
 
     public CloudinaryCompraDocumentoStorageService(
         IConfiguration configuration,
         IHttpContextAccessor? httpContextAccessor = null,
-        IUsuarioScopeService? usuarioScopeService = null)
+        IUsuarioScopeService? usuarioScopeService = null,
+        ILogger<CloudinaryCompraDocumentoStorageService>? logger = null)
     {
         var cloudName = configuration["Cloudinary:CloudName"];
         var apiKey = configuration["Cloudinary:ApiKey"];
@@ -45,6 +51,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
         _httpContextAccessor = httpContextAccessor;
         _usuarioScopeService = usuarioScopeService;
+        _logger = logger;
     }
 
     public async Task<DocumentoAlmacenado> UploadAsync(IFormFile archivo)
@@ -53,14 +60,16 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         return await UploadAsync(tenant, archivo, RequestAborted);
     }
 
-    public Task<DocumentoAlmacenado> UploadAsync(
+    public async Task<DocumentoAlmacenado> UploadAsync(
         StorageTenantContext tenant,
         IFormFile archivo,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(tenant);
         ArgumentNullException.ThrowIfNull(archivo);
-        return UploadInternalAsync(archivo, TenantFolder(tenant), cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "upload", "TENANT_SCOPE_VERIFIED");
+        return await UploadInternalAsync(archivo, TenantFolder(tenant), cancellationToken);
     }
 
     private async Task<DocumentoAlmacenado> UploadInternalAsync(
@@ -88,7 +97,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                 var resultado = await _cloudinary.UploadAsync(parametros);
                 cancellationToken.ThrowIfCancellationRequested();
                 if (resultado.Error is not null)
-                    throw new BusinessRuleException($"Cloudinary rechazó el PDF: {resultado.Error.Message}");
+                    throw new BusinessRuleException("Cloudinary rechazó el comprobante PDF.");
 
                 return new DocumentoAlmacenado(
                     resultado.SecureUrl.ToString(),
@@ -109,7 +118,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
             var resultadoImagen = await _cloudinary.UploadAsync(parametrosImagen);
             cancellationToken.ThrowIfCancellationRequested();
             if (resultadoImagen.Error is not null)
-                throw new BusinessRuleException($"Cloudinary rechazó la imagen: {resultadoImagen.Error.Message}");
+                throw new BusinessRuleException("Cloudinary rechazó la imagen del comprobante.");
 
             return new DocumentoAlmacenado(
                 resultadoImagen.SecureUrl.ToString(),
@@ -126,10 +135,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         {
             throw;
         }
-        catch (Exception ex)
+        catch
         {
             throw new BusinessRuleException(
-                $"No se pudo almacenar el comprobante en Cloudinary. Detalle: {ex.Message}");
+                "No se pudo almacenar el comprobante en Cloudinary. Intenta nuevamente.");
         }
     }
 
@@ -157,8 +166,9 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         if (string.IsNullOrWhiteSpace(resourceType))
             throw new ArgumentException("El resourceType es obligatorio.", nameof(resourceType));
 
-        ExigirLocatorTenant(tenant, publicId, esUrl: false);
+        ExigirLocatorTenant(tenant, publicId, esUrl: false, operation: "delete");
         cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "delete", "TENANT_LOCATOR_VERIFIED");
         await DeleteInternalAsync(publicId, resourceType);
     }
 
@@ -180,7 +190,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
         var resultado = await _cloudinary.DestroyAsync(parametros);
         if (resultado.Error is not null)
-            throw new BusinessRuleException($"No se pudo retirar el comprobante de Cloudinary: {resultado.Error.Message}");
+            throw new BusinessRuleException("No se pudo retirar el comprobante de Cloudinary.");
     }
 
     public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
@@ -198,7 +208,9 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         if (string.IsNullOrWhiteSpace(url))
             throw new ArgumentException("La URL de almacenamiento es obligatoria.", nameof(url));
 
-        ExigirLocatorTenant(tenant, url, esUrl: true);
+        ExigirLocatorTenant(tenant, url, esUrl: true, operation: "download");
+        cancellationToken.ThrowIfCancellationRequested();
+        RegistrarPermitido(tenant, "download", "TENANT_LOCATOR_VERIFIED");
         return DownloadInternalAsync(url, cancellationToken);
     }
 
@@ -273,7 +285,11 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
     private string TenantFolder(StorageTenantContext tenant) =>
         $"{_folder.TrimEnd('/')}/{tenant.TenantPrefix}";
 
-    private void ExigirLocatorTenant(StorageTenantContext tenant, string locator, bool esUrl)
+    private void ExigirLocatorTenant(
+        StorageTenantContext tenant,
+        string locator,
+        bool esUrl,
+        string operation)
     {
         var tenantFolder = TenantFolder(tenant).Trim('/');
         if (!esUrl)
@@ -281,7 +297,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
             var normalizado = locator.Trim().Trim('/');
             if (!normalizado.StartsWith($"{tenantFolder}/", StringComparison.Ordinal))
             {
-                throw new BusinessRuleException(
+                Denegar(
+                    tenant,
+                    operation,
+                    "TENANT_LOCATOR_MISMATCH",
                     "El comprobante solicitado no pertenece al contexto tenant verificado.");
             }
 
@@ -290,7 +309,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
         if (!EsUrlCloudinaryPermitida(locator))
         {
-            throw new BusinessRuleException(
+            Denegar(
+                tenant,
+                operation,
+                "LOCATOR_ORIGIN_INVALID",
                 "La URL del comprobante no pertenece al origen Cloudinary configurado.");
         }
 
@@ -298,7 +320,10 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         var marker = $"/{tenantFolder}/";
         if (!uri.AbsolutePath.Contains(marker, StringComparison.Ordinal))
         {
-            throw new BusinessRuleException(
+            Denegar(
+                tenant,
+                operation,
+                "TENANT_LOCATOR_MISMATCH",
                 "El comprobante solicitado no pertenece al contexto tenant verificado.");
         }
     }
@@ -321,5 +346,49 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                (string.Equals(segments[1], "image", StringComparison.Ordinal) ||
                 string.Equals(segments[1], "raw", StringComparison.Ordinal)) &&
                string.Equals(segments[2], "upload", StringComparison.Ordinal);
+    }
+
+    private void RegistrarPermitido(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode)
+    {
+        _logger?.LogInformation(
+            "{AuditMarker} operation={Operation} outcome={Outcome} reason={ReasonCode} tenant_ref={TenantRef}",
+            TenantAuditMarker,
+            operation,
+            "SCOPE_ALLOW",
+            reasonCode,
+            TenantReference(tenant));
+    }
+
+    private void RegistrarDenegado(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode)
+    {
+        _logger?.LogWarning(
+            "{AuditMarker} operation={Operation} outcome={Outcome} reason={ReasonCode} tenant_ref={TenantRef}",
+            TenantAuditMarker,
+            operation,
+            "DENY_SAFE",
+            reasonCode,
+            TenantReference(tenant));
+    }
+
+    private void Denegar(
+        StorageTenantContext tenant,
+        string operation,
+        string reasonCode,
+        string safeMessage)
+    {
+        RegistrarDenegado(tenant, operation, reasonCode);
+        throw new BusinessRuleException(safeMessage);
+    }
+
+    private static string TenantReference(StorageTenantContext tenant)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes($"empresa:{tenant.EmpresaId}"));
+        return Convert.ToHexString(bytes.AsSpan(0, 6));
     }
 }
