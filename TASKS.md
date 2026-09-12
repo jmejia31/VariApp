@@ -79,7 +79,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] Frontend/UX N3.4.E certificado sobre `a167434880eab07c3b08ca651ae9309da964c23b` con M13 `#32809392404` SUCCESS.
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
-- [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
+- [x] Runbook canónico publicado: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
@@ -123,8 +123,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` sobre `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` sobre `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
@@ -156,7 +156,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 ## ERP-N3.10 — Crédito de cliente — ROLLUP SUPERSEDING 2026-08-27
 
-Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9/N3.10 registrado arriba; no elimina ni reescribe historia previa.
+Este bloque es aditivo y supersede únicamente el estado operativo stale anterior; no elimina ni reescribe historia previa.
 
 - [x] N3.9.H quedó cerrado formalmente antes de N3.10; `CHANGELOG_AI.md` contiene el cierre canónico history-preserving.
 - [x] N3.10.A auditoría/preflight — `LISTO_REAL`.
@@ -440,3 +440,16 @@ Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot 
 - [ ] Cierre H permanece condicionado a `CHANGELOG_AI.md`, REVIEW_FIRST final, checkpoint exact-head y receipt. Este rollup no declara por sí mismo `LISTO_REAL`.
 
 **CURRENT_PARENT=N6.4.H. NEXT_PARENT_PREARMED=N6.5.A. N6.5.A permanece bloqueado hasta el cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N6.8 — Storage aislado — ROLLUP DE CIERRE 2026-09-12
+
+Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot histórico stale; la autoridad viva permanece en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N6.8.A-G — `LISTO_REAL` con evidencia canónica y P0/P1 atribuibles conocidos=0.
+- [x] N6.8.G — candidate de TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`.
+- [x] N6.8.H — certificación canónica publicada en `docs/CERTIFICACION_N6_8_STORAGE_AISLADO.md` mediante material DOC_CERT `dae43dfc5a3211643565c7002abcc67a845ef179`.
+- [x] `CHANGELOG_AI.md` reconciliado de forma aditiva/history-preserving en el changeset documental de cierre.
+- [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup; este archivo no cambia por sí mismo el estado machine-readable.
+- [ ] `N6.8.H` sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, DoD PASS y receipt persistido/releído; `N6.9.A` permanece sequence-held hasta ese cierre.
+
+**N6.8.H queda documentalmente reconciliado y listo para REVIEW_FIRST final; no hay falsa promoción de N6.9.A desde este archivo.**
