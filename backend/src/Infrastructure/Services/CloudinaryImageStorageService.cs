@@ -38,16 +38,35 @@ public class CloudinaryImageStorageService : IImageStorageService
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
     }
 
-    public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
+    public Task<(string Url, string PublicId)> UploadAsync(IFormFile file) =>
+        UploadInternalAsync(file, _folder, CancellationToken.None);
+
+    public Task<(string Url, string PublicId)> UploadAsync(
+        StorageTenantContext tenant,
+        IFormFile file,
+        CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(tenant);
+        ArgumentNullException.ThrowIfNull(file);
+        return UploadInternalAsync(file, TenantFolder(tenant), cancellationToken);
+    }
+
+    private async Task<(string Url, string PublicId)> UploadInternalAsync(
+        IFormFile file,
+        string folder,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             using var segura = await ImagenUploadSecurity.ProcesarAsync(file);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(segura.NombreArchivo, segura.Contenido),
-                Folder = _folder,
+                Folder = folder,
                 UseFilename = false,
                 UniqueFilename = true,
                 Overwrite = false,
@@ -60,6 +79,10 @@ public class CloudinaryImageStorageService : IImageStorageService
                 throw new BusinessRuleException("No se pudo guardar la imagen del producto.");
 
             return (result.SecureUrl.ToString(), result.PublicId);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (BusinessRuleException)
         {
@@ -76,6 +99,25 @@ public class CloudinaryImageStorageService : IImageStorageService
 
     public async Task DeleteAsync(string publicId)
     {
+        await DeleteInternalAsync(publicId);
+    }
+
+    public async Task DeleteAsync(
+        StorageTenantContext tenant,
+        string publicId,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        if (string.IsNullOrWhiteSpace(publicId))
+            throw new ArgumentException("El publicId es obligatorio.", nameof(publicId));
+
+        ExigirLocatorTenant(tenant, publicId, esUrl: false);
+        cancellationToken.ThrowIfCancellationRequested();
+        await DeleteInternalAsync(publicId);
+    }
+
+    private async Task DeleteInternalAsync(string publicId)
+    {
         if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
         {
             throw new BusinessRuleException(
@@ -86,23 +128,82 @@ public class CloudinaryImageStorageService : IImageStorageService
         await _cloudinary.DestroyAsync(deleteParams);
     }
 
-    public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
+    public Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url) =>
+        DownloadInternalAsync(url, CancellationToken.None);
+
+    public Task<(Stream Contenido, string ContentType)?> DownloadAsync(
+        StorageTenantContext tenant,
+        string url,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("La URL de almacenamiento es obligatoria.", nameof(url));
+
+        ExigirLocatorTenant(tenant, url, esUrl: true);
+        return DownloadInternalAsync(url, cancellationToken);
+    }
+
+    private static async Task<(Stream Contenido, string ContentType)?> DownloadInternalAsync(
+        string url,
+        CancellationToken cancellationToken)
     {
         // Streaming server-side en vez de redirigir a la URL de Cloudinary
         // directamente: el backend controla la autorización real de la descarga.
         using var httpClient = new HttpClient();
         try
         {
-            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            var response = await httpClient.GetAsync(
+                url,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
             if (!response.IsSuccessStatusCode) return null;
 
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-            var stream = await response.Content.ReadAsStreamAsync();
+            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
             return (stream, contentType);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch
         {
             return null;
+        }
+    }
+
+    private string TenantFolder(StorageTenantContext tenant) =>
+        $"{_folder.TrimEnd('/')}/{tenant.TenantPrefix}";
+
+    private void ExigirLocatorTenant(StorageTenantContext tenant, string locator, bool esUrl)
+    {
+        var tenantFolder = TenantFolder(tenant).Trim('/');
+
+        if (!esUrl)
+        {
+            var normalizado = locator.Trim().Trim('/');
+            if (!normalizado.StartsWith($"{tenantFolder}/", StringComparison.Ordinal))
+            {
+                throw new BusinessRuleException(
+                    "El recurso solicitado no pertenece al contexto tenant verificado.");
+            }
+
+            return;
+        }
+
+        if (!Uri.TryCreate(locator, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new BusinessRuleException(
+                "La URL de almacenamiento no es un locator seguro para este tenant.");
+        }
+
+        var marker = $"/{tenantFolder}/";
+        if (!uri.AbsolutePath.Contains(marker, StringComparison.Ordinal))
+        {
+            throw new BusinessRuleException(
+                "El recurso solicitado no pertenece al contexto tenant verificado.");
         }
     }
 }
