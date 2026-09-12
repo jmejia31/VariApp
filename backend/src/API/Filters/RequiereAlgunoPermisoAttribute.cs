@@ -26,10 +26,11 @@ public sealed class RequiereAlgunoPermisoAttribute : Attribute, IAsyncActionFilt
         ActionExecutingContext context,
         ActionExecutionDelegate next)
     {
+        var empresaId = TenantPermissionContext.RequireEmpresaId(context.HttpContext);
         var permisoService = context.HttpContext.RequestServices.GetRequiredService<IPermisoService>();
         foreach (var accion in _acciones)
         {
-            if (await permisoService.TienePermisoAsync(_modulo, accion))
+            if (await permisoService.TienePermisoAsync(empresaId, _modulo, accion))
             {
                 await next();
                 return;
@@ -37,6 +38,6 @@ public sealed class RequiereAlgunoPermisoAttribute : Attribute, IAsyncActionFilt
         }
 
         throw new ForbiddenAccessException(
-            $"No tienes permisos para ejecutar esta operación en el módulo {_modulo}.");
+            $"No tienes permisos para ejecutar esta operación en el módulo {_modulo} dentro de la empresa solicitada.");
     }
 }
