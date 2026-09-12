@@ -32,9 +32,16 @@ public sealed class SuscripcionesSaaSController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(idempotencyKey))
         {
-            return BadRequest(ApiResponse<string>.Fail(
-                SuscripcionSaaSErrorCodes.IdempotencyKeyRequerida,
-                new List<string> { "Idempotency-Key es obligatorio para onboarding." }));
+            var problem = new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Idempotency-Key requerida",
+                Detail = "Idempotency-Key es obligatorio para onboarding.",
+                Type = "https://httpstatuses.com/400"
+            };
+            problem.Extensions["code"] = SuscripcionSaaSErrorCodes.IdempotencyKeyRequerida;
+
+            return BadRequest(problem);
         }
 
         var suscripcion = await _service.OnboardingAsync(
