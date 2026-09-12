@@ -3,6 +3,7 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const TENANT_ID = Number.parseInt(process.env['E2E_TENANT_ID'] ?? '1', 10);
 
 let adminToken = '';
 let limitedRoleId = 0;
@@ -121,6 +122,44 @@ async function ensureUser(
   return await dataOf(updateResponse);
 }
 
+async function ensureTenantMembership(
+  request: APIRequestContext,
+  userId: number,
+  roleId: number
+): Promise<void> {
+  const membershipsResponse = await request.get(`${API_URL}/usuarios/${userId}/empresas`, {
+    headers: authHeaders(adminToken)
+  });
+  expect(membershipsResponse.status(), await membershipsResponse.text()).toBe(200);
+  const memberships = await dataOf(membershipsResponse) as Array<Record<string, any>>;
+  const membership = memberships.find((item) => Number(item.empresaId) === TENANT_ID);
+
+  if (!membership) {
+    const assignResponse = await request.post(`${API_URL}/usuarios/${userId}/empresas`, {
+      headers: authHeaders(adminToken),
+      data: { empresaId: TENANT_ID, rolId: roleId }
+    });
+    expect(assignResponse.status(), await assignResponse.text()).toBe(200);
+    return;
+  }
+
+  if (Number(membership.rolId) !== roleId) {
+    const roleResponse = await request.put(
+      `${API_URL}/usuarios/${userId}/empresas/${TENANT_ID}/rol`,
+      { headers: authHeaders(adminToken), data: { rolId: roleId } }
+    );
+    expect(roleResponse.status(), await roleResponse.text()).toBe(200);
+  }
+
+  if (membership.activa === false) {
+    const stateResponse = await request.put(
+      `${API_URL}/usuarios/${userId}/empresas/${TENANT_ID}/estado`,
+      { headers: authHeaders(adminToken), data: { activa: true } }
+    );
+    expect(stateResponse.status(), await stateResponse.text()).toBe(200);
+  }
+}
+
 test.describe('Fase 7 — aceptación end-to-end aislada', () => {
   // La suite modifica usuario y contraseña deliberadamente. Reintentarla sobre
   // la misma base produciría un estado diferente; cada workflow ya parte de una
@@ -168,14 +207,16 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
       rolId: limitedRoleId
     });
     limitedUserId = limitedUser.id;
+    await ensureTenantMembership(request, Number(limitedUser.id), Number(limitedRoleId));
 
-    await ensureUser(request, {
+    const sellerUser = await ensureUser(request, {
       nombreUsuario: sellerUsername,
       nombreCompleto: 'Vendedor E2E',
       password: sellerPassword,
       rol: 'Vendedor',
       rolId: sellerRole!.id
     });
+    await ensureTenantMembership(request, Number(sellerUser.id), Number(sellerRole!.id));
   });
 
   test('Administrador conserva acceso a módulos corporativos', async ({ request }) => {
@@ -187,7 +228,7 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
     });
     expect(audit.status()).toBe(200);
 
-    const permissions = await request.get(`${API_URL}/permisos/mis-permisos`, {
+    const permissions = await request.get(`${API_URL}/permisos/mis-permisos/empresa/${TENANT_ID}`, {
       headers: authHeaders(adminToken)
     });
     expect(permissions.status()).toBe(200);
@@ -198,7 +239,7 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
   test('Rol personalizado recibe únicamente sus permisos y el backend responde 403', async ({ request }) => {
     const token = await loginApi(request, limitedUsername, limitedPassword);
 
-    const permissions = await request.get(`${API_URL}/permisos/mis-permisos`, {
+    const permissions = await request.get(`${API_URL}/permisos/mis-permisos/empresa/${TENANT_ID}`, {
       headers: authHeaders(token)
     });
     expect(permissions.status()).toBe(200);
@@ -222,7 +263,7 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
 
   test('Rol Vendedor no hereda acceso administrativo', async ({ request }) => {
     const token = await loginApi(request, sellerUsername, sellerPassword);
-    const permissions = await request.get(`${API_URL}/permisos/mis-permisos`, {
+    const permissions = await request.get(`${API_URL}/permisos/mis-permisos/empresa/${TENANT_ID}`, {
       headers: authHeaders(token)
     });
     expect(permissions.status()).toBe(200);

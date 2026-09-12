@@ -56,7 +56,7 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
       localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
     });
 
-    await page.route('**/permisos/mis-permisos', route => route.fulfill({
+    await page.route('**/permisos/mis-permisos/empresa/*', route => route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({

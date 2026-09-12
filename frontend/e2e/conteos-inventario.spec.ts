@@ -23,7 +23,7 @@ async function autenticar(page: Page): Promise<void> {
     localStorage.setItem('inventoryapp_rol', 'Administrador');
     localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
   });
-  await page.route('**/permisos/mis-permisos', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: 'Permisos cargados', errors: [], data: { permisos: ['MovimientosInventario:Ver','MovimientosInventario:Crear','MovimientosInventario:Editar','MovimientosInventario:CambiarEstado','MovimientosInventario:Cerrar','MovimientosInventario:Aprobar','MovimientosInventario:Anular'], esAdministrador: false } }) }));
+  await page.route('**/permisos/mis-permisos/empresa/*', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: 'Permisos cargados', errors: [], data: { permisos: ['MovimientosInventario:Ver','MovimientosInventario:Crear','MovimientosInventario:Editar','MovimientosInventario:CambiarEstado','MovimientosInventario:Cerrar','MovimientosInventario:Aprobar','MovimientosInventario:Anular'], esAdministrador: false } }) }));
   await page.route('**/almacenes/activos', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [almacenActivo] }) }));
 }
 

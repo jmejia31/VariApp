@@ -3,6 +3,7 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const TENANT_ID = Number.parseInt(process.env['E2E_TENANT_ID'] ?? '1', 10);
 
 const ROLE_NAME = 'E2E Vendedor Aislado';
 const USER_A = {
@@ -149,6 +150,44 @@ async function ensureUser(
   return await dataOf(updateResponse);
 }
 
+async function ensureTenantMembership(
+  request: APIRequestContext,
+  userId: number,
+  roleId: number
+): Promise<void> {
+  const membershipsResponse = await request.get(`${API_URL}/usuarios/${userId}/empresas`, {
+    headers: authHeaders(adminToken)
+  });
+  expect(membershipsResponse.status(), await membershipsResponse.text()).toBe(200);
+  const memberships = await dataOf(membershipsResponse) as Array<Record<string, any>>;
+  const membership = memberships.find((item) => Number(item.empresaId) === TENANT_ID);
+
+  if (!membership) {
+    const assignResponse = await request.post(`${API_URL}/usuarios/${userId}/empresas`, {
+      headers: authHeaders(adminToken),
+      data: { empresaId: TENANT_ID, rolId: roleId }
+    });
+    expect(assignResponse.status(), await assignResponse.text()).toBe(200);
+    return;
+  }
+
+  if (Number(membership.rolId) !== roleId) {
+    const roleResponse = await request.put(
+      `${API_URL}/usuarios/${userId}/empresas/${TENANT_ID}/rol`,
+      { headers: authHeaders(adminToken), data: { rolId: roleId } }
+    );
+    expect(roleResponse.status(), await roleResponse.text()).toBe(200);
+  }
+
+  if (membership.activa === false) {
+    const stateResponse = await request.put(
+      `${API_URL}/usuarios/${userId}/empresas/${TENANT_ID}/estado`,
+      { headers: authHeaders(adminToken), data: { activa: true } }
+    );
+    expect(stateResponse.status(), await stateResponse.text()).toBe(200);
+  }
+}
+
 async function createConfirmedSale(
   request: APIRequestContext,
   token: string,
@@ -220,8 +259,10 @@ test.describe('Fase 7 — permisos exactos y aislamiento por UsuarioId', () => {
     adminToken = await loginApi(request, ADMIN_USERNAME, ADMIN_PASSWORD);
     const role = await ensureRole(request);
     await configureRole(request, Number(role.id));
-    await ensureUser(request, Number(role.id), USER_A);
-    await ensureUser(request, Number(role.id), USER_B);
+    const userA = await ensureUser(request, Number(role.id), USER_A);
+    const userB = await ensureUser(request, Number(role.id), USER_B);
+    await ensureTenantMembership(request, Number(userA.id), Number(role.id));
+    await ensureTenantMembership(request, Number(userB.id), Number(role.id));
 
     const productResponse = await request.post(`${API_URL}/productos`, {
       headers: authHeaders(adminToken),
@@ -249,7 +290,7 @@ test.describe('Fase 7 — permisos exactos y aislamiento por UsuarioId', () => {
   });
 
   test('La matriz exacta no concede Compras ni Proveedores', async ({ request }) => {
-    const permissionsResponse = await request.get(`${API_URL}/permisos/mis-permisos`, {
+    const permissionsResponse = await request.get(`${API_URL}/permisos/mis-permisos/empresa/${TENANT_ID}`, {
       headers: authHeaders(tokenA)
     });
     expect(permissionsResponse.status(), await permissionsResponse.text()).toBe(200);

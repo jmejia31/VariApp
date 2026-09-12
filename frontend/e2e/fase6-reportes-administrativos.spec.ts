@@ -3,6 +3,7 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const TENANT_ID = Number.parseInt(process.env['E2E_TENANT_ID'] ?? '1', 10);
 const suffix = `${Date.now()}`;
 const LIMITED_USERNAME = `fase6_limitado_${suffix}`;
 const LIMITED_PASSWORD = 'Fase6.Limitado#2026!';
@@ -96,6 +97,12 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
       }
     });
     expect(userResponse.status(), await userResponse.text()).toBe(200);
+    const limitedUser = await dataOf(userResponse);
+    const membershipResponse = await request.post(`${API_URL}/usuarios/${limitedUser.id}/empresas`, {
+      headers: auth(adminToken),
+      data: { empresaId: TENANT_ID, rolId: limitedRoleId }
+    });
+    expect(membershipResponse.status(), await membershipResponse.text()).toBe(200);
     limitedToken = await login(request, LIMITED_USERNAME, LIMITED_PASSWORD);
   });
 
@@ -203,7 +210,7 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
   });
 
   test('rol no administrativo recibe 403 en reportes, exportación y auditoría', async ({ request }) => {
-    const permissions = await request.get(`${API_URL}/permisos/mis-permisos`, {
+    const permissions = await request.get(`${API_URL}/permisos/mis-permisos/empresa/${TENANT_ID}`, {
       headers: auth(limitedToken)
     });
     expect(permissions.status(), await permissions.text()).toBe(200);

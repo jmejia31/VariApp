@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { CentroReportesComponent } from './centro-reportes.component';
@@ -7,13 +8,15 @@ import { CentroReportesComponent } from './centro-reportes.component';
 describe('CentroReportesComponent N5.2.G QA takeover', () => {
   const permisos = {
     puede: vi.fn(),
-    esAdministrador: vi.fn()
+    esAdministrador: vi.fn(),
+    cargar: vi.fn(() => of(true))
   } as unknown as PermisosRuntimeService;
 
   beforeEach(async () => {
     vi.mocked(permisos.puede).mockReset();
     vi.mocked(permisos.esAdministrador).mockReset();
     vi.mocked(permisos.esAdministrador).mockReturnValue(false);
+    vi.mocked(permisos.cargar).mockClear();
 
     await TestBed.configureTestingModule({
       imports: [CentroReportesComponent],

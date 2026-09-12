@@ -11,7 +11,7 @@ type PermisoVentas =
   | 'Ventas:Anular';
 
 async function loginConPermisos(page: Page, permisos: PermisoVentas[]): Promise<void> {
-  await page.route('**/permisos/mis-permisos', async route => {
+  await page.route('**/permisos/mis-permisos/empresa/*', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -114,7 +114,7 @@ test.describe('PedidoVenta - seguridad frontend', () => {
     await expect(page.getByRole('heading', { name: 'Pedidos de venta' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Nuevo pedido/ })).toHaveCount(0);
 
-    await page.unroute('**/permisos/mis-permisos');
+    await page.unroute('**/permisos/mis-permisos/empresa/*');
   });
 
   test('muestra Nuevo pedido cuando existe Ventas:Crear', async ({ page }) => {

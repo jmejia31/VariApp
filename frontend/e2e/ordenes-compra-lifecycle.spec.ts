@@ -6,7 +6,7 @@ const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!'
 type Estado = 'Borrador' | 'PendienteAprobacion' | 'Aprobada' | 'Cancelada';
 
 async function loginConPermisos(page: Page, permisos: string[]): Promise<void> {
-  await page.route('**/permisos/mis-permisos', async route => {
+  await page.route('**/permisos/mis-permisos/empresa/*', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

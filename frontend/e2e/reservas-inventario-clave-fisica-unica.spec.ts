@@ -4,7 +4,7 @@ const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 
 async function login(page: Page): Promise<void> {
-  await page.route('**/permisos/mis-permisos', async route => {
+  await page.route('**/permisos/mis-permisos/empresa/*', async route => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: 'OK', data: { permisos: ['Dashboard:Ver', 'MovimientosInventario:Ver', 'MovimientosInventario:Crear'], esAdministrador: false } }) });
   });
   await page.goto('/login');

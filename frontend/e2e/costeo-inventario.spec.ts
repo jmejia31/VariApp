@@ -4,7 +4,7 @@ const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 
 async function loginConPermisosCosteo(page: Page): Promise<void> {
-  await page.route('**/permisos/mis-permisos', async route => {
+  await page.route('**/permisos/mis-permisos/empresa/*', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

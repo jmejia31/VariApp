@@ -34,7 +34,7 @@ const borrador = {
 };
 
 async function login(page: Page, permisos: string[] = ['Dashboard:Ver', 'Compras:Ver', 'Compras:Crear', 'Compras:Editar', 'Compras:Confirmar', 'Compras:Aprobar', 'Compras:Rechazar']): Promise<void> {
-  await page.route('**/permisos/mis-permisos', route => route.fulfill({
+  await page.route('**/permisos/mis-permisos/empresa/*', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
     body: JSON.stringify({ success: true, message: '', errors: [], data: { permisos, esAdministrador: false } })

@@ -11,7 +11,7 @@ type PermisoCompras =
   | 'Compras:Anular';
 
 async function loginConPermisos(page: Page, permisos: PermisoCompras[]): Promise<void> {
-  await page.route('**/permisos/mis-permisos', async route => {
+  await page.route('**/permisos/mis-permisos/empresa/*', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
