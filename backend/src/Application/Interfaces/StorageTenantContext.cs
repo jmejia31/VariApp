@@ -54,6 +54,29 @@ public sealed record StorageTenantContext
     }
 
     /// <summary>
+    /// Construye el scope de almacenamiento desde el resultado tenant-aware de
+    /// <see cref="IUsuarioScopeService"/>. Ese resultado ya fue resuelto
+    /// server-side contra una membresía UsuarioEmpresa activa; nunca se aceptan
+    /// EmpresaId/UsuarioId suministrados directamente por el cliente.
+    /// </summary>
+    public static StorageTenantContext Desde(UsuarioTenantScopeActual? contexto)
+    {
+        if (contexto is null)
+        {
+            throw new InvalidOperationException(
+                "Se requiere un contexto tenant verificado para operar almacenamiento tenant-owned.");
+        }
+
+        if (contexto.EmpresaId <= 0 || contexto.UsuarioId <= 0)
+        {
+            throw new InvalidOperationException(
+                "El contexto tenant verificado contiene identificadores inválidos.");
+        }
+
+        return new StorageTenantContext(contexto.EmpresaId, contexto.UsuarioId);
+    }
+
+    /// <summary>
     /// Impide reutilizar este scope para un recurso de otra Empresa.
     /// </summary>
     public void ExigirEmpresa(int empresaId)
