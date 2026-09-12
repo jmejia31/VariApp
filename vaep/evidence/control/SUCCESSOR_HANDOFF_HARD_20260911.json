@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "policy": "SUCCESSOR_HANDOFF_HARD",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "repository": "jmejia31/VariApp",
+  "branch": "Desarrollo",
+  "objective": {
+    "rolling60ListoRealTarget": 3,
+    "countOnlyValidReceipts": true,
+    "neverAuthorizeFalseClosure": true
+  },
+  "stateMachine": ["PENDIENTE", "EN_PROGRESO", "VALIDANDO", "LISTO"],
+  "listoRealLivesInEvidence": true,
+  "rules": {
+    "logicalSessionContinuesUntilListoReal": true,
+    "runBoundaryDoesNotCompleteParent": true,
+    "ifCurrentParentNotListoReal": "HANDOFF_SAME_CURRENT_PARENT",
+    "ifCurrentParentListoReal": "HANDOFF_NEXT_DEPENDENCY_VALID_PARENT",
+    "nextParentBeforePrerequisiteListoReal": "PENDIENTE_PREARM_READ_ONLY",
+    "parallelCausalParentsProhibited": true,
+    "singleWriterRequired": true,
+    "freshOwnerProgressLe10m": "VERIFIER_READ_ONLY",
+    "staleOrNoProgressGe10m": "TAKEOVER_RECOVER",
+    "fillerProhibited": true,
+    "dependencySkippingProhibited": true,
+    "gateLoweringProhibited": true
+  },
+  "successorChain": [
+    {"from":"VAEP :00 Primary","automationId":"6aa15346f5408191bdd9043fd26ff7aa","to":"Tarea Supervisión :00","targetAutomationId":"6aa3652bc97c8191a67ec8a47ebc9947","minute":5},
+    {"from":"Tarea Supervisión :00","automationId":"6aa3652bc97c8191a67ec8a47ebc9947","to":"VAEP :12 Recovery","targetAutomationId":"6aa1534deee481918280def1343adcfa","minute":12},
+    {"from":"VAEP :12 Recovery","automationId":"6aa1534deee481918280def1343adcfa","to":"Tarea Supervisión :12","targetAutomationId":"6aa36544d80c819181fdb7c490042c72","minute":17},
+    {"from":"Tarea Supervisión :12","automationId":"6aa36544d80c819181fdb7c490042c72","to":"VAEP :24 Review","targetAutomationId":"6aa153545c5c819199047566bda1cdac","minute":24},
+    {"from":"VAEP :24 Review","automationId":"6aa153545c5c819199047566bda1cdac","to":"Tarea Supervisión :24","targetAutomationId":"6aa365540cc48191b3be28cf1c6d02a0","minute":29},
+    {"from":"Tarea Supervisión :24","automationId":"6aa365540cc48191b3be28cf1c6d02a0","to":"VAEP :36 Watchdog","targetAutomationId":"6aa1535a51508191a610e6cdb90a2a4d","minute":36},
+    {"from":"VAEP :36 Watchdog","automationId":"6aa1535a51508191a610e6cdb90a2a4d","to":"Tarea Supervisión :36","targetAutomationId":"6aa3656116d88191b03d75cc782c4941","minute":41},
+    {"from":"Tarea Supervisión :36","automationId":"6aa3656116d88191b03d75cc782c4941","to":"VAEP :48 Debt","targetAutomationId":"6aa1535f8cd48191b73e10f17843372a","minute":48},
+    {"from":"VAEP :48 Debt","automationId":"6aa1535f8cd48191b73e10f17843372a","to":"Tarea Supervisión :48","targetAutomationId":"6aa365706b7c8191bd29f52a1133da07","minute":53},
+    {"from":"Tarea Supervisión :48","automationId":"6aa365706b7c8191bd29f52a1133da07","to":"VAEP :00 Primary","targetAutomationId":"6aa15346f5408191bdd9043fd26ff7aa","minute":0,"nextHour":true}
+  ]
+}
