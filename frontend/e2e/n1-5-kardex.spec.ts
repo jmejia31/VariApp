@@ -35,7 +35,9 @@ test.describe('ERP-N1.5 — Kardex empresarial', () => {
     const cargaInicial = page.waitForResponse(response =>
       response.url().includes('/inventario/movimientos/paged') && response.request().method() === 'GET'
     );
-    await page.goto('/inventario/movimientos');
+    // Mantener la navegación dentro de la SPA: un page.goto() recarga Angular y,
+    // por diseño fail-closed, revoca el contexto tenant verificado en memoria.
+    await page.locator('a[href="/inventario/movimientos"]').click();
     expect((await cargaInicial).status()).toBe(200);
 
     await expect(page.getByRole('heading', { name: 'Kardex de inventario', exact: true })).toBeVisible();
