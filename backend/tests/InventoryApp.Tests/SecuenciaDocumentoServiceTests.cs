@@ -96,15 +96,19 @@ public sealed class SecuenciaDocumentoServiceTests
         await using var db = new AppDbContext(options);
         await db.Database.EnsureCreatedAsync();
 
-        db.SecuenciasDocumento.Add(new SecuenciaDocumento(7, null, "FACTURA", "FAC-", 6, 41));
+        var empresa = new Empresa("Empresa audit test");
+        db.Set<Empresa>().Add(empresa);
+        await db.SaveChangesAsync();
+
+        db.SecuenciasDocumento.Add(new SecuenciaDocumento(empresa.Id, null, "FACTURA", "FAC-", 6, 41));
         await db.SaveChangesAsync();
 
         var scope = new Mock<IUsuarioScopeService>();
-        scope.Setup(x => x.ObtenerActualAsync(7, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new UsuarioTenantScopeActual(10, 7, 20, "Administrador", true));
+        scope.Setup(x => x.ObtenerActualAsync(empresa.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UsuarioTenantScopeActual(10, empresa.Id, 20, "Administrador", true));
 
         var service = new SecuenciaDocumentoService(db, scope.Object);
-        await service.ReservarSiguienteAsync(new ReservarSecuenciaDocumentoRequest(7, null, "FACTURA"));
+        await service.ReservarSiguienteAsync(new ReservarSecuenciaDocumentoRequest(empresa.Id, null, "FACTURA"));
 
         db.ChangeTracker.Clear();
         var secuencia = await db.SecuenciasDocumento.SingleAsync();
@@ -115,7 +119,7 @@ public sealed class SecuenciaDocumentoServiceTests
         Assert.Equal(nameof(SecuenciaDocumento), auditoria.Entidad);
         Assert.Equal(secuencia.Id, auditoria.ReferenciaId);
         Assert.Equal("Exito", auditoria.Resultado);
-        Assert.Contains("\"empresaId\":7", auditoria.ValoresNuevos ?? string.Empty, StringComparison.Ordinal);
+        Assert.Contains($"\"empresaId\":{empresa.Id}", auditoria.ValoresNuevos ?? string.Empty, StringComparison.Ordinal);
         Assert.Contains("\"valorSiguiente\":42", auditoria.ValoresNuevos ?? string.Empty, StringComparison.Ordinal);
     }
 }
