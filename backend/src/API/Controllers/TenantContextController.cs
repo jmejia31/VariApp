@@ -12,7 +12,7 @@ namespace InventoryApp.API.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/tenant-context")]
+[Route("tenant-context")]
 public sealed class TenantContextController : ControllerBase
 {
     private readonly IUsuarioScopeService _usuarioScopeService;
