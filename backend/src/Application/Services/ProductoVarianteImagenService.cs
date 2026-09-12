@@ -15,19 +15,25 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
     private readonly IImageStorageService _storage;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IUsuarioScopeService? _usuarioScopeService;
 
     public ProductoVarianteImagenService(
         IProductoRepository productoRepository,
         IProductoVarianteRepository varianteRepository,
         IImageStorageService storage,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IUsuarioScopeService? usuarioScopeService = null)
     {
         _productoRepository = productoRepository;
         _varianteRepository = varianteRepository;
         _storage = storage;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _httpContextAccessor = httpContextAccessor;
+        _usuarioScopeService = usuarioScopeService;
     }
 
     public async Task<IReadOnlyList<ProductoImagenDto>?> GetAsync(int productoId, int varianteId)
@@ -63,13 +69,14 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         if (actuales.Count + archivos.Count > MaximoImagenesPorVariante)
             throw new BusinessRuleException($"Cada variante puede tener hasta {MaximoImagenesPorVariante} imágenes.");
 
+        var tenant = await ResolverStorageTenantAsync();
         var subidas = new List<ProductoImagen>();
         try
         {
             var orden = actuales.Count == 0 ? 0 : actuales.Max(x => x.Orden) + 1;
             foreach (var archivo in archivos)
             {
-                var (url, publicId) = await _storage.UploadAsync(archivo);
+                var (url, publicId) = await _storage.UploadAsync(tenant, archivo, RequestAborted);
                 var imagen = new ProductoImagen
                 {
                     ProductoId = productoId,
@@ -90,7 +97,7 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         {
             foreach (var imagen in subidas)
             {
-                try { await _storage.DeleteAsync(imagen.PublicId); } catch { }
+                try { await _storage.DeleteAsync(tenant, imagen.PublicId, RequestAborted); } catch { }
             }
             throw;
         }
@@ -146,7 +153,8 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         }
         await _productoRepository.SaveChangesAsync();
 
-        try { await _storage.DeleteAsync(imagen.PublicId); } catch { }
+        var tenant = await ResolverStorageTenantAsync();
+        try { await _storage.DeleteAsync(tenant, imagen.PublicId, RequestAborted); } catch { }
         await _auditoria.RegistrarAsync(
             ModuloSistema.Productos,
             AccionPermiso.Editar,
@@ -156,6 +164,15 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
             valoresNuevos: new { productoId, varianteId, imagenId });
         return true;
     }
+
+    private CancellationToken RequestAborted =>
+        _httpContextAccessor?.HttpContext?.RequestAborted ?? default;
+
+    private Task<StorageTenantContext> ResolverStorageTenantAsync() =>
+        StorageTenantContextResolver.ResolverRequeridoAsync(
+            _httpContextAccessor,
+            _usuarioScopeService,
+            RequestAborted);
 
     private static IReadOnlyList<ProductoImagenDto> Map(IEnumerable<ProductoImagen> imagenes) =>
         imagenes.OrderBy(x => x.Orden).Select(x => new ProductoImagenDto
