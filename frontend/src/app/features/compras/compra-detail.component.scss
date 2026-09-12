@@ -33,6 +33,18 @@
 .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; a[mat-button] { text-decoration: none; } }
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+.documentos-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--color-danger);
+  border-radius: 10px;
+  color: var(--color-danger);
+
+  p { margin: 0 0 8px; }
+}
+
 @media (max-width: 600px) { .totales { max-width: 100%; } }
 @media (max-width: 480px) {
   .header-row { flex-wrap: wrap; }

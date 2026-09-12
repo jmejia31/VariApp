@@ -13,6 +13,7 @@ import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+import { descargarBlobSeguro } from '../../shared/descarga-segura';
 
 @Component({
   selector: 'app-compra-detail',
@@ -28,9 +29,11 @@ export class CompraDetailComponent implements OnInit {
   readonly documentos = signal<CompraDocumento[]>([]);
   readonly loading = signal(true);
   readonly loadingDocumentos = signal(true);
+  readonly documentosError = signal<string | null>(null);
   readonly procesando = signal(false);
   readonly subiendoDocumento = signal(false);
   readonly descargandoDocumentoId = signal<number | null>(null);
+  readonly eliminandoDocumentoId = signal<number | null>(null);
   readonly puedeEditar = signal(false);
   readonly puedeConfirmar = signal(false);
   readonly puedeAnular = signal(false);
@@ -68,6 +71,7 @@ export class CompraDetailComponent implements OnInit {
 
   cargarDocumentos(): void {
     this.loadingDocumentos.set(true);
+    this.documentosError.set(null);
     this.compraService.getDocumentos(this.compraId).subscribe({
       next: (res) => {
         this.documentos.set(res.data);
@@ -75,6 +79,7 @@ export class CompraDetailComponent implements OnInit {
       },
       error: () => {
         this.documentos.set([]);
+        this.documentosError.set('No se pudieron cargar los comprobantes. Verifica tu acceso e inténtalo de nuevo.');
         this.loadingDocumentos.set(false);
       }
     });
@@ -113,6 +118,11 @@ export class CompraDetailComponent implements OnInit {
     input.value = '';
     if (!archivo || !this.puedeEditar() || this.subiendoDocumento()) return;
 
+    if (archivo.size === 0) {
+      this.snackBar.open('El comprobante está vacío y no se puede adjuntar.', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
     const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
     if (!permitidos.includes(archivo.type)) {
       this.snackBar.open('Solo se permiten archivos JPG, PNG, WebP o PDF.', 'Cerrar', { duration: 5000 });
@@ -144,12 +154,9 @@ export class CompraDetailComponent implements OnInit {
     this.compraService.descargarDocumento(this.compraId, documento.id).subscribe({
       next: (blob) => {
         this.descargandoDocumentoId.set(null);
-        const url = URL.createObjectURL(blob);
-        const enlace = document.createElement('a');
-        enlace.href = url;
-        enlace.download = documento.nombreOriginal;
-        enlace.click();
-        URL.revokeObjectURL(url);
+        if (!descargarBlobSeguro(blob, documento.nombreOriginal, `comprobante-${documento.id}`)) {
+          this.snackBar.open('El comprobante descargado está vacío.', 'Cerrar', { duration: 5000 });
+        }
       },
       error: () => {
         this.descargandoDocumentoId.set(null);
@@ -159,7 +166,7 @@ export class CompraDetailComponent implements OnInit {
   }
 
   eliminarDocumento(documento: CompraDocumento): void {
-    if (!this.puedeEditar()) return;
+    if (!this.puedeEditar() || this.eliminandoDocumentoId() !== null) return;
 
     const ref = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -170,12 +177,17 @@ export class CompraDetailComponent implements OnInit {
 
     ref.afterClosed().subscribe((confirmado) => {
       if (!confirmado) return;
+      this.eliminandoDocumentoId.set(documento.id);
       this.compraService.eliminarDocumento(this.compraId, documento.id).subscribe({
         next: () => {
+          this.eliminandoDocumentoId.set(null);
           this.snackBar.open('Comprobante retirado correctamente.', 'Cerrar', { duration: 3500 });
           this.cargarDocumentos();
         },
-        error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo retirar el comprobante.', 'Cerrar', { duration: 5000 })
+        error: (err) => {
+          this.eliminandoDocumentoId.set(null);
+          this.snackBar.open(err.error?.message ?? 'No se pudo retirar el comprobante.', 'Cerrar', { duration: 5000 });
+        }
       });
     });
   }

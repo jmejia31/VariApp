@@ -9,6 +9,7 @@ import { ProductoService } from '../../services/producto.service';
 import { Producto, ProductoImagen } from '../../core/models/producto.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+import { descargarBlobSeguro } from '../../shared/descarga-segura';
 
 @Component({
   selector: 'app-producto-detail',
@@ -112,12 +113,9 @@ export class ProductoDetailComponent implements OnInit {
   }
 
   private guardarBlob(blob: Blob, nombreSugerido: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = nombreSugerido;
-    enlace.click();
-    window.URL.revokeObjectURL(url);
+    if (!descargarBlobSeguro(blob, nombreSugerido, 'imagen-producto')) {
+      this.snackBar.open('El archivo descargado está vacío.', 'Cerrar', { duration: 5000 });
+    }
   }
 
   descargarImagen(imagen: ProductoImagen): void {

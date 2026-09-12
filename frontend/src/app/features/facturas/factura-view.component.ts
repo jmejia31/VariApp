@@ -20,6 +20,7 @@ import {
   ResultadoDiagnosticoSmtp
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { descargarBlobSeguro } from '../../shared/descarga-segura';
 
 const FORMATO_STORAGE_KEY = 'variapp_factura_formato_pdf';
 const FORMATOS_FALLBACK: FacturaFormatoPdf[] = [
@@ -190,13 +191,9 @@ export class FacturaViewComponent implements OnInit {
           const dimensiones = await this.leerDimensionesPdf(blob);
           if (dimensiones) this.alturaTermicaMm.set(dimensiones.altoMm);
         }
-        const url = window.URL.createObjectURL(blob);
-        const enlace = document.createElement('a');
-        enlace.href = url;
-        enlace.download = `${factura.numeroFactura}-${formato.codigo}.pdf`;
-        enlace.rel = 'noopener';
-        enlace.click();
-        window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        if (!descargarBlobSeguro(blob, `${factura.numeroFactura}-${formato.codigo}.pdf`, 'factura.pdf')) {
+          this.snackBar.open('El PDF generado está vacío.', 'Cerrar', { duration: 5000 });
+        }
       },
       error: () => {
         this.descargandoPdf.set(false);
