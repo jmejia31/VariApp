@@ -4,6 +4,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -79,5 +80,41 @@ public sealed class SecuenciaDocumentoServiceTests
             x => x.ObtenerActualAsync(2, It.IsAny<CancellationToken>()),
             Times.Once);
         Assert.Empty(db.RegistrosAuditoria);
+    }
+
+    [Fact]
+    public async Task ReservarSiguienteAsync_PersisteAuditoriaConLaReserva()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        await using var db = new AppDbContext(options);
+        await db.Database.EnsureCreatedAsync();
+
+        db.SecuenciasDocumento.Add(new SecuenciaDocumento(7, null, "FACTURA", "FAC-", 6, 41));
+        await db.SaveChangesAsync();
+
+        var scope = new Mock<IUsuarioScopeService>();
+        scope.Setup(x => x.ObtenerActualAsync(7, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UsuarioTenantScopeActual(10, 7, 20, "Administrador", true));
+
+        var service = new SecuenciaDocumentoService(db, scope.Object);
+        await service.ReservarSiguienteAsync(new ReservarSecuenciaDocumentoRequest(7, null, "FACTURA"));
+
+        db.ChangeTracker.Clear();
+        var secuencia = await db.SecuenciasDocumento.SingleAsync();
+        var auditoria = await db.RegistrosAuditoria.SingleAsync();
+
+        Assert.Equal(42, secuencia.UltimoValor);
+        Assert.Equal(10, auditoria.UsuarioId);
+        Assert.Equal(nameof(SecuenciaDocumento), auditoria.Entidad);
+        Assert.Equal(secuencia.Id, auditoria.ReferenciaId);
+        Assert.Equal("Exito", auditoria.Resultado);
+        Assert.Contains("\"empresaId\":7", auditoria.ValoresNuevos ?? string.Empty, StringComparison.Ordinal);
+        Assert.Contains("\"valorSiguiente\":42", auditoria.ValoresNuevos ?? string.Empty, StringComparison.Ordinal);
     }
 }
