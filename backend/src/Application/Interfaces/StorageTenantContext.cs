@@ -1,4 +1,6 @@
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Domain.Security;
+using Microsoft.AspNetCore.Http;
 
 namespace InventoryApp.Application.Interfaces;
 
@@ -118,4 +120,47 @@ public sealed record StorageTenantContext
 
         return $"{TenantPrefix}/{normalizado}";
     }
+}
+
+/// <summary>
+/// Resuelve el tenant de storage desde el header de contexto de la petición y lo
+/// confirma server-side contra UsuarioEmpresa. El EmpresaId enviado por el cliente
+/// sólo identifica el tenant solicitado: nunca se convierte en autoridad hasta que
+/// <see cref="IUsuarioScopeService"/> confirma una membresía activa del usuario.
+/// </summary>
+public static class StorageTenantContextResolver
+{
+    public const string EmpresaHeader = "X-Empresa-Id";
+
+    public static async Task<StorageTenantContext> ResolverRequeridoAsync(
+        IHttpContextAccessor? httpContextAccessor,
+        IUsuarioScopeService? usuarioScopeService,
+        CancellationToken cancellationToken = default)
+    {
+        var httpContext = httpContextAccessor?.HttpContext;
+        if (httpContext is null || usuarioScopeService is null)
+        {
+            throw new ForbiddenAccessException(
+                "La operación de almacenamiento requiere un contexto tenant verificado por el servidor.");
+        }
+
+        var rawEmpresaId = httpContext.Request.Headers[EmpresaHeader].FirstOrDefault();
+        if (!int.TryParse(rawEmpresaId, out var empresaId) || empresaId <= 0)
+        {
+            throw new ForbiddenAccessException(
+                "La operación de almacenamiento requiere un EmpresaId de contexto válido.");
+        }
+
+        var scope = await usuarioScopeService.ObtenerActualAsync(empresaId, cancellationToken);
+        if (scope is null)
+        {
+            throw new ForbiddenAccessException(
+                "El usuario autenticado no tiene una membresía activa en la empresa solicitada.");
+        }
+
+        return DesdeScope(scope);
+    }
+
+    private static StorageTenantContext DesdeScope(UsuarioTenantScopeActual scope) =>
+        StorageTenantContext.Desde(scope);
 }
