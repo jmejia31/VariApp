@@ -38,7 +38,7 @@ public sealed class QuestPdfFacturaService : IFacturaPdfService
     {
         ArgumentNullException.ThrowIfNull(factura);
         if (!EsCapabilityPublicoValidado(factura.Id))
-            _ = await ResolverTenantProduccionAsync();
+            await ValidarTenantProduccionAsync();
         return await _inner.GenerarPdfAsync(factura);
     }
 
@@ -46,7 +46,7 @@ public sealed class QuestPdfFacturaService : IFacturaPdfService
     {
         ArgumentNullException.ThrowIfNull(factura);
         if (!EsCapabilityPublicoValidado(factura.Id))
-            _ = await ResolverTenantProduccionAsync();
+            await ValidarTenantProduccionAsync();
         return await _inner.GenerarPdfAsync(factura, formato);
     }
 
@@ -69,15 +69,15 @@ public sealed class QuestPdfFacturaService : IFacturaPdfService
                autorizado == facturaId;
     }
 
-    private async Task<StorageTenantContext> ResolverTenantProduccionAsync()
+    private async Task ValidarTenantProduccionAsync()
     {
-        // Las construcciones manuales de tests existentes no tienen request ni
-        // servicios HTTP. La producción, resuelta por DI, sí los proporciona y
-        // por tanto ejecuta el camino fail-closed.
+        // Construcciones unitarias directas anteriores no tienen pipeline HTTP.
+        // En producción el contenedor proporciona ambos servicios y se exige el
+        // contexto server-side. Si sólo uno está presente, el resolver falla cerrado.
         if (_httpContextAccessor is null && _usuarioScopeService is null)
-            return StorageTenantContext.Desde(new UsuarioTenantScopeActual(1, 1, 1, "TEST_ONLY", false));
+            return;
 
-        return await StorageTenantContextResolver.ResolverRequeridoAsync(
+        _ = await StorageTenantContextResolver.ResolverRequeridoAsync(
             _httpContextAccessor,
             _usuarioScopeService,
             _httpContextAccessor?.HttpContext?.RequestAborted ?? default);
