@@ -11,4 +11,20 @@ public interface IFacturaPdfService
 
     Task<byte[]> GenerarPdfAsync(FacturaDto factura, FacturaFormatoPdf formato) =>
         GenerarPdfAsync(factura);
+
+    /// <summary>
+    /// Contrato tenant-aware para generación autenticada. El contexto debe
+    /// provenir de UsuarioEmpresa validado server-side; EmpresaId del cliente no
+    /// es autoridad por sí mismo. El PDF sigue siendo un deliverable efímero y no
+    /// se persiste desde este contrato.
+    /// </summary>
+    Task<byte[]> GenerarPdfAsync(
+        StorageTenantContext tenant,
+        FacturaDto factura,
+        FacturaFormatoPdf formato = FacturaFormatoPdf.A4)
+    {
+        ArgumentNullException.ThrowIfNull(tenant);
+        ArgumentNullException.ThrowIfNull(factura);
+        return GenerarPdfAsync(factura, formato);
+    }
 }
