@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineConfig } from '@playwright/test';
 
 const baseURL = process.env['PLAYWRIGHT_TEST_BASE_URL'] ?? 'http://127.0.0.1:4200';
@@ -7,6 +9,28 @@ const hasTenantBootstrapContext = Boolean(
   process.env['PHASE7_ADMIN_USERNAME'] &&
   process.env['PHASE7_ADMIN_PASSWORD']
 );
+
+function enableTenantAwareFixtureForCi(): void {
+  if (!process.env['CI']) return;
+
+  const e2eDir = resolve(process.cwd(), 'e2e');
+  for (const entry of readdirSync(e2eDir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith('.spec.ts')) continue;
+
+    const path = resolve(e2eDir, entry.name);
+    const source = readFileSync(path, 'utf8');
+    const tenantAwareSource = source.replace(
+      /from\s+(['"])@playwright\/test\1/g,
+      "from './tenant-aware-test'"
+    );
+
+    if (tenantAwareSource !== source) {
+      writeFileSync(path, tenantAwareSource, 'utf8');
+    }
+  }
+}
+
+enableTenantAwareFixtureForCi();
 
 export default defineConfig({
   testDir: './e2e',
