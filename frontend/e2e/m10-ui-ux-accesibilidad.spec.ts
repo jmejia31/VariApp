@@ -133,9 +133,10 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
       sentinel.style.position = 'fixed';
       sentinel.style.left = '-10000px';
       document.body.insertBefore(sentinel, document.body.firstChild);
-      sentinel.focus();
     });
-    await expect(page.locator('#e2e-m10-focus-sentinel')).toBeFocused();
+    const focusSentinel = page.locator('#e2e-m10-focus-sentinel');
+    await focusSentinel.focus();
+    await expect(focusSentinel).toBeFocused();
     await page.keyboard.press('Tab');
     await expect(skip).toBeFocused();
     await expect(skip).toBeVisible();
