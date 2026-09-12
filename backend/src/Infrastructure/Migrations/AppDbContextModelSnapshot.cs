@@ -11450,6 +11450,7 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Navigation("ImpuestosAplicados");
                 });
+            ApplyN69CModel(modelBuilder);
 #pragma warning restore 612, 618
         }
     }
