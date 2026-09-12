@@ -3,6 +3,8 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +17,9 @@ public sealed class SecuenciasDocumentoController : ControllerBase
 {
     private readonly ISecuenciaDocumentoService _service;
 
-    public SecuenciasDocumentoController(ISecuenciaDocumentoService service)
+    public SecuenciasDocumentoController(AppDbContext db, IUsuarioScopeService usuarioScope)
     {
-        _service = service;
+        _service = new SecuenciaDocumentoService(db, usuarioScope);
     }
 
     [HttpGet]
