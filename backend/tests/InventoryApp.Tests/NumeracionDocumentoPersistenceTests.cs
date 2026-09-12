@@ -21,6 +21,7 @@ public class NumeracionDocumentoPersistenceTests
         Assert.Equal("SecuenciasDocumento", entity!.GetTableName());
         Assert.NotNull(entity.FindProperty("SucursalScopeKey"));
         Assert.Equal("IFNULL(`SucursalId`, 0)", entity.FindProperty("SucursalScopeKey")!.GetComputedColumnSql());
+        Assert.True(entity.FindProperty(nameof(SecuenciaDocumento.UltimoValor))!.IsConcurrencyToken);
 
         var scopeIndex = Assert.Single(entity.GetIndexes(), index =>
             index.IsUnique && index.GetDatabaseName() == "UX_SecuenciasDocumento_Empresa_Sucursal_Tipo");

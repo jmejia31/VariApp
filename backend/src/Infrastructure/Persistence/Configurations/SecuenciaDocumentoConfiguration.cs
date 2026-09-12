@@ -25,7 +25,8 @@ public sealed class SecuenciaDocumentoConfiguration : IEntityTypeConfiguration<S
             .IsRequired();
         builder.Property(x => x.UltimoValor)
             .IsRequired()
-            .HasDefaultValue(0L);
+            .HasDefaultValue(0L)
+            .IsConcurrencyToken();
         builder.Property(x => x.Prefijo)
             .HasMaxLength(40)
             .IsRequired();

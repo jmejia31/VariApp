@@ -47,6 +47,20 @@ public class NumeracionDocumentoDomainTests
     }
 
     [Fact]
+    public void SecuenciaDocumento_RechazaTipoDocumentalQueExcedePersistencia()
+    {
+        Assert.Throws<ArgumentException>(() => new SecuenciaDocumento(1, 2, new string('X', 81)));
+    }
+
+    [Fact]
+    public void SecuenciaDocumento_RechazaPrefijoQueExcedePersistencia()
+    {
+        var secuencia = new SecuenciaDocumento(1, 2, "FACTURA");
+
+        Assert.Throws<ArgumentException>(() => secuencia.ActualizarFormato(new string('P', 41), 6));
+    }
+
+    [Fact]
     public void RegistrarValorReservado_ExigeSiguienteConsecutivoExacto()
     {
         var secuencia = new SecuenciaDocumento(1, 2, "VENTA", valorInicial: 7);

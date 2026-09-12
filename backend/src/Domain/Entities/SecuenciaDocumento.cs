@@ -9,6 +9,9 @@ namespace InventoryApp.Domain.Entities;
 /// </summary>
 public sealed class SecuenciaDocumento : AuditableEntity
 {
+    private const int TipoDocumentoMaxLength = 80;
+    private const int PrefijoMaxLength = 40;
+
     private SecuenciaDocumento()
     {
     }
@@ -70,7 +73,13 @@ public sealed class SecuenciaDocumento : AuditableEntity
             throw new ArgumentOutOfRangeException(nameof(longitudNumero), "La longitud numérica debe estar entre 1 y 18.");
         }
 
-        Prefijo = prefijo?.Trim() ?? string.Empty;
+        var prefijoNormalizado = prefijo?.Trim() ?? string.Empty;
+        if (prefijoNormalizado.Length > PrefijoMaxLength)
+        {
+            throw new ArgumentException($"El prefijo no puede exceder {PrefijoMaxLength} caracteres.", nameof(prefijo));
+        }
+
+        Prefijo = prefijoNormalizado;
         LongitudNumero = longitudNumero;
     }
 
@@ -132,5 +141,13 @@ public sealed class SecuenciaDocumento : AuditableEntity
     }
 
     private static string NormalizarTipoDocumento(string tipoDocumento)
-        => tipoDocumento.Trim().ToUpperInvariant();
+    {
+        var normalizado = tipoDocumento.Trim().ToUpperInvariant();
+        if (normalizado.Length > TipoDocumentoMaxLength)
+        {
+            throw new ArgumentException($"El tipo documental no puede exceder {TipoDocumentoMaxLength} caracteres.", nameof(tipoDocumento));
+        }
+
+        return normalizado;
+    }
 }
