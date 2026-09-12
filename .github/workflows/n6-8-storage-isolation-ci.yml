@@ -6,10 +6,10 @@ on:
     paths:
       - 'backend/src/Application/Interfaces/IImageStorageService.cs'
       - 'backend/src/Application/Interfaces/ICompraDocumentoStorageService.cs'
+      - 'backend/src/Application/Interfaces/StorageTenantContext.cs'
       - 'backend/src/Infrastructure/Services/CloudinaryFolderResolver.cs'
       - 'backend/src/Infrastructure/Services/CloudinaryImageStorageService.cs'
       - 'backend/src/Infrastructure/Services/CloudinaryCompraDocumentoStorageService.cs'
-      - 'backend/src/Infrastructure/Services/StorageTenantContextResolver.cs'
       - 'backend/tests/InventoryApp.Tests/Application/Storage/**'
       - 'backend/tests/InventoryApp.Tests/Priority3FileSecurityTests.cs'
       - 'backend/tests/InventoryApp.Tests/CloudinaryEnvironmentIsolationTests.cs'
