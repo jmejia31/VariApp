@@ -1,15 +1,17 @@
 using System.Data;
+using System.Text.Json;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Services;
 
 /// <summary>
-/// N6.6.D — consulta y reserva monotónica de secuencias documentales por tenant.
+/// N6.6.D/F — consulta, reserva monotónica y auditoría de secuencias documentales por tenant.
 /// La reserva usa compare-and-swap dentro de una transacción corta: nunca MAX()+1,
 /// memoria local ni un contador compartido entre Empresas.
 /// </summary>
@@ -86,6 +88,45 @@ public sealed class SecuenciaDocumentoService : ISecuenciaDocumentoService
 
             if (filas == 1)
             {
+                _db.RegistrosAuditoria.Add(new RegistroAuditoria
+                {
+                    Fecha = ahora,
+                    UsuarioId = tenant.UsuarioId,
+                    NombreUsuario = $"Usuario:{tenant.UsuarioId}",
+                    Modulo = ModuloSistema.Configuracion,
+                    Accion = AccionPermiso.Editar,
+                    Entidad = nameof(SecuenciaDocumento),
+                    ReferenciaId = secuencia.Id,
+                    Descripcion = $"Reserva de numeración {tipo} para Empresa {request.EmpresaId} / PuntoEmision {request.SucursalId?.ToString() ?? "GLOBAL"}: {anterior} -> {siguiente}.",
+                    ValoresAnteriores = JsonSerializer.Serialize(new
+                    {
+                        usuarioId = tenant.UsuarioId,
+                        fecha = ahora,
+                        empresaId = request.EmpresaId,
+                        puntoEmisionId = request.SucursalId,
+                        tipoDocumento = tipo,
+                        valorAnterior = anterior,
+                        origen = nameof(SecuenciaDocumentoService),
+                        canal = "API"
+                    }),
+                    ValoresNuevos = JsonSerializer.Serialize(new
+                    {
+                        usuarioId = tenant.UsuarioId,
+                        fecha = ahora,
+                        empresaId = request.EmpresaId,
+                        puntoEmisionId = request.SucursalId,
+                        tipoDocumento = tipo,
+                        valorAnterior = anterior,
+                        valorSiguiente = siguiente,
+                        origen = nameof(SecuenciaDocumentoService),
+                        canal = "API"
+                    }),
+                    Resultado = "Exito"
+                });
+
+                // La auditoría forma parte de la misma transacción que el CAS: si la
+                // evidencia no se puede persistir, la numeración tampoco se consume.
+                await _db.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return new SecuenciaDocumentoSiguienteDto(
                     secuencia.EmpresaId,
