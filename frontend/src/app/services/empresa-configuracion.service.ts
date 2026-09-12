@@ -42,6 +42,13 @@ export interface ActualizarConfigEmpresaTenant {
   version: number;
 }
 
+export interface ActualizarPlantillaCorreoEmpresa {
+  asunto: string;
+  cuerpo: string;
+  activa: boolean;
+  version: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmpresaConfiguracionService {
   private readonly apiUrl = `${environment.apiUrl}/empresa-configuracion`;
@@ -86,5 +93,28 @@ export class EmpresaConfiguracionService {
 
   restaurarTenantLogo(empresaId: number): Observable<ApiResponse<ConfigEmpresaTenant>> {
     return this.http.delete<ApiResponse<ConfigEmpresaTenant>>(`${this.apiUrl}/tenant/${empresaId}/logo`);
+  }
+
+  upsertTenantPlantilla(
+    empresaId: number,
+    tipoPlantilla: string,
+    valor: ActualizarPlantillaCorreoEmpresa
+  ): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    const tipo = encodeURIComponent(tipoPlantilla.trim());
+    return this.http.put<ApiResponse<ConfigEmpresaTenant>>(
+      `${this.apiUrl}/tenant/${empresaId}/plantillas/${tipo}`,
+      valor
+    );
+  }
+
+  desactivarTenantPlantilla(
+    empresaId: number,
+    tipoPlantilla: string,
+    version: number
+  ): Observable<ApiResponse<ConfigEmpresaTenant>> {
+    const tipo = encodeURIComponent(tipoPlantilla.trim());
+    return this.http.delete<ApiResponse<ConfigEmpresaTenant>>(
+      `${this.apiUrl}/tenant/${empresaId}/plantillas/${tipo}?version=${encodeURIComponent(String(version))}`
+    );
   }
 }
