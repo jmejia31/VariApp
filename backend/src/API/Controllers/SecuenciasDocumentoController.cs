@@ -36,7 +36,7 @@ public sealed class SecuenciasDocumentoController : ControllerBase
             tipoDocumento,
             cancellationToken);
 
-        return Ok(ApiResponse<SecuenciaDocumentoDto>.Ok(secuencia));
+        return Ok(ApiResponse<SecuenciaDocumentoConsultaDto>.Ok(secuencia));
     }
 
     [HttpPost("siguiente")]
