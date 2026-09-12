@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TenantContextService } from './tenant-context.service';
@@ -63,7 +63,7 @@ import { TenantContextService } from './tenant-context.service';
     .error { margin: 1rem 0 0; color: #b91c1c; font-weight: 600; }
   `]
 })
-export class TenantSelectorComponent {
+export class TenantSelectorComponent implements OnInit {
   @Output() readonly confirmado = new EventEmitter<void>();
 
   empresaId: number | null;
@@ -72,6 +72,14 @@ export class TenantSelectorComponent {
 
   constructor(public readonly tenant: TenantContextService) {
     this.empresaId = this.tenant.empresaSolicitadaId();
+  }
+
+  ngOnInit(): void {
+    // Una selección persistida sigue siendo sólo una solicitud. Revalidarla
+    // automáticamente conserva continuidad sin convertir localStorage en autoridad.
+    if (this.empresaValida()) {
+      this.activarEmpresa();
+    }
   }
 
   empresaValida(): boolean {
