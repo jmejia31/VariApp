@@ -94,6 +94,26 @@ public class CloudinaryTenantOwnershipTests
     }
 
     [Fact]
+    public async Task CompraDeleteAsync_CrossTenant_RegistraDenySafeSinLocatorNiSecretos()
+    {
+        var logger = new CapturingLogger<CloudinaryCompraDocumentoStorageService>();
+        var storage = CrearCompraStorage(logger);
+        var tenant = CrearScope(usuarioId: 7, empresaId: 31, rolId: 4);
+        const string locatorAjeno = "inventoryapp/compras/empresas/32/comprobante-otro-tenant";
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            storage.DeleteAsync(tenant, locatorAjeno, "raw", CancellationToken.None));
+
+        var audit = Assert.Single(logger.Messages);
+        Assert.Contains("TENANT_STORAGE_AUDIT", audit, StringComparison.Ordinal);
+        Assert.Contains("DENY_SAFE", audit, StringComparison.Ordinal);
+        Assert.Contains("TENANT_LOCATOR_MISMATCH", audit, StringComparison.Ordinal);
+        Assert.DoesNotContain(locatorAjeno, audit, StringComparison.Ordinal);
+        Assert.DoesNotContain("unit-test-secret", audit, StringComparison.Ordinal);
+        Assert.DoesNotContain("empresas/32", audit, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task CompraDownloadAsync_UrlDeOtraEmpresa_FallaCerradoAntesDeHttp()
     {
         var storage = CrearCompraStorage();
@@ -153,8 +173,9 @@ public class CloudinaryTenantOwnershipTests
         ILogger<CloudinaryImageStorageService>? logger = null) =>
         new(CrearConfiguracion(), logger: logger);
 
-    private static CloudinaryCompraDocumentoStorageService CrearCompraStorage() =>
-        new(CrearConfiguracion());
+    private static CloudinaryCompraDocumentoStorageService CrearCompraStorage(
+        ILogger<CloudinaryCompraDocumentoStorageService>? logger = null) =>
+        new(CrearConfiguracion(), logger: logger);
 
     private static IConfiguration CrearConfiguracion() =>
         new ConfigurationBuilder()
