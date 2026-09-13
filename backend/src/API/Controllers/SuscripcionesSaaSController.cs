@@ -107,4 +107,21 @@ public sealed class SuscripcionesSaaSController : ControllerBase
         var limites = await _service.ObtenerLimitesAsync(empresaId, query, cancellationToken);
         return Ok(ApiResponse<PaginaSuscripcionSaaSDto<LimiteSuscripcionSaaSDto>>.Ok(limites));
     }
+
+    [HttpGet("modulos/{moduloClave}/entitlement")]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Ver)]
+    public async Task<IActionResult> EvaluarModulo(
+        int empresaId,
+        string moduloClave,
+        [FromQuery] DateTime? instanteUtc,
+        CancellationToken cancellationToken)
+    {
+        var entitlement = await _service.EvaluarModuloAsync(
+            empresaId,
+            moduloClave,
+            instanteUtc,
+            cancellationToken);
+
+        return Ok(ApiResponse<EntitlementModuloSaaSDto>.Ok(entitlement));
+    }
 }
