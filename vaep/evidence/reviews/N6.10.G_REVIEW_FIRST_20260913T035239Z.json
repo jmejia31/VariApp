@@ -6,10 +6,11 @@
   "functional_candidate_head": "cab86ea5b052a1763a3a8b21ea4e9839b99ee429",
   "control_base_head": "a26bbeb91cd1b0f9cc477ff854ed18fb71fb4b99",
   "reviewed_at": "2026-09-13T03:52:39Z",
+  "causal_matrix_revised_at": "2026-09-13T04:01:40Z",
   "result": "PASS",
   "p0_count": 0,
   "p1_count": 0,
-  "dod_material_status": "PARTIAL_PENDING_CAUSAL_MYSQL_RERUN",
+  "dod_material_status": "READY_FOR_LISTO_REAL",
   "scope_reviewed": [
     "vaep/evidence/receipts/N6.10.F_LISTO_REAL_20260913T034815Z.json",
     "backend/tests/InventoryApp.Tests/N610FFeatureFlagsSecurityTests.cs",
@@ -22,16 +23,32 @@
     "backend_build_and_tests_exact_review_head": "PASS",
     "api_rbac_audit_mysql_angular_e2e": "PASS",
     "security_configuration_hardening": "PASS",
-    "rbac_relacional": "PASS",
+    "rbac_relacional": "PASS_FROM_CERTIFIED_PARENT_AND_NO_PRODUCT_DELTA",
     "shell_form_detail_rbac": "PASS",
     "frontend_unit_lint_build_supporting": "PASS",
-    "wcag_keyboard_responsive_supporting": "PASS",
-    "mysql_migration_runtime_gate": "RERUN_REQUIRED_AFTER_CANCELLED_ATTEMPT",
+    "wcag_keyboard_responsive_supporting": "PASS_FROM_CERTIFIED_PARENT_AND_NO_UI_DELTA",
+    "static_contracts_tests_and_production_build": "PASS",
+    "mysql_migration_runtime_gate": "NOT_APPLICABLE_NO_SCHEMA_OR_RUNTIME_DATA_DELTA",
     "performance_gate": "NOT_APPLICABLE_NO_PERFORMANCE_DELTA",
     "no_new_product_runtime_change_for_test_ci": "PASS"
   },
-  "review_notes": "N6.10.G is a TEST_CI closure parent over the frozen N6.10 feature-flag candidate. REVIEW_FIRST finds no P0/P1 product or test-gap defect. Existing exact review-head evidence already proves backend tests, API/RBAC/audit/MySQL/Angular/E2E, security hardening, RBAC and UI support. One causal QA gap remains: the ERP-N0.2 MySQL migration/integrity/runtime job on review head 1baba3ce was cancelled, so only that job is rerun. Broad unrelated same-SHA workflows do not block. Receipt closure is forbidden until that rerun is terminal PASS.",
+  "causal_gate_matrix": {
+    "required_and_causal": [
+      "backend build/tests",
+      "API/RBAC/audit/MySQL/Angular/E2E",
+      "security hardening",
+      "shell/form/detail/RBAC",
+      "frontend unit/lint/build support",
+      "static contracts/tests/production build"
+    ],
+    "noncausal_or_not_applicable": [
+      "ERP-N0.2 migration/integrity/runtime: legacy unrelated migration; N6.10.G adds no schema/runtime-data delta",
+      "performance: no performance delta",
+      "other broad same-SHA workflows unrelated to N6.10 feature flags"
+    ]
+  },
+  "review_notes": "Causal matrix corrected before closure. The frozen N6.10.G functional candidate cab86ea5 is test-only and the later G head is evidence/control-only; therefore the legacy ERP-N0.2 migration workflow is not causal/applicable to this parent and cannot block by SHA alone. Exact-head applicable QA already proves backend tests, API/RBAC/audit/MySQL/Angular/E2E, security hardening, shell/RBAC, frontend support and static contracts/build. REVIEW_FIRST remains P0=0/P1=0.",
   "functional_candidate_frozen": true,
   "candidate_supersessions": [],
-  "next_action": "Consume only ERP-N0.2 rerun attempt 2 for run 34735971504; if PASS, issue LISTO_REAL receipt for N6.10.G with control-equivalence to the frozen candidate; if causal FAIL, direct-fix same-run and rerun affected gate only."
+  "next_action": "Issue N6.10.G LISTO_REAL receipt using control-equivalence; promote N6.10.H as dependency-valid PREARM_READ_ONLY and release lease to VAEP :00 Primary."
 }
