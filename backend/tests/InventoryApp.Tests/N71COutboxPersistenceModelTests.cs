@@ -21,7 +21,7 @@ public class N71COutboxPersistenceModelTests
         Assert.Equal("MensajesOutbox", entity!.GetTableName());
         Assert.Equal(160, entity.FindProperty(nameof(MensajeOutbox.TipoEvento))!.GetMaxLength());
         Assert.Equal(200, entity.FindProperty(nameof(MensajeOutbox.ClaveIdempotencia))!.GetMaxLength());
-        Assert.Equal("longtext", entity.FindProperty(nameof(MensajeOutbox.PayloadJson))!\n            .FindAnnotation("Relational:ColumnType")!.Value);
+        var payload = entity.FindProperty(nameof(MensajeOutbox.PayloadJson));\n        Assert.NotNull(payload);\n        // HasColumnType is a relational annotation; avoid provider-specific type-mapping casts in this model test.\n        Assert.Equal("longtext", payload!.FindAnnotation("Relational:ColumnType")?.Value);
 
         var idempotency = Assert.Single(entity.GetIndexes().Where(index =>
             index.Properties.Select(property => property.Name).SequenceEqual(new[]
