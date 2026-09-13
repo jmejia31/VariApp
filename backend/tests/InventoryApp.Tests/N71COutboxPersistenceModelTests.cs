@@ -21,7 +21,7 @@ public class N71COutboxPersistenceModelTests
         Assert.Equal("MensajesOutbox", entity!.GetTableName());
         Assert.Equal(160, entity.FindProperty(nameof(MensajeOutbox.TipoEvento))!.GetMaxLength());
         Assert.Equal(200, entity.FindProperty(nameof(MensajeOutbox.ClaveIdempotencia))!.GetMaxLength());
-        Assert.Equal("longtext", entity.FindProperty(nameof(MensajeOutbox.PayloadJson))!.GetColumnType());
+        Assert.Equal("longtext", entity.FindProperty(nameof(MensajeOutbox.PayloadJson))!\n            .FindAnnotation("Relational:ColumnType")!.Value);
 
         var idempotency = Assert.Single(entity.GetIndexes().Where(index =>
             index.Properties.Select(property => property.Name).SequenceEqual(new[]
