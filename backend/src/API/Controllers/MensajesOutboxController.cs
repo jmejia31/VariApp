@@ -43,6 +43,19 @@ public sealed class MensajesOutboxController : ControllerBase
                 "OUTBOX_IDEMPOTENCY_KEY_REQUIRED");
         }
 
+        // El filtro de permiso autoriza el tenant indicado en X-Empresa-Id. La ruta
+        // no puede apuntar a otro tenant: de lo contrario un usuario con permiso en
+        // A y mera membresía en B podría reutilizar el permiso de A para escribir en B.
+        var empresaAutorizada = TenantPermissionContext.RequireEmpresaId(HttpContext);
+        if (empresaAutorizada != empresaId)
+        {
+            return Problema(
+                StatusCodes.Status403Forbidden,
+                "Contexto tenant inconsistente",
+                "El tenant autorizado no coincide con la empresa solicitada.",
+                "OUTBOX_TENANT_CONTEXT_MISMATCH");
+        }
+
         try
         {
             var mensaje = await _service.RegistrarAsync(
