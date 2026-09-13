@@ -28,12 +28,12 @@ public sealed record OutboxRetryProcessorOptions(
 
         if (BatchSize is <= 0 or > 200)
             throw new InvalidOperationException("Outbox:BatchSize debe estar entre 1 y 200.");
-        if (MaxAttempts <= 0)
-            throw new InvalidOperationException("Outbox:MaxAttempts debe ser mayor que cero.");
+        if (MaxAttempts is <= 0 or > OutboxRetryPolicy.MaximoIntentosPermitido)
+            throw new InvalidOperationException($"Outbox:MaxAttempts debe estar entre 1 y {OutboxRetryPolicy.MaximoIntentosPermitido}.");
         if (demoraBase <= TimeSpan.Zero)
             throw new InvalidOperationException("Outbox:BaseDelay debe ser mayor que cero.");
-        if (demoraMaxima < demoraBase)
-            throw new InvalidOperationException("Outbox:MaxDelay no puede ser menor que BaseDelay.");
+        if (demoraMaxima < demoraBase || demoraMaxima > OutboxRetryPolicy.DemoraMaximaPermitida)
+            throw new InvalidOperationException("Outbox:MaxDelay debe ser mayor o igual que BaseDelay y no exceder siete días.");
         if (stale <= TimeSpan.Zero)
             throw new InvalidOperationException("Outbox:StaleClaimAfter debe ser mayor que cero.");
         if (JitterRatio is < 0 or > 1)
