@@ -164,6 +164,56 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
             total);
     }
 
+    public async Task<EntitlementModuloSaaSDto> EvaluarModuloAsync(
+        int empresaId,
+        string moduloClave,
+        DateTime? instanteUtc = null,
+        CancellationToken cancellationToken = default)
+    {
+        // La autoridad tenant se resuelve antes de cualquier lectura SaaS. La ruta
+        // sólo selecciona; nunca concede acceso por sí misma.
+        var scope = await ResolverTenantAsync(empresaId, cancellationToken);
+        var instante = NormalizarUtc(instanteUtc ?? DateTime.UtcNow);
+        var suscripcion = await _repository.ObtenerVigenteAsync(
+            scope.EmpresaId,
+            instante,
+            cancellationToken);
+
+        Plan? plan = null;
+        IReadOnlyList<PlanModulo> reglas = Array.Empty<PlanModulo>();
+        if (suscripcion is not null)
+        {
+            plan = await _repository.ObtenerPlanPorIdAsync(suscripcion.PlanId, cancellationToken);
+            if (plan is not null)
+            {
+                reglas = await _repository.ObtenerModulosPlanAsync(
+                    plan.Id,
+                    plan.Codigo,
+                    cancellationToken);
+            }
+        }
+
+        var decision = PoliticaModulosSaaS.Evaluar(
+            scope.EmpresaId,
+            empresaId,
+            suscripcion,
+            plan,
+            reglas,
+            moduloClave,
+            instante);
+
+        var moduloNormalizado = string.IsNullOrWhiteSpace(moduloClave)
+            ? string.Empty
+            : moduloClave.Trim().ToUpperInvariant();
+
+        return new EntitlementModuloSaaSDto(
+            moduloNormalizado,
+            decision.Habilitado,
+            decision.Motivo,
+            plan?.Id,
+            plan?.Codigo);
+    }
+
     private async Task<SuscripcionSaaSDto> ResolverReplayAsync(
         Suscripcion replay,
         string codigoPlan,
