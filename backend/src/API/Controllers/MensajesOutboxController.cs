@@ -19,11 +19,16 @@ public sealed class MensajesOutboxController : ControllerBase
 
     private readonly IMensajeOutboxService _service;
     private readonly AppDbContext _db;
+    private readonly IAuditoriaService? _auditoria;
 
-    public MensajesOutboxController(IMensajeOutboxService service, AppDbContext db)
+    public MensajesOutboxController(
+        IMensajeOutboxService service,
+        AppDbContext db,
+        IAuditoriaService? auditoria = null)
     {
         _service = service;
         _db = db;
+        _auditoria = auditoria;
     }
 
     [HttpPost]
@@ -49,6 +54,18 @@ public sealed class MensajesOutboxController : ControllerBase
         var empresaAutorizada = TenantPermissionContext.RequireEmpresaId(HttpContext);
         if (empresaAutorizada != empresaId)
         {
+            if (_auditoria is not null)
+            {
+                await _auditoria.RegistrarAsync(
+                    ModuloSistema.Configuracion,
+                    AccionPermiso.Crear,
+                    "Intento rechazado de registrar un mensaje outbox con tenant de ruta distinto al tenant autorizado.",
+                    entidad: "MensajeOutbox",
+                    valoresNuevos: new { EmpresaSolicitada = empresaId, EmpresaAutorizada = empresaAutorizada },
+                    resultado: "Rechazado",
+                    error: "OUTBOX_TENANT_CONTEXT_MISMATCH");
+            }
+
             return Problema(
                 StatusCodes.Status403Forbidden,
                 "Contexto tenant inconsistente",
@@ -65,6 +82,23 @@ public sealed class MensajesOutboxController : ControllerBase
                 cancellationToken);
 
             await _db.SaveChangesAsync(cancellationToken);
+
+            if (_auditoria is not null)
+            {
+                await _auditoria.RegistrarAsync(
+                    ModuloSistema.Configuracion,
+                    AccionPermiso.Crear,
+                    "Mensaje outbox registrado para despacho posterior.",
+                    entidad: "MensajeOutbox",
+                    valoresNuevos: new
+                    {
+                        mensaje.EventoId,
+                        mensaje.EmpresaId,
+                        mensaje.TipoEvento,
+                        mensaje.Estado,
+                        mensaje.CorrelationId
+                    });
+            }
 
             return Accepted(ApiResponse<MensajeOutboxRegistroResponse>.Ok(
                 new MensajeOutboxRegistroResponse(
