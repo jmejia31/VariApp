@@ -492,3 +492,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.4 — Idempotencia — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.4.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.4.G — functional candidate `1c366562a90c590cc2925a153298fd1b758e8dab`; causal gates `34782712890/103792518381`, `34782712890/103792518352`, `34782712890/103792518396`, `34782712884/103792518243` y `34782712884/103792518046` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.4.G_LISTO_REAL_20260913T220100Z_SUP48.json`.
+- [x] N7.4.H — certificación canónica `docs/CERTIFICACION_N7_4_IDEMPOTENCIA.md` publicada en `6097f60ff68d163878d5d3d85c590c59f0cd2f75`.
+- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
+- [ ] N7.4.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional y persistir/releer receipt H.
+
+**CURRENT_PARENT=N7.4.H. NEXT_PARENT_PREARMED=N7.5.A. No se promueve N7.5.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
