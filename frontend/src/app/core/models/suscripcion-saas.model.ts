@@ -12,6 +12,14 @@ export interface LimiteSuscripcionSaaS {
   valorMaximo?: number | null;
 }
 
+export interface EntitlementModuloSaaS {
+  moduloClave: string;
+  habilitado: boolean;
+  motivo: number | string;
+  planId?: number | null;
+  planCodigo?: string | null;
+}
+
 export interface PaginaSuscripcionSaaS<T> {
   items: T[];
   pagina: number;
