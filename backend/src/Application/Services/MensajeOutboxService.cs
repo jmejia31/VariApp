@@ -41,10 +41,7 @@ public sealed class MensajeOutboxService : IMensajeOutboxService
             throw new ForbiddenAccessException("No existe una membresía activa para la empresa solicitada.");
 
         var claveNormalizada = claveIdempotencia.Trim();
-        if (await _repository.ExisteClaveIdempotenciaAsync(empresaId, claveNormalizada, cancellationToken))
-            throw new ConflictException("La clave de idempotencia ya fue registrada para esta empresa.");
-
-        var mensaje = MensajeOutbox.Crear(
+        var candidato = MensajeOutbox.Crear(
             empresaId,
             request.TipoEvento,
             request.PayloadJson,
@@ -53,7 +50,38 @@ public sealed class MensajeOutboxService : IMensajeOutboxService
             request.IdAgregado,
             request.CorrelationId);
 
-        await _repository.AddAsync(mensaje, cancellationToken);
-        return mensaje;
+        var existente = await _repository.GetByClaveIdempotenciaAsync(
+            empresaId,
+            claveNormalizada,
+            cancellationToken);
+
+        if (existente is not null)
+        {
+            if (EsMismaSolicitud(existente, candidato))
+                return existente;
+
+            throw new ConflictException(
+                "La clave de idempotencia ya fue registrada con una solicitud diferente para esta empresa.");
+        }
+
+        // Fallback fail-closed para repositorios legacy/test que todavía no
+        // implementen lookup por clave, además de mantener la precondición
+        // histórica antes de stagear una nueva intención.
+        if (await _repository.ExisteClaveIdempotenciaAsync(empresaId, claveNormalizada, cancellationToken))
+            throw new ConflictException("La clave de idempotencia ya fue registrada para esta empresa.");
+
+        await _repository.AddAsync(candidato, cancellationToken);
+        return candidato;
+    }
+
+    private static bool EsMismaSolicitud(MensajeOutbox existente, MensajeOutbox candidato)
+    {
+        return existente.EmpresaId == candidato.EmpresaId &&
+               string.Equals(existente.ClaveIdempotencia, candidato.ClaveIdempotencia, StringComparison.Ordinal) &&
+               string.Equals(existente.TipoEvento, candidato.TipoEvento, StringComparison.Ordinal) &&
+               string.Equals(existente.PayloadJson, candidato.PayloadJson, StringComparison.Ordinal) &&
+               string.Equals(existente.TipoAgregado, candidato.TipoAgregado, StringComparison.Ordinal) &&
+               string.Equals(existente.IdAgregado, candidato.IdAgregado, StringComparison.Ordinal) &&
+               string.Equals(existente.CorrelationId, candidato.CorrelationId, StringComparison.Ordinal);
     }
 }

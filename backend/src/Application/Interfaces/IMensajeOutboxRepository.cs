@@ -16,6 +16,17 @@ public interface IMensajeOutboxRepository
         Guid eventoId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Obtiene el mensaje durable asociado a la clave idempotente del tenant.
+    /// Implementaciones legacy/test pueden devolver null; el servicio conserva
+    /// ExisteClaveIdempotenciaAsync como fallback fail-closed.
+    /// </summary>
+    Task<MensajeOutbox?> GetByClaveIdempotenciaAsync(
+        int empresaId,
+        string claveIdempotencia,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<MensajeOutbox?>(null);
+
     Task<bool> ExisteClaveIdempotenciaAsync(
         int empresaId,
         string claveIdempotencia,

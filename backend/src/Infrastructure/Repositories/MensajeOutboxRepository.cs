@@ -40,6 +40,21 @@ public sealed class MensajeOutboxRepository : IMensajeOutboxRepository
             cancellationToken);
     }
 
+    public Task<MensajeOutbox?> GetByClaveIdempotenciaAsync(
+        int empresaId,
+        string claveIdempotencia,
+        CancellationToken cancellationToken = default)
+    {
+        ExigirEmpresa(empresaId);
+        if (string.IsNullOrWhiteSpace(claveIdempotencia))
+            throw new ArgumentException("La clave de idempotencia es obligatoria.", nameof(claveIdempotencia));
+
+        var normalizada = claveIdempotencia.Trim();
+        return Mensajes.AsNoTracking().SingleOrDefaultAsync(
+            mensaje => mensaje.EmpresaId == empresaId && mensaje.ClaveIdempotencia == normalizada,
+            cancellationToken);
+    }
+
     public Task<bool> ExisteClaveIdempotenciaAsync(
         int empresaId,
         string claveIdempotencia,
