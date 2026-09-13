@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-API-CONTRACT-PREFLIGHT-C-20260905T1443Z",
+  "taskId": "N4.9.D.SUPPORT.API_CONTRACT_PREFLIGHT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9d7ed1d009b386d174aebbbcc4e51cc1701cce9c",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_D_API_CONTRACT_PREFLIGHT.md only; read-only inspection of current PeriodoContable domain and existing controller/service conventions; no code writes outside this doc",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT N4.9.C is still in certification; do safe pipeline work for N4.9.D with PROMOTION_BLOCKED_BY_N4.9.C. Perform a repository-grounded API contract preflight for PeriodoContable using existing controller/service/ProblemDetails/idempotency patterns. Produce ONLY `docs/qa/N4_9_D_API_CONTRACT_PREFLIGHT.md` with exact proposed endpoints, request/response DTO expectations, state-transition behavior, pagination/filtering if applicable, error/ProblemDetails cases, idempotency/duplicate-close behavior, rollback/compatibility risks, and a concrete test matrix. Cite exact existing repo files/patterns inspected. Do not invent implementation or edit code. Run any static checks applicable to the doc plus two independent self-reviews for correctness/non-duplication. Do not branch/PR/push/merge/deploy; no main/Produccion/secrets. Return patch/artifact for VAEP REVIEW_FIRST."
+}

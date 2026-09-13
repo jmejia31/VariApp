@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-5-NAV-PERM-A",
+  "taskId": "N4.10.F.5.NAV_PERMISSION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.component.finanzas-nav.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Test financial-statements navigation visibility only with Finanzas/Ver permission. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "d139ecb2b91661bbc454895d918cbfdd67a67f02"
+}

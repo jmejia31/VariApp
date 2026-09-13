@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-G-2-QA-B",
+  "taskId": "N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Reconcile the N5.1.A QA preflight matrix against implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual evidence, list commands/results, and keep unresolved gaps explicit. No product changes; include two self-reviews.",
+  "primaryBaseHead": "dd78d11311dc29e452b6729211f7ba110750c2e1"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-API-SERVICE-REGRESSION-A-20260906T0035Z",
+  "taskId": "N4.9.G.API_SERVICE_REGRESSION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableApiServiceRegressionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Your previous N4.9.H preflight R2 is terminal/exhausted and MUST NOT be retried. Own a NEW distinct current-parent regression scope: add ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableApiServiceRegressionTests.cs. Cover PeriodoContable API/service behavior already implemented: create/list/get/close happy path, invalid/duplicate close, filtering/pagination contract, authorization-sensitive failure semantics, and cancellation/error propagation without modifying production code. Do not edit migrations, frontend, workflows, manifests, main, Produccion, secrets or deploy. Run focused dotnet tests/build and two independent self-reviews. Return material patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "235931a85078232bed2691bd306a053fdcc44ad8"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-B-5-FINANCIAL-STATEMENT-KIND-CONTRACT-TESTS-A-MATERIAL",
+  "taskId": "N4.10.B.5.FINANCIAL_STATEMENT_KIND_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementKindContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B. Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementKindContractTests.cs. Add focused contract tests for the approved TipoEstadoFinanciero values and stable serialization/naming; do not alter production files. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes.",
+  "primaryBaseHead": "e46ac071c0a538e3d76f1b5a03bce4f4bea5dcbb"
+}

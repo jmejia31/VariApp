@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-21-RETRY-C",
+  "taskId": "N4.10.F.21.SECURE_RETRY_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.secure-retry.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test retry after sanitized error resets error/loading/result state deterministically. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "6fbb54962f0003a6fb01f8456d2716226d510aa4"
+}

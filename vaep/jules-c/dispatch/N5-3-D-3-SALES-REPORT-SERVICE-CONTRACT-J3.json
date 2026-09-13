@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-D-3-SALES-REPORT-SERVICE-CONTRACT-J3",
+  "taskId": "N5.3.D.3.SALES_REPORT_SERVICE_CONTRACT",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Interfaces/IReporteVentasService.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md plus the REVIEW_FIRST-accepted N5.3.D.1 result contracts and N5.3.D.2 query rules. Define the narrow sales-report service contract for summary and bounded paged detail using ReporteVentasFiltroDto and the accepted result DTOs. No implementation, controller, persistence, export or security changes. Run proportional compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR #2 merge.",
+  "primaryBaseHead": "d31a6cb7c27c48e0ffd980ad2e62870f66658479"
+}

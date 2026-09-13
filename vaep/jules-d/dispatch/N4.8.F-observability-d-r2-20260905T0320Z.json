@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-OBS-D-R2-20260905T0320Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bdc4b04ed65478dfe06fd840c0057f889260d37c",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Middleware/CorrelationIdMiddleware.cs; backend/src/API/Program.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionObservabilityTests.cs; backend/tests/InventoryApp.Tests/CorrelationIdMiddlewareTests.cs; no controller/RBAC files; no audit writer/service; no EF snapshot/migrations; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. MASTER RECOVERY R2 for N4.8.F after the prior observability dispatch was superseded for >10m without verifiable session/useful activity. Own only correlation/logging/health/observability for the automatic accounting path. Prove normalized correlation ID reaches downstream logging/audit context and health/observability remains fail-closed without exposing secrets. Add focused tests; change CorrelationIdMiddleware.cs or Program.cs only for a demonstrated bounded gap. Do not touch ContabilizacionController/RBAC, AsientoContableWriter/audit trail, or EF snapshot/migrations. Run focused backend tests/build and two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST. This is attempt 2/2; no R3."
+}

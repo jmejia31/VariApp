@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-B-3-GROUPING-IDENTITY-CONTRACT-J3",
+  "taskId": "N5.4.B.3.GROUPING_IDENTITY_CONTRACT",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve domain identity semantics for profitability grouping by product, category, seller and customer, including the current-vs-historical category caveat from N5.4.A. Write only docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md. Ground every decision in existing entities/report/query contracts; if historical category identity is not source-backed, record that exact dependency instead of inventing a snapshot rule. No C+ implementation. Desarrollo only.",
+  "primaryBaseHead": "ff69f98c5e78189e87c14b7d939c58c6a7ce149f"
+}

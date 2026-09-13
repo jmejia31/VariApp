@@ -1,0 +1,8 @@
+{
+  "feedbackId": "VAEP-FEEDBACK-N23G2-V311-CLOSE-20260820T0140Z",
+  "dispatchId": "VAEP-JULES-N23G2-V311-20260820T0045Z",
+  "taskId": "N2.3.G.2",
+  "sessionName": "sessions/5949708121902191827",
+  "expectedBranch": "Desarrollo",
+  "prompt": "NO_MORE_CHANGES. Esta revalidación es histórica y quedó SUPERSEDED_NO_PATCH: N2.3.G.2 ya estaba LISTO antes del redispatch y no debe reabrirse. No generes ni modifiques docs/qa/N2_3_G_M13_REVIEW_JULES_A.md, no hagas cambios de código ni produzcas un nuevo ChangeSet. Conserva la evidencia de actividad y pruebas ya reportada, registra que patchPresent=false y finaliza la sesión como completada/histórica. No branch, PR, push, merge, deploy, main ni Producción."
+}

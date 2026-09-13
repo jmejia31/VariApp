@@ -1,0 +1,104 @@
+name: VAEP catalog throughput guard
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/control/jules-autorefill-catalog.json'
+      - '.github/workflows/vaep-catalog-throughput.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'vaep/control/jules-autorefill-catalog.json'
+      - '.github/workflows/vaep-catalog-throughput.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-material-swarm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate TASKS_FIRST material contract
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          catalog = json.loads(Path('vaep/control/jules-autorefill-catalog.json').read_text(encoding='utf-8'))
+
+          if catalog.get('authority') != 'docs/VAEP_AUTHORITY.md':
+              raise SystemExit('catalog authority mismatch')
+          if catalog.get('schemaVersion') != 'tasks-first.v1':
+              raise SystemExit('tasks-first schema mismatch')
+          if catalog.get('executionModel') != 'TASKS_FIRST_JULES_ON_DEMAND':
+              raise SystemExit('execution model mismatch')
+
+          canonical = {'J1','J2','J3','J4','J5','J6'}
+          lanes = catalog.get('lanes')
+          if set(lanes or {}) != canonical:
+              raise SystemExit('all six optional Jules lanes must be represented')
+
+          policy = catalog.get('policy') or {}
+          required = {
+              'directExecutionDefault': True,
+              'taskScopeLeaseRequired': True,
+              'julesRequiredForProgress': False,
+              'julesAutomaticRefill': False,
+              'julesAutomaticQueueFloor': False,
+              'julesMinimumUtilizationTarget': 0,
+              'noBusywork': True,
+              'requireDistinctWriteScopesWhenParallel': True,
+          }
+          for key, expected in required.items():
+              if policy.get(key) != expected:
+                  raise SystemExit(f'tasks-first policy mismatch: {key}')
+          if policy.get('availableOptionalWorkers') != ['J1','J2','J3','J4','J5','J6']:
+              raise SystemExit('optional worker registry mismatch')
+
+          tasks = [task for lane in lanes.values() for task in lane]
+          task_ids = [task.get('taskId') for task in tasks]
+          dispatch_ids = [task.get('dispatchId') for task in tasks if task.get('dispatchId')]
+          if len(task_ids) != len(set(task_ids)) or len(dispatch_ids) != len(set(dispatch_ids)):
+              raise SystemExit('TASK_IDENTITY_UNIQUE violated')
+
+          current = catalog.get('currentParent')
+          if not isinstance(current, str) or not current.strip():
+              raise SystemExit('current parent missing')
+          for task in tasks:
+              if task.get('dispatchEligible') is True and task.get('plannedParent') != current:
+                  raise SystemExit('future-parent task is dispatchEligible')
+
+          plan = catalog.get('throughputPlan') or {}
+          if plan.get('mode') != 'TASKS_FIRST_PARENT_CLOSE_FIRST':
+              raise SystemExit('throughput mode mismatch')
+          if plan.get('currentParent') != current:
+              raise SystemExit('throughput current parent mismatch')
+          if plan.get('julesOffload') != 'OPTIONAL_EXPLICIT_ONLY':
+              raise SystemExit('Jules offload must remain explicit-only')
+          current_scope_count = plan.get('currentParentMaterialScopeCount')
+          if not isinstance(current_scope_count, int) or isinstance(current_scope_count, bool) or current_scope_count < 1:
+              raise SystemExit('current parent material scope count invalid')
+          next_parent = plan.get('nextParent')
+          if not isinstance(next_parent, str) or not next_parent.strip():
+              raise SystemExit('next parent prearm missing')
+          prearm = plan.get('directNextSafePrearm')
+          if not isinstance(prearm, str) or not prearm.strip():
+              raise SystemExit('direct NEXT_SAFE prearm missing')
+
+          lease = catalog.get('lease') or {}
+          if lease.get('ttlMinutes') != 10:
+              raise SystemExit('lease TTL mismatch')
+          if lease.get('status') not in {'ACTIVE','RELEASED','COMPLETED','SUPERSEDED'}:
+              raise SystemExit('lease status invalid')
+
+          if catalog.get('julesOffloadCandidates') not in ([], None):
+              for candidate in catalog['julesOffloadCandidates']:
+                  if candidate.get('approvalMarker') != 'JULES_OFFLOAD_APPROVED':
+                      raise SystemExit('unapproved Jules offload candidate')
+
+          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} tasks={len(tasks)} mode=TASKS_FIRST')
+          PY

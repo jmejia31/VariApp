@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.F-CORRELATION-OBSERVABILITY-C-ATTEMPT1-20260905T2155Z",
+  "taskId": "N4.9.F.CORRELATION_OBSERVABILITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0d4188e566608c66965b3743341844169445b5cf",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49FPeriodoContableObservabilityTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD remains 3fbbae7bdaa014bf77e911a874c409d53f3db659; prior manifest commits are CONTROL_PLANE_HEAD_EQUIVALENT. CURRENT_PARENT=N4.9.F. Create a focused observability/correlation regression test file proving PeriodosContables endpoints remain under the application's existing correlation-id/error-handling/security pipeline and do not introduce a bypass or sensitive-data leakage. Prefer contract/integration assertions against existing middleware/filters and controller metadata; do not add new production instrumentation unless a concrete causal gap is demonstrated. Own ONLY backend/tests/InventoryApp.Tests/N49FPeriodoContableObservabilityTests.cs. Do not edit production code or any other test file. Validate the targeted test/project. Do not touch main, Produccion, secrets, deploy, branches, PR merge, auto-merge or force-push. Return material patch, changed files, validation and risks; no status-only response."
+}

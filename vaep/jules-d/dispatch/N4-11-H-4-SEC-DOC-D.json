@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-4-SEC-DOC-D",
+  "taskId": "N4.11.H.4.SECURITY_DOCUMENTATION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_SECURITY.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified RBAC/security boundaries; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "85ba8284f8e5e9456e6ecaab5e3381bc2e1c8231"
+}

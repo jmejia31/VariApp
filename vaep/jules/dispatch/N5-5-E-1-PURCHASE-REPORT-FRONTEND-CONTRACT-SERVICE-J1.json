@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-5-E-1-PURCHASE-REPORT-FRONTEND-CONTRACT-SERVICE-J1",
+  "taskId": "N5.5.E.1.PURCHASE_REPORT_FRONTEND_CONTRACT_SERVICE",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/reporte-compras.models.ts;frontend/src/app/core/services/reporte-compras.service.ts",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. N5.5.D is LISTO_REAL. Create the typed frontend purchase-report DTO/filter contract and HTTP service for the accepted read-only GET /compras/reportes/detalle API. Mirror only backend source-backed fields and filters: UTC range, supplier/product/variant, explicit order/invoice/receipt/return states, bounded page/pageSize, factual ordered/invoiced prices, same-currency absolute variation, receipt/return/evaluation facts. Do not invent FX, percentages, SLA, ranking or composite scores. No page, route or backend changes. Run proportional frontend validation, self-review twice, and return patch/artifact only.",
+  "primaryBaseHead": "5e07a089b0ece48f0fa3ef67ba8c78d2899ee62c"
+}

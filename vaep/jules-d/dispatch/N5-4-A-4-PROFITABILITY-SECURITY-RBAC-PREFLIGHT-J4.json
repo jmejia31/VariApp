@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-A-4-PROFITABILITY-SECURITY-RBAC-PREFLIGHT-J4",
+  "taskId": "N5.4.A.4.PROFITABILITY_SECURITY_RBAC_PREFLIGHT",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_A_SECURITY_RBAC_PREFLIGHT.md",
+  "prompt": "Using docs/VAEP_AUTHORITY.md and live security/RBAC/audit source, inspect authorization and information-disclosure implications of exposing cost/margin profitability data. Identify existing relational grants, seller scoping, audit/correlation patterns and whether cost visibility requires a source-backed stricter permission; never invent a permission. Write only docs/qa/N5_4_A_SECURITY_RBAC_PREFLIGHT.md. No implementation. Desarrollo only.",
+  "primaryBaseHead": "55dbda99a86fa3c4c77c345af4d2dbd38436d579"
+}

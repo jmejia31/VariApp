@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-LOADING-STATES-C-NEXT-20260906T0559Z",
+  "taskId": "N4.10.A.32.FINANCIAL_REPORT_UI_LOADING_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-loading-states.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Material NEXT_SAFE work for N4.10.A only; do not promote N4.10.A while predecessor closure remains unresolved. Own ONLY frontend/e2e/n4-10-financial-report-loading-states.spec.ts. Add focused Playwright regression for loading/refresh transitions on current financial-report/accounting UI surfaces: initial loading, successful render, repeated refresh without stale duplication, and truthful fallback when data is unavailable, using only routes/components that already exist. Do not create production UI or invent routes. Perform TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "1effc31933b51388d5c5916ea933f99d86c7bed7"
+}

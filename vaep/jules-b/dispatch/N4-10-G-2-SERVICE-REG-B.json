@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-2-SERVICE-REG-B",
+  "taskId": "N4.10.G.2.SERVICE_REGRESSION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.regression.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add consolidated service regression coverage. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "144ea5a9e967560bc22d41f64abe88ad0ce175d2"
+}

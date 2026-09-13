@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-3-E-2-SALES-REPORT-FRONTEND-SERVICE-J2-TRANSPORT-R1",
+  "taskId": "N5.3.E.2.SALES_REPORT_FRONTEND_SERVICE",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/services/reporte-ventas.service.ts",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, the accepted N5.3.E.1 frontend models, and live Desarrollo state. Implement the typed Angular HTTP service for GET /ventas/reportes/resumen and /ventas/reportes/detalle, mapping only accepted filter, paging and sort parameters and typed ApiResponse/PagedResult contracts. Do not modify components, routes, backend, control-plane, main, Production, secrets or merge PR #2. Run proportional frontend lint/build/tests as applicable and perform two self-reviews before terminal handoff.",
+  "primaryBaseHead": "a50ed06b79b70cf0007827f23703b35fab0392a8",
+  "transportRecoveryOf": "N5-3-E-2-SALES-REPORT-FRONTEND-SERVICE-J2",
+  "transportRecoveryReason": "PRE_SESSION_WRONG_LANE_PATH__CONTENT_ATTEMPT_NOT_CONSUMED"
+}

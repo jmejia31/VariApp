@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-B-1-DOMAIN-J2",
+  "taskId": "N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACTS.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.A evidence. Own only the cross-report domain/query envelope: canonical filter/value objects, pagination/order semantics, common report result metadata and compatibility boundaries. Do not redefine valuation/kardex semantics (J1), reconciliation (J3), extension topology (J4), QA acceptance (J5), or RBAC/scoping (J6). Make minimum coherent domain/contract changes if required; otherwise document N/A with exact evidence. Desarrollo only; two self-reviews; no production/secrets.",
+  "primaryBaseHead": "bf28c2a0dd68d0d34ee894e097e5676884d89443"
+}

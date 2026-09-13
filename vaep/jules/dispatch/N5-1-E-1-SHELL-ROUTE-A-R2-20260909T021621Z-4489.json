@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-E-1-SHELL-ROUTE-A-R2-20260909T021621Z-4489",
+  "taskId": "N5.1.E.1.INDEPENDENT_REPORT_CENTER_SHELL_ROUTE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/centro-reportes/**;frontend/src/app/app.routes.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Implement the independent Centro de Reportes standalone feature shell and its route as one atomic self-contained scope. Reuse ReporteAdministrativoService and EstadoFinancieroService; do not duplicate report algorithms or add backend endpoints. Route protection must use the existing auth/permission guards and the accepted authorization contract. Own only frontend/src/app/features/centro-reportes/** and frontend/src/app/app.routes.ts. Do not edit app.component.ts or service spec files owned by other lanes. Cover loading, empty, error and accessibility states where the shell owns them. Run targeted frontend tests/type checks and two independent self-reviews.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "58d679b863b2886310820e8c3a79146d39f68cad"
+}

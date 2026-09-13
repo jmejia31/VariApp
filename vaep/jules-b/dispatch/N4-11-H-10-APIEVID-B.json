@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-10-APIEVID-B",
+  "taskId": "N4.11.H.10.API_EVIDENCE_INDEX",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API_EVIDENCE.md",
+  "prompt": "After N4.11.G LISTO_REAL, consolidate verified API evidence only; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "831dca8a14574e61a0b7777bb06b39e6087c2717"
+}

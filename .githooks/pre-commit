@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+EXPECTED_REPO="jmejia31/VariApp"
+EXPECTED_BRANCH="Desarrollo"
+
+fail() {
+  echo "[VariApp][pre-commit] $1" >&2
+  exit 1
+}
+
+branch="$(git branch --show-current 2>/dev/null)"
+[ "$branch" = "$EXPECTED_BRANCH" ] || fail "Rama '$branch' no autorizada. Debes trabajar en '$EXPECTED_BRANCH'."
+
+origin_url="$(git remote get-url origin 2>/dev/null)" || fail "No existe remote origin."
+case "$origin_url" in
+  "https://github.com/jmejia31/VariApp"|"https://github.com/jmejia31/VariApp.git"|"git@github.com:jmejia31/VariApp.git"|"ssh://git@github.com/jmejia31/VariApp.git") ;;
+  *) fail "origin='$origin_url' no corresponde a $EXPECTED_REPO. Posible confusión de proyecto." ;;
+esac
+
+[ -f AGENTS.md ] || fail "Falta AGENTS.md."
+[ -f PROJECT_CONTEXT.md ] || fail "Falta PROJECT_CONTEXT.md."
+[ -f TASKS.md ] || fail "Falta TASKS.md."
+[ -f CHANGELOG_AI.md ] || fail "Falta CHANGELOG_AI.md."
+
+grep -Fq 'jmejia31/VariApp' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma $EXPECTED_REPO."
+grep -Fq 'PROJECT_ID: VARIAPP' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma PROJECT_ID=VARIAPP."
+
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+if [ -n "$staged" ] && ! printf '%s\n' "$staged" | grep -qx 'CHANGELOG_AI.md'; then
+  fail "Todo changeset intencional debe incluir evidencia en CHANGELOG_AI.md."
+fi
+
+echo "[VariApp][pre-commit] Gate OK: $EXPECTED_REPO / $EXPECTED_BRANCH / evidencia presente."
+exit 0

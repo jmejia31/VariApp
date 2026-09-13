@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-H-10-FILTER-MATRIX-B-RECOVERY",
+  "taskId": "N4.10.H.10.FILTER_MATRIX",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_FILTER_MATRIX.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Document accepted/rejected period/date filter combinations against current backend/frontend validators and tests, citing real evidence only. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "286fc70f22b1a3faeb0362641c55fc147be797ea"
+}

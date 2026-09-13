@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-4-A-1-USUARIOS-EMPRESA-PREFLIGHT-J1-A1-20260911T1405Z",
+  "taskId": "N6.4.A.1.USUARIOS_EMPRESA_PREFLIGHT",
+  "semanticFacet": "USUARIOS_EMPRESA_PREFLIGHT",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "0e35a7d5a3ab54f95ce75563e2123137ab9b6b3a",
+  "dependency": "N6.3.H_LISTO_REAL__SEQUENCE_GATE",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json",
+  "fileScopeHint": "docs;vaep/evidence;CHANGELOG_AI.md;TASKS.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and treat it as the only normative authority. Revalidate fresh Desarrollo HEAD, CURRENT_PARENT=N6.4.A, this manifest primaryBaseHead and the N6.3.H LISTO_REAL dependency receipt before editing. Execute only the roadmap-derived N6.4 Usuarios por empresa audit/preflight. Inspect the existing real implementation and produce evidence-backed preflight documentation for allowing a user in one or multiple empresas with potentially different roles per empresa: current state, in-scope/out-of-scope boundaries, affected entities/endpoints/components, dependencies, risks, acceptance criteria, rollback strategy and proportional test strategy. Do not implement large product changes in this microtask; if the coherent material scope would exceed preflight, document subdivision for later dependency-valid children rather than editing them now. Do not make global rescans without need. Update only canonical documentation/VAEP evidence and CHANGELOG_AI.md/TASKS.md if the preflight contract requires them. No application behavior, migrations, workflow, secret, main, Produccion, deployment or PR #2 changes. Return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no duplicate owner and no R2/R3 unless later recovery rules explicitly require it.",
+  "acceptance": "Evidence-backed N6.4 Usuarios por empresa preflight confirms real current state and scope, affected entities/endpoints/components, dependencies, risks, acceptance criteria, rollback and tests; no large implementation change; REVIEW_FIRST-ready artifact; no main/Produccion/secrets/PR#2 changes."
+}

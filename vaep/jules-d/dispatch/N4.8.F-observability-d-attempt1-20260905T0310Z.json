@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-OBS-D-20260905T0310Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ce4a611330bf9a6342d7b98f9a9c2289d1c274fd",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Middleware/CorrelationIdMiddleware.cs; backend/src/API/Program.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionObservabilityTests.cs; backend/tests/InventoryApp.Tests/CorrelationIdMiddlewareTests.cs; no controller/RBAC files; no audit writer/service; no EF snapshot/migrations; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. CURRENT_PARENT=N4.8.F SEC_AUDIT. Own only correlation/logging/health/observability. Review the automatic accounting request path against the existing CorrelationIdMiddleware and /health wiring. Demonstrate that POST /contabilizacion/eventos receives a normalized correlation identifier, that the request correlation is available to downstream audit/logging, and that health/observability remains fail-closed without exposing secrets. Add focused N48FContabilizacionObservabilityTests.cs and extend CorrelationIdMiddlewareTests.cs only if needed. Change CorrelationIdMiddleware.cs or Program.cs only for a demonstrated bounded observability gap; do not redesign infrastructure. Do not touch ContabilizacionController/RBAC (Jules B), AsientoContableWriter/audit trail (Jules C), or EF snapshot/migrations (Jules A). Run focused backend tests/build and two independent self-reviews. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact for VAEP REVIEW_FIRST."
+}

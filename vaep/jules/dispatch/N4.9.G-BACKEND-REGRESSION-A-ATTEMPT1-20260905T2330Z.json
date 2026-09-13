@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-BACKEND-REGRESSION-A-ATTEMPT1-20260905T2330Z",
+  "taskId": "N4.9.G.BACKEND_REGRESSION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "37f51feefc402b27ce926bcdaaa042e4456a94cd",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableRegressionTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. CURRENT_PARENT=N4.9.G. FUNCTIONAL_HEAD=37f51feefc402b27ce926bcdaaa042e4456a94cd; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. Create focused backend regression coverage for PeriodoContable end-to-end business behavior already implemented: create/open/close transitions, invalid transitions, authorization-sensitive service/controller contracts, and no regression of existing period behavior. Own ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableRegressionTests.cs. Do not edit production code, migrations, frontend, CI, main, Produccion, secrets, deploy, branches, PR merge or force-push. Run the narrowest applicable dotnet tests/build you can. Return material patch, changed files, validation, self-review twice and risks; no status-only response."
+}

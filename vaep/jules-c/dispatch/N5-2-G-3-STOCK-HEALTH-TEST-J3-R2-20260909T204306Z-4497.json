@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-3-STOCK-HEALTH-TEST-J3-R2-20260909T204306Z-4497",
+  "taskId": "N5.2.G.3.STOCK_HEALTH_TEST_CI",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioStockHealth*Tests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only stock-health bounded-query, regression and performance-oriented test coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "c39ffb79617239ac0ba0247ea4570e1c8d216027"
+}

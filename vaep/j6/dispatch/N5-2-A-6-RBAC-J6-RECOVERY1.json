@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-2-A-6-RBAC-J6-RECOVERY1",
+  "taskId": "N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "N5-2-A-6-RBAC-J6",
+  "recoveryReason": "PRE_SESSION_TRANSPORT_FAILURE_CANONICAL_J6_PATH_WAS_REJECTED_BY_LEGACY_MASTER_REGEX__MASTER_FIXED_BEFORE_RECOVERY",
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for permissions, auditability, tenant/sucursal/almacen scoping, sensitive inventory/cost visibility, observability and security risks only. Identify reusable guards/policies and gaps without feature code. J5 owns broad synthesis; do not write its file. No production/secrets, exclusive write scope, two self-reviews. This is transport RECOVERY1 after a pre-session failure; taskAttempt remains 1. Do not expand scope or touch control-plane files.",
+  "primaryBaseHead": "8b86f05c76b7e4c8b9e1b60ae68a35f8c38f2df2"
+}

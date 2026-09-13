@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-C-1-PERSISTENCE-B",
+  "taskId": "N5.1.C.1.PERSISTENCE_APPLICABILITY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_REPORTES_PERSISTENCE_DECISION.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Evaluate persistence/migration applicability from the accepted N5.1.B contracts. If the center only composes existing read contracts, prove N/A for new schema/migration and document rollback boundary. If a material persistence gap is actually required, document the exact minimal schema/migration need rather than implementing beyond the decision scope. Include directed repository inspection evidence and two self-reviews.",
+  "primaryBaseHead": "226430f59c2a3c3b60bb97a45a0a66d030924df5"
+}

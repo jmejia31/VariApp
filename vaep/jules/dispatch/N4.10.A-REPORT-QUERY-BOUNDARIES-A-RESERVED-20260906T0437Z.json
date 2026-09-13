@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-QUERY-BOUNDARIES-A-RESERVED-20260906T0437Z",
+  "taskId": "N4.10.A.16.FINANCIAL_REPORT_QUERY_BOUNDARY_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryBoundaryTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is NEXT_RUN_RESERVED behind the current Jules A run and must remain dependency-safe while CURRENT_PARENT=N4.9.H. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryBoundaryTests.cs. Add material tests against CURRENT accounting/reporting contracts for date-boundary, inclusive/exclusive range, invalid range and deterministic query behavior. Do not invent missing report endpoints or production code. If the dedicated surface is absent, test reusable current query invariants and report the exact gap. No docs/workflows/manifests/production changes. Two distinct self-reviews; no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "5caf7d8b5b5dbc8f596c69912d03edf0cc404cb8"
+}

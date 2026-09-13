@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-D-4-RECON-API-J4",
+  "taskId": "N5.2.D.4.RECONCILIATION_BACKEND_API",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/ReportesInventario/Reconciliacion/**;backend/src/Infrastructure/ReportesInventario/Reconciliacion/**;backend/src/API/Controllers/ReportesInventarioReconciliacionController.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.B reconciliation plus N5.2.C persistence decisions first. Implement only the consolidated reconciliation analytical slice using accepted Conteo/Transferencia/Ajuste mappings, traceability and server-side paging without a parallel ledger. Do not implement valuation, kardex, stock-health or common shell. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "884b93433b8a0043b7053e2c8409f0e8c7992cae"
+}

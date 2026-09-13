@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-B-3-VALID-C",
+  "taskId": "N4.11.B.3.DOMAIN_VALIDATION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Validators/CentroCostoValidator.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and docs/N4.11_CENTROS_COSTO_PREFLIGHT.md first. CURRENT_PARENT=N4.11.B. Implement focused CentroCosto validation rules consistent with the N4.11.B domain contract; validate required names/types and fail closed without assuming unavailable related entities. Add proportional validator tests if needed. No persistence/API/frontend/main/production/deploy/workflow/manifest changes. TWO independent self-reviews and a reviewable gitPatch are mandatory.",
+  "primaryBaseHead": "97878873e1eb72faf1caf864957e96e27b95987f"
+}

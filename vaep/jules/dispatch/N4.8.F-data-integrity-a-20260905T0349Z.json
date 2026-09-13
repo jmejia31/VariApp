@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-DATA-INTEGRITY-A-20260905T0349Z",
+  "taskId": "N4.8.F.SUPPORT.DATA_INTEGRITY",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3baa77cdfb5bb091a0f602e40bef1396de1fe19b",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingDataIntegrityTests.cs; READ_ONLY inspection of ConfiguracionContable/AsientoContable/AsientoDetalle EF mappings and migrations; no snapshot/migration edits; no controller/audit/observability files",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. You are Jules A on a NEW SAFE SUPPORT task after the prior snapshot-alignment R2 exhausted; this is NOT R3 and you must not modify snapshot/migrations. CURRENT_PARENT=N4.8.F SEC_AUDIT. Audit database/data-integrity guarantees relevant to accounting security: required relationships, delete behavior, uniqueness/required fields, tenant/store boundaries if present, and fail-closed persistence assumptions for ConfiguracionContable/AsientoContable/AsientoDetalle. Your only authorized write is backend/tests/InventoryApp.Tests/N48FAccountingDataIntegrityTests.cs, and only for non-duplicative focused regression coverage. Functional EF mappings/migrations/snapshot are READ_ONLY in this task; if a real product defect is found, document it for VAEP QA_TAKEOVER instead of changing it. Run focused backend tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact/patch for REVIEW_FIRST."
+}

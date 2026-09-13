@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-D-1-VALUATION-API-J1",
+  "taskId": "N5.2.D.1.VALUATION_BACKEND_API",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/ReportesInventario/Valorizacion/**;backend/src/Infrastructure/ReportesInventario/Valorizacion/**;backend/src/API/Controllers/ReportesInventarioValorizacionController.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md, the accepted N5.2.B valuation/kardex contract and N5.2.C valuation persistence decision first. Implement only the valuation inventory-report application/repository/API slice, preserving authoritative cost/history semantics, physical scope and bounded server-side queries. Do not implement kardex, stock-health, reconciliation or common-shell ownership. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "6462a4ee1a3c3c6cc562d82c4ff05e8b06963cbe"
+}

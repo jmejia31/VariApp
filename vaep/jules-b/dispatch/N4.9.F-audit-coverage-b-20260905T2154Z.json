@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.F-AUDIT-COVERAGE-B-ATTEMPT1-20260905T2154Z",
+  "taskId": "N4.9.F.AUDIT_COVERAGE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e2c06b80d7b7226cffd062eb607d191f6a615a53",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49FPeriodoContableAuditCoverageTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD remains 3fbbae7bdaa014bf77e911a874c409d53f3db659; e2c06b80d7b7226cffd062eb607d191f6a615a53 and this manifest are CONTROL_PLANE_HEAD_EQUIVALENT. CURRENT_PARENT=N4.9.F. Create focused audit regression coverage for PeriodoContableService proving Crear and Cerrar emit IAuditoriaService entries with ModuloSistema.Configuracion, the correct actions, entity id/type and appropriate before/after/new values, following repository test conventions. Own ONLY backend/tests/InventoryApp.Tests/N49FPeriodoContableAuditCoverageTests.cs. Do not edit production code or any other test file. If current service already satisfies the contract, the material deliverable is the new regression test coverage. Validate the targeted test/project. Do not touch main, Produccion, secrets, deploy, branches, PR merge, auto-merge or force-push. Return patch, changed files, validation and risks; no status-only response."
+}

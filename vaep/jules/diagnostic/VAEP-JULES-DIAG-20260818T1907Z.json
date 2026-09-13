@@ -1,0 +1,7 @@
+{
+  "dispatchId": "VAEP-JULES-DIAG-20260818T1907Z",
+  "purpose": "P0 pre-session diagnostic through PR-capable Jules adapter",
+  "expectedRepository": "jmejia31/VariApp",
+  "expectedBranch": "Desarrollo",
+  "createdAt": "2026-08-18T19:07:00Z"
+}

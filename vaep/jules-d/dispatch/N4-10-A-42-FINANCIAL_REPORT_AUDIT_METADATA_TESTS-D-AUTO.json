@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-42-FINANCIAL_REPORT_AUDIT_METADATA_TESTS-D-AUTO",
+  "taskId": "N4.10.A.42.FINANCIAL_REPORT_AUDIT_METADATA_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditMetadataTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditMetadataTests.cs. Add focused backend tests for audit metadata already emitted by current financial-report/accounting operations: operation identity, correlation/trace fields where present, actor context where present, and no fabricated metadata. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "559e0b9071d281629d8fc5a0ede8175921798219"
+}

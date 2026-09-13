@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-FRONTEND-E2E-D-ATTEMPT1-CORRECTED-20260905T1901Z",
+  "taskId": "N4.9.E.FRONTEND_E2E",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9a58837eb79b8eadb3e4cbf047873dda464c721c",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/periodos-contables.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is d514b4354efeabbc914383399a521725b6441c5a; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. Create focused deterministic Playwright coverage for N4.9.E Periodos contables: authorized navigation, paginated/filtered list, loading/empty/error UX, valid creation, 409 conflict feedback, close confirmation, Abierto-to-Cerrado state, and prevention of invalid close action on Cerrado. Own ONLY frontend/e2e/periodos-contables.spec.ts. Follow real repository E2E patterns; do not edit frontend/src/app, backend, playwright config, main, Produccion, secrets, deploy, branches, PR merge or force-push. If execution is blocked only because lanes A/B/C are not yet integrated, produce the contract-first spec and report that exact dependency without expanding scope. Return material patch, changed files, validations and risks; no status-only response."
+}

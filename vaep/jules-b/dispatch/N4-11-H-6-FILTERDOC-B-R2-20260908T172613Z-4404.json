@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-6-FILTERDOC-B-R2-20260908T172613Z-4404",
+  "taskId": "N4.11.H.6.FILTER_MATRIX",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FILTER_MATRIX.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto query/filter matrix; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=86d5c51ba7c1ec4172ab840733627d1d201a1f61 requested=81873e0ad998e56c5625d8ec98f28d522ca66006. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "f5ea3ea3ac2b3e83a0f78ee1aa723de050e6b128"
+}

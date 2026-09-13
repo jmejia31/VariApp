@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-BACKEND-EVIDENCE-CROSSREVIEW-A-R2-20260906T0146Z",
+  "taskId": "N4.9.G.BACKEND_EVIDENCE_CROSSREVIEW",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/qa/N4_9_G_BACKEND_EVIDENCE_CROSSREVIEW.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Final R2, no R3. Prior attempt produced useful backend evidence but also generated out-of-scope plan.md and must be corrected. Re-run the cross-review against CURRENT repository state and write ONLY docs/qa/N4_9_G_BACKEND_EVIDENCE_CROSSREVIEW.md. Remove stale claims, cite exact current tests/files, explicitly state whether API/service regression coverage is present now, and verify any cancellation-token claim against current PeriodoContableService signatures. No plan.md, no other files. Perform TWO genuinely independent self-reviews as separate reasoning passes with distinct findings/checklists; do not merely echo markers. Return material patch/artifact only.",
+  "primaryBaseHead": "8e5debdb2db1db6674886bd1eeec39d8941e7638"
+}

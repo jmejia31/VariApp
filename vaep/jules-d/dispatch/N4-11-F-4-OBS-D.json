@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-F-4-OBS-D",
+  "taskId": "N4.11.F.4.SECURITY_OBSERVABILITY",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoSecurityObservabilityTests.cs",
+  "prompt": "After N4.11.E LISTO, add security/observability contract tests.",
+  "primaryBaseHead": "6b594cb11dea6cfdc8d48ca611edc4316170fd50"
+}

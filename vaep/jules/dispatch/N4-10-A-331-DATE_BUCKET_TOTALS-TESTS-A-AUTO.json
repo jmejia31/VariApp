@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-331-DATE_BUCKET_TOTALS-TESTS-A-AUTO",
+  "taskId": "N4.10.A.331.DATE_BUCKET_TOTALS_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDATEBUCKETTOTALS331Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDATEBUCKETTOTALS331Tests.cs. Add a focused regression for the current behavior identified by DATE_BUCKET_TOTALS; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "9be055500a8d79407ccd8bdcec5f6b5af5497808"
+}

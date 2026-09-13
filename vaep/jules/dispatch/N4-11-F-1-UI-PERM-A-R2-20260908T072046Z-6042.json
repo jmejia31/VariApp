@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-F-1-UI-PERM-A-R2-20260908T072046Z-6042",
+  "taskId": "N4.11.F.1.UI_PERMISSION_CONTRACT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.permission.spec.ts",
+  "prompt": "After N4.11.E LISTO, add CentroCosto UI permission-contract tests.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=8aec42db8a45e35fbba86783d9fffd3ea4a46ae9 requested=804006013b05358cf404d9ff5ba638c2975928c3. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "8aec42db8a45e35fbba86783d9fffd3ea4a46ae9"
+}

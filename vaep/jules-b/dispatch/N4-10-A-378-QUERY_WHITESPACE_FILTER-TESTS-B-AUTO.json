@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-378-QUERY_WHITESPACE_FILTER-TESTS-B-AUTO",
+  "taskId": "N4.10.A.378.QUERY_WHITESPACE_FILTER_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER378Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER378Tests.cs. Add a focused regression for the current behavior identified by QUERY_WHITESPACE_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "8d94e5095143af51817be7119380e894f684012f"
+}

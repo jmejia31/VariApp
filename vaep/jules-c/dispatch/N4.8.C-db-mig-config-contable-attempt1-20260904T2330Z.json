@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.C-DB-MIG-CONFIG-CONTABLE-20260904T2330Z",
+  "taskId": "N4.8.C",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8625fbdef8cc481ba8dd3b9d65b28792e8d145f8",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Domain/**; backend/src/Infrastructure/Persistence/**; backend/src/Infrastructure/Migrations/**; backend/tests/**; no controllers/API/frontend; no production data",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the sole operational authority. Execute CURRENT_PARENT N4.8.C only: Persistencia, migración y datos del motor de contabilización configurable, on exact base 8625fbdef8cc481ba8dd3b9d65b28792e8d145f8. First inspect the existing accounting entities, AppDbContext configurations and migration conventions. Materialize ONE minimal coherent reversible DB_MIG slice that persists the accounting-engine configuration needed to resolve TipoEventoContable into account/debit-credit behavior without implementing N4.8.D services/API or transaction hooks. Preserve historical data; add explicit EF constraints/indexes and a migration only if the project convention supports it and the schema change is demonstrably safe. Do not backfill invented account mappings; if safe backfill cannot be derived, keep migration additive with nullable/empty-safe semantics or document the exact blocker instead of fabricating data. Add focused tests for model constraints/configuration where feasible. Run applicable backend build/tests plus two independent self-reviews. Report exact files changed, commands/results, migration/rollback characteristics, risks and anything not executed. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. Return patch/artifact for VAEP REVIEW_FIRST; COMPLETED is not LISTO_REAL." 
+}

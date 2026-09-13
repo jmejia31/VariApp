@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-3-C-1-SUCURSALES-EMPRESA-PERSISTENCE-MIGRATION-J2-A1",
+  "taskId": "N6.3.C.1.SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION",
+  "semanticFacet": "SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "de6aa03686d895e79f1c4799ae01d3f7251c4c9e",
+  "dependency": "N6.3.B_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs;backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs;backend/src/Infrastructure/Migrations/*N6_3_C*;backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs;backend/tests/InventoryApp.Tests/*N63C*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo HEAD, dispatch admission, and N6.3.B LISTO_REAL before editing. Execute only N6.3.C persistence/migration for Empresa -> multiple Sucursales. Materialize the accepted N6.3.B domain contract in EF/MySQL safely: persist the Sucursal.EmpresaId relationship with the correct Restrict/requiredness semantics supported by live data, implement the physical per-Empresa normalized Codigo uniqueness decision only after data-safe prechecks/backfill strategy, produce one reversible migration plus snapshot/configuration changes, and add directed persistence/migration tests or exact verifiable migration evidence. Do not implement N6.3.D application/service/API ownership enforcement, frontend, N6.4 memberships/roles, N6.5 anti-leakage enforcement, deployment, secrets, main, or merge PR #2. Preserve existing production data compatibility; do not invent tenant assignments or destructive cleanup. Run proportional backend/model/migration checks, complete SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, report tests/omissions/risks and P0/P1, and return a terminal patch/evidence for independent REVIEW_FIRST. One writer for this scope; no filler and no R3.",
+  "acceptance": "N6.3.C persistence coherently represents Empresa-to-Sucursales according to the accepted N6.3.B contract; migration/configuration/snapshot are internally consistent and reversible; data safety is explicit with no invented ownership or destructive production assumptions; Codigo uniqueness is physically enforced per Empresa only if migration preconditions make it safe; directed persistence/migration verification is present; two self-reviews report P0=0/P1=0; no N6.3.D/API/frontend/N6.4/N6.5/main/Produccion/secrets/PR2 spillover; terminal result is ready for independent REVIEW_FIRST."
+}

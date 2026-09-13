@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-19-COMP-401-C-CHECKPOINT",
+  "taskId": "N4.10.F.19.COMPONENT_401_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.unauthorized.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Verify component 401 state shows only safe messaging, clears result data and exits loading. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.unauthorized.spec.ts. Production files read-only. Run proportional tests and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "aca355c8caf4b22128f917db7ae9e4ed08dfb62b"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-A-4-RECON-J3",
+  "taskId": "N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for inventory differences, transfers and physical counts only: source entities/events, reconciliation rules, audit trail, location boundaries, existing APIs/UI and missing contracts. J5 owns broad synthesis; do not write its file. Preflight evidence only, no large implementation/production/secrets, exclusive write scope, two self-reviews.",
+  "primaryBaseHead": "cdc65ab11f86da1d68ff595bf6d421b8d190b925"
+}

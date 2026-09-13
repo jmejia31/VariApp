@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-39-FINANCIAL_REPORT_PERIOD_TRANSITION_TESTS-A-AUTO",
+  "taskId": "N4.10.A.39.FINANCIAL_REPORT_PERIOD_TRANSITION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPeriodTransitionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPeriodTransitionTests.cs. Add focused backend tests for period transitions already supported by current financial-report/accounting code: month end, year end, adjacent periods, and deterministic inclusive boundaries. Reuse existing contracts only; do not invent report APIs or production behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ed79002eadd3c132a0af0067337c75504111c610"
+}

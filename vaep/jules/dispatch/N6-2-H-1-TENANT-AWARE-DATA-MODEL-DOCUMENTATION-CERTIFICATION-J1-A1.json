@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
+  "taskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
+  "semanticFacet": "TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "fd3abd5cce42b1ec8f271fde4d702a11f785d741",
+  "dependency": "N6.2.G_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json",
+  "fileScopeHint": "docs;CHANGELOG_AI.md;TASKS.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Revalidate Desarrollo HEAD, CURRENT_PARENT=N6.2.H, this manifest primaryBaseHead and dependency receipt before editing. N6.2.G is LISTO_REAL. Produce only the material N6.2 tenant-aware data-model documentation/certification closure required by the roadmap: reconcile source-backed evidence from N6.2.A-G, implemented persistence/domain/application/API/frontend/security/audit/QA behavior, migration and rollback constraints, and explicitly preserve dependency boundaries for N6.3 Empresa-Sucursal, N6.4 memberships/roles per Empresa and N6.5 complete tenant isolation. Update canonical documentation and CHANGELOG_AI.md/TASKS.md only when required by the current closure contract; do not invent files, behavior, gates or LISTO_REAL. Do not change application behavior, migrations, workflows, secrets, main, Produccion, deployment or PR #2. Run proportional read-only/document validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no unrelated roadmap work, no R3.",
+  "acceptance": "N6.2 canonical documentation accurately reconciles A-G source-backed implementation and certification evidence; roadmap boundaries, migration/rollback and verification guidance are explicit; no production behavior changes; P0=0; P1=0; artifact ready for VAEP REVIEW_FIRST."
+}

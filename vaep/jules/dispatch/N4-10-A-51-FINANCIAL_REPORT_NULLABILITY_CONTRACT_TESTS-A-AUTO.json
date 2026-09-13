@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-51-FINANCIAL_REPORT_NULLABILITY_CONTRACT_TESTS-A-AUTO",
+  "taskId": "N4.10.A.51.FINANCIAL_REPORT_NULLABILITY_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportNullabilityContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportNullabilityContractTests.cs. Add focused backend tests for nullability/optional-field behavior in current report DTOs/services, covering truthful defaults, missing optional values, and no fabricated values. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "036514270e8b05561769432c202265158502223a"
+}

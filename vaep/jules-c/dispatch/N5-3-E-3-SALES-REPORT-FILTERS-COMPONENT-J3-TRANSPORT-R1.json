@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-3-E-3-SALES-REPORT-FILTERS-COMPONENT-J3-TRANSPORT-R1",
+  "taskId": "N5.3.E.3.SALES_REPORT_FILTERS_COMPONENT",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-ventas/filtros/**",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, the accepted N5.3.E.1 frontend models, and live Desarrollo state. Build the bounded sales-report filter component for period and source-backed dimensions with validation, selector loading/error states, keyboard accessibility and responsive layout. Do not own report result tables, routing, HTTP service, backend, control-plane, main, Production, secrets or merge PR #2. Run proportional frontend lint/build/tests as applicable and perform two self-reviews before terminal handoff.",
+  "primaryBaseHead": "a50ed06b79b70cf0007827f23703b35fab0392a8",
+  "transportRecoveryOf": "N5-3-E-3-SALES-REPORT-FILTERS-COMPONENT-J3",
+  "transportRecoveryReason": "PRE_SESSION_WRONG_LANE_PATH__CONTENT_ATTEMPT_NOT_CONSUMED"
+}

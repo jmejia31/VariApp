@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N6-2-B-1-TENANT-AWARE-DATA-MODEL-DOMAIN-CONTRACTS-J1-A1",
+  "taskId": "N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS",
+  "semanticFacet": "TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "1aa2d75c7f1d9462de723115251e7826e42ac2a2",
+  "fileScopeHint": "backend/src/Domain/Entities/**;backend/tests/InventoryApp.Tests/*N62B*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo before editing. N6.2.A is LISTO_REAL and N6.2.B is the first dependency-valid DOMAIN facet for tenant-aware data model. Use docs/N6.2_TENANT_AWARE_DATA_MODEL_PREFLIGHT.md as the approved preflight contract. Implement only the minimum coherent domain contracts/invariants needed to give business aggregates an unambiguous route to Empresa/Tenant. Preserve existing hierarchy: do not spray redundant EmpresaId across children when tenant can be derived uniquely through Sucursal/Almacen. Do not implement EF mappings, migrations/backfill, repositories/services/controllers/API, frontend, global query filters, memberships/roles, cross-tenant authorization, anti-leakage enforcement, infrastructure, deploy, secrets, main or PR merge. Add directed domain tests for any invariant introduced. Run proportional tests available, perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, report tests executed/omitted, risks/limitations and P0/P1, and return terminal patch/evidence for independent REVIEW_FIRST. No filler, no duplicate scope, no R3.",
+  "acceptance": "Domain ownership contracts for the N6.2 tenant-aware model are coherent and minimal; each changed aggregate has one deterministic tenant ownership path; no contradictory/redundant EmpresaId path is introduced; changes remain domain/test-only; directed tests for introduced invariants pass or exact environment blockers are evidenced; two self-reviews complete; P0=0/P1=0; no persistence/API/frontend/security-enforcement/control-plane/Produccion/main/secrets/PR2 merge changes; patch is ready for REVIEW_FIRST."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-19-MODEL-CONTRACT-B",
+  "taskId": "N4.10.E.19.MODEL_CONTRACT_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/estado-financiero.contract.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add model contract tests for six statement kinds, line/totals shape and numeric decimal semantics without changing the production model. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "c499983e935928fbb5b280c78778012c90ecc81f"
+}

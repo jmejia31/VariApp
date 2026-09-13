@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-B-4-DISCOUNT-ALLOCATION-CONTRACT-J4",
+  "taskId": "N5.4.B.4.DISCOUNT_ALLOCATION_CONTRACT",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve whether the repository already defines a source-backed rule for allocating/reconciling sale-header discounts into product/category profitability groups. Write only docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md. If a rule exists, cite its exact code/test authority and invariants; if not, record the unresolved causal contract and prohibit invented allocation. No persistence/API/frontend implementation. Desarrollo only.",
+  "primaryBaseHead": "65a81e5eefdefac90f1838c6ece2b3067b1d9633"
+}

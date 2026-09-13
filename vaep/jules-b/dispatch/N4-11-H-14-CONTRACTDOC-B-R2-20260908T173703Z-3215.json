@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-14-CONTRACTDOC-B-R2-20260908T173703Z-3215",
+  "taskId": "N4.11.H.14.CONTRACT_SUMMARY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CONTRACT_SUMMARY.md",
+  "prompt": "After N4.11.G LISTO_REAL, summarize verified public contracts without deployment claims; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=f48ddad9d859f9e95de6d8d8bebb7884ca6b029f requested=7fe825be8dcc934ce6637ccb758b38a8214cd332. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "fcdbad37538216976d8aadfededea48754a0a983"
+}

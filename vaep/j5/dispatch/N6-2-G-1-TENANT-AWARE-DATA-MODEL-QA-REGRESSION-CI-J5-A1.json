@@ -1,0 +1,13 @@
+{
+  "dispatchId": "N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1",
+  "taskId": "N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI",
+  "parent": "N6.2.G",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "contentAttempt": 1,
+  "primaryBaseHead": "584d5c58db50863f3c2cac2853e8232e2a3cc19f",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json",
+  "fileScopeHint": "backend/tests/**;frontend/src/**/*.spec.ts;frontend/e2e/**;.github/workflows/**;scripts/**;vaep/evidence/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the single operational authority and execute only N6.2.G.1 for the tenant-aware data model. Run and, where an internal causal defect is found, fix the applicable unit/integration/contract/E2E/security/migration/regression checks for N6.2, adjusting CI only when necessary and never hiding a failure. Preserve the N6.2 scope boundary: do not invent N6.4 memberships/roles per Empresa or claim N6.5 complete tenant isolation. Preserve one writer per scope. ATTEMPT1 only; if a material defect remains, return exact evidence for controller REVIEW_FIRST and do not create R3. Run proportional tests and two self-reviews. Do not touch main, Produccion, production databases, secrets, or merge PR#2. Do not fabricate ACTIVE/PASS/LISTO_REAL; LISTO_REAL is controller-only after REVIEW_FIRST, exact-head gates and P0/P1=0."
+}

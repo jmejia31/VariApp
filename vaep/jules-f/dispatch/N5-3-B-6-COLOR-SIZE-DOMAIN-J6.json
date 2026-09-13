@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-B-6-COLOR-SIZE-DOMAIN-J6",
+  "taskId": "N5.3.B.6.COLOR_SIZE_DOMAIN",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.ColorTalla.cs",
+  "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only color/size filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.ColorTalla.cs as a partial sales-report filter facet. Preserve historical snapshot versus current-master semantics; no persistence/API/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
+  "primaryBaseHead": "4bbee8fa83646033277ca6af4660dad9e7251689"
+}

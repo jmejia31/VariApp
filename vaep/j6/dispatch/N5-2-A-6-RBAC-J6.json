@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-A-6-RBAC-J6",
+  "taskId": "N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for permissions, auditability, tenant/sucursal/almacen scoping, sensitive inventory/cost visibility, observability and security risks only. Identify reusable guards/policies and gaps without feature code. J5 owns broad synthesis; do not write its file. No production/secrets, exclusive write scope, two self-reviews.",
+  "primaryBaseHead": "2cf666249f7e2b492b0cdc7f3049ba65cf652aa9"
+}

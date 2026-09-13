@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1",
+  "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+  "semanticFacet": "TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "b0c6c6892cd1a70ea3d0f8ae0466a9e464c8be57",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/**;backend/tests/InventoryApp.Tests/*N62C*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo before editing. N6.2.B is LISTO_REAL and N6.2.C is the first dependency-valid persistence facet. Use docs/N6.2_TENANT_AWARE_DATA_MODEL_PREFLIGHT.md plus the certified N6.2.B domain contract as authority. Implement only the minimum coherent persistence/migration/backfill needed to make Sucursal -> Empresa tenant ownership durable and enforceable at storage level. Preserve the canonical hierarchy; do not add redundant EmpresaId to Almacen or UbicacionAlmacen. Address existing nullable Sucursal.EmpresaId safely: define mapping/FK/index/backfill/constraint sequencing appropriate to the current database baseline and make migration rollback explicit. Do not implement repositories/services/controllers/API/frontend/global query filters/memberships/roles/cross-tenant authorization or later N6.2 parents. Do not touch control-plane, main, Produccion, secrets, deploy, PR merge or auto-merge. Add directed persistence/migration tests, run proportional backend/MySQL gates available, perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, report tests executed/omitted, risks/limitations and P0/P1, and return a terminal patch/artifact for independent REVIEW_FIRST. No filler, no duplicate scope, no R3.",
+  "acceptance": "N6.2.C persistence is coherent with the certified domain ownership path; Sucursal has one durable Empresa relationship with safe migration/backfill/constraint strategy; no redundant tenant columns are introduced downstream; rollback is explicit; directed persistence/migration tests and applicable backend/MySQL gates pass or exact external blockers are evidenced; two self-reviews complete; P0=0/P1=0; no API/frontend/security-enforcement/control-plane/Produccion/main/secrets/PR2 merge changes; patch is ready for REVIEW_FIRST."
+}

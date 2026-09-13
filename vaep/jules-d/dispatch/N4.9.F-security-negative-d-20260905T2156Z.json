@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.F-SECURITY-NEGATIVE-D-ATTEMPT1-20260905T2156Z",
+  "taskId": "N4.9.F.SECURITY_NEGATIVE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a9a9c3233c74ba794449b6e311cf17f5bc3f3bb5",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49FPeriodoContableSecurityRegressionTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD remains 3fbbae7bdaa014bf77e911a874c409d53f3db659; prior manifest commits are CONTROL_PLANE_HEAD_EQUIVALENT. CURRENT_PARENT=N4.9.F. Create focused negative security regression coverage for periodos contables: authorization metadata must fail closed, closing a missing/already closed period must not leak internals, and retroactive operations remain denied unless explicitly authorized through the existing domain/application contract. Follow existing test conventions and avoid duplicating A/B/C ownership. Own ONLY backend/tests/InventoryApp.Tests/N49FPeriodoContableSecurityRegressionTests.cs. Do not edit production code or any other test file. Validate the targeted test/project. Do not touch main, Produccion, secrets, deploy, branches, PR merge, auto-merge or force-push. Return material patch, changed files, validation and risks; no status-only response."
+}
