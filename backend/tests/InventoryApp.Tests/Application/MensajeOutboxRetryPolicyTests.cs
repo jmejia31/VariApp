@@ -34,7 +34,7 @@ public class MensajeOutboxRetryPolicyTests
     [Fact]
     public void BackoffExponencial_EsDeterministaYAcotado()
     {
-        var policy = CrearPolicy(jitter: 10);
+        var policy = CrearPolicy(maxAttempts: 10, jitter: 10);
 
         var primero = policy.CalculateDelay(1, Evento);
         var repetido = policy.CalculateDelay(1, Evento);
