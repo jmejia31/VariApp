@@ -38,7 +38,7 @@ public class N73COutboxDeadLetterPersistenceTests
 
         var tenantEstado = builder.Operations
             .OfType<CreateIndexOperation>()
-            .Single(index => index.Name == "IX_MensajesOutbox_EmpresaId_Estado_DisponibleDesdeUtc");
+            .Single(index => index.Name == "IX_MensajesOutbox_EmpresaId_Estado_Disponible");
         Assert.Equal(new[] { "EmpresaId", "Estado", "DisponibleDesdeUtc" }, tenantEstado.Columns);
     }
 
