@@ -402,7 +402,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 ## VAEP Fase 7 — Certificación integral y retorno operativo — 2026-09-04
 
 - [x] REVIEW_FIRST de migración F0-F6 detectó una regresión concreta: el overlay de admisión de Fase 1 había sido retirado anteriormente por no estar definido en MASTER. Fase 7 lo corrigió sin crear autoridad paralela: `docs/VAEP_AUTHORITY.md` ahora define explícitamente `vaep/control/dispatch-admission.json` y `.github/scripts/vaep-jules-master.sh` lo consume fail-closed.
-- [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `VariApp CI=SKIPPED` excluido como PASS.
+- [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `VariApp CI=SKIPPED` excluido de PASS.
 - [x] Admisión probada por self-test: `NO_OP`, múltiples manifests fail-closed, `FROZEN`, `OPEN`, valor inválido, clave desconocida y state ausente. `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones ACTIVE_REAL preexistentes.
 - [x] Política MASTER: exactamente un bloque parseable con seis claves; parser fail-closed sin `source`/`eval`; hash determinístico del bloque preservado; runtime emite `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
 - [x] Runtime Jules final: `NO_OP=PASS`, budget interno desde MASTER, safety-net externo 25m, timeout supersession, ownership revoke, lane release, durable evidence y late-result guard.
@@ -480,15 +480,3 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.2.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.2.H. NEXT_PARENT_PREARMED=N7.3.A. No se promueve N7.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
-
-## ERP-N7.3 — Dead-letter del Outbox — ROLLUP DOCUMENTAL 2026-09-13
-
-Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
-
-- [x] N7.3.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
-- [x] N7.3.G — candidate funcional final `2c19221fdbb0a3cdfdcf8afdc839999bf8e80265`; gates causales `34776343835/103775053849`, `34776340372/103775044416` y `34776340372/103775044622` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.3.G_LISTO_REAL_20260913T191310Z.json`.
-- [x] N7.3.H — certificación canónica `docs/CERTIFICACION_N7_3_DEAD_LETTER.md` publicada en `c7c0d449991419bc7e1dd9c13b9a70ab5a15764c`.
-- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
-- [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
-
-**CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
