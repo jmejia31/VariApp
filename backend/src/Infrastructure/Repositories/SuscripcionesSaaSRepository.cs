@@ -48,6 +48,22 @@ public sealed class SuscripcionesSaaSRepository : ISuscripcionesSaaSRepository
             .SingleOrDefaultAsync(x => x.Id == planId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<PlanModulo>> ObtenerModulosPlanAsync(
+        int planId,
+        string planCodigo,
+        CancellationToken cancellationToken = default)
+    {
+        if (planId <= 0 || string.IsNullOrWhiteSpace(planCodigo))
+            return Array.Empty<PlanModulo>();
+
+        var codigoNormalizado = planCodigo.Trim().ToUpperInvariant();
+        return await _db.Set<PlanModulo>()
+            .AsNoTracking()
+            .Where(x => x.PlanId == planId && x.PlanCodigo == codigoNormalizado)
+            .OrderBy(x => x.ModuloClave)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<Suscripcion?> ObtenerVigenteAsync(
         int empresaId,
         DateTime instanteUtc,
