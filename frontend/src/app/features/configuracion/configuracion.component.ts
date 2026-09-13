@@ -20,6 +20,7 @@ import { EmpresaAdministracionCardComponent } from './empresa-administracion-car
 import { EmpresaConfiguracionTenantCardComponent } from './empresa-configuracion-tenant-card.component';
 import { EmpresaConfiguracionPlantillasTenantCardComponent } from './empresa-configuracion-plantillas-tenant-card.component';
 import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.component';
+import { SuscripcionSaaSCardComponent } from './suscripcion-saas-card.component';
 
 @Component({
   selector: 'app-configuracion',
@@ -28,7 +29,8 @@ import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.comp
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
     EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
-    EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent
+    EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent,
+    SuscripcionSaaSCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
