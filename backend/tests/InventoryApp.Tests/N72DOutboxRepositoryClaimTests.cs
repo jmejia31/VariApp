@@ -106,8 +106,12 @@ public sealed class N72DOutboxRepositoryClaimTests
 
         public AppDbContext NewContext()
         {
+            var connection = new SqliteConnection(_connectionString);
+            connection.CreateFunction<string?, int>("CHAR_LENGTH", value => value?.Length ?? 0);
+            connection.Open();
+
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite(_connectionString)
+                .UseSqlite(connection, contextOwnsConnection: true)
                 .Options;
             return new AppDbContext(options);
         }
