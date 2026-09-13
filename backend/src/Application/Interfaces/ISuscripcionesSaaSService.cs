@@ -18,6 +18,11 @@ public interface ISuscripcionesSaaSRepository
         int planId,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<PlanModulo>> ObtenerModulosPlanAsync(
+        int planId,
+        string planCodigo,
+        CancellationToken cancellationToken = default);
+
     Task<Suscripcion?> ObtenerVigenteAsync(
         int empresaId,
         DateTime instanteUtc,
@@ -58,5 +63,11 @@ public interface ISuscripcionesSaaSService
     Task<PaginaSuscripcionSaaSDto<LimiteSuscripcionSaaSDto>> ObtenerLimitesAsync(
         int empresaId,
         LimitesSuscripcionSaaSQuery query,
+        CancellationToken cancellationToken = default);
+
+    Task<EntitlementModuloSaaSDto> EvaluarModuloAsync(
+        int empresaId,
+        string moduloClave,
+        DateTime? instanteUtc = null,
         CancellationToken cancellationToken = default);
 }
