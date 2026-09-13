@@ -724,7 +724,7 @@ La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.np
 
 Responsable: Codex local autorizado en `Desarrollo`; changeset preparado sobre el cierre N4.6 `d6ca66fd790eb3446d028f84f57bd03ccc5647bf`.
 
-Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
+Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento material devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
 
 Validación real: JSON schema parseable, `node --check` en ambos scripts y `node scripts/vaep/dispatch-preflight-self-test.mjs` con 9/9 casos PASS. No se modifican manifests históricos, código de producto, Producción ni `main`.
 
@@ -1003,3 +1003,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro previo `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. El append se publica sobre el árbol restaurado `5d186f061a3b7bc1545e27002b3fa455aa582bc6` y debe verificarse como único archivo modificado, con `deletions=0`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-13 — ERP-N7.2 Retry controlado — cierre documental append-only
+
+**Responsable:** CHATGPT_VAEP / VAEP :48 Debt.
+
+**Objetivo/alcance:** resolver de forma estrictamente aditiva/history-preserving el P1 documental de `N7.2.H`, sin reabrir el runtime de retry ni adelantar `N7.3`.
+
+**Evidencia:** `N7.2.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_2_RETRY.md` materializada en `3fda2525d0a9f0931e25cfa146c372c2e48fb5f5`; REVIEW_FIRST bloqueante `c2c7c07a2fc833aa5b6132629a7010bc322a2531` / `vaep/evidence/reviews/N7.2.H_REVIEW_FIRST_20260913T124807Z_SUP36.json` con `P0=0/P1=2`; QA exact-head run `34757554438`, job `103724457658=SUCCESS`.
+
+**Control:** esta publicación resuelve únicamente la reconciliación aditiva de `CHANGELOG_AI.md`. `N7.2.H` no pasa a `LISTO_REAL` hasta reconciliar también `TASKS.md`, repetir REVIEW_FIRST con `P0=0/P1=0`, consumir el gate causal exact-head aplicable y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploy ni PR #2.
