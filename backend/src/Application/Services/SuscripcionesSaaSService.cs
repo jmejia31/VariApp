@@ -41,17 +41,7 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
             cancellationToken);
 
         if (replay is not null)
-        {
-            var replayPlan = await ObtenerPlanPersistidoAsync(replay.PlanId, cancellationToken);
-            if (!string.Equals(replayPlan.Codigo, codigoPlan, StringComparison.Ordinal) ||
-                replay.InicioUtc != inicioUtc)
-            {
-                throw new ConflictException(
-                    $"{SuscripcionSaaSErrorCodes.IdempotencyKeyConflictiva}: la Idempotency-Key ya fue usada con otro payload.");
-            }
-
-            return Mapear(replay, replayPlan);
-        }
+            return await ResolverReplayAsync(replay, codigoPlan, inicioUtc, cancellationToken);
 
         var vigente = await _repository.ObtenerVigenteAsync(
             scope.EmpresaId,
@@ -69,9 +59,31 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
 
         var suscripcion = new Suscripcion(scope.EmpresaId, plan.Id, inicioUtc);
         await _repository.AgregarAsync(suscripcion, key, cancellationToken);
-        await _repository.GuardarCambiosAsync(cancellationToken);
 
-        return Mapear(suscripcion, plan);
+        try
+        {
+            await _repository.GuardarCambiosAsync(cancellationToken);
+            return Mapear(suscripcion, plan);
+        }
+        catch (IdempotencyConcurrencyException)
+        {
+            // Otra solicitud ganó la UNIQUE(EmpresaId, IdempotencyKey) después del
+            // primer read. El ledger ganador es ahora la única autoridad: payload
+            // equivalente => replay; payload distinto => conflicto determinista.
+            var ganador = await _repository.ObtenerPorIdempotenciaAsync(
+                scope.EmpresaId,
+                key,
+                cancellationToken);
+
+            if (ganador is null)
+            {
+                // No degradar una colisión real a un éxito sin evidencia durable.
+                // Si el ganador aún no es observable, propagar el fallo causal.
+                throw;
+            }
+
+            return await ResolverReplayAsync(ganador, codigoPlan, inicioUtc, cancellationToken);
+        }
     }
 
     public async Task<SuscripcionSaaSDto> ObtenerActualAsync(
@@ -128,6 +140,23 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
             normalizada.Pagina,
             normalizada.TamanoPagina,
             total);
+    }
+
+    private async Task<SuscripcionSaaSDto> ResolverReplayAsync(
+        Suscripcion replay,
+        string codigoPlan,
+        DateTime inicioUtc,
+        CancellationToken cancellationToken)
+    {
+        var replayPlan = await ObtenerPlanPersistidoAsync(replay.PlanId, cancellationToken);
+        if (!string.Equals(replayPlan.Codigo, codigoPlan, StringComparison.Ordinal) ||
+            replay.InicioUtc != inicioUtc)
+        {
+            throw new ConflictException(
+                $"{SuscripcionSaaSErrorCodes.IdempotencyKeyConflictiva}: la Idempotency-Key ya fue usada con otro payload.");
+        }
+
+        return Mapear(replay, replayPlan);
     }
 
     private async Task<UsuarioTenantScopeActual> ResolverTenantAsync(
