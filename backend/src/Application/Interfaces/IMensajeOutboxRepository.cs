@@ -36,13 +36,16 @@ public interface IMensajeOutboxRepository
     /// Libera claims abandonados antes del corte indicado. La implementación
     /// debe volver a Fallido únicamente filas que continúen en Procesando y cuyo
     /// ProcesandoDesdeUtc siga siendo stale al ejecutar el update condicional.
+    /// El default falla cerrado para implementaciones legacy/test que todavía no
+    /// declaren soporte de retry processing.
     /// </summary>
     Task<int> RecuperarProcesandoStaleAsync(
         int empresaId,
         DateTime staleAntesUtc,
         DateTime ahoraUtc,
         int maximoMensajes,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("El repositorio no soporta recuperación stale de outbox.");
 
     /// <summary>
     /// Confirma entrega únicamente si el intento esperado sigue siendo el owner
@@ -53,7 +56,8 @@ public interface IMensajeOutboxRepository
         int mensajeId,
         int intentoEsperado,
         DateTime ahoraUtc,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("El repositorio no soporta confirmación de entrega outbox.");
 
     /// <summary>
     /// Confirma un fallo del intento esperado y programa la próxima ventana o
@@ -67,5 +71,6 @@ public interface IMensajeOutboxRepository
         DateTime ahoraUtc,
         DateTime disponibleDesdeUtc,
         bool deadLetter,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("El repositorio no soporta confirmación de fallo outbox.");
 }
