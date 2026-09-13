@@ -1,8 +1,10 @@
 using System.Data;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace InventoryApp.Infrastructure.Repositories;
 
@@ -148,9 +150,18 @@ public sealed class SuscripcionesSaaSRepository : ISuscripcionesSaaSRepository
             var creadoUtc = DateTime.UtcNow;
             foreach (var pendiente in _idempotenciasPendientes)
             {
-                await _db.Database.ExecuteSqlInterpolatedAsync(
-                    $"INSERT INTO `SuscripcionSaaSIdempotencia` (`EmpresaId`, `IdempotencyKey`, `SuscripcionId`, `CreadoUtc`) VALUES ({pendiente.Suscripcion.EmpresaId}, {pendiente.IdempotencyKey}, {pendiente.Suscripcion.Id}, {creadoUtc});",
-                    cancellationToken);
+                try
+                {
+                    await _db.Database.ExecuteSqlInterpolatedAsync(
+                        $"INSERT INTO `SuscripcionSaaSIdempotencia` (`EmpresaId`, `IdempotencyKey`, `SuscripcionId`, `CreadoUtc`) VALUES ({pendiente.Suscripcion.EmpresaId}, {pendiente.IdempotencyKey}, {pendiente.Suscripcion.Id}, {creadoUtc});",
+                        cancellationToken);
+                }
+                catch (MySqlException ex) when (ex.Number == 1062)
+                {
+                    throw new IdempotencyConcurrencyException(
+                        "Otra solicitud ganó concurrentemente la clave durable de idempotencia del tenant.",
+                        ex);
+                }
             }
 
             await transaction.CommitAsync(cancellationToken);
@@ -160,6 +171,11 @@ public sealed class SuscripcionesSaaSRepository : ISuscripcionesSaaSRepository
         {
             await transaction.RollbackAsync(cancellationToken);
             _idempotenciasPendientes.Clear();
+
+            // SaveChanges puede haber marcado la Suscripcion como persistida antes de que
+            // el INSERT del ledger colisionara. El rollback revierte la base, pero no el
+            // ChangeTracker; limpiarlo evita que un guardado posterior resurrecte el loser.
+            _db.ChangeTracker.Clear();
             throw;
         }
     }
