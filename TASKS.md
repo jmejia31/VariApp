@@ -480,3 +480,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.2.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.2.H. NEXT_PARENT_PREARMED=N7.3.A. No se promueve N7.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.3 — Dead-letter del Outbox — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.3.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.3.G — candidate funcional final `2c19221fdbb0a3cdfdcf8afdc839999bf8e80265`; gates causales `34776343835/103775053849`, `34776340372/103775044416` y `34776340372/103775044622` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.3.G_LISTO_REAL_20260913T191310Z.json`.
+- [x] N7.3.H — certificación canónica `docs/CERTIFICACION_N7_3_DEAD_LETTER.md` publicada en `c7c0d449991419bc7e1dd9c13b9a70ab5a15764c`.
+- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
+- [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
+
+**CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
