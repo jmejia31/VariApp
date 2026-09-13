@@ -20,4 +20,15 @@ public interface IMensajeOutboxRepository
         int empresaId,
         string claveIdempotencia,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reclama de forma atómica hasta <paramref name="maximoMensajes"/> mensajes
+    /// vencidos del tenant. Dos workers concurrentes no pueden obtener el mismo
+    /// mensaje: la implementación debe usar compare-and-set/lock equivalente.
+    /// </summary>
+    Task<IReadOnlyList<MensajeOutbox>> ClaimDisponiblesAsync(
+        int empresaId,
+        DateTime ahoraUtc,
+        int maximoMensajes,
+        CancellationToken cancellationToken = default);
 }
