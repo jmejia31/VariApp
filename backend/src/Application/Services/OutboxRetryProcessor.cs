@@ -136,7 +136,7 @@ public sealed class OutboxRetryProcessor
                 if (confirmado)
                 {
                     entregados++;
-                    await AuditarAsync(
+                    await AuditarSeguroAsync(
                         "OUTBOX_RETRY_DELIVERED",
                         empresaId,
                         mensaje,
@@ -146,7 +146,7 @@ public sealed class OutboxRetryProcessor
                 else
                 {
                     supersedidos++;
-                    await AuditarAsync(
+                    await AuditarSeguroAsync(
                         "OUTBOX_RETRY_SUPERSEDED",
                         empresaId,
                         mensaje,
@@ -179,7 +179,7 @@ public sealed class OutboxRetryProcessor
                 if (!confirmado)
                 {
                     supersedidos++;
-                    await AuditarAsync(
+                    await AuditarSeguroAsync(
                         "OUTBOX_RETRY_SUPERSEDED",
                         empresaId,
                         mensaje,
@@ -191,7 +191,7 @@ public sealed class OutboxRetryProcessor
                 if (decision.DeadLetter)
                 {
                     deadLetter++;
-                    await AuditarAsync(
+                    await AuditarSeguroAsync(
                         "OUTBOX_RETRY_DEAD_LETTER",
                         empresaId,
                         mensaje,
@@ -201,7 +201,7 @@ public sealed class OutboxRetryProcessor
                 else
                 {
                     reprogramados++;
-                    await AuditarAsync(
+                    await AuditarSeguroAsync(
                         "OUTBOX_RETRY_RESCHEDULED",
                         empresaId,
                         mensaje,
@@ -220,7 +220,7 @@ public sealed class OutboxRetryProcessor
             supersedidos);
     }
 
-    private Task AuditarAsync(
+    private async Task AuditarSeguroAsync(
         string accion,
         int empresaId,
         MensajeOutbox mensaje,
@@ -228,7 +228,7 @@ public sealed class OutboxRetryProcessor
         CancellationToken cancellationToken)
     {
         if (_auditoria is null)
-            return Task.CompletedTask;
+            return;
 
         // SEC_AUDIT: allow-list estricta. Nunca payload, ClaveIdempotencia,
         // Exception.Message ni datos del proveedor en la evidencia de auditoria.
@@ -240,12 +240,24 @@ public sealed class OutboxRetryProcessor
             Resultado = resultado
         };
 
-        return _auditoria.RegistrarAsync(
-            AuditUsuario,
-            accion,
-            AuditEntidad,
-            mensaje.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            detalle,
-            cancellationToken);
+        try
+        {
+            await _auditoria.RegistrarAsync(
+                AuditUsuario,
+                accion,
+                AuditEntidad,
+                mensaje.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                detalle,
+                cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch
+        {
+            // La observabilidad no puede reabrir una entrega ya confirmada ni
+            // convertir un audit outage en un reenvio duplicado.
+        }
     }
 }
