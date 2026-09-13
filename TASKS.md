@@ -467,3 +467,16 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] Este rollup resuelve únicamente el lado `TASKS.md` del P1 documental. N7.1.H no pasa a `LISTO_REAL` hasta reconciliar también `CHANGELOG_AI.md`, repetir REVIEW_FIRST con `P0=0/P1=0`, DoD PASS y persistir/releer receipt H.
 
 **CURRENT_PARENT=N7.1.H. NEXT_PARENT_PREARMED=N7.2.A. No se promueve N7.2.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.2 — Retry controlado del Outbox — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.2.A-G — `LISTO_REAL` con receipts/evidencia VAEP y sin reabrir gates ya certificados.
+- [x] N7.2.F — candidate funcional `dce32d1336a4f541e75818115b346003a7b250f6`; REVIEW_FIRST P0=0/P1=0; hardening run `34755931334` job `103720179912=SUCCESS`; backend/MySQL run `34755931419` job `103720190895=SUCCESS`.
+- [x] N7.2.G — candidate congelado `6f297cd6107312ad9e301491d47d9f88b5497539`; REVIEW_FIRST P0=0/P1=0; gate exact-head run `34757554438`, job `103724457658=SUCCESS`; receipt `vaep/evidence/fragments/N7.2.G_LISTO_REAL_20260913T124538Z.json`.
+- [x] N7.2.H — certificación canónica `docs/CERTIFICACION_N7_2_RETRY.md` publicada en `3fda2525d0a9f0931e25cfa146c372c2e48fb5f5`.
+- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
+- [ ] N7.2.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
+
+**CURRENT_PARENT=N7.2.H. NEXT_PARENT_PREARMED=N7.3.A. No se promueve N7.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
