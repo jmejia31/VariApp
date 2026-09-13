@@ -4,7 +4,7 @@
   "stage": "MODEL",
   "branch": "Desarrollo",
   "result": "LISTO_REAL",
-  "closed_at": "2026-09-13T20:29:00Z",
+  "closed_at": "2026-09-13T20:27:49Z",
   "countsTowardRolling60": true,
   "authority": "docs/VAEP_AUTHORITY.md",
   "dependency": {
@@ -37,89 +37,27 @@
     "provider_replay_proof": "ASSIGNED_TO_N7.4.G"
   },
   "evidence": {
-    "domain_entity": {
-      "path": "backend/src/Domain/Entities/MensajeOutbox.cs",
-      "blob": "b970800c7ea9c996a5cce40f57250585b308e3ea"
-    },
-    "domain_tests": {
-      "path": "backend/tests/InventoryApp.Tests/Domain/MensajeOutboxTests.cs",
-      "blob": "d252beb28ba7b2d6d5b471c28d53958cd97da7f8"
-    },
-    "persistence_mapping": {
-      "path": "backend/src/Infrastructure/Persistence/Configurations/MensajeOutboxConfiguration.cs",
-      "blob": "a56141a489f59034df65e91b7146dfe74a644d4b"
-    }
+    "domain_entity": {"path": "backend/src/Domain/Entities/MensajeOutbox.cs", "blob": "b970800c7ea9c996a5cce40f57250585b308e3ea"},
+    "domain_tests": {"path": "backend/tests/InventoryApp.Tests/Domain/MensajeOutboxTests.cs", "blob": "d252beb28ba7b2d6d5b471c28d53958cd97da7f8"},
+    "persistence_mapping": {"path": "backend/src/Infrastructure/Persistence/Configurations/MensajeOutboxConfiguration.cs", "blob": "a56141a489f59034df65e91b7146dfe74a644d4b"}
   },
   "causal_gate_matrix": [
-    {
-      "gate": "AUTHORITY_REREAD",
-      "required": true,
-      "status": "PASS"
-    },
-    {
-      "gate": "DEPENDENCY_N7_4_A_RECEIPT",
-      "required": true,
-      "status": "PASS"
-    },
-    {
-      "gate": "REVIEW_FIRST",
-      "required": true,
-      "status": "PASS",
-      "exact_head": "dccd520064999fe11e67db5428fa87f030142ebc",
-      "p0": 0,
-      "p1": 0
-    },
-    {
-      "gate": "DIRECTED_DOMAIN_SOURCE_INSPECTION",
-      "required": true,
-      "status": "PASS"
-    },
-    {
-      "gate": "DIRECTED_DOMAIN_TEST_COVERAGE_INSPECTION",
-      "required": true,
-      "status": "PASS"
-    },
-    {
-      "gate": "PRODUCT_PATCH_INTEGRATION",
-      "required": false,
-      "status": "NOT_APPLICABLE_ALREADY_SATISFIED"
-    },
-    {
-      "gate": "BROAD_FUNCTIONAL_CI",
-      "required": false,
-      "status": "NOT_APPLICABLE_EVIDENCE_ONLY_NO_PRODUCT_DELTA"
-    },
-    {
-      "gate": "CONTROL_PLANE_WRITE",
-      "required": false,
-      "status": "DEBT_OPEN_NON_MATERIAL"
-    },
-    {
-      "gate": "DEPLOY_PRODUCTION",
-      "required": false,
-      "status": "OUT_OF_SCOPE"
-    }
+    {"gate": "AUTHORITY_REREAD", "required": true, "status": "PASS"},
+    {"gate": "DEPENDENCY_N7_4_A_RECEIPT", "required": true, "status": "PASS"},
+    {"gate": "REVIEW_FIRST", "required": true, "status": "PASS", "exact_head": "dccd520064999fe11e67db5428fa87f030142ebc", "p0": 0, "p1": 0},
+    {"gate": "DIRECTED_DOMAIN_SOURCE_INSPECTION", "required": true, "status": "PASS"},
+    {"gate": "DIRECTED_DOMAIN_TEST_COVERAGE_INSPECTION", "required": true, "status": "PASS"},
+    {"gate": "PRODUCT_PATCH_INTEGRATION", "required": false, "status": "NOT_APPLICABLE_ALREADY_SATISFIED"},
+    {"gate": "BROAD_FUNCTIONAL_CI", "required": false, "status": "NOT_APPLICABLE_EVIDENCE_ONLY_NO_PRODUCT_DELTA"},
+    {"gate": "CONTROL_PLANE_WRITE", "required": false, "status": "DEBT_OPEN_NON_MATERIAL"},
+    {"gate": "DEPLOY_PRODUCTION", "required": false, "status": "OUT_OF_SCOPE"}
   ],
   "next_parent": "N7.4.C",
   "next_parent_disposition": "DEPENDENCY_VALID__PENDIENTE__HANDOFF_TO_VAEP24",
-  "handoff_successor": {
-    "name": "VAEP :24 Review",
-    "id": "6aa153545c5c819199047566bda1cdac"
-  },
-  "control_plane_debt": {
-    "sheet_write_persisted": false,
-    "material_blocker": false,
-    "reconciliation_required": true
-  },
-  "prohibited_operations": {
-    "main_touched": false,
-    "production_touched": false,
-    "deploy_touched": false,
-    "secrets_touched": false,
-    "pr2_touched": false,
-    "git_destructive": false,
-    "new_branch_created": false
-  },
+  "handoff_successor": {"name": "VAEP :24 Review", "id": "6aa153545c5c819199047566bda1cdac"},
+  "control_plane_debt": {"sheet_write_persisted": false, "material_blocker": false, "reconciliation_required": true},
+  "prohibited_operations": {"main_touched": false, "production_touched": false, "deploy_touched": false, "secrets_touched": false, "pr2_touched": false, "git_destructive": false, "new_branch_created": false},
+  "recovery_same_run": {"timestamp_canonicalized_to_github_commit_created_at": true, "canonical_closed_at": "2026-09-13T20:27:49Z"},
   "falsePass": false,
   "falseListo": false
 }
