@@ -23,6 +23,18 @@ public sealed record LimiteSuscripcionSaaSDto(
     string Clave,
     int? ValorMaximo);
 
+/// <summary>
+/// Decisión server-side de acceso a un módulo SaaS. El cliente nunca aporta
+/// EmpresaId dentro del payload ni una decisión de entitlement: ambos se resuelven
+/// desde el tenant verificado y las reglas PlanModulo persistidas.
+/// </summary>
+public sealed record EntitlementModuloSaaSDto(
+    string ModuloClave,
+    bool Habilitado,
+    MotivoDecisionModuloSaaS Motivo,
+    int? PlanId,
+    string? PlanCodigo);
+
 public sealed record LimitesSuscripcionSaaSQuery(
     int Pagina = 1,
     int TamanoPagina = 50,
