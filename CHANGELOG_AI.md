@@ -1003,3 +1003,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro previo `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. El append se publica sobre el árbol restaurado `5d186f061a3b7bc1545e27002b3fa455aa582bc6` y debe verificarse como único archivo modificado, con `deletions=0`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-13 — ERP-N7.2 Retry controlado del Outbox — reconciliación documental append-only
+
+**Responsable:** CHATGPT_VAEP / VAEP :12 Recovery.
+
+**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.2.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ni adelantar `N7.3`.
+
+**Evidencia:** `N7.2.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_2_RETRY.md` en `3fda2525d0a9f0931e25cfa146c372c2e48fb5f5`; N7.2.G candidate congelado `6f297cd6107312ad9e301491d47d9f88b5497539`, gate exact-head run `34757554438`, job `103724457658=SUCCESS`, receipt `vaep/evidence/fragments/N7.2.G_LISTO_REAL_20260913T124538Z.json`. `TASKS.md` quedó reconciliado aditivamente en `e3bc89479493b163c99ccf53e7a52d8047342c44`; REVIEW_FIRST vigente `vaep/evidence/reviews/N7.2.H_REVIEW_FIRST_20260913T140109Z_SUP48.json` sobre control-head `695adaf21df85b872b27d51d9f18822c381793c4` dejó P0=0/P1=1 exclusivamente por `CHANGELOG_AI_ADDITIVE_RECONCILIATION`.
+
+**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.2.H` no se declara `LISTO_REAL` hasta REVIEW_FIRST fresco P0=0/P1=0, gates causales exact-head aplicables PASS y receipt persistido/releído. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
