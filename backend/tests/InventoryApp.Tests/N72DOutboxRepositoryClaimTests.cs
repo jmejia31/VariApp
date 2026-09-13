@@ -23,8 +23,8 @@ public sealed class N72DOutboxRepositoryClaimTests
         var repo1 = new MensajeOutboxRepository(db1);
         var repo2 = new MensajeOutboxRepository(db2);
 
-        var primero = await repo1.ClaimDisponiblesAsync(7, AhoraUtc, 10);
-        var segundo = await repo2.ClaimDisponiblesAsync(7, AhoraUtc, 10);
+        var primero = await repo1.ClaimDisponiblesAsync(harness.EmpresaId, AhoraUtc, 10);
+        var segundo = await repo2.ClaimDisponiblesAsync(harness.EmpresaId, AhoraUtc, 10);
 
         var claimed = Assert.Single(primero);
         Assert.Empty(segundo);
@@ -32,8 +32,8 @@ public sealed class N72DOutboxRepositoryClaimTests
         Assert.Equal(1, claimed.Intentos);
         Assert.Equal(EstadoMensajeOutbox.Procesando, claimed.Estado);
 
-        Assert.True(await repo1.MarcarEntregadoAsync(7, id, 1, AhoraUtc.AddSeconds(1)));
-        Assert.False(await repo2.MarcarEntregadoAsync(7, id, 1, AhoraUtc.AddSeconds(2)));
+        Assert.True(await repo1.MarcarEntregadoAsync(harness.EmpresaId, id, 1, AhoraUtc.AddSeconds(1)));
+        Assert.False(await repo2.MarcarEntregadoAsync(harness.EmpresaId, id, 1, AhoraUtc.AddSeconds(2)));
 
         await using var verify = harness.NewContext();
         var persisted = await verify.Set<MensajeOutbox>().AsNoTracking().SingleAsync(x => x.Id == id);
@@ -49,20 +49,20 @@ public sealed class N72DOutboxRepositoryClaimTests
 
         await using var db = harness.NewContext();
         var repo = new MensajeOutboxRepository(db);
-        var first = Assert.Single(await repo.ClaimDisponiblesAsync(7, AhoraUtc, 10));
+        var first = Assert.Single(await repo.ClaimDisponiblesAsync(harness.EmpresaId, AhoraUtc, 10));
         Assert.Equal(1, first.Intentos);
 
         var recoveryTime = AhoraUtc.AddMinutes(11);
         var recovered = await repo.RecuperarProcesandoStaleAsync(
-            7,
+            harness.EmpresaId,
             AhoraUtc.AddMinutes(10),
             recoveryTime,
             10);
 
         Assert.Equal(1, recovered);
-        Assert.False(await repo.MarcarEntregadoAsync(7, id, 1, recoveryTime.AddSeconds(1)));
+        Assert.False(await repo.MarcarEntregadoAsync(harness.EmpresaId, id, 1, recoveryTime.AddSeconds(1)));
 
-        var second = Assert.Single(await repo.ClaimDisponiblesAsync(7, recoveryTime, 10));
+        var second = Assert.Single(await repo.ClaimDisponiblesAsync(harness.EmpresaId, recoveryTime, 10));
         Assert.Equal(id, second.Id);
         Assert.Equal(2, second.Intentos);
         Assert.Equal(EstadoMensajeOutbox.Procesando, second.Estado);
@@ -72,13 +72,13 @@ public sealed class N72DOutboxRepositoryClaimTests
     public async Task Claim_Esta_Aislado_Por_Tenant()
     {
         await using var harness = await Harness.CreateAsync();
-        await harness.InsertAsync("idem-tenant", empresaId: 8);
+        await harness.InsertAsync("idem-tenant", harness.OtraEmpresaId);
 
         await using var db = harness.NewContext();
         var repo = new MensajeOutboxRepository(db);
 
-        Assert.Empty(await repo.ClaimDisponiblesAsync(7, AhoraUtc, 10));
-        Assert.Single(await repo.ClaimDisponiblesAsync(8, AhoraUtc, 10));
+        Assert.Empty(await repo.ClaimDisponiblesAsync(harness.EmpresaId, AhoraUtc, 10));
+        Assert.Single(await repo.ClaimDisponiblesAsync(harness.OtraEmpresaId, AhoraUtc, 10));
     }
 
     private sealed class Harness : IAsyncDisposable
@@ -92,6 +92,9 @@ public sealed class N72DOutboxRepositoryClaimTests
             _connectionString = connectionString;
         }
 
+        public int EmpresaId { get; private set; }
+        public int OtraEmpresaId { get; private set; }
+
         public static async Task<Harness> CreateAsync()
         {
             var name = $"n72d-{Guid.NewGuid():N}";
@@ -101,6 +104,14 @@ public sealed class N72DOutboxRepositoryClaimTests
             var harness = new Harness(keeper, connectionString);
             await using var db = harness.NewContext();
             await db.Database.EnsureCreatedAsync();
+
+            var empresa = new Empresa("N7.2.D Tenant A");
+            var otraEmpresa = new Empresa("N7.2.D Tenant B");
+            db.AddRange(empresa, otraEmpresa);
+            await db.SaveChangesAsync();
+            harness.EmpresaId = empresa.Id;
+            harness.OtraEmpresaId = otraEmpresa.Id;
+
             return harness;
         }
 
@@ -116,11 +127,11 @@ public sealed class N72DOutboxRepositoryClaimTests
             return new AppDbContext(options);
         }
 
-        public async Task<int> InsertAsync(string idempotencyKey, int empresaId = 7)
+        public async Task<int> InsertAsync(string idempotencyKey, int? empresaId = null)
         {
             await using var db = NewContext();
             var mensaje = MensajeOutbox.Crear(
-                empresaId,
+                empresaId ?? EmpresaId,
                 "inventory.changed",
                 "{\"safe\":true}",
                 idempotencyKey,
