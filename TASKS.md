@@ -79,7 +79,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] Frontend/UX N3.4.E certificado sobre `a167434880eab07c3b08ca651ae9309da964c23b` con M13 `#32809392404` SUCCESS.
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
-- [x] Runbook canónico: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
+- [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
@@ -100,7 +100,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.6.D Application/API completado y certificado.
 - [x] N3.6.E frontend/UX completado y certificado.
 - [x] N3.6.F RBAC/auditoría/seguridad/observabilidad completado y certificado.
-- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
+- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase 8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
 - [x] N3.6.H certificación canónica publicada en `4fe25e8cf656f82e3883f0585fa29358769aa48c` y runbook en `d906393fc26b0073ac782721ea08cb0fa35827b5`.
 - [ ] Cierre formal H pendiente únicamente de reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving y obtener gate causal del rollup final; no false LISTO.
 
@@ -383,7 +383,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
 - [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
