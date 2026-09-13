@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v4
+      - name: Record exact candidate SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -40,4 +42,4 @@ jobs:
       - name: Build Release
         run: dotnet build backend/InventoryApp.sln -c Release --no-restore
       - name: Directed N7.2.D tests
-        run: dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~N72DOutbox"
+        run: dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~N72DOutbox" --logger "console;verbosity=normal"
