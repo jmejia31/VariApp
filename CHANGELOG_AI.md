@@ -111,7 +111,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Objetivo/alcance:** cerrar formalmente ERP-N2.8 Cuentas por pagar con N2.8.A–H completadas: preflight, dominio/contratos, persistencia y migración, Application/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión/CI y documentación/certificación. El alcance cubre obligación financiera por factura de proveedor, contado/crédito, vencimientos, pagos parciales, anticipos, retenciones y saldo, sin adelantar evaluación de proveedores de N2.9.
 
-**Validación final:** HEAD documental `360ff3303af3587810c21e32ceeeb88fcc9e51d3`; Development #32607259773 SUCCESS; Acceptance #32607259650 SUCCESS incluido Playwright/SMTP/PDF; Fase8 #32607259716 SUCCESS; M10 #32607259703 SUCCESS; M13 #32607259695 SUCCESS. `TASKS.md` ya declara ERP-N2.8 cerrado y la bitácora queda ahora reconciliada. P0/P1 bloqueantes conocidos=0.
+**Validación final:** HEAD documental `360ff3303af3587810c21e32ceeeb88fcc9e51d3`; Development #32607259773 SUCCESS; Acceptance #32607259650 SUCCESS; Fase8 #32607259716 SUCCESS; M13 #32607259703 SUCCESS; Recovery MySQL #32607259695 SUCCESS. `TASKS.md` ya declara ERP-N2.8 cerrado y la bitácora queda ahora reconciliada. P0/P1 bloqueantes conocidos=0.
 
 **Control:** `N2.8.A–H` quedan formalmente cerrados. Parent40 avanza 13→14/40, GAP 27→26. La siguiente MICROTAREA dependency-valid es `N2.9.A — Evaluación de proveedores — Auditoría y preflight`; reutilizar su evidencia histórica existente y no repetir preflight redundante. `main`, Producción, PR #2 merge/auto-merge, ramas nuevas, force-push, secretos y despliegues permanecen intactos.
 
@@ -131,19 +131,19 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Resultado funcional:** lifecycle `Borrador → PendienteAprobacion → Aprobada` con cancelación controlada, moneda ISO, proveedor/snapshots, detalles, descuentos/impuestos, fecha esperada, observaciones e idempotencia durable `Idempotency-Key + SHA-256`. La API `/ordenes-compra` exige autenticación y grants relacionales `Compras:Ver/Crear/Editar/Confirmar/Aprobar/Anular`. Frontend cubre listado, creación/edición, detalle, aprobación/cancelación, errores fail-closed, paginación y performance. La migración canónica `20260818204700_N2_2_OrdenCompraPersistencia` crea tablas dedicadas con guards y rollback bloqueado cuando existen documentos.
 
-**Trazabilidad:** D `01770a23cbf9a50e7d21a0a7913f32e31ce6070a`; E.1 `26a7eada...`, E.2 `9ede060d...`, E.3 `f9000061...`; F hasta `1eb26cf60a3d4e1e37f9c89b60929f432de3c1ac`; G.1 `23fa5ac6...`; G.2/G.3 baseline `b4d477e2de25077c459d02b479968c93c93bc910`. Paquete H: `e59b7bb59cf51b99ae14665cee18c1fe70220bbb`, `6d53ae43f4a9fa54b41f1981704cb03c427d2a74`, `74ebbe969b22b9d8e0130ea733ae0c9fa9f18891`, `821431340afceb70b93f5431a719b8adc2ab6717` y candidato documental `736683476714300d6bf29406967e17c312abac7d`; `TASKS.md` reconciliado en `da05e6625ec6caf98f4e7e4a6dc4912d284dd805`.
+**Trazabilidad:** A `73ef31c49f08c8bff9732978ffc86dbe74e0a116`; B `88047cde42929c1b2dcd8faf77da1c6543a2f2a9` + fix `f17983ef49bb8f5032e6fb328564f36c02f103b9`; C `adff03723b4336b570328179e468e8470e611b95`; D hasta `a5340f991b0f93438ac184afeac41cc9ed82a756`; E.1 `26a7eada...`, E.2 `9ede060d...`, E.3 `f9000061...`; F hasta `1eb26cf60a3d4e1e37f9c89b60929f432de3c1ac`; G.1 `23fa5ac6...`; G.2/G.3 baseline `b4d477e2de25077c459d02b479968c93c93bc910`. Paquete H: `e59b7bb59cf51b99ae14665cee18c1fe70220bbb`, `6d53ae43f4a9fa54b41f1981704cb03c427d2a74`, `74ebbe969b22b9d8e0130ea733ae0c9fa9f18891`, `821431340afceb70b93f5431a719b8adc2ab6717` y candidato documental `736683476714300d6bf29406967e17c312abac7d`; `TASKS.md` reconciliado en `da05e6625ec6caf98f4e7e4a6dc4912d284dd805`.
 
 **Validación:** baseline funcional `b4d477e2...`: Development `32218997006`, Acceptance `32218996971`, Fase 8 `32218996994`, M10 `32218996973` y M13 `32218996978` SUCCESS. Persistencia N2.2.C: M12 `32184108722` SUCCESS en MySQL 8.4. Sobre el candidato documental `73668347...`, Development `32227719896` terminó SUCCESS completo —backend/unitarias, frontend, higiene, Docker, aplicación de migraciones, integración MySQL y SQL forward— y recovery MySQL `32227719707` SUCCESS; el diff H es exclusivamente documental/colaborativo y no modifica aplicación ni workflows.
 
 **Documentación:** `docs/ERP_N2_2_ORDEN_COMPRA.md`, `docs/RUNBOOK_N2_2_ORDEN_COMPRA.md`, `docs/ADR_N2_2_ORDEN_COMPRA_AUTORIDAD_DOCUMENTAL.md`, `docs/OPENAPI_N2_2_ORDEN_COMPRA.md` y `docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md`, más el preflight histórico `docs/ERP_N2_2_ORDEN_COMPRA_PREFLIGHT.md`.
 
-**Control:** `N2.2.A–H` quedan formalmente cerrados. El siguiente foco FINISH_FIRST elegible es `N2.3.A — Recepción de mercancía — Auditoría y preflight`, donde recién debe materializarse el incremento de stock por recepción real. El scope Jules no fue editado ni integrado. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos.
+**Control:** `N2.2.A–H` quedan formalmente cerrados. El siguiente foco FINISH_FIRST elegible es `N2.3.A — Recepción de mercancía — Auditoría y preflight`, donde recién debe materializarse el incremento de stock por recepción real. El scope Jules no fue editado ni integrado. `main`, Producción, merge/auto-merge del PR #2, ramas nuevas, force-push, secretos e infraestructura productiva permanecen intactos.
 
 ## 2026-08-18 — ERP-N2.1 SolicitudCompra — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive, preservando cambios concurrentes publicados en `Desarrollo`.
 
-**Objetivo/alcance:** cerrar formalmente ERP-N2.1 después de completar preflight, dominio y contratos, persistencia/migración, Application/API, frontend/UX, RBAC, auditoría, observabilidad, regresión integral y documentación. `SolicitudCompra` queda como documento empresarial independiente con lifecycle `Borrador → Solicitada → Aprobada/Rechazada` y sin efectos de stock, Kardex, costeo o finanzas.
+**Objetivo/alcance:** cerrar formalmente ERP-N2.1 después de completar preflight, dominio y contratos, persistencia/migración, Application/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión y documentación. `SolicitudCompra` queda como documento empresarial independiente con lifecycle `Borrador → Solicitada → Aprobada/Rechazada` y sin efectos de stock, Kardex, costeo o finanzas.
 
 **Decisiones y seguridad:** una solicitud aprobada continúa siendo documental y no crea implícitamente una `Compra`; la materialización posterior pertenece a `N2.2` y siguientes. Update/Enviar/Aprobar/Rechazar se serializan con transacción y lock pesimista. La autorización usa grants relacionales sin bypass efectivo por `EsAdministrador`. Crear/Editar/Enviar/Aprobar/Rechazar registran auditoría estricta dentro de la unidad transaccional, sin copiar notas u observaciones sensibles. Correlation ID, health/readiness y configuración segura reutilizan la infraestructura transversal existente.
 
@@ -159,7 +159,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
 
-**Objetivo/alcance:** cerrar formalmente ERP-N1.9 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC, auditoría crítica, seguridad/observabilidad, regresión integral y documentación. La capacidad queda deliberadamente opt-in por `ProductoVariante`: Lote, Número de Serie y Fecha de Vencimiento no se imponen a todos los productos y `ExistenciaVariante` continúa siendo la única autoridad cuantitativa del stock físico.
+**Objetivo/alcance:** cerrar formalmente ERP-N1.9 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC/auditoría/seguridad, QA/regresión y documentación. La capacidad queda deliberadamente opt-in por `ProductoVariante`: Lote, Número de Serie y Fecha de Vencimiento no se imponen a todos los productos y `ExistenciaVariante` continúa siendo la única autoridad cuantitativa del stock físico.
 
 **Resultado funcional:** `LoteInventario` y `SerieInventario` funcionan como subledger de identidad trazable, no como una segunda autoridad de cantidad. La persistencia es aditiva y preserva históricos con flags desactivados por defecto, sin inventar backfill de lotes/series/vencimientos. La API y UI permiten configurar la política por variante, capturar/listar lotes y series y controlar vencimientos. La seguridad usa RBAC relacional de `MovimientosInventario`, auditoría estricta transaccional e idempotente, correlation saneado y contratos HTTP protegidos. Durante QA se detectó y corrigió causalmente la falta de límite de longitud de `NumeroSerie`; el dominio ahora rechaza valores de más de 120 caracteres antes de mutar estado.
 
@@ -173,7 +173,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
 
-**Objetivo/alcance:** cerrar formalmente ERP-N1.8 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC, auditoría crítica, seguridad/observabilidad, regresión integral y documentación. El objetivo empresarial queda cumplido: diferenciar stock físico, reservado y disponible e impedir overselling sin crear una segunda autoridad cuantitativa.
+**Objetivo/alcance:** cerrar formalmente ERP-N1.8 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, backend/API, frontend/UX, RBAC, auditoría crítica, seguridad/observabilidad, regresión integral y documentación. El objetivo empresarial queda cumplido: diferenciar stock físico, reservado y disponible e impedir overselling sin crear una segunda autoridad cuantitativa.
 
 **Resultado funcional:** `ExistenciaVariante` permanece como autoridad única de cantidad por clave física `ProductoVarianteId + AlmacenId + UbicacionAlmacenId`; `ReservaInventario` y sus detalles explican el compromiso reservado y su lifecycle. Activar/consumir/liberar/expirar/cancelar opera bajo lock pesimista y transacción; la auditoría crítica es obligatoria y usa `RegistrarEstrictoAsync` dentro de `IUnitOfWork`, por lo que una mutación no puede confirmarse si su evidencia falla. Frontend y API conservan RBAC relacional, CorrelationId saneado, estados físico/reservado/disponible y protección de rutas/acciones.
 
@@ -257,7 +257,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación final sobre `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`:** CI principal `31808933744` SUCCESS completo, incluida integración MySQL 8.4; aceptación integral `31808933692` SUCCESS completo, incluido Playwright/SMTP/PDF; M13 `31808933833` COMPLETED/SUCCESS, incluido backend/MySQL/migraciones/upgrade histórico, frontend, Docker/backup, secretos/dependencias, seguridad HTTP, runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS exigiendo todos los gates verdes.
 
-**Documentación/control:** fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; `TASKS.md`, CHANGELOG y tablero VAEP quedan reconciliados. N0.7.A–H quedan cerrados y el siguiente foco FINISH_FIRST elegible es N0.8.A. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+**Documentación/control:** fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; `TASKS.md`, CHANGELOG y tablero VAEP quedan reconciliados. N0.7.A–H quedan cerrados y el siguiente foco FINISH_FIRST elegible es `N0.8.A`. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
 
 ## 2026-08-13 — ERP-N0.6 Referencias polimórficas críticas — CIERRE FORMAL
 
@@ -331,7 +331,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación real:** el CI general `31594243722` sobre `ed570bb842ae4fbeb57b981bd596dfafbecf6072` terminó `SUCCESS` completo en Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene. Los intentos previos `31593684786` y `31593975660` fallaron por defectos de prueba/build (`mapping EF` asumido y API `SqlQueryInterpolated` no disponible) y fueron corregidos sin modificar el servicio funcional; la verificación final usa ADO.NET contra MySQL real.
 
-**Control:** `N0.6.D2B3`, `N0.6.D2B` y `N0.6.D2` quedan `LISTO`; `N0.6.D3` queda habilitada. `N0.5.07B/07B1` mantiene lock concurrente y no fue intervenido. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
+**Control:** `N0.6.D2B3`, `N0.6.D2B` y `N0.6.D2` quedan `LISTO`; `N0.6.D3` queda habilitada. `N0.5.07B/07B1` conserva su lock concurrente. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
 ## 2026-08-12 — N0.6.D2B1: productor Compra migra a origen tipado — LISTO
 
@@ -1003,13 +1003,3 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro previo `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. El append se publica sobre el árbol restaurado `5d186f061a3b7bc1545e27002b3fa455aa582bc6` y debe verificarse como único archivo modificado, con `deletions=0`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
-
-## 2026-09-13 — ERP-N7.2 Retry controlado del Outbox — reconciliación documental append-only
-
-**Responsable:** CHATGPT_VAEP / Tarea Supervisión :48.
-
-**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.2.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ni adelantar `N7.3`.
-
-**Evidencia:** `N7.2.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_2_RETRY.md` en `3fda2525d0a9f0931e25cfa146c372c2e48fb5f5`; N7.2.G candidate congelado `6f297cd6107312ad9e301491d47d9f88b5497539`, gate exact-head run `34757554438`, job `103724457658=SUCCESS`, receipt `vaep/evidence/fragments/N7.2.G_LISTO_REAL_20260913T124538Z.json`. `TASKS.md` quedó reconciliado aditivamente en `e3bc89479493b163c99ccf53e7a52d8047342c44`; REVIEW_FIRST vigente `vaep/evidence/reviews/N7.2.H_REVIEW_FIRST_20260913T140109Z_SUP48.json` sobre control-head `695adaf21df85b872b27d51d9f18822c381793c4` dejó P0=0/P1=1 exclusivamente por `CHANGELOG_AI_ADDITIVE_RECONCILIATION`.
-
-**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.2.H` no se declara `LISTO_REAL` hasta REVIEW_FIRST fresco P0=0/P1=0, gates causales exact-head aplicables PASS y receipt persistido/releído. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
