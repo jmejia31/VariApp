@@ -34,8 +34,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-          cache: true
-          cache-dependency-path: backend/**/*.csproj
       - run: dotnet restore InventoryApp.sln
       - run: dotnet build InventoryApp.sln --configuration Release --no-restore
       - name: Regresión dirigida del modelo outbox
