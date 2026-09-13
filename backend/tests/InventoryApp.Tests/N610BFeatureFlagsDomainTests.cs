@@ -10,11 +10,11 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void Free_ModuloConReglaExplicita_QuedaHabilitado()
     {
-        var plan = new Plan("FREE", "Free");
+        var plan = CrearPlan(10, "FREE", "Free");
         var suscripcion = new Suscripcion(7, 10, Ahora.AddDays(-1), Ahora.AddDays(29));
         var reglas = new[] { new PlanModulo(10, " inventario ") };
 
-        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 10, plan, reglas, "INVENTARIO", Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, reglas, "INVENTARIO", Ahora);
 
         Assert.True(decision.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.HabilitadoPorReglaExplicita, decision.Motivo);
@@ -24,11 +24,11 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void Free_ModuloSinReglaExplicita_FallaCerrado()
     {
-        var plan = new Plan("FREE", "Free");
+        var plan = CrearPlan(10, "FREE", "Free");
         var suscripcion = new Suscripcion(7, 10, Ahora.AddDays(-1), Ahora.AddDays(29));
         var reglas = new[] { new PlanModulo(10, "INVENTARIO") };
 
-        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 10, plan, reglas, "REPORTES", Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, reglas, "REPORTES", Ahora);
 
         Assert.False(decision.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.SinReglaExplicita, decision.Motivo);
@@ -37,12 +37,12 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void Pro_NoTieneWildcardImplicito()
     {
-        var plan = new Plan("PRO", "Pro");
+        var plan = CrearPlan(20, "PRO", "Pro");
         var suscripcion = new Suscripcion(9, 20, Ahora.AddDays(-1));
         var reglas = new[] { new PlanModulo(20, "REPORTES") };
 
-        var permitida = PoliticaModulosSaaS.Evaluar(9, 9, suscripcion, 20, plan, reglas, "REPORTES", Ahora);
-        var noDeclarada = PoliticaModulosSaaS.Evaluar(9, 9, suscripcion, 20, plan, reglas, "ADMIN_TOTAL", Ahora);
+        var permitida = PoliticaModulosSaaS.Evaluar(9, 9, suscripcion, plan, reglas, "REPORTES", Ahora);
+        var noDeclarada = PoliticaModulosSaaS.Evaluar(9, 9, suscripcion, plan, reglas, "ADMIN_TOTAL", Ahora);
 
         Assert.True(permitida.Habilitado);
         Assert.False(noDeclarada.Habilitado);
@@ -52,11 +52,11 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void TenantCruzado_NoPuedeReutilizarDecisionDeOtraEmpresa()
     {
-        var plan = new Plan("PRO", "Pro");
+        var plan = CrearPlan(20, "PRO", "Pro");
         var suscripcionEmpresaB = new Suscripcion(22, 20, Ahora.AddDays(-1));
         var reglas = new[] { new PlanModulo(20, "REPORTES") };
 
-        var decision = PoliticaModulosSaaS.Evaluar(11, 22, suscripcionEmpresaB, 20, plan, reglas, "REPORTES", Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(11, 22, suscripcionEmpresaB, plan, reglas, "REPORTES", Ahora);
 
         Assert.False(decision.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.TenantNoCoincide, decision.Motivo);
@@ -65,13 +65,13 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void SinSuscripcionActiva_FallaCerrado()
     {
-        var plan = new Plan("FREE", "Free");
+        var plan = CrearPlan(10, "FREE", "Free");
         var reglas = new[] { new PlanModulo(10, "INVENTARIO") };
 
-        var sinSuscripcion = PoliticaModulosSaaS.Evaluar(7, 7, null, 10, plan, reglas, "INVENTARIO", Ahora);
+        var sinSuscripcion = PoliticaModulosSaaS.Evaluar(7, 7, null, plan, reglas, "INVENTARIO", Ahora);
 
         var expirada = new Suscripcion(7, 10, Ahora.AddDays(-10), Ahora.AddDays(-1));
-        var conSuscripcionExpirada = PoliticaModulosSaaS.Evaluar(7, 7, expirada, 10, plan, reglas, "INVENTARIO", Ahora);
+        var conSuscripcionExpirada = PoliticaModulosSaaS.Evaluar(7, 7, expirada, plan, reglas, "INVENTARIO", Ahora);
 
         Assert.False(sinSuscripcion.Habilitado);
         Assert.False(conSuscripcionExpirada.Habilitado);
@@ -82,20 +82,20 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void PlanInactivoONoCoincidente_FallaCerrado()
     {
-        var plan = new Plan("PRO", "Pro");
+        var plan = CrearPlan(20, "PRO", "Pro");
         var suscripcion = new Suscripcion(7, 20, Ahora.AddDays(-1));
         var reglas = new[] { new PlanModulo(20, "REPORTES") };
 
         plan.Desactivar();
-        var inactivo = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 20, plan, reglas, "REPORTES", Ahora);
+        var inactivo = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, reglas, "REPORTES", Ahora);
 
-        plan.Activar();
-        var planDistinto = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 21, plan, reglas, "REPORTES", Ahora);
+        var planDistinto = CrearPlan(21, "PRO_OTRO", "Pro Otro");
+        var distinto = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, planDistinto, reglas, "REPORTES", Ahora);
 
         Assert.False(inactivo.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.PlanNoDisponible, inactivo.Motivo);
-        Assert.False(planDistinto.Habilitado);
-        Assert.Equal(MotivoDecisionModuloSaaS.PlanNoCoincide, planDistinto.Motivo);
+        Assert.False(distinto.Habilitado);
+        Assert.Equal(MotivoDecisionModuloSaaS.PlanNoCoincide, distinto.Motivo);
     }
 
     [Theory]
@@ -104,11 +104,11 @@ public class N610BFeatureFlagsDomainTests
     [InlineData("   ")]
     public void ModuloVacioODesconocido_NoHabilita(string? moduloClave)
     {
-        var plan = new Plan("FREE", "Free");
+        var plan = CrearPlan(10, "FREE", "Free");
         var suscripcion = new Suscripcion(7, 10, Ahora.AddDays(-1));
         var reglas = new[] { new PlanModulo(10, "INVENTARIO") };
 
-        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 10, plan, reglas, moduloClave, Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, reglas, moduloClave, Ahora);
 
         Assert.False(decision.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.ModuloInvalido, decision.Motivo);
@@ -117,11 +117,11 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void LimiteCuantitativo_NoSeInterpretaComoFeatureFlag()
     {
-        var plan = new Plan("FREE", "Free");
+        var plan = CrearPlan(10, "FREE", "Free");
         plan.DefinirLimite("INVENTARIO", 100);
         var suscripcion = new Suscripcion(7, 10, Ahora.AddDays(-1));
 
-        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 10, plan, Array.Empty<PlanModulo>(), "INVENTARIO", Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, Array.Empty<PlanModulo>(), "INVENTARIO", Ahora);
 
         Assert.False(decision.Habilitado);
         Assert.Single(plan.Limites);
@@ -131,14 +131,30 @@ public class N610BFeatureFlagsDomainTests
     [Fact]
     public void ReglaDesactivada_NoHabilitaModulo()
     {
-        var plan = new Plan("PRO", "Pro");
+        var plan = CrearPlan(20, "PRO", "Pro");
         var suscripcion = new Suscripcion(7, 20, Ahora.AddDays(-1));
         var regla = new PlanModulo(20, "REPORTES");
         regla.Desactivar();
 
-        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, 20, plan, new[] { regla }, "REPORTES", Ahora);
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, new[] { regla }, "REPORTES", Ahora);
 
         Assert.False(decision.Habilitado);
         Assert.Equal(MotivoDecisionModuloSaaS.SinReglaExplicita, decision.Motivo);
     }
+
+    [Fact]
+    public void PlanSinIdentidadPersistida_FallaCerrado()
+    {
+        var plan = new Plan("FREE", "Free");
+        var suscripcion = new Suscripcion(7, 10, Ahora.AddDays(-1));
+        var reglas = new[] { new PlanModulo(10, "INVENTARIO") };
+
+        var decision = PoliticaModulosSaaS.Evaluar(7, 7, suscripcion, plan, reglas, "INVENTARIO", Ahora);
+
+        Assert.False(decision.Habilitado);
+        Assert.Equal(MotivoDecisionModuloSaaS.PlanNoDisponible, decision.Motivo);
+    }
+
+    private static Plan CrearPlan(int id, string codigo, string nombre) =>
+        new(codigo, nombre) { Id = id };
 }
