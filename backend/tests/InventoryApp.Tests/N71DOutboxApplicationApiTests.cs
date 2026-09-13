@@ -74,13 +74,15 @@ public sealed class N71DOutboxApplicationApiTests
     public async Task Api_Mapea_Duplicado_A_Rfc7807_Sin_Filtrar_Excepcion()
     {
         await using var db = NewDb();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["X-Empresa-Id"] = "7";
         var controller = new MensajesOutboxController(
             new ThrowingOutboxService(new ConflictException("provider-secret-duplicate")),
             db)
         {
             ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = httpContext
             }
         };
 
@@ -91,6 +93,32 @@ public sealed class N71DOutboxApplicationApiTests
         var problem = Assert.IsType<ProblemDetails>(objectResult.Value);
         Assert.Equal("OUTBOX_IDEMPOTENCY_CONFLICT", problem.Extensions["code"]);
         Assert.DoesNotContain("provider-secret", problem.Detail ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("application/problem+json", objectResult.ContentTypes);
+    }
+
+    [Fact]
+    public async Task Api_Rechaza_Tenant_Ruta_Distinto_Al_Contexto_Autorizado()
+    {
+        await using var db = NewDb();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["X-Empresa-Id"] = "8";
+        var controller = new MensajesOutboxController(
+            new ThrowingOutboxService(new InvalidOperationException("no debe invocarse")),
+            db)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var result = await controller.Registrar(7, "key-1", Request, CancellationToken.None);
+
+        var objectResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(StatusCodes.Status403Forbidden, objectResult.StatusCode);
+        var problem = Assert.IsType<ProblemDetails>(objectResult.Value);
+        Assert.Equal("OUTBOX_TENANT_CONTEXT_MISMATCH", problem.Extensions["code"]);
+        Assert.DoesNotContain("no debe invocarse", problem.Detail ?? string.Empty, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("application/problem+json", objectResult.ContentTypes);
     }
 
