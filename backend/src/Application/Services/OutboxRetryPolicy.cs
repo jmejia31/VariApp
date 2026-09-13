@@ -14,6 +14,8 @@ public sealed record OutboxRetryDecision(
 public sealed class OutboxRetryPolicy
 {
     public const int MaximoIntentosPredeterminado = 5;
+    public const int MaximoIntentosPermitido = 100;
+    public static readonly TimeSpan DemoraMaximaPermitida = TimeSpan.FromDays(7);
     public static readonly TimeSpan DemoraBasePredeterminada = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan DemoraMaximaPredeterminada = TimeSpan.FromMinutes(5);
 
@@ -31,11 +33,11 @@ public sealed class OutboxRetryPolicy
         _demoraBase = demoraBase ?? DemoraBasePredeterminada;
         _demoraMaxima = demoraMaxima ?? DemoraMaximaPredeterminada;
 
-        if (maximoIntentos <= 0)
+        if (maximoIntentos is <= 0 or > MaximoIntentosPermitido)
             throw new ArgumentOutOfRangeException(nameof(maximoIntentos));
         if (_demoraBase <= TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(demoraBase));
-        if (_demoraMaxima < _demoraBase)
+        if (_demoraMaxima < _demoraBase || _demoraMaxima > DemoraMaximaPermitida)
             throw new ArgumentOutOfRangeException(nameof(demoraMaxima));
         if (jitterRatio is < 0 or > 1)
             throw new ArgumentOutOfRangeException(nameof(jitterRatio));
@@ -72,6 +74,8 @@ public sealed class OutboxRetryPolicy
             1d,
             _demoraMaxima.Ticks);
         var demora = TimeSpan.FromTicks(ticksFinales);
+        if (ahoraUtc.Ticks > DateTime.MaxValue.Ticks - demora.Ticks)
+            throw new InvalidOperationException("La próxima disponibilidad excede el rango de DateTime.");
 
         return new OutboxRetryDecision(
             true,
