@@ -993,3 +993,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N6.8.A–G=LISTO_REAL`; candidate de storage/TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`; material DOC_CERT `dae43dfc5a3211643565c7002abcc67a845ef179`; REVIEW_FIRST bloqueante `6acb02e87d7cbde013fe2bed2ff79a7a9b068482` / `vaep/evidence/reviews/N6.8.H_REVIEW_FIRST_20260912T2002Z.json` con `P0=0/P1=2` exclusivamente por `CHANGELOG_AI.md` y `TASKS.md`.
 
 **Control:** esta publicación resuelve el P1 de `CHANGELOG_AI.md` de forma append-only. No declara por sí sola `N6.8.H=LISTO_REAL`: requiere reconciliar `TASKS.md`, rerun REVIEW_FIRST con P0=0/P1=0, DoD PASS y receipt persistido/releído antes de promover `N6.9.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-13 — ERP-N7.1 Outbox Pattern — cierre documental append-only
+
+**Responsable:** CHATGPT_VAEP / VAEP :12 Recovery.
+
+**Objetivo/alcance:** resolver de forma estrictamente aditiva y byte-preserving el único P1 documental abierto de `N7.1.H`, sin reabrir el runtime de Outbox ni adelantar `N7.2`.
+
+**Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro previo `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. El append se publica sobre el árbol restaurado `5d186f061a3b7bc1545e27002b3fa455aa582bc6` y debe verificarse como único archivo modificado, con `deletions=0`.
+
+**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
