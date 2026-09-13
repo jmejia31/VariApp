@@ -399,7 +399,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación real:** CI general run `31575657900`: `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
 
-**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner ChatGPT y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
+**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
 ## 2026-08-12 — N0.6.A: preflight de referencias polimórficas críticas — LISTO
 
@@ -658,7 +658,7 @@ Reconciliación QA append-only: este rollup supersede únicamente el estado oper
 
 Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial `1cf6847e4e70e2fe99ef5ec59b57c33f4f7c49d3`.
 
-Alcance: auditoría de los 43 workflows existentes, sin eliminar workflows ni evidencias. `erp-n0-2-ci.yml`, `erp-n0-3-ci.yml`, `erp-n0-4-ci.yml` y `erp-n0-5-ci.yml` quedaron clasificados como certificación histórica y sus triggers genéricos `backend/src/**`/`backend/tests/**` fueron acotados a artefactos, migraciones, pruebas, scripts propios o el workflow correspondiente; todos conservan `workflow_dispatch`. `erp-n0-6-preflight-ci.yml` fue revisado y no modificado porque ya usa paths específicos. `desarrollo-ci.yml` ahora escucha solo áreas técnicas backend/frontend, configuración de build, migraciones e infraestructura asociada; la documentación, VAEP, bitácoras y evidencias no disparan el CI pesado. `vaep-jules-diagnostic.yml` conserva su no-op por ausencia de manifest y ahora filtra PR por `vaep/jules/diagnostic/*.json` y su propio workflow.
+Alcance: auditoría de los 43 workflows existentes, sin eliminar workflows ni evidencias. `erp-n0-2-ci.yml`, `erp-n0-3-ci.yml`, `erp-n0-4-ci.yml` y `erp-n0-5-ci.yml` quedaron clasificados como certificación histórica y sus triggers genéricos `backend/src/**`/`backend/tests/**` fueron acotados a artefactos, migraciones, pruebas, scripts y workflows propios; todos conservan `workflow_dispatch`. `erp-n0-6-preflight-ci.yml` fue revisado y no modificado porque ya usa paths específicos. `desarrollo-ci.yml` ahora escucha solo áreas técnicas backend/frontend, configuración de build, migraciones e infraestructura asociada; la documentación, VAEP, bitácoras y evidencias no disparan el CI pesado. `vaep-jules-diagnostic.yml` conserva su no-op por ausencia de manifest y ahora filtra PR por `vaep/jules/diagnostic/*.json` y su propio workflow.
 
 Playwright: se agregó `actions/cache@v4` para `~/.cache/ms-playwright`, versionado mediante `hashFiles('frontend/package-lock.json')`, a los 12 workflows que ejecutan `npx playwright install --with-deps chromium`. Se conserva `--with-deps` para las dependencias Linux; no se afirma ahorro cuantitativo sin medición histórica comparable. No se implementó build-once entre jobs porque los jobs de base e integración tienen restores, bases MySQL y artefactos separados; hacerlo en este cambio ampliaría el riesgo.
 
@@ -993,13 +993,3 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N6.8.A–G=LISTO_REAL`; candidate de storage/TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`; material DOC_CERT `dae43dfc5a3211643565c7002abcc67a845ef179`; REVIEW_FIRST bloqueante `6acb02e87d7cbde013fe2bed2ff79a7a9b068482` / `vaep/evidence/reviews/N6.8.H_REVIEW_FIRST_20260912T2002Z.json` con `P0=0/P1=2` exclusivamente por `CHANGELOG_AI.md` y `TASKS.md`.
 
 **Control:** esta publicación resuelve el P1 de `CHANGELOG_AI.md` de forma append-only. No declara por sí sola `N6.8.H=LISTO_REAL`: requiere reconciliar `TASKS.md`, rerun REVIEW_FIRST con P0=0/P1=0, DoD PASS y receipt persistido/releído antes de promover `N6.9.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
-
-## 2026-09-13 — ERP-N7.1 Outbox Pattern — cierre documental append-only
-
-**Responsable:** CHATGPT_VAEP / Tarea Supervisión :24.
-
-**Objetivo/alcance:** resolver de forma estrictamente aditiva y byte-preserving el único P1 documental abierto de `N7.1.H`, sin reabrir el runtime de Outbox ni adelantar `N7.2`.
-
-**Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro de control previo a este append `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. La recuperación previa restauró ese blob exacto después de rechazar un reemplazo no append-only; este changeset debe validarse con `deletions=0` y únicamente `CHANGELOG_AI.md` modificado.
-
-**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
