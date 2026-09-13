@@ -150,21 +150,22 @@ public sealed class MensajeOutbox : BaseEntity
         if (maximoIntentos <= 0)
             throw new ArgumentOutOfRangeException(nameof(maximoIntentos), "El máximo de intentos debe ser mayor que cero.");
 
+        var agotado = Intentos >= maximoIntentos;
+        if (!agotado && disponibleDesdeUtc < ahoraUtc)
+            throw new ArgumentOutOfRangeException(
+                nameof(disponibleDesdeUtc),
+                "La próxima disponibilidad no puede quedar en el pasado.");
+
         UltimoError = NormalizarRequerido(error, LongitudMaximaError, nameof(error));
         ProcesandoDesdeUtc = null;
         FechaActualizacion = ahoraUtc;
 
-        if (Intentos >= maximoIntentos)
+        if (agotado)
         {
             Estado = EstadoMensajeOutbox.DeadLetter;
             DisponibleDesdeUtc = ahoraUtc;
             return;
         }
-
-        if (disponibleDesdeUtc < ahoraUtc)
-            throw new ArgumentOutOfRangeException(
-                nameof(disponibleDesdeUtc),
-                "La próxima disponibilidad no puede quedar en el pasado.");
 
         Estado = EstadoMensajeOutbox.Fallido;
         DisponibleDesdeUtc = disponibleDesdeUtc;
