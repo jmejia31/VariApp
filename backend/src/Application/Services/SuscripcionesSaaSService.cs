@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -14,13 +15,16 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
     private const int IdempotencyKeyMaxLength = 160;
     private readonly ISuscripcionesSaaSRepository _repository;
     private readonly IUsuarioScopeService _usuarioScopeService;
+    private readonly IAuditoriaService? _auditoria;
 
     public SuscripcionesSaaSService(
         ISuscripcionesSaaSRepository repository,
-        IUsuarioScopeService usuarioScopeService)
+        IUsuarioScopeService usuarioScopeService,
+        IAuditoriaService? auditoria = null)
     {
         _repository = repository;
         _usuarioScopeService = usuarioScopeService;
+        _auditoria = auditoria;
     }
 
     public async Task<SuscripcionSaaSDto> OnboardingAsync(
@@ -63,7 +67,25 @@ public sealed class SuscripcionesSaaSService : ISuscripcionesSaaSService
         try
         {
             await _repository.GuardarCambiosAsync(cancellationToken);
-            return Mapear(suscripcion, plan);
+            var dto = Mapear(suscripcion, plan);
+
+            if (_auditoria is not null)
+            {
+                await _auditoria.RegistrarAsync(
+                    ModuloSistema.Configuracion,
+                    AccionPermiso.Crear,
+                    $"Suscripción SaaS creada para empresa {scope.EmpresaId} con plan {plan.Codigo}.",
+                    suscripcion.Id,
+                    entidad: "Suscripcion",
+                    valoresNuevos: new
+                    {
+                        EmpresaId = scope.EmpresaId,
+                        PlanCodigo = plan.Codigo,
+                        suscripcion.InicioUtc
+                    });
+            }
+
+            return dto;
         }
         catch (IdempotencyConcurrencyException)
         {
