@@ -13,7 +13,7 @@ public sealed class PlanModulo : AuditableEntity
     {
     }
 
-    public PlanModulo(int planId, string moduloClave)
+    public PlanModulo(int planId, string planCodigo, string moduloClave)
     {
         if (planId <= 0)
         {
@@ -21,16 +21,28 @@ public sealed class PlanModulo : AuditableEntity
         }
 
         PlanId = planId;
+        PlanCodigo = NormalizarPlanCodigo(planCodigo);
         ModuloClave = NormalizarModuloClave(moduloClave);
         Activo = true;
     }
 
     public int PlanId { get; private set; }
+    public string PlanCodigo { get; private set; } = string.Empty;
     public string ModuloClave { get; private set; } = string.Empty;
     public bool Activo { get; private set; }
 
     public void Activar() => Activo = true;
     public void Desactivar() => Activo = false;
+
+    internal static string NormalizarPlanCodigo(string planCodigo)
+    {
+        if (string.IsNullOrWhiteSpace(planCodigo))
+        {
+            throw new ArgumentException("El codigo canonico del plan es obligatorio.", nameof(planCodigo));
+        }
+
+        return planCodigo.Trim().ToUpperInvariant();
+    }
 
     internal static string NormalizarModuloClave(string moduloClave)
     {
@@ -124,9 +136,11 @@ public static class PoliticaModulosSaaS
             return DecisionModuloSaaS.Deshabilitar(MotivoDecisionModuloSaaS.ModuloInvalido);
         }
 
+        var planCodigo = planEfectivo.Codigo.Trim().ToUpperInvariant();
         var habilitado = reglas?.Any(regla =>
             regla.Activo &&
             regla.PlanId == planEfectivo.Id &&
+            string.Equals(regla.PlanCodigo, planCodigo, StringComparison.Ordinal) &&
             string.Equals(regla.ModuloClave, moduloNormalizado, StringComparison.Ordinal)) == true;
 
         return habilitado
