@@ -239,6 +239,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired();
             });
+            ApplyN71CModel(modelBuilder);
 #pragma warning restore 612, 618
         }
     }
