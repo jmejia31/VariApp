@@ -66,6 +66,23 @@ public class N72DOutboxRetryPolicyTests
     }
 
     [Fact]
+    public void ConfiguracionSinLimitesYOverflow_FallanCerrado()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new OutboxRetryPolicy(maximoIntentos: OutboxRetryPolicy.MaximoIntentosPermitido + 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new OutboxRetryPolicy(demoraMaxima: OutboxRetryPolicy.DemoraMaximaPermitida.Add(TimeSpan.FromTicks(1))));
+
+        var policy = new OutboxRetryPolicy(jitterRatio: 0);
+        var casiMaximo = DateTime.SpecifyKind(
+            DateTime.MaxValue.Subtract(TimeSpan.FromSeconds(1)),
+            DateTimeKind.Utc);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            policy.EvaluarDespuesDeFallo(1, casiMaximo, 0.5));
+    }
+
+    [Fact]
     public void RechazaFechaNoUtc_Y_MuestraJitterFueraDeRango()
     {
         var policy = new OutboxRetryPolicy();
