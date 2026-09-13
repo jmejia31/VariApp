@@ -174,6 +174,13 @@ public sealed class N71DOutboxApplicationApiTests
             string claveIdempotencia,
             CancellationToken cancellationToken = default) =>
             Task.FromResult(Exists);
+
+        public Task<IReadOnlyList<MensajeOutbox>> ClaimDisponiblesAsync(
+            int empresaId,
+            DateTime ahoraUtc,
+            int maximoMensajes,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<MensajeOutbox>>(Array.Empty<MensajeOutbox>());
     }
 
     private sealed class FakeUsuarioScopeService : IUsuarioScopeService
