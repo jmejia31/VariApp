@@ -299,7 +299,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 - [x] FASE 0 — EXCLUSIVIDAD: `PASS/CLOSED`. `docs/VAEP_AUTHORITY.md` permanece como autoridad operativa única; ChatGPT/VAEP conserva controller/REVIEW_FIRST/QA/certificación; Codex y AntiG no tienen autoridad operativa vigente; PR #2 continúa `OPEN+DRAFT` y `main` permanece congelada.
 - [x] FASE 1 — FREEZE + RECONCILIACIÓN: `PASS/CLOSED`. El guard técnico de admisión está activo en `.github/scripts/vaep-jules-master.sh` y el estado declarativo `vaep/control/dispatch-admission.json` está en `FROZEN`.
-- [x] Admisión Fase 1: cero manifests nuevos => `NO_OP/exit 0`; más de uno => fail-closed; exactamente uno => valida control state antes de sesión/attempt/ownership/recovery; `FROZEN` rechaza nuevos dispatches sin invalidar sesiones `ACTIVE_REAL` preexistentes.
+- [x] Admisión Fase 1: cero manifests nuevos => `NO_OP/exit 0`; más de uno => fail-closed; exactamente uno => valida control state antes de sesión/attempt/ownership/recovery; `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones `ACTIVE_REAL` preexistentes.
 - [x] Reconciliación N4.7 preservada: `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. El cierre de Fase 1 NO declara `N4.7.H=LISTO_REAL` ni promueve N4.8.
 - [x] `ADMISSION_BATTERY=PASS` sobre los casos aislados ya validados: `NO_OP`, `FROZEN`, `OPEN`, múltiples manifests y estados inválidos.
 - [x] `FALSE_PASS=NO`, `FALSE_LISTO=NO`, `SCOPE_LEAK=NO`.
@@ -393,7 +393,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] MASTER contiene el estado canónico AntiG completo y fail-closed.
 - [x] Preservados los seis componentes AntiG requeridos; ninguno fue eliminado.
 - [x] Agent deshabilitado como main/subagent; worker normal devuelve `NO_ACTION`; instalador no contiene ruta de creación de scheduler.
-- [x] Self-test AntiG valida componentes, MASTER, no scheduler creation, no handoff runtime, no LISTO_REAL y cero labels protocolarios numéricos activos.
+- [x] Self-test AntiG valida componentes, MASTER, no scheduler creation, no LISTO_REAL y cero labels protocolarios numéricos activos.
 - [x] Runbook y consumidores vigentes quedaron alineados al estado reservado.
 - [x] Los tres checkboxes históricos de activación pendiente quedaron cerrados; `ANTIG_CURRENT_QUEUE_ITEM=NO`.
 - [x] `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. Fase 6 no certifica N4.7.H ni promueve N4.8.
@@ -480,3 +480,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.2.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.2.H. NEXT_PARENT_PREARMED=N7.3.A. No se promueve N7.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.3 — Dead-letter del Outbox — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.3.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.3.G — candidate funcional final `2c19221fdbb0a3cdfdcf8afdc839999bf8e80265`; gates causales `34776343835/103775053849`, `34776340372/103775044416` y `34776340372/103775044622` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.3.G_LISTO_REAL_20260913T191310Z.json`.
+- [x] N7.3.H — certificación canónica `docs/CERTIFICACION_N7_3_DEAD_LETTER.md` publicada en `c7c0d449991419bc7e1dd9c13b9a70ab5a15764c`.
+- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
+- [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
+
+**CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
