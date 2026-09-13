@@ -123,8 +123,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` sobre `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` sobre `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
@@ -163,8 +163,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9
 - [x] N3.10.B dominio/contratos — `LISTO_REAL`; la capacidad de crédito permanece integrada a Cliente y no introduce un motor autónomo de scoring ni una segunda autoridad comercial.
 - [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 SUCCESS.
 - [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 SUCCESS.
-- [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
-- [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 SUCCESS.
+- [x] N3.10.E Frontend/UX — `LISTO_REAL` sobre `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
+- [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` sobre `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 SUCCESS.
 - [x] N3.10.G QA/regresión/CI — `LISTO_REAL`, reutilizando la misma autoridad exact-head `98b7777555cd6f7ee881edb76321cd1226ca69eb` sin fabricar evidencia duplicada.
 - [x] N3.10.H documentación/certificación — certificación canónica `docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`; rollup aditivo TASKS+CHANGELOG hard-verificado; P0/P1 atribuibles conocidos=0.
 
@@ -280,7 +280,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Handoffs inválidos en cuarentena; errores transitorios retryables sin avance de watermark.
 - [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
 - [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
-- [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidas, patch causal, watermark, idempotencia y planes de rollback.
+- [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
 - [x] AntiG RESERVED_INACTIVE: instalación/scheduler/handoff processing están bloqueados fail-closed; futura reincorporación exige autorización explícita.
 
 ## ERP-N4.7 — Asientos Contables — ROLLUP 2026-09-04
