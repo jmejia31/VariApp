@@ -20,6 +20,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: backend
+
 concurrency:
   group: vaep-n7-1-c-outbox-${{ github.ref }}
   cancel-in-progress: false
@@ -38,7 +42,7 @@ jobs:
       - run: dotnet build InventoryApp.sln --configuration Release --no-restore
       - name: Regresión dirigida del modelo outbox
         run: >
-          dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj
+          dotnet test tests/InventoryApp.Tests/InventoryApp.Tests.csproj
           --configuration Release
           --no-build
           --filter "FullyQualifiedName~N71COutboxPersistenceModelTests"
