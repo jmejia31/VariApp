@@ -1023,3 +1023,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.3.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_3_DEAD_LETTER.md`; N7.3.G functional candidate `2c19221fdbb0a3cdfdcf8afdc839999bf8e80265`, REVIEW_FIRST `67be3a7aff8f6ce77bb6de27f1a96187452565ad` con `P0=0/P1=0`, receipt `vaep/evidence/receipts/N7.3.G_LISTO_REAL_20260913T191310Z.json` en `1f5a62910b3a84b99ee90b45d204ee2fcf240f75`; `TASKS.md` quedó reconciliado de forma aditiva/history-preserving en `4ed8cfce16ad00b735194280b73f42c5e28e58a2`. La certificación N7.3 registra 17/17 criterios de aceptación satisfechos.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.3.H` no se declara `LISTO_REAL` hasta REVIEW_FIRST fresco `P0=0/P1=0`, gates causales exact-head aplicables PASS y receipt persistido/releído. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-13 — ERP-N7.4 Idempotencia — reconciliación documental append-only
+
+**Responsable:** CHATGPT_VAEP / Tarea Supervisión :48.
+
+**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.4.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ni adelantar `N7.5`.
+
+**Evidencia:** `N7.4.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_4_IDEMPOTENCIA.md` en `6097f60ff68d163878d5d3d85c590c59f0cd2f75`; functional candidate `1c366562a90c590cc2925a153298fd1b758e8dab`; causal gates `34782712890/103792518381`, `34782712890/103792518352`, `34782712890/103792518396`, `34782712884/103792518243` y `34782712884/103792518046` en `SUCCESS`; receipt G `vaep/evidence/receipts/N7.4.G_LISTO_REAL_20260913T220100Z_SUP48.json`.
+
+**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.4.H` no se declara `LISTO_REAL` hasta resolver también `TASKS_ADDITIVE_STATE_RECONCILIATION`, repetir REVIEW_FIRST con `P0=0/P1=0`, demostrar equivalencia funcional y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
