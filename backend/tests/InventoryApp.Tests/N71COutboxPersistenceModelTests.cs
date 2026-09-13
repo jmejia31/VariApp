@@ -1,6 +1,8 @@
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -15,7 +17,7 @@ public class N71COutboxPersistenceModelTests
             .Options;
 
         using var context = new AppDbContext(options);
-        var entity = context.Model.FindEntityType(typeof(MensajeOutbox));
+        var entity = context.GetService<IDesignTimeModel>().Model.FindEntityType(typeof(MensajeOutbox));
 
         Assert.NotNull(entity);
         Assert.Equal("MensajesOutbox", entity!.GetTableName());
