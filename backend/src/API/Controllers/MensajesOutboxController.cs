@@ -15,6 +15,8 @@ namespace InventoryApp.API.Controllers;
 [Route("api/outbox/tenants/{empresaId:int}")]
 public sealed class MensajesOutboxController : ControllerBase
 {
+    private const string IndiceIdempotencia = "UX_MensajesOutbox_EmpresaId_ClaveIdempotencia";
+
     private readonly IMensajeOutboxService _service;
     private readonly AppDbContext _db;
 
@@ -81,16 +83,27 @@ public sealed class MensajesOutboxController : ControllerBase
                 "Los datos del mensaje outbox no cumplen el contrato requerido.",
                 "OUTBOX_INVALID_REQUEST");
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (EsColisionIdempotencia(ex))
         {
             // La restricción única (EmpresaId, ClaveIdempotencia) es la última
-            // defensa ante carreras interleaved. No se filtran mensajes del provider.
+            // defensa ante carreras interleaved. El detalle del provider nunca sale al cliente.
             return Problema(
                 StatusCodes.Status409Conflict,
                 "Conflicto de idempotencia",
                 "No fue posible registrar el mensaje porque la clave ya fue consumida.",
                 "OUTBOX_IDEMPOTENCY_RACE");
         }
+    }
+
+    private static bool EsColisionIdempotencia(DbUpdateException exception)
+    {
+        for (Exception? current = exception; current is not null; current = current.InnerException)
+        {
+            if (current.Message.Contains(IndiceIdempotencia, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private ObjectResult Problema(int status, string title, string detail, string code)
