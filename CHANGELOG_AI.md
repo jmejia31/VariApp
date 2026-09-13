@@ -109,11 +109,11 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT/VAEP v3.21 mediante cierre canónico parent-first; artifacts Jules se usaron únicamente como evidencia revisada cuando correspondió y no sustituyen el DoD causal.
 
-**Objetivo/alcance:** cerrar formalmente ERP-N2.8 Cuentas por pagar con N2.8.A–H completadas: preflight, dominio/contratos, persistencia y migración, Application/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión/CI y documentación/certificación. El alcance cubre obligación financiera por factura de proveedor, contado/crédito, vencimientos, pagos parciales, anticipos, retenciones y saldo, sin adelantar evaluación de proveedores de N2.9.
+**Objetivo/alcance:** cerrar formalmente ERP-N2.8 Cuentas por pagar con N2.8.A-H completadas: preflight, dominio/contratos, persistencia y migración, Application/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión/CI y documentación/certificación. El alcance cubre obligación financiera por factura de proveedor, contado/crédito, vencimientos, pagos parciales, anticipos, retenciones y saldo, sin adelantar evaluación de proveedores de N2.9.
 
 **Validación final:** HEAD documental `360ff3303af3587810c21e32ceeeb88fcc9e51d3`; Development #32607259773 SUCCESS; Acceptance #32607259650 SUCCESS; Fase8 #32607259716 SUCCESS; M13 #32607259703 SUCCESS; Recovery MySQL #32607259695 SUCCESS. `TASKS.md` ya declara ERP-N2.8 cerrado y la bitácora queda ahora reconciliada. P0/P1 bloqueantes conocidos=0.
 
-**Control:** `N2.8.A–H` quedan formalmente cerrados. Parent40 avanza 13→14/40, GAP 27→26. La siguiente MICROTAREA dependency-valid es `N2.9.A — Evaluación de proveedores — Auditoría y preflight`; reutilizar su evidencia histórica existente y no repetir preflight redundante. `main`, Producción, PR #2 merge/auto-merge, ramas nuevas, force-push, secretos y despliegues permanecen intactos.
+**Control:** `N2.8.A–H` quedan formalmente cerrados. Parent40 avanza 13→14/40 y GAP 27→26. La siguiente MICROTAREA dependency-valid es `N2.9.A — Evaluación de proveedores — Auditoría y preflight`; reutilizar su evidencia histórica existente y no repetir preflight redundante. `main`, Producción, PR #2 merge/auto-merge, ramas nuevas, force-push, secretos y despliegues permanecen intactos.
 
 ## 2026-08-22 — ERP-N2.7 NotaCreditoProveedor — CIERRE FORMAL
 
@@ -616,7 +616,7 @@ Approved closure facts:
 
 **Evidencia:** N3.9.A-G están formalmente `LISTO_REAL`. La certificación canónica documental reposa en `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`. P0/P1 atribuibles conocidos al cierre: 0.
 
-**Promoción:** con esta publicación, N3.9.H queda formalmente `LISTO`. El selector fail-closed puede promover el siguiente padre `N3.10.A`, respetando el bloqueo que impedía avanzar antes del cierre de H.
+**Promoción:** con esta publicación, N3.9.H queda formalmente `LISTO`. El selector fail-closed puede promover el siguiente parent `N3.10.A`, respetando el bloqueo que impedía avanzar antes del cierre de H.
 
 ## 2026-08-27 — ERP-N3.10 Crédito del cliente — CIERRE FORMAL
 
@@ -993,3 +993,15 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N6.8.A–G=LISTO_REAL`; candidate de storage/TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`; material DOC_CERT `dae43dfc5a3211643565c7002abcc67a845ef179`; REVIEW_FIRST bloqueante `6acb02e87d7cbde013fe2bed2ff79a7a9b068482` / `vaep/evidence/reviews/N6.8.H_REVIEW_FIRST_20260912T2002Z.json` con `P0=0/P1=2` exclusivamente por `CHANGELOG_AI.md` y `TASKS.md`.
 
 **Control:** esta publicación resuelve el P1 de `CHANGELOG_AI.md` de forma append-only. No declara por sí sola `N6.8.H=LISTO_REAL`: requiere reconciliar `TASKS.md`, rerun REVIEW_FIRST con P0=0/P1=0, DoD PASS y receipt persistido/releído antes de promover `N6.9.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-13 — ERP-N7.1 Libro digital + Outbox — cierre documental append-only
+
+**Responsable:** CHATGPT_VAEP / Tarea Supervisión :48.
+
+**Objetivo/alcance:** reconciliar de forma estrictamente aditiva/history-preserving el lado `CHANGELOG_AI.md` del cierre `N7.1.H`, sin modificar runtime ni adelantar `N7.2`. La certificación canónica es `docs/CERTIFICACION_N7_1_OUTBOX.md`; el alcance certificado mantiene contexto de empresa/tenant, idempotencia durable y registro Outbox transaccional, sin inventar dispatcher/retry de N7.2+.
+
+**Evidencia:** `N7.1.A–G=LISTO_REAL`; receipt de G `vaep/evidence/fragments/N7.1.G_LISTO_REAL_20260913T070412Z.json`; functional candidate heredado `2bb8148c1119a0a6c433b60cd9a893a3933e4a3e`; material DOC_CERT `9741584e0c5439648dda26c1faad0eab69f768d7`; REVIEW_FIRST inicial `6d010df403c0b27520f950f0e837a0aefdd7b736` con `P0=0/P1=1`. `TASKS.md` ya contiene el rollup aditivo de N7.1; esta entrada resuelve el único lado documental restante del P1.
+
+**Gates heredados causales:** run `34743908510`, job `103688163982=SUCCESS`; run `34743908521`, job `103688167028=SUCCESS`. `N7.1.H` introduce sólo delta documental, por lo que no se rerunnea runtime ya certificado sin causalidad nueva.
+
+**Control:** esta publicación no declara por sí sola `N7.1.H=LISTO_REAL`: exige REVIEW_FIRST fresco `P0=0/P1=0`, DoD PASS, receipt H persistido/releído y reconciliación de `COLA/CONFIG` antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
