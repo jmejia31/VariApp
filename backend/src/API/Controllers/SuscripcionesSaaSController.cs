@@ -1,7 +1,9 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -29,10 +31,12 @@ public sealed class SuscripcionesSaaSController : ControllerBase
     [ActivatorUtilitiesConstructor]
     public SuscripcionesSaaSController(
         AppDbContext db,
-        IUsuarioScopeService usuarioScopeService)
+        IUsuarioScopeService usuarioScopeService,
+        IAuditoriaService auditoriaService)
         : this(new SuscripcionesSaaSService(
             new SuscripcionesSaaSRepository(db),
-            usuarioScopeService))
+            usuarioScopeService,
+            auditoriaService))
     {
     }
 
@@ -45,6 +49,7 @@ public sealed class SuscripcionesSaaSController : ControllerBase
     }
 
     [HttpPost("onboarding")]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Crear)]
     public async Task<IActionResult> Onboarding(
         int empresaId,
         [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,
@@ -75,6 +80,7 @@ public sealed class SuscripcionesSaaSController : ControllerBase
     }
 
     [HttpGet("suscripcion")]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Ver)]
     public async Task<IActionResult> ObtenerActual(
         int empresaId,
         [FromQuery] DateTime? instanteUtc,
@@ -89,6 +95,7 @@ public sealed class SuscripcionesSaaSController : ControllerBase
     }
 
     [HttpGet("limites")]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Ver)]
     public async Task<IActionResult> ObtenerLimites(
         int empresaId,
         [FromQuery] int pagina = 1,
