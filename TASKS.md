@@ -79,7 +79,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] Frontend/UX N3.4.E certificado sobre `a167434880eab07c3b08ca651ae9309da964c23b` con M13 `#32809392404` SUCCESS.
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
-- [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
+- [x] Runbook canónico: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
@@ -100,7 +100,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.6.D Application/API completado y certificado.
 - [x] N3.6.E frontend/UX completado y certificado.
 - [x] N3.6.F RBAC/auditoría/seguridad/observabilidad completado y certificado.
-- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase 8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
+- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
 - [x] N3.6.H certificación canónica publicada en `4fe25e8cf656f82e3883f0585fa29358769aa48c` y runbook en `d906393fc26b0073ac782721ea08cb0fa35827b5`.
 - [ ] Cierre formal H pendiente únicamente de reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving y obtener gate causal del rollup final; no false LISTO.
 
@@ -453,3 +453,17 @@ Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot 
 - [ ] `N6.8.H` sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, DoD PASS y receipt persistido/releído; `N6.9.A` permanece sequence-held hasta ese cierre.
 
 **N6.8.H queda documentalmente reconciliado y listo para REVIEW_FIRST final; no hay falsa promoción de N6.9.A desde este archivo.**
+
+## ERP-N7.1 — Outbox Pattern — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.1.A-G — `LISTO_REAL` con receipts canónicos y sin P0/P1 abiertos atribuibles al alcance certificado.
+- [x] N7.1.E — receipt `1a53847ce0126755f42e5eb27c337ddd41f896df`.
+- [x] N7.1.F — receipt `433af6740735367eaa6937debcd1b5f01a4af360`.
+- [x] N7.1.G — receipt `9a29a444e5d1e55be5af77b0f16fc00ab568cc87`; functional candidate heredado `2bb8148c1119a0a6c433b60cd9a893a3933e4a3e`.
+- [x] N7.1.H — certificación canónica `docs/CERTIFICACION_N7_1_OUTBOX.md` materializada en `9741584e0c5439648dda26c1faad0eab69f768d7`.
+- [x] REVIEW_FIRST inicial `6d010df403c0b27520f950f0e837a0aefdd7b736` confirmó `P0=0/P1=1`, siendo el único P1 la reconciliación aditiva de `CHANGELOG_AI.md` y `TASKS.md`.
+- [ ] Este rollup resuelve únicamente el lado `TASKS.md` del P1 documental. N7.1.H no pasa a `LISTO_REAL` hasta reconciliar también `CHANGELOG_AI.md`, repetir REVIEW_FIRST con `P0=0/P1=0`, DoD PASS y persistir/releer receipt H.
+
+**CURRENT_PARENT=N7.1.H. NEXT_PARENT_PREARMED=N7.2.A. No se promueve N7.2.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
