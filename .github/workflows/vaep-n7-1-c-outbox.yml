@@ -1,0 +1,47 @@
+name: VAEP N7.1.C outbox exact-head gate
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - 'backend/src/Domain/Entities/MensajeOutbox.cs'
+      - 'backend/src/Domain/Enums/EstadoMensajeOutbox.cs'
+      - 'backend/src/Application/Interfaces/IMensajeOutboxRepository.cs'
+      - 'backend/src/Infrastructure/Persistence/AppDbContext.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/MensajeOutboxConfiguration.cs'
+      - 'backend/src/Infrastructure/Migrations/20260913050800_N71COutboxPersistence.cs'
+      - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N69C.cs'
+      - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N71C.cs'
+      - 'backend/tests/InventoryApp.Tests/N71COutboxPersistenceModelTests.cs'
+      - '.github/workflows/vaep-n7-1-c-outbox.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vaep-n7-1-c-outbox-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Build y modelo outbox N7.1.C
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+      - run: dotnet restore InventoryApp.sln
+      - run: dotnet build InventoryApp.sln --configuration Release --no-restore
+      - name: Regresión dirigida del modelo outbox
+        run: >
+          dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj
+          --configuration Release
+          --no-build
+          --filter "FullyQualifiedName~N71COutboxPersistenceModelTests"
+          --logger "console;verbosity=normal"
