@@ -1,5 +1,6 @@
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -63,7 +64,6 @@ public sealed record OutboxRetryBatchResult(
 /// </summary>
 public sealed class OutboxRetryProcessor
 {
-    private const string AuditUsuario = "outbox-worker";
     private const string AuditEntidad = "MensajeOutbox";
 
     private readonly IMensajeOutboxRepository _repository;
@@ -242,13 +242,15 @@ public sealed class OutboxRetryProcessor
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             await _auditoria.RegistrarAsync(
-                AuditUsuario,
+                ModuloSistema.Auditoria,
+                AccionPermiso.Actualizar,
                 accion,
+                mensaje.Id,
                 AuditEntidad,
-                mensaje.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                detalle,
-                cancellationToken);
+                valoresNuevos: detalle,
+                resultado: resultado);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
