@@ -399,7 +399,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación real:** CI general run `31575657900`: `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
 
-**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight fail-closed sobre valores históricos, backfill determinista, constraints/postcheck y mantener columnas legacy hasta limpieza posterior segura en N0.8.
+**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
 ## 2026-08-12 — N0.6.A: preflight de referencias polimórficas críticas — LISTO
 
@@ -592,7 +592,7 @@ Approved closure facts:
 
 **Objetivo/alcance:** cerrar formalmente N3.7.A-H sin reabrir código funcional ni inventar semánticas fiscales, stock, Kardex, caja o downstream no certificadas. `NotaCreditoCliente` conserva el alcance y contratos ya certificados por N3.7.A-G.
 
-**Evidencia:** N3.7.A Issue #752 `LISTO_REAL`; N3.7.B `46a250fcc0cfd1562306538375e772a94c39bea5`; N3.7.C `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; N3.7.D `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; N3.7.E `f9ef582749a79c8900741d1a40ff393039c7b287`; N3.7.F `943aa0e607199a3239c9cc0b2afc1891446322`; N3.7.G Issue #781 `LISTO_REAL`. Los gates causales y P0/P1 atribuibles de esos padres quedaron certificados en sus cierres.
+**Evidencia:** N3.7.A Issue #752 `LISTO_REAL`; N3.7.B `46a250fcc0cfd1562306538375e772a94c39bea5`; N3.7.C `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; N3.7.D `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; N3.7.E `f9ef582749a79c8900741d1a40ff393039c7b287`; N3.7.F `943aa0e607af3221ed8987a0edac37a539561696`; N3.7.G Issue #781 `LISTO_REAL`. Los gates causales y P0/P1 atribuibles de esos padres quedaron certificados en sus cierres.
 
 **Cierre documental/control:** `TASKS.md` ya contiene el rollup N3.7 y esta publicación agrega únicamente este bloque a `CHANGELOG_AI.md`, preservando byte por byte todo el blob source `d53c56416ac7ac01beef761adab5172cf5297487` y sin eliminar ni reformular historia previa. Issue #782 es el control de cierre; PR #2 permanece Draft `Desarrollo → main`, sin merge. P0/P1 atribuibles conocidos al cierre: 0.
 
@@ -1003,13 +1003,3 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.1.A–G=LISTO_REAL`; baseline seguro previo `6a4a8df9b4397a8028c74b50870295ca7d940cd7`; blob fuente exacto de `CHANGELOG_AI.md` `e48e7f339e09f385df329591eb1806fc33978323`. El append se publica sobre el árbol restaurado `5d186f061a3b7bc1545e27002b3fa455aa582bc6` y debe verificarse como único archivo modificado, con `deletions=0`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. No declara por sí sola `N7.1.H=LISTO_REAL`: requiere REVIEW_FIRST fresco `P0=0/P1=0`, receipt H persistido/releído y reconciliación canónica antes de promover `N7.2.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
-
-## 2026-09-13 — ERP-N7.2 Retry controlado — cierre documental append-only
-
-**Responsable:** CHATGPT_VAEP / VAEP :48 Debt.
-
-**Objetivo/alcance:** resolver de forma estrictamente aditiva/history-preserving el P1 documental de `N7.2.H`, sin reabrir el runtime de retry ni adelantar `N7.3`.
-
-**Evidencia:** `N7.2.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_2_RETRY.md` materializada en `3fda2525d0a9f0931e25cfa146c372c2e48fb5f5`; REVIEW_FIRST bloqueante `c2c7c07a2fc833aa5b6132629a7010bc322a2531` / `vaep/evidence/reviews/N7.2.H_REVIEW_FIRST_20260913T124807Z_SUP36.json` con `P0=0/P1=2`; QA exact-head run `34757554438`, job `103724457658=SUCCESS`.
-
-**Control:** esta publicación resuelve únicamente la reconciliación aditiva de `CHANGELOG_AI.md`. `N7.2.H` no pasa a `LISTO_REAL` hasta reconciliar también `TASKS.md`, repetir REVIEW_FIRST con `P0=0/P1=0`, consumir el gate causal exact-head aplicable y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploy ni PR #2.
