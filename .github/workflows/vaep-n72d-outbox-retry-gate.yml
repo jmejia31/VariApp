@@ -13,6 +13,7 @@ on:
       - "backend/tests/InventoryApp.Tests/N72DOutboxRetryPolicyTests.cs"
       - "backend/tests/InventoryApp.Tests/N72DOutboxRetryProcessorTests.cs"
       - "backend/tests/InventoryApp.Tests/N72DOutboxRepositoryClaimTests.cs"
+      - "backend/tests/InventoryApp.Tests/N72DOutboxMySqlConcurrencyTests.cs"
       - ".github/workflows/vaep-n72d-outbox-retry-gate.yml"
   workflow_dispatch:
 
@@ -28,6 +29,18 @@ jobs:
     name: Build and directed retry tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
     steps:
       - name: Checkout exact candidate
         uses: actions/checkout@v4
@@ -41,5 +54,5 @@ jobs:
         run: dotnet restore backend/InventoryApp.sln
       - name: Build Release
         run: dotnet build backend/InventoryApp.sln -c Release --no-restore
-      - name: Directed N7.2.D tests
+      - name: Directed N7.2.D tests including MySQL concurrency
         run: dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~N72DOutbox" --logger "console;verbosity=normal"
