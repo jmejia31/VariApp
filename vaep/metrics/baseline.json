@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "2.0",
+  "measurementStatus": "INSTRUMENTED_WITH_AUDITED_SAMPLE",
+  "scope": "VAEP/Jules operational dispatch and productivity controls",
+  "authority": {
+    "operationalEvaluator": "scripts/vaep/metrics.mjs",
+    "productivityEvaluator": "scripts/vaep/jules_integration_metrics.py",
+    "productivityCountedStage": "INTEGRATED"
+  },
+  "targets": {
+    "noOpRate": { "operator": "<", "value": 0.01 },
+    "manifestAcceptedRate": { "operator": ">", "value": 0.95 },
+    "sessionCreatedRate": { "operator": ">", "value": 0.95 },
+    "timeoutRate": { "operator": "<", "value": 0.05 },
+    "r2Rate": { "operator": "<", "value": 0.10 },
+    "patchPresentRate": { "operator": ">", "value": 0.90 },
+    "reviewFirstPassRate": { "operator": ">", "value": 0.85 }
+  },
+  "latestAuditedSample": {
+    "dispatchCommit": "637781b4c6718301ba51bf3b3c1f6498fcce7b23",
+    "workflowRunIds": [34134525403, 34134525405, 34134525451, 34134525470],
+    "sampleSize": 4,
+    "counts": {
+      "triggered": 4,
+      "noOp": 0,
+      "manifestAccepted": 4,
+      "sessionCreated": 4,
+      "sessionCompleted": 3,
+      "timeout": 0,
+      "r2": 0,
+      "patchPresent": 3,
+      "reviewAccepted": 0,
+      "reviewFirstPass": 0
+    },
+    "rates": {
+      "noOpRate": 0.0,
+      "manifestAcceptedRate": 1.0,
+      "sessionCreatedRate": 1.0,
+      "timeoutRate": 0.0,
+      "r2Rate": 0.0,
+      "patchPresentRate": 1.0,
+      "reviewFirstPassRate": null
+    },
+    "status": "INSUFFICIENT_REVIEW_SAMPLE",
+    "note": "This four-run sample proves transport/session/patch stages only. reviewFirstPassRate remains NOT_MEASURED until REVIEW_FIRST acceptance evidence exists; GitHub workflow success is not counted as functional productivity."
+  }
+}

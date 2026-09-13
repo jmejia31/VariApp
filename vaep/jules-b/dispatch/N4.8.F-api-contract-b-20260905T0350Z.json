@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-API-CONTRACT-B-20260905T0350Z",
+  "taskId": "N4.8.F.SUPPORT.API_CONTRACT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8b664e47401240880fd7bd327d2aa36cb0d28e44",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionApiContractTests.cs; READ_ONLY inspection of ContabilizacionController.cs and DTOs; no changes to controller/RBAC/EF/audit/observability code",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. Jules B completed the prior negative-security regression and is free; take this NEW SAFE SUPPORT scope. Audit the HTTP/API contract of POST /contabilizacion/eventos for stable success/error semantics, validation failures, unauthorized/forbidden behavior consistency, absence of sensitive implementation details, and response-shape regressions. Your only authorized write is backend/tests/InventoryApp.Tests/N48FContabilizacionApiContractTests.cs for non-duplicative focused coverage. Controller/DTOs are READ_ONLY; any real functional defect becomes a precise VAEP QA_TAKEOVER finding, not an out-of-scope change. Run focused backend tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact/patch for REVIEW_FIRST."
+}

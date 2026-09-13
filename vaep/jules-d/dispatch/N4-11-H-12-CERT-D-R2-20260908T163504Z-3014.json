@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-12-CERT-D-R2-20260908T163504Z-3014",
+  "taskId": "N4.11.H.12.CERTIFICATION_CHECKLIST",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CERT_CHECKLIST.md",
+  "prompt": "After N4.11.G LISTO_REAL, build factual certification checklist without declaring LISTO; Desarrollo only; two self-reviews.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "6176022371e22cf9eaad7aebeb8ddba15b16398b"
+}

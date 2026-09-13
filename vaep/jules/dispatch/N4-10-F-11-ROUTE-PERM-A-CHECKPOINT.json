@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-11-ROUTE-PERM-A-CHECKPOINT",
+  "taskId": "N4.10.F.11.ROUTE_PERMISSION_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.routes.estados-financieros-permission.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Add route-contract tests proving estados-financieros requires authGuard + permisoGuard with Finanzas/Ver. Own ONLY frontend/src/app/app.routes.estados-financieros-permission.spec.ts. Production files read-only. Run proportional tests and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "aca355c8caf4b22128f917db7ae9e4ed08dfb62b"
+}

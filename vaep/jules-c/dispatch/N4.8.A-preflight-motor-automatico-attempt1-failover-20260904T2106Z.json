@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.A-PREFLIGHT-FAILOVER-20260904T2106Z",
+  "taskId": "N4.8.A",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b588283ab4c9e29f0993b05d4980dc29fbf90a9c",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/**; TASKS.md; CHANGELOG_AI.md; read-only inspection of Backend/** and Frontend/** as needed; no product implementation",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. Controlled pre-session failover for N4.8.A: prior Jules B dispatch N4.8.A-PREFLIGHT-20260904T2046Z produced no correlated session or useful activity beyond the MASTER stall/recovery threshold, so it consumed no content attempt and must be treated as superseded evidence-only if it appears late. Execute N4.8.A only: technical preflight for the automatic accounting engine. Inspect the current N4.7 accounting implementation and produce a precise preflight deliverable identifying exact integration/hook points, dependencies, invariants, transaction/idempotency/concurrency/security risks actually supported by the code, and safe implementation boundaries for the next dependency-valid task. Do not implement N4.8 engine/product behavior. Preserve history; only update TASKS.md or CHANGELOG_AI.md if DoD requires append-only handoff/certification evidence. Run two independent self-reviews before COMPLETED. Report files inspected/changed, validations run, risks, and anything not executed. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. Return patch/artifact for VAEP REVIEW_FIRST."
+}

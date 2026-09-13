@@ -1,0 +1,8 @@
+{
+  "stopId": "VAEP-STOP-N22H2-R1-20260819T2030Z",
+  "dispatchId": "VAEP-JULES-N22H2-R1-20260819T1913Z",
+  "taskId": "N2.2.H.2",
+  "sessionName": "sessions/12103263808292463808",
+  "expectedBranch": "Desarrollo",
+  "reason": "N2.2.H.2 ya fue reconciliada/certificada por VAEP y el recovery R1 quedó cerrado como not_planned. La sesión no debe competir con la tarea Jules autoritativa vigente N2.3.G.2."
+}

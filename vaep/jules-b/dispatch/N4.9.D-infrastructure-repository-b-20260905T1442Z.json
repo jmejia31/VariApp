@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-INFRASTRUCTURE-REPOSITORY-B-20260905T1442Z",
+  "taskId": "N4.9.D.INFRASTRUCTURE_REPOSITORY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "679f3837c18f8e767c6fa4cf76cdaaa3f0d9cc8c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure only; PeriodoContable repository/persistence service strictly for N4.9.D; do not edit Application/API/Domain/migrations/snapshot/frontend/tests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Implement the Infrastructure-layer repository/persistence service required by PeriodoContable application use-cases, following existing patterns and preserving fail-closed lifecycle/concurrency semantics. Scope exclusively backend/src/Infrastructure non-migration files directly required by PeriodoContable. Do not edit Application, API, Domain, migrations/snapshot, frontend, tests, workflows, secrets or manifests. Run focused build/tests if possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST."
+}

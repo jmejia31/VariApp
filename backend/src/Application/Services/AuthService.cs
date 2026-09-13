@@ -1,7 +1,7 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
-using BCrypt.Net;
+using InventoryApp.Domain.Entities;
 
 namespace InventoryApp.Application.Services;
 
@@ -10,37 +10,65 @@ public class AuthService : IAuthService
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly IJwtService _jwtService;
 
-    public AuthService(IUsuarioRepository usuarioRepository, IJwtService jwtService)
+    public AuthService(
+        IUsuarioRepository usuarioRepository,
+        IRolRepository rolRepository,
+        IJwtService jwtService)
     {
         _usuarioRepository = usuarioRepository;
         _jwtService = jwtService;
+        _ = rolRepository; // Compatibilidad de constructor; RolId ya fue backfilleado por N0.4.
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
     {
-        var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(dto.NombreUsuario);
+        var nombreUsuario = dto.NombreUsuario?.Trim() ?? string.Empty;
+        var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(nombreUsuario);
         if (usuario is null || usuario.Eliminado) return null;
 
-        var passwordValida = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash);
-        if (!passwordValida) return null;
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash))
+            return null;
 
-        // A diferencia de credenciales inválidas (mensaje genérico por seguridad),
-        // el bloqueo/desactivación sí se comunica explícitamente: la contraseña
-        // era correcta, el dueño legítimo de la cuenta necesita saber por qué no entra.
-        if (usuario.Bloqueado)
-            throw new BusinessRuleException($"Esta cuenta está bloqueada. Motivo: {usuario.MotivoBloqueo ?? "no especificado"}. Contacta a un administrador.");
-        if (!usuario.Activo)
-            throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
+        ValidarEstadoCuenta(usuario);
+        ValidarRolRelacional(usuario);
+        return CrearRespuesta(usuario);
+    }
 
+    public async Task<LoginResponseDto?> RenovarAsync(int usuarioId)
+    {
+        var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+        if (usuario is null || usuario.Eliminado) return null;
+
+        ValidarEstadoCuenta(usuario);
+        ValidarRolRelacional(usuario);
+        return CrearRespuesta(usuario);
+    }
+
+    private LoginResponseDto CrearRespuesta(Usuario usuario)
+    {
         var (token, expiraEn) = _jwtService.GenerarToken(usuario);
-
         return new LoginResponseDto
         {
             Token = token,
             NombreUsuario = usuario.NombreUsuario,
             NombreCompleto = usuario.NombreCompleto,
-            Rol = usuario.Rol.ToString(),
+            Rol = usuario.RolEntidad.Nombre,
+            FotoPerfilUrl = usuario.FotoPerfilUrl,
             ExpiraEn = expiraEn
         };
+    }
+
+    private static void ValidarEstadoCuenta(Usuario usuario)
+    {
+        if (usuario.Bloqueado)
+            throw new BusinessRuleException($"Esta cuenta está bloqueada. Motivo: {usuario.MotivoBloqueo ?? "no especificado"}. Contacta a un administrador.");
+        if (!usuario.Activo)
+            throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
+    }
+
+    private static void ValidarRolRelacional(Usuario usuario)
+    {
+        if (usuario.RolId <= 0 || usuario.RolEntidad is null || usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
+            throw new BusinessRuleException("La cuenta no tiene un rol relacional activo válido. Contacta a un administrador.");
     }
 }

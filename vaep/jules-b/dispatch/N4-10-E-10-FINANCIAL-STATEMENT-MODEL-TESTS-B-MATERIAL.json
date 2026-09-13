@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-10-FINANCIAL-STATEMENT-MODEL-TESTS-B-MATERIAL",
+  "taskId": "N4.10.E.10.FINANCIAL_STATEMENT_MODEL_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/estado-financiero.model.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/core/models/estado-financiero.model.spec.ts. Add focused runtime/contract tests for the six TipoEstadoFinanciero numeric values and representative typed payload shape without inventing fields or changing production models. TWO independent self-reviews. No other files.",
+  "primaryBaseHead": "7c8638e8cbee5dbe595710013b1eef5bbc547974"
+}

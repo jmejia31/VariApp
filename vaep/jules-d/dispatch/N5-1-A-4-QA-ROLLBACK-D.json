@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-A-4-QA-ROLLBACK-D",
+  "taskId": "N5.1.A.4.ACCEPTANCE_ROLLBACK_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_QA.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. Inspect existing reporting tests and CI entrypoints for N5.1.A. Produce an executable acceptance matrix for the future independent report center: authorized/unauthorized, valid/invalid filters, empty/error/loading, historical integrity, non-regression and rollback boundaries. Anchor each proposed check to actual existing files or explicitly label a gap. Write only docs/N5.1_REPORTES_PREFLIGHT_QA.md. No new product/tests/control-plane code, migrations, dispatches, production or invented results. Deliver nonempty patch against primaryBaseHead, exact TESTS_EXECUTED or not-run reasons, and separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No closure/integration claim.",
+  "primaryBaseHead": "f49fc2024b72d014f3e7c60ee2649739a4eb2a99"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-D-2-SERVICE-B",
+  "taskId": "N4.11.D.2.APPLICATION_SERVICE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Services/CentroCostoService.cs",
+  "prompt": "After N4.11.C LISTO, implement focused CentroCosto application service/query behavior.",
+  "primaryBaseHead": "752a2ea10389f4182cd88776f47a4dfa08b7b751"
+}

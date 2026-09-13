@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-25-ERROR-CONTRACT-D",
+  "taskId": "N4.10.F.25.API_ERROR_REDACTION_CONTRACT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410FEstadosFinancierosErrorRedactionTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Add API contract tests proving financial-statement errors do not expose stack traces, SQL or internal exception detail. Production files read-only. Run proportional tests/build and TWO self-reviews.",
+  "primaryBaseHead": "2d32830b6ed88c1a83496d2fb43496d6c015c8a1"
+}

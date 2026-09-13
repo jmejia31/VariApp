@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-161-UNAUTHORIZED_QUERY-TESTS-D-AUTO",
+  "taskId": "N4.10.A.161.UNAUTHORIZED_QUERY_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportUNAUTHORIZEDQUERY161Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportUNAUTHORIZEDQUERY161Tests.cs. Add a focused regression for the current behavior identified by UNAUTHORIZED_QUERY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "bb2d582bd5732494a6151b398cd8305170603663"
+}

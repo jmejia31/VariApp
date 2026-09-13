@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-E-1-COMPONENT-A-R2-TRANSPORT-20260908T022320Z-4210",
+  "taskId": "N4.11.E.1.FRONTEND_COMPONENT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.ts",
+  "prompt": "After N4.11.D LISTO, implement CentroCosto component shell and deterministic UI states.\n\nR2 RCA: R2_PRE_SESSION_TRANSPORT_FAILURE r2_dispatch=N4-11-E-1-COMPONENT-A-R2-20260908T020237Z-4214 r2_commit=98983a8a3d8ca40f3de82ae7b6ae92577a906637 r2_run=34178694037. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "e7daf7a59d6cfcbdd48913cde0ec1fbe8f45eb29"
+}

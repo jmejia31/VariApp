@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-12-FINANCIAL-STATEMENT-INTEGRATION-TESTS-D-MATERIAL",
+  "taskId": "N4.10.E.12.FINANCIAL_STATEMENT_INTEGRATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts. Add focused frontend integration tests that wire the standalone EstadosFinancierosComponent with HttpClientTestingModule and verify a generated statement request renders representative line/totals data plus error response behavior. No production edits or new dependencies. TWO independent self-reviews.",
+  "primaryBaseHead": "d234d9f8fb2339cbba1d6c8b32709c22b6ede240"
+}

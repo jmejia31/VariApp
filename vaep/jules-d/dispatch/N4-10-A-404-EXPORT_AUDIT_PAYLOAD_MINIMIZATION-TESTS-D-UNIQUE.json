@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-404-EXPORT_AUDIT_PAYLOAD_MINIMIZATION-TESTS-D-UNIQUE",
+  "taskId": "N4.10.A.404.EXPORT_AUDIT_PAYLOAD_MINIMIZATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AExportAuditPayloadMinimizationTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AExportAuditPayloadMinimizationTests.cs. Add focused tests for the existing ReportesAdministrativosController export audit call proving the audit metadata is limited to Tipo, Formato, Desde and Hasta plus the existing operation description/entity, and does not include exported row contents, credentials, tokens or raw sensitive payloads. Reuse current controller/audit contracts only; no production changes. Run focused tests/build when possible and TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "b77a858bb9c8ad9bb86334b4d9c967c7aa0e1961"
+}

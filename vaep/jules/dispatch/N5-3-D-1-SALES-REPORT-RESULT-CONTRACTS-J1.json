@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-D-1-SALES-REPORT-RESULT-CONTRACTS-J1",
+  "taskId": "N5.3.D.1.SALES_REPORT_RESULT_CONTRACTS",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasResultadoDto.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md plus accepted N5.3.A/N5.3.B contracts. Define bounded sales-report summary/detail result DTOs for gross/net/discount/tax/cost/margin and historical display dimensions. Do not implement queries, controllers, exports, security changes or persistence. Preserve explicit historical snapshot semantics and nullable legacy identities. Run proportional compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR #2 merge.",
+  "primaryBaseHead": "bf2917463d823b871cbcbd2cefaaace01bab76b9"
+}

@@ -45,10 +45,17 @@ export interface CreateRevisionValue {
 export interface FinanzasResumen {
   ingresosTotales: number;
   egresosTotales: number;
+  gastosOperativos: number;
   utilidadBruta: number;
+  margenUtilidadBruta: number;
   utilidadNeta: number;
   valorInventarioCosto: number;
+  valorInventarioCostoMercaderia: number;
+  valorInventarioCostoInsumosAdministrativos: number;
   valorPotencialVenta: number;
+  valorPotencialVentaMercaderia: number;
+  utilidadInventarioPotencial: number;
+  margenInventarioPotencial: number;
   cuentasPorCobrar: number;
   cuentasPorPagar: number;
   balanceOperativo: number;

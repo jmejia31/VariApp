@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-SECURITY-OBSERVABILITY-REGRESSION-D-ATT2-20260906T0151Z",
+  "taskId": "N4.9.G.SECURITY_OBSERVABILITY_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableSecurityObservabilityTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. This is the single allowed content ATTEMPT2/R2 for the existing security/observability regression task. Own ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableSecurityObservabilityTests.cs. Revalidate the existing patch against current Desarrollo, correct only material test defects if needed, run focused tests/build, and perform TWO genuinely independent self-reviews with distinct findings/evidence before COMPLETED. Do not modify production code, workflows, manifests, docs, main, Produccion, secrets or deploy. Do not invent PASS. No R3 is allowed; residual gaps must be reported for QA_TAKEOVER.",
+  "primaryBaseHead": "22012715ded11478d0d74807090ac895c7e08f0c"
+}

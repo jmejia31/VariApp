@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-10-AUDIT-CORR-D",
+  "taskId": "N4.10.F.10.AUDIT_CORRELATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/VariStore.Api.Tests/Controllers/EstadosFinancierosAuditCorrelationTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Add focused audit/correlation tests for financial-statement requests using existing observability patterns. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "406511d5aa46c15fb42fec710b28bc8c60cfd60c"
+}

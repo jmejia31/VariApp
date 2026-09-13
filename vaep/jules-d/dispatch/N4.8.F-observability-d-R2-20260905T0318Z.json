@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-OBS-D-R2-20260905T0318Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "64b181ee7f80bb01afd088819b368a3c79cb0b08",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Middleware/CorrelationIdMiddleware.cs; backend/src/API/Program.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionObservabilityTests.cs; backend/tests/InventoryApp.Tests/CorrelationIdMiddlewareTests.cs; no controller/RBAC files; no audit writer/service; no EF snapshot/migrations; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. FINAL JULES R2 for CURRENT_PARENT N4.8.F correlation/health/observability. ATTEMPT1 N4.8.F-OBS-D-20260905T0310Z was superseded after bootstrap/no-progress watchdog without ACTIVE_REAL evidence; do not revive or integrate it. Verify POST /contabilizacion/eventos receives a normalized correlation identifier, downstream audit/logging can use request correlation, and health/observability remains fail-closed without exposing secrets. Make only demonstrated bounded changes and focused tests; do not redesign infrastructure. Do not touch controller/RBAC, audit writer/service, EF snapshot/migrations. Run backend build/focused tests and two independent self-reviews. This is taskAttempt 2/2: unresolved blocker transfers to ChatGPT/VAEP QA_TAKEOVER; no R3. No branch/PR/push/merge/deploy; no main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact only."
+}

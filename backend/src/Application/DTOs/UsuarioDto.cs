@@ -12,10 +12,6 @@ public class UsuarioDto
     public DateTime FechaCreacion { get; set; }
 }
 
-/// Vista de detalle real (sección 4 del prompt: "no reutilices incorrectamente
-/// el formulario de edición como vista de consulta"). Incluye lo que el
-/// formulario de edición no necesita mostrar: motivo de bloqueo, trazabilidad
-/// completa, nombre del rol dinámico legible.
 public class UsuarioDetalleDto
 {
     public int Id { get; set; }
@@ -42,10 +38,7 @@ public class CreateUsuarioDto
     public string NombreUsuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public string Rol { get; set; } = "Vendedor"; // "Administrador" | "Vendedor" (legado, fallback)
-
-    /// Id del rol dinámico (Domain.Entities.Rol). Si se informa, tiene prioridad
-    /// sobre `Rol` y es la vía recomendada de asignación (sección 4/10: AsignarRol).
+    public string Rol { get; set; } = "Vendedor";
     public int? RolId { get; set; }
 }
 
@@ -56,10 +49,41 @@ public class UpdateUsuarioEstadoDto
 
 public class UpdateUsuarioDto
 {
+    public string NombreUsuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public string Rol { get; set; } = "Vendedor";
     public int? RolId { get; set; }
 
-    /// Si se informa, se resetea la contraseña del usuario. Si es null/vacío, se conserva la actual.
+    /// Si se informa, se restablece la contraseña del usuario. El controlador
+    /// exige además el permiso Usuarios:RestablecerContrasena.
     public string? NuevaPassword { get; set; }
+}
+
+/// <summary>
+/// Membresía efectiva de un usuario dentro de una empresa/tenant.
+/// N6.4.D expone este contrato sin sustituir todavía el contexto de autenticación.
+/// </summary>
+public class UsuarioEmpresaDto
+{
+    public int Id { get; set; }
+    public int UsuarioId { get; set; }
+    public int EmpresaId { get; set; }
+    public int RolId { get; set; }
+    public bool Activa { get; set; }
+}
+
+public class AsignarUsuarioEmpresaDto
+{
+    public int EmpresaId { get; set; }
+    public int RolId { get; set; }
+}
+
+public class CambiarRolUsuarioEmpresaDto
+{
+    public int RolId { get; set; }
+}
+
+public class UpdateUsuarioEmpresaEstadoDto
+{
+    public bool Activa { get; set; }
 }

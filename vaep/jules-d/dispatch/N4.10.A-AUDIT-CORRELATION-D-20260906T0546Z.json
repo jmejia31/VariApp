@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-AUDIT-CORRELATION-D-20260906T0546Z",
+  "taskId": "N4.10.A.27.FINANCIAL_REPORT_AUDIT_CORRELATION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditCorrelationTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Continue material N4.10.A financial-report groundwork without promoting N4.10.A while N4.9.H remains open. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditCorrelationTests.cs. Add focused tests for current financial-report/accounting paths that verify audit/correlation behavior already exposed by the implementation: correlation identifier propagation or capture, auditable operation metadata, failure-path traceability, and no sensitive-data leakage. Do not invent endpoints, permissions, middleware contracts, audit APIs, or production behavior. If a required contract is absent, encode the exact current gap in a truthful failing/diagnostic test only when appropriate; otherwise document the limitation in test naming/comments without fabricating PASS. Keep this scope distinct from precision, deterministic query, report error-state, and authorization-matrix work owned by other lanes. Run focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ea98baf7703ef8a0434db91e37810c2179d71577"
+}

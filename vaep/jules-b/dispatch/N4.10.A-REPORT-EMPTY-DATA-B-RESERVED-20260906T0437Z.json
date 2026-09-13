@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-EMPTY-DATA-B-RESERVED-20260906T0437Z",
+  "taskId": "N4.10.A.17.FINANCIAL_REPORT_EMPTY_DATA_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is NEXT_RUN_RESERVED behind the current Jules B run and must remain dependency-safe while CURRENT_PARENT=N4.9.H. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataTests.cs. Add material tests for CURRENT accounting/reporting behavior with empty datasets, no matching rows, zero balances and deterministic empty export/report contracts where available. Do not invent missing endpoints or production code. Report exact missing contracts rather than false PASS. No docs/workflows/manifests/production changes. Two distinct self-reviews; no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "9d9b9030990836bba14e6a3a3ab1831b4b0625d2"
+}

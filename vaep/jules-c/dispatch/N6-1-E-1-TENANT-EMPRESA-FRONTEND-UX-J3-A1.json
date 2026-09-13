@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-1-E-1-TENANT-EMPRESA-FRONTEND-UX-J3-A1",
+  "taskId": "N6.1.E.1.TENANT_EMPRESA_FRONTEND_UX",
+  "semanticFacet": "TENANT_EMPRESA_FRONTEND_UX",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "d2eeb806f5b27a87c9a51916e79376cdc194998c",
+  "dependency": "N6.1.D_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.1.D_LISTO_REAL_20260910T1907Z.json",
+  "fileScopeHint": "frontend/src/app/**;frontend/src/assets/**;frontend/src/styles*;frontend/tests/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo/current parent before editing. N6.1.D is LISTO_REAL and N6.1.E is the first dependency-valid unfinished frontend/UX facet for the canonical Empresa root. Implement one coherent, material frontend slice for Empresa administration using the repository's existing Angular architecture and visual/accessibility conventions. Consume the already-certified N6.1.D API contract; provide the minimum usable list/read/create/edit/activate/deactivate UX that the current roadmap facet requires, with correct loading/empty/error states, validation mirroring backend constraints, permission-aware action visibility/disablement where the existing frontend permission model supports it, keyboard/focus/accessibility semantics, and responsive behavior consistent with existing maintenance screens. Reuse existing shared components/services/patterns instead of creating a parallel design system. Add or update proportional frontend tests for the material behavior. Do not add backend/domain/persistence migrations, tenant isolation across unrelated entities, Empresa-Sucursal physical relation, user memberships, later N6.1.F security/audit hardening, N6.1.G broad regression work, N6.1.H documentation, N6.2+ tenant-aware global model work, Produccion execution, secrets, main changes, deployment/infrastructure changes, or PR #2 merge. Keep the patch coherent and reviewable; if an existing frontend architectural blocker prevents safe implementation, return exact evidence rather than inventing a workaround. Perform two independent self-reviews, explicitly report P0/P1, and return terminal patch/evidence for controller REVIEW_FIRST. No filler, no R3.",
+  "acceptance": "A coherent Empresa administration frontend exists against the certified N6.1.D API using current Angular/shared UI conventions; core list/read/create/edit/activate/deactivate interactions required by the facet are usable and state-complete; validation/accessibility/permission-aware behavior is proportional and tested; no backend/migration/later-parent scope is introduced; two self-reviews report P0=0/P1=0; no main/Produccion/secrets/deploy/PR2 changes; patch is ready for independent REVIEW_FIRST."
+}

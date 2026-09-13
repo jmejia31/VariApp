@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://variapp-api.onrender.com'
+  // En Vercel se usa un proxy same-origin para evitar exponer el navegador
+  // a restricciones CORS entre los dominios Preview y Render.
+  apiUrl: '/api'
 };

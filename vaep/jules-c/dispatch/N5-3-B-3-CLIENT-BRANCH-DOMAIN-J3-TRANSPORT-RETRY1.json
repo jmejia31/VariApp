@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-B-3-CLIENT-BRANCH-DOMAIN-J3-TRANSPORT-RETRY1",
+  "taskId": "N5.3.B.3.CLIENT_BRANCH_DOMAIN",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs",
+  "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only client/branch filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs as a partial sales-report filter facet. Represent ClienteId/SucursalId without inventing a Venta.SucursalId ownership model; branch attribution is later resolved from sale detail/warehouse evidence. Do not touch query implementation or other facet files. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge. This is a transport-only retry of the same semantic task after the prior manifest failed before any Jules session; do not treat it as R2.",
+  "primaryBaseHead": "c8807fdf77f0bdacd5d4c690beb11cc1b7b953d5"
+}

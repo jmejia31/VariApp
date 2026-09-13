@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-SNAPSHOT-ALIGN-R2-20260905T0318Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d0b8ad72b7ad6326dc581b6593399e036eb06a61",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs; backend/src/Infrastructure/Persistence/Migrations/20260905061000_N4_8_C_ConfiguracionContable.cs; backend/src/Infrastructure/Persistence/Configurations/**; backend/src/Domain/**/ConfiguracionContable*.cs; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. FINAL JULES R2 for CURRENT_PARENT N4.8.F EF snapshot causal recovery. ATTEMPT1 N4.8.F-SNAPSHOT-ALIGN-20260905T0305Z was superseded by VAEP after bootstrap/no-progress watchdog with no ACTIVE_REAL evidence; do not reuse or revive that session/result. Reproduce dotnet ef migrations has-pending-model-changes and correct only the demonstrated ConfiguracionContable snapshot/model metadata drift while preserving the existing reversible migration and avoiding duplicate migration/data changes. If another unrelated model delta exists, stop and report it rather than widen scope. Run restore/build/focused tests plus has-pending-model-changes and two independent self-reviews. This is taskAttempt 2/2: if blocking work remains, report exactly for ChatGPT/VAEP QA_TAKEOVER; never create R3. Do not branch/PR/push/merge/deploy or touch main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact only for VAEP REVIEW_FIRST."
+}

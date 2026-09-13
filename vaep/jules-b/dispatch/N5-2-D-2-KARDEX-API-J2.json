@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-D-2-KARDEX-API-J2",
+  "taskId": "N5.2.D.2.KARDEX_BACKEND_API",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/ReportesInventario/Kardex/**;backend/src/Infrastructure/ReportesInventario/Kardex/**;backend/src/API/Controllers/ReportesInventarioKardexController.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.B/N5.2.C Kardex decisions first. Implement only Kardex/movement-history application/repository/API, including deterministic (Fecha,Id) ordering, bounded server-side pagination and accepted legacy/history semantics. Do not implement valuation, stock-health, reconciliation or common shell. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "cdc80e50b9d3704fdd9b1ba511b34b98c60e4f0a"
+}

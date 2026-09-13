@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-LEDGER-INVARIANTS-D-20260906T0339Z",
+  "taskId": "N4.10.A.11.LEDGER_BALANCE_INVARIANT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410ALedgerBalanceInvariantTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT remains N4.9.H closure debt; this is dependency-safe concurrent N4.10.A material support only and does NOT promote N4.10. Own ONLY backend/tests/InventoryApp.Tests/N410ALedgerBalanceInvariantTests.cs. Add focused accounting invariants needed by financial reporting using CURRENT repository mechanisms: debit/credit balance conservation, deterministic aggregation and handling of zero/empty ledger slices. If current accounting abstractions cannot support a test, report the exact missing contract instead of inventing implementation or PASS. No production/workflow/docs/manifest changes. Run focused tests/build when possible and perform TWO distinct self-reviews. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "b7d5b95d92f26ef3d01abf399c5391872064a5e0"
+}

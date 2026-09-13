@@ -1,0 +1,9 @@
+{
+  "dispatchId": "20260904T0219HND-N4_7_C-EF-MODEL-PROBE-R3TECH",
+  "parent": "N4.7.C",
+  "purpose": "QA_TAKEOVER EF model scaffold probe after working-directory correction",
+  "baseSha": "c8676573460ec928d799f2129fa302eefeef60f4",
+  "classification": "DIAGNOSTIC_RETRY_NOT_JULES_ATTEMPT",
+  "nonProduction": true,
+  "noDeployment": true
+}

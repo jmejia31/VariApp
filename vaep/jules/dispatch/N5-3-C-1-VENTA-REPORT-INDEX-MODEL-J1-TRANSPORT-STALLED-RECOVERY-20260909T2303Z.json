@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-3-C-1-VENTA-REPORT-INDEX-MODEL-J1-TRANSPORT-STALLED-RECOVERY-20260909T2303Z",
+  "taskId": "N5.3.C.1.VENTA_REPORT_INDEX_MODEL",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "vaep/jules/dispatch/N5-3-C-1-VENTA-REPORT-INDEX-MODEL-J1.json",
+  "recoveryReason": "ATTEMPT1_TRANSPORT_STALLED_GT10M__NO_CONTROLLER_VISIBLE_CORRELATED_SESSION_OR_USEFUL_ACTIVITY__ORIGINAL_QUARANTINED_ISSUE_3213",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs",
+  "prompt": "TRANSPORT_STALLED_RECOVERY for the exact already-authorized N5.3.C.1 material scope. Use only docs/VAEP_AUTHORITY.md, original COLA N5.3.C, accepted N5.3.A backend/data preflight, current N5.3.B filter contracts and current Desarrollo. As sole writer of backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs, verify persistence/index support for source-backed sales-report filters on period, authorized user/seller and client. Inspect current migrations/model snapshot first and add only necessary non-duplicative EF indexes justified by those query dimensions; do not add fields, change report semantics, implement repository/API/frontend, or generate a migration in this scope. Preserve row-scope fail-closed semantics. The prior transport exceeded 10 minutes without controller-visible correlated session/activity and is superseded by issue #3213; do not broaden scope. Run proportional backend build/tests and two self-reviews. Content attempt remains 1 because no Jules session was evidenced. Desarrollo only; no main/Production/secrets/PR merge.",
+  "primaryBaseHead": "9bd66833f65411d97051abe13177275a67d2e2c5"
+}

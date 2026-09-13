@@ -23,14 +23,23 @@ export class ImpuestosListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
   readonly puedeDuplicar = signal(false);
 
-  constructor(private service: ImpuestoService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar, private alerts: AppAlertService) {}
+  constructor(
+    private service: ImpuestoService,
+    private permisosRuntime: PermisosRuntimeService,
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
+  ) {}
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Impuestos', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Impuestos', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Impuestos', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Impuestos', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Impuestos', 'EliminarLogico'));
     this.puedeDuplicar.set(this.permisosRuntime.puede('Impuestos', 'Duplicar'));
     this.cargar();
@@ -44,29 +53,61 @@ export class ImpuestosListComponent implements OnInit {
     });
   }
 
-  toggleActivo(i: Impuesto): void {
-    const accion$ = i.activo ? this.service.desactivar(i.id) : this.service.activar(i.id);
+  puedeCambiarEstado(impuesto: Impuesto): boolean {
+    return impuesto.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
+  toggleActivo(impuesto: Impuesto): void {
+    if (!this.puedeCambiarEstado(impuesto)) return;
+
+    const accion$ = impuesto.activo
+      ? this.service.desactivar(impuesto.id)
+      : this.service.activar(impuesto.id);
+
     accion$.subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado.', 'Cerrar', { duration: 5000 })
     });
   }
 
-  async eliminar(i: Impuesto): Promise<void> {
-    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar impuesto', mensaje: `Se eliminará el impuesto "${i.nombre}".`, detalle: 'No se aplicará a nuevas operaciones.', tipo: 'peligro', confirmarTexto: 'Eliminar impuesto' });
+  async eliminar(impuesto: Impuesto): Promise<void> {
+    if (!this.puedeEliminar()) return;
+
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar impuesto',
+      mensaje: `Se eliminará el impuesto "${impuesto.nombre}".`,
+      detalle: 'No se aplicará a nuevas operaciones.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar impuesto'
+    });
     if (!confirmado) return;
-    this.service.eliminarLogico(i.id).subscribe({
+
+    this.service.eliminarLogico(impuesto.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar.', 'Cerrar', { duration: 5000 })
     });
   }
 
-  async duplicar(i: Impuesto): Promise<void> {
-    const nuevoNombre = await this.alerts.solicitarTexto({ titulo: 'Duplicar impuesto', mensaje: `Define el nombre de la copia de "${i.nombre}".`, confirmarTexto: 'Continuar', entrada: { etiqueta: 'Nombre del impuesto', valor: `${i.nombre} (copia)`, requerida: true } });
+  async duplicar(impuesto: Impuesto): Promise<void> {
+    if (!this.puedeDuplicar()) return;
+
+    const nuevoNombre = await this.alerts.solicitarTexto({
+      titulo: 'Duplicar impuesto',
+      mensaje: `Define el nombre de la copia de "${impuesto.nombre}".`,
+      confirmarTexto: 'Continuar',
+      entrada: { etiqueta: 'Nombre del impuesto', valor: `${impuesto.nombre} (copia)`, requerida: true }
+    });
     if (!nuevoNombre) return;
-    const nuevoCodigo = await this.alerts.solicitarTexto({ titulo: 'Código del impuesto', mensaje: 'El código debe ser único en el sistema.', confirmarTexto: 'Crear copia', entrada: { etiqueta: 'Código único', valor: `${i.codigo}-COPIA`, requerida: true } });
+
+    const nuevoCodigo = await this.alerts.solicitarTexto({
+      titulo: 'Código del impuesto',
+      mensaje: 'El código debe ser único en el sistema.',
+      confirmarTexto: 'Crear copia',
+      entrada: { etiqueta: 'Código único', valor: `${impuesto.codigo}-COPIA`, requerida: true }
+    });
     if (!nuevoCodigo) return;
-    this.service.duplicar(i.id, nuevoNombre, nuevoCodigo).subscribe({
+
+    this.service.duplicar(impuesto.id, nuevoNombre, nuevoCodigo).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo duplicar.', 'Cerrar', { duration: 5000 })
     });

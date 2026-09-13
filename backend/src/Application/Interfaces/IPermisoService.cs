@@ -15,6 +15,9 @@ public interface IPermisoService
     Task PrecargarMatrizPorDefectoAsync(int rolId, bool esAdministrador);
 
     Task<MisPermisosDto> GetMisPermisosAsync();
+    Task<MisPermisosDto> GetMisPermisosAsync(int empresaId);
     Task<bool> TienePermisoAsync(ModuloSistema modulo, AccionPermiso accion);
+    Task<bool> TienePermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion);
     Task VerificarPermisoAsync(ModuloSistema modulo, AccionPermiso accion);
+    Task VerificarPermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion);
 }

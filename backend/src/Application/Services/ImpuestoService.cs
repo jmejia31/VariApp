@@ -125,13 +125,12 @@ public class ImpuestoService : IImpuestoService
         var operaciones = ParseOperaciones(dto.Operaciones);
 
         var codigo = dto.Codigo.Trim().ToUpperInvariant();
-        if (await _repository.ExisteCodigoAsync(codigo, id))
-            throw new BusinessRuleException($"Ya existe un impuesto con el código '{dto.Codigo}'.");
+        if (!string.Equals(codigo, impuesto.Codigo, StringComparison.OrdinalIgnoreCase))
+            throw new BusinessRuleException("El código del impuesto es su identidad fiscal estable y no puede modificarse después de crearlo.");
 
         // No se recalculan documentos históricos: editar el impuesto solo afecta
         // aplicaciones futuras (sección 12).
         impuesto.Nombre = dto.Nombre.Trim();
-        impuesto.Codigo = codigo;
         impuesto.Descripcion = dto.Descripcion;
         impuesto.Tipo = tipo;
         impuesto.Tasa = dto.Tasa;

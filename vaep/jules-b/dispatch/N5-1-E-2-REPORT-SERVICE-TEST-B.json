@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-E-2-REPORT-SERVICE-TEST-B",
+  "taskId": "N5.1.E.2.REPORT_SERVICE_REGRESSION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/reporte-administrativo.service.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add focused regression coverage for the existing ReporteAdministrativoService in exactly frontend/src/app/services/reporte-administrativo.service.spec.ts. Verify endpoint composition, optional desde/hasta parameters, users/roles/audit calls, export format parameter and blob response behavior without editing production service code. This is material support for the independent report center and must remain fully independent from the shell/route/navigation writers. Run the targeted frontend test and two independent self-reviews.",
+  "primaryBaseHead": "f16fe52114b527bdc5868b8f0128724f1786f660"
+}

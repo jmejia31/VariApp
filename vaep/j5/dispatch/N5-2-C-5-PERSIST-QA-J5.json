@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-C-5-PERSIST-QA-J5",
+  "taskId": "N5.2.C.5.PERSISTENCE_RECONCILIATION_QA_PLAN",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_QA_PLAN.md",
+  "prompt": "Only after N5.2.B LISTO_REAL, define preflight/postcheck/reconciliation tests for any persistence change. No Production execution; P0/P1 and rollback explicit.",
+  "primaryBaseHead": "d93d9263f046e86d5950d95659285a687320adef"
+}

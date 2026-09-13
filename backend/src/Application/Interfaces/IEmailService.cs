@@ -7,12 +7,56 @@ public class AdjuntoCorreo
     public string ContentType { get; set; } = "application/octet-stream";
 }
 
-/// Envío real de correo vía SMTP configurable (sección 15 del prompt).
-/// Nunca coloca credenciales en el código: se leen de configuración/
-/// variables de entorno (ver appsettings.json -> sección "Smtp", con
-/// placeholders "CHANGE_ME" que deben sobrescribirse vía variables de
-/// entorno en producción, nunca commiteados con valores reales).
+public sealed class ResultadoEntregaEmail
+{
+    public bool Exito { get; init; }
+    public string? Error { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public bool EsTransitorio { get; init; }
+    public int Intentos { get; init; }
+    public string? MessageId { get; init; }
+}
+
+public sealed class EstadoConfiguracionSmtp
+{
+    public bool Configurado { get; init; }
+    public string Host { get; init; } = string.Empty;
+    public int Puerto { get; init; }
+    public bool UsaTls { get; init; }
+    public string ModoSeguridad { get; init; } = string.Empty;
+    public bool RequiereAutenticacion { get; init; }
+    public string RemitenteEnmascarado { get; init; } = string.Empty;
+    public int MaximoIntentos { get; init; }
+    public int TimeoutSegundos { get; init; }
+    public string Mensaje { get; init; } = string.Empty;
+}
+
+public sealed class ResultadoDiagnosticoSmtp
+{
+    public bool Exito { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Mensaje { get; init; } = string.Empty;
+    public string Host { get; init; } = string.Empty;
+    public int Puerto { get; init; }
+    public string ModoSeguridad { get; init; } = string.Empty;
+    public bool Autenticado { get; init; }
+    public int DuracionMilisegundos { get; init; }
+}
+
+/// Envío transaccional de correo vía SMTP configurable. Las credenciales se
+/// obtienen exclusivamente de configuración o variables de entorno.
 public interface IEmailService
 {
-    Task<(bool Exito, string? Error)> EnviarAsync(string destinatario, string asunto, string cuerpoHtml, List<AdjuntoCorreo>? adjuntos = null);
+    Task<ResultadoEntregaEmail> EnviarAsync(
+        string destinatario,
+        string asunto,
+        string cuerpoHtml,
+        List<AdjuntoCorreo>? adjuntos = null,
+        CancellationToken cancellationToken = default);
+
+    EstadoConfiguracionSmtp ObtenerEstadoConfiguracion();
+
+    /// Comprueba conexión, negociación TLS y autenticación sin enviar correo ni
+    /// exponer secretos. Está pensado para diagnosticar exclusivamente Desarrollo.
+    Task<ResultadoDiagnosticoSmtp> ProbarConexionAsync(CancellationToken cancellationToken = default);
 }

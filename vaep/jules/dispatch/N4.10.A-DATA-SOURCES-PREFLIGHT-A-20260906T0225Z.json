@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-DATA-SOURCES-PREFLIGHT-A-20260906T0225Z",
+  "taskId": "N4.10.A.1.DATA_SOURCES_PREFLIGHT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_10_A_DATA_SOURCES_PREFLIGHT.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is NEXT_SAFE prearmed work. Promotion is blocked by N4.9.H, but WORK_CAN_PIPELINE. Write ONLY docs/qa/N4_10_A_DATA_SOURCES_PREFLIGHT.md. Inspect current CuentaContable, AsientoContable/Detalle, PeriodoContable and persistence/query surfaces and map the exact data sources required for Balance General, Estado de Resultados, Balance de Comprobación, Libro Diario, Libro Mayor and Flujo de efectivo. Identify missing material capabilities without implementing product code. No LISTO_REAL claim. Two independent self-reviews; material patch only.",
+  "primaryBaseHead": "07ae3f8a07e31920d105d0bb8bc7317694edb254"
+}

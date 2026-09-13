@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-1-F-1-TENANT-EMPRESA-SEC-AUDIT-J5-A1",
+  "taskId": "N6.1.F.1.TENANT_EMPRESA_SEC_AUDIT",
+  "semanticFacet": "TENANT_EMPRESA_SEC_AUDIT",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "5a60a8d999d3476e9bd891a12f9d9bac8878f55e",
+  "dependency": "N6.1.E_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.1.E_LISTO_REAL_20260910T1939Z.json",
+  "fileScopeHint": "backend/src/API/Controllers/EmpresasController.cs;backend/src/API/Program.cs;backend/src/Application/Services/EmpresaService.cs;backend/src/Application/Interfaces/IEmpresaService.cs;backend/tests/InventoryApp.Tests/N61FEmpresaSecurityAuditTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo/current parent before editing. N6.1.E is LISTO_REAL and N6.1.F is the first dependency-valid unfinished SEC_AUDIT facet for the canonical Empresa root. Implement one coherent, minimal security/audit/observability slice for Empresa using existing VariApp conventions only: remove the temporary direct controller construction if the repository's certified patterns require DI; preserve fail-closed RBAC for read/create/edit/activate/deactivate; add proportional audit/correlation/logging or observability only where the existing architecture already provides a canonical mechanism; add directed authorization/audit/security tests proving no bypass and no secret exposure. Do not broaden into global tenant isolation, Empresa-Sucursal relations, user memberships, N6.1.G broad regression, N6.1.H docs, N6.2+, Production, secrets, main, deployment, or PR #2 merge. Keep write scope narrow and reviewable. If a requested concern is already satisfied or requires later-parent architecture, document evidence instead of inventing infrastructure. Perform two independent self-reviews, explicitly report P0/P1, and return terminal patch/evidence for controller REVIEW_FIRST. No filler and no R3.",
+  "acceptance": "Empresa endpoints remain fail-closed under existing RBAC; temporary DI/security debt is resolved using canonical patterns where applicable; proportional audit/correlation/observability evidence and directed security tests exist; no bypasses or secrets are introduced; no later-parent/global tenant scope is pulled forward; two self-reviews report P0=0/P1=0; patch is ready for independent REVIEW_FIRST."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-G-7-VALIDREG-C-R2-20260908T103227Z-3232",
+  "taskId": "N4.11.G.7.VALIDATION_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoValidationRegressionTests.cs",
+  "prompt": "Add CentroCosto validation regression coverage; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=83905f269848f13e5de19febe4703548d857acfc requested=5dd47eac6ca75ad5e5ec5408d7bde64ca392085f. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "8194ca12e8529b636395deab7354d31d438d8fc0"
+}

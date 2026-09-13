@@ -5,8 +5,8 @@ public enum AccionPermiso
     Ver = 1,
     Crear = 2,
     Editar = 3,
-    /// Conservado por compatibilidad con datos existentes; nuevas asignaciones
-    /// deben usar EliminarLogico o EliminarPermanente.
+    /// Conservado únicamente para contratos históricos. Los módulos modernos
+    /// deben diferenciar EliminarLogico/EliminarPermanente cuando aplique.
     Eliminar = 4,
     Confirmar = 5,
     Anular = 6,
@@ -26,5 +26,11 @@ public enum AccionPermiso
     ConsultarHistorial = 20,
     Aplicar = 21,
     Duplicar = 22,
-    Compartir = 23
+    Compartir = 23,
+    AjustarStock = 24,
+    RegistrarConsumo = 25,
+    ExonerarEnvio = 26,
+    Importar = 27,
+    Cerrar = 28,
+    Reabrir = 29
 }

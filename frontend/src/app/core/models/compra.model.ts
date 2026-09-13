@@ -3,12 +3,28 @@ import { ImpuestoAplicado, ResultadoCalculo } from './venta.model';
 export interface CompraDetalle {
   id: number;
   productoId: number;
+  productoVarianteId?: number;
   productoNombre: string;
   productoMarca: string;
   productoModelo: string;
+  productoColor?: string;
+  productoTalla?: string;
+  productoSku?: string;
+  productoImagenPrincipalUrl?: string;
   cantidad: number;
   costoUnitario: number;
   subtotal: number;
+}
+
+export interface CompraDocumento {
+  id: number;
+  compraId: number;
+  nombreOriginal: string;
+  contentType: string;
+  sizeBytes: number;
+  esImagen: boolean;
+  fechaCreacion: string;
+  creadoPorNombreUsuario?: string;
 }
 
 export interface Compra {
@@ -40,6 +56,7 @@ export interface Compra {
 
 export interface CompraDetalleInput {
   productoId: number;
+  productoVarianteId?: number | null;
   cantidad: number;
   costoUnitario: number;
 }
@@ -51,7 +68,6 @@ export interface CompraFormValue {
   documentoReferencia?: string;
   metodoPago: string;
   estadoPago: string;
-  /** Se envían en 0 por compatibilidad; el backend los ignora y recalcula. */
   descuento: number;
   impuesto: number;
   notas?: string;

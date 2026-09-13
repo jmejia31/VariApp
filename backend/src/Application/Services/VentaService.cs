@@ -2,8 +2,10 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -12,19 +14,24 @@ public class VentaService : IVentaService
     private readonly IVentaRepository _ventaRepository;
     private readonly IClienteRepository _clienteRepository;
     private readonly IProductoRepository _productoRepository;
+    private readonly IProductoVarianteRepository _productoVarianteRepository;
+    private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IFacturaRepository _facturaRepository;
-    private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly VentaKardexMovimientoRegistrar _ventaKardexMovimientoRegistrar;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
     private readonly ICalculoService _calculoService;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
+    private readonly ITipoClientePredeterminadoResolver _predeterminadoResolver;
 
     public VentaService(
         IVentaRepository ventaRepository,
         IClienteRepository clienteRepository,
         IProductoRepository productoRepository,
+        IProductoVarianteRepository productoVarianteRepository,
+        IInventarioConcurrencyService inventarioConcurrency,
         IFacturaRepository facturaRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
@@ -32,19 +39,25 @@ public class VentaService : IVentaService
         ICalculoService calculoService,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        ITipoClientePredeterminadoResolver predeterminadoResolver,
+        IKardexMovimientoWriter? kardexMovimientoWriter = null)
     {
         _ventaRepository = ventaRepository;
         _clienteRepository = clienteRepository;
         _productoRepository = productoRepository;
+        _productoVarianteRepository = productoVarianteRepository;
+        _inventarioConcurrency = inventarioConcurrency;
         _facturaRepository = facturaRepository;
-        _movimientoInventarioRepository = movimientoInventarioRepository;
+        _ventaKardexMovimientoRegistrar = new VentaKardexMovimientoRegistrar(
+            kardexMovimientoWriter ?? new KardexMovimientoWriter(movimientoInventarioRepository));
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _empresaConfiguracionService = empresaConfiguracionService;
         _calculoService = calculoService;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _auditoria = auditoria;
+        _predeterminadoResolver = predeterminadoResolver;
     }
 
     public async Task<VentaDto?> GetByIdAsync(int id)
@@ -67,15 +80,18 @@ public class VentaService : IVentaService
 
     public async Task<VentaDto> CreateAsync(CreateVentaDto dto)
     {
+        var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
         var venta = new Venta
         {
-            NumeroVenta = await GenerarNumeroVentaAsync(),
+            NumeroVenta = CrearNumeroTemporal("VEN"),
             ClienteNombre = string.IsNullOrWhiteSpace(dto.ClienteNombre) ? "Cliente final" : dto.ClienteNombre,
             ClienteTelefono = dto.ClienteTelefono,
             ClienteIdentidadORTN = dto.ClienteIdentidadORTN,
             ClienteCorreo = dto.ClienteCorreo,
             ClienteDireccion = dto.ClienteDireccion,
-            MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
+            MetodoPagoId = metodoPagoCatalogo.Id,
+            MetodoPagoCatalogo = metodoPagoCatalogo,
+            MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
             EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
             // Descuento/Impuesto NO se toman de dto: se recalculan abajo (sección 13).
@@ -86,11 +102,38 @@ public class VentaService : IVentaService
 
         await VincularClienteAsync(venta, dto);
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional, dto.CostoEnvioId, dto.EnvioExonerado, dto.MotivoExoneracionEnvio);
 
-        await _ventaRepository.AddAsync(venta);
-        await _ventaRepository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Crear, $"Venta creada: {venta.NumeroVenta}", venta.Id);
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _ventaRepository.AddAsync(venta);
+            await _ventaRepository.SaveChangesAsync();
+
+            // El identificador autoincremental es la única fuente de numeración.
+            // El número temporal evita colisiones mientras MySQL asigna el Id.
+            venta.NumeroVenta = $"VEN-{venta.Id:D6}";
+            _ventaRepository.Update(venta);
+            await _ventaRepository.SaveChangesAsync();
+        });
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Crear,
+            $"Venta creada: {venta.NumeroVenta}",
+            venta.Id,
+            entidad: "Venta",
+            valoresNuevos: new
+            {
+                venta.NumeroVenta,
+                venta.ImporteBruto,
+                venta.Subtotal,
+                venta.Impuesto,
+                venta.Descuento,
+                venta.CostoEnvio,
+                venta.EnvioExonerado,
+                venta.MotivoExoneracionEnvio,
+                venta.Total
+            });
 
         return ToDto(venta);
     }
@@ -103,12 +146,15 @@ public class VentaService : IVentaService
         if (venta.Estado != EstadoDocumento.Borrador)
             throw new BusinessRuleException("Solo se pueden editar ventas en estado Borrador.");
 
+        var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
         venta.ClienteNombre = string.IsNullOrWhiteSpace(dto.ClienteNombre) ? "Cliente final" : dto.ClienteNombre;
         venta.ClienteTelefono = dto.ClienteTelefono;
         venta.ClienteIdentidadORTN = dto.ClienteIdentidadORTN;
         venta.ClienteCorreo = dto.ClienteCorreo;
         venta.ClienteDireccion = dto.ClienteDireccion;
-        venta.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
+        venta.MetodoPagoId = metodoPagoCatalogo.Id;
+        venta.MetodoPagoCatalogo = metodoPagoCatalogo;
+        venta.MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo);
         venta.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
         venta.Notas = dto.Notas;
         venta.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
@@ -120,7 +166,7 @@ public class VentaService : IVentaService
         venta.DescuentosAplicados.Clear();
         venta.ImpuestosAplicados.Clear();
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional, dto.CostoEnvioId, dto.EnvioExonerado, dto.MotivoExoneracionEnvio);
 
         _ventaRepository.Update(venta);
         await _ventaRepository.SaveChangesAsync();
@@ -131,49 +177,71 @@ public class VentaService : IVentaService
 
     public async Task<VentaDto?> ConfirmarAsync(int id)
     {
-        var venta = await _ventaRepository.GetByIdAsync(id);
-        if (venta is null) return null;
-
-        if (venta.Estado != EstadoDocumento.Borrador)
-            throw new BusinessRuleException("Solo se pueden confirmar ventas en estado Borrador.");
-        if (venta.Detalles.Count == 0)
-            throw new BusinessRuleException("La venta debe tener al menos un producto para confirmarse.");
-
-        // Validar stock suficiente ANTES de tocar nada.
-        foreach (var detalle in venta.Detalles)
-        {
-            var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
-                ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
-
-            if (producto.Cantidad < detalle.Cantidad)
-                throw new BusinessRuleException(
-                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {detalle.Cantidad}.");
-        }
-
         var empresa = await _empresaConfiguracionService.GetActivaEntidadAsync();
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            foreach (var detalle in venta.Detalles)
+            var venta = await _ventaRepository.GetByIdForUpdateAsync(id);
+            if (venta is null)
+                throw new KeyNotFoundException($"Venta ID '{id}' no encontrada.");
+
+            if (venta.Estado != EstadoDocumento.Borrador)
+                throw new BusinessRuleException("Solo se pueden confirmar ventas en estado Borrador.");
+            if (venta.Detalles.Count == 0)
+                throw new BusinessRuleException("La venta debe tener al menos un producto para confirmarse.");
+
+            var demanda = venta.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
-                var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
-                    ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
-
-                var stockAnterior = producto.Cantidad;
-                producto.Cantidad -= detalle.Cantidad;
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad -= productoGrupo.Sum(x => x.Cantidad);
                 _productoRepository.Update(producto);
+            }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = venta.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var precioUnitarioMovimiento = detallesClave.Sum(d => d.Subtotal) / item.Cantidad;
+                var costoUnitarioMovimiento = detallesClave.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad) / item.Cantidad;
+
+                var stockAnteriorMovimiento = producto.Cantidad + item.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad;
+
+                if (item.ProductoVarianteId.HasValue)
+                {
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
+                    if (!variante.Activo)
+                        throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva y no puede venderse.");
+
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad -= item.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+
+                await _ventaKardexMovimientoRegistrar.RegistrarConfirmacionAsync(venta.Id, new MovimientoInventario
                 {
                     ProductoId = producto.Id,
+                    ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
-                    Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
-                    PrecioUnitario = detalle.PrecioUnitario,
-                    CostoUnitario = detalle.CostoUnitarioSnapshot,
-                    ReferenciaTipo = "Venta",
-                    ReferenciaId = venta.Id,
+                    Cantidad = item.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
+                    PrecioUnitario = precioUnitarioMovimiento,
+                    CostoUnitario = costoUnitarioMovimiento,
                     Descripcion = $"Salida por venta {venta.NumeroVenta}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
@@ -189,7 +257,9 @@ public class VentaService : IVentaService
                 Estado = venta.EstadoPago == EstadoPago.Pagado
                     ? EstadoMovimientoFinanciero.Pagado
                     : EstadoMovimientoFinanciero.Pendiente,
-                MetodoPago = venta.MetodoPago,
+                MetodoPagoId = venta.MetodoPagoId,
+                MetodoPagoCatalogo = venta.MetodoPagoCatalogo,
+                MetodoPago = venta.MetodoPagoCatalogo is null ? null : DerivarMetodoPagoLegacy(venta.MetodoPagoCatalogo),
                 EsAutomatico = true,
                 ModuloOrigen = "Venta",
                 ReferenciaId = venta.Id,
@@ -204,11 +274,10 @@ public class VentaService : IVentaService
             venta.FechaConfirmacion = DateTime.UtcNow;
             _ventaRepository.Update(venta);
 
-            // Generar factura automáticamente
             var factura = new Factura
             {
                 VentaId = venta.Id,
-                NumeroFactura = await GenerarNumeroFacturaAsync(),
+                NumeroFactura = CrearNumeroTemporal("FAC"),
                 Estado = EstadoFactura.Emitida,
                 EmpresaNombre = empresa.NombreComercial,
                 EmpresaRTN = empresa.RTN,
@@ -224,16 +293,34 @@ public class VentaService : IVentaService
                 VendedorNombreUsuario = _currentUser.NombreCompleto ?? _currentUser.NombreUsuario ?? "—",
                 GeneradaPorUsuarioId = _currentUser.UsuarioId,
                 GeneradaPorNombreUsuario = _currentUser.NombreCompleto ?? _currentUser.NombreUsuario,
+                ImporteBruto = venta.ImporteBruto,
                 Subtotal = venta.Subtotal,
                 Descuento = venta.Descuento,
                 Impuesto = venta.Impuesto,
+                CostoEnvioId = venta.CostoEnvioId,
+                CostoEnvioNombreSnapshot = venta.CostoEnvioNombreSnapshot,
+                CostoEnvioDepartamentoSnapshot = venta.CostoEnvioDepartamentoSnapshot,
+                CostoEnvioCiudadSnapshot = venta.CostoEnvioCiudadSnapshot,
+                CostoEnvioZonaSnapshot = venta.CostoEnvioZonaSnapshot,
+                CostoEnvioModalidadSnapshot = venta.CostoEnvioModalidadSnapshot,
+                CostoEnvioMontoSnapshot = venta.CostoEnvioMontoSnapshot,
+                CostoEnvio = venta.CostoEnvio,
+                EnvioExonerado = venta.EnvioExonerado,
+                MotivoExoneracionEnvio = venta.MotivoExoneracionEnvio,
                 Total = venta.Total,
+                SaldoPendiente = venta.Total,
+                MetodoPagoCodigoSnapshot = venta.MetodoPagoCatalogo?.Codigo,
+                MetodoPagoNombreSnapshot = venta.MetodoPagoCatalogo?.Nombre,
                 Detalles = venta.Detalles.Select(d => new FacturaDetalle
                 {
                     ProductoId = d.ProductoId,
+                    ProductoVarianteId = d.ProductoVarianteId,
                     ProductoNombre = d.ProductoNombreSnapshot,
                     ProductoMarca = d.ProductoMarcaSnapshot,
                     ProductoModelo = d.ProductoModeloSnapshot,
+                    VarianteColor = d.ProductoColorSnapshot,
+                    VarianteTalla = d.ProductoTallaSnapshot,
+                    VarianteSku = d.ProductoSkuSnapshot,
                     Cantidad = d.Cantidad,
                     PrecioUnitario = d.PrecioUnitario,
                     Subtotal = d.Subtotal
@@ -241,10 +328,11 @@ public class VentaService : IVentaService
             };
 
             await _facturaRepository.AddAsync(factura);
+            await _facturaRepository.SaveChangesAsync();
 
-            // Registrar el uso histórico (incrementa UsosRealizados de cada
-            // descuento, guarda HistorialAplicacionImpuesto) SOLO al confirmar,
-            // nunca al crear/editar un borrador que podría nunca confirmarse.
+            factura.NumeroFactura = $"FAC-{factura.Id:D6}";
+            _facturaRepository.Update(factura);
+
             await _calculoService.RegistrarUsoVentaAsync(
                 venta.Id, venta.ClienteId,
                 venta.DescuentosAplicados.ToList(),
@@ -254,42 +342,75 @@ public class VentaService : IVentaService
         });
 
         var actualizada = await _ventaRepository.GetByIdAsync(id);
-        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Confirmar, $"Venta confirmada: {venta.NumeroVenta}", venta.Id);
-        return ToDto(actualizada!);
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Confirmar, $"Venta confirmada: {actualizada!.NumeroVenta}", id);
+        return ToDto(actualizada);
     }
 
     public async Task<VentaDto?> AnularAsync(int id, string motivo)
     {
-        var venta = await _ventaRepository.GetByIdAsync(id);
-        if (venta is null) return null;
-
-        if (venta.Estado != EstadoDocumento.Confirmada)
-            throw new BusinessRuleException("Solo se pueden anular ventas confirmadas.");
         if (string.IsNullOrWhiteSpace(motivo))
             throw new BusinessRuleException("El motivo de anulación es obligatorio.");
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            foreach (var detalle in venta.Detalles)
+            var venta = await _ventaRepository.GetByIdForUpdateAsync(id);
+            if (venta is null)
+                throw new KeyNotFoundException($"Venta ID '{id}' no encontrada.");
+
+            if (venta.Estado != EstadoDocumento.Confirmada)
+                throw new BusinessRuleException("Solo se pueden anular ventas confirmadas.");
+
+            var demanda = venta.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: false);
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
-                var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
-                    ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
-
-                var stockAnterior = producto.Cantidad;
-                producto.Cantidad += detalle.Cantidad;
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad += productoGrupo.Sum(x => x.Cantidad);
                 _productoRepository.Update(producto);
+            }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = venta.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var precioUnitarioMovimiento = detallesClave.Sum(d => d.Subtotal) / item.Cantidad;
+                var costoUnitarioMovimiento = detallesClave.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad) / item.Cantidad;
+
+                var stockAnteriorMovimiento = producto.Cantidad - item.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad;
+
+                if (item.ProductoVarianteId.HasValue)
+                {
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad += item.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+
+                await _ventaKardexMovimientoRegistrar.RegistrarAnulacionAsync(venta.Id, new MovimientoInventario
                 {
                     ProductoId = producto.Id,
-                    Tipo = TipoMovimientoInventario.Reversion,
-                    Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
-                    PrecioUnitario = detalle.PrecioUnitario,
-                    ReferenciaTipo = "Venta",
-                    ReferenciaId = venta.Id,
-                    Descripcion = $"Reversión por anulación de venta {venta.NumeroVenta}",
+                    ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
+                    Tipo = TipoMovimientoInventario.Entrada,
+                    Causa = CausaMovimientoInventario.AnulacionVenta,
+                    Cantidad = item.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
+                    PrecioUnitario = precioUnitarioMovimiento,
+                    CostoUnitario = costoUnitarioMovimiento,
+                    Descripcion = $"Entrada por anulación de venta {venta.NumeroVenta}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 });
@@ -333,8 +454,8 @@ public class VentaService : IVentaService
 
         var actualizada = await _ventaRepository.GetByIdAsync(id);
         await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Anular,
-            $"Venta anulada: {venta.NumeroVenta}.", venta.Id, entidad: "Venta", motivo: motivo);
-        return ToDto(actualizada!);
+            $"Venta anulada: {actualizada!.NumeroVenta}.", id, entidad: "Venta", motivo: motivo);
+        return ToDto(actualizada);
     }
 
     public async Task<bool> DeleteBorradorAsync(int id)
@@ -375,6 +496,8 @@ public class VentaService : IVentaService
 
             if (cliente is null)
             {
+                int tipoClienteId = await _predeterminadoResolver.ResolverIdPredeterminadoAsync();
+
                 cliente = new Cliente
                 {
                     Nombre = dto.ClienteNombre.Trim(),
@@ -383,6 +506,7 @@ public class VentaService : IVentaService
                     Correo = dto.ClienteCorreo,
                     Direccion = dto.ClienteDireccion,
                     Activo = true,
+                    TipoClienteId = tipoClienteId,
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 };
@@ -431,58 +555,114 @@ public class VentaService : IVentaService
             var producto = await _productoRepository.GetByIdAsync(input.ProductoId)
                 ?? throw new BusinessRuleException($"El producto con id {input.ProductoId} no existe.");
 
-            if (validarStock && producto.Cantidad < input.Cantidad)
-                throw new BusinessRuleException(
-                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {input.Cantidad}.");
+            ProductoVariante variante;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else
+            {
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de venderlo.");
+            }
 
-            var subtotal = input.Cantidad * input.PrecioUnitario;
-            var costoTotal = input.Cantidad * producto.Costo;
+            if (validarStock && variante.Cantidad < input.Cantidad)
+                throw new BusinessRuleException(
+                    $"Stock insuficiente para '{producto.Nombre}' / '{variante.Sku}': disponible {variante.Cantidad}, solicitado {input.Cantidad}.");
+
+            var costoUnitario = variante.Costo ?? 0m;
+            var precioUnitario = variante.Precio ?? input.PrecioUnitario;
+            var subtotal = input.Cantidad * precioUnitario;
+            var costoTotal = input.Cantidad * costoUnitario;
 
             venta.Detalles.Add(new VentaDetalle
             {
                 ProductoId = producto.Id,
+                ProductoVarianteId = variante.Id,
                 Cantidad = input.Cantidad,
-                PrecioUnitario = input.PrecioUnitario,
-                CostoUnitarioSnapshot = producto.Costo,
+                PrecioUnitario = precioUnitario,
+                CostoUnitarioSnapshot = costoUnitario,
                 Subtotal = subtotal,
                 UtilidadBruta = subtotal - costoTotal,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = producto.Marca,
-                ProductoModeloSnapshot = producto.Modelo
+                ProductoMarcaSnapshot = variante.Marca?.Nombre ?? string.Empty,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre ?? string.Empty,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
+                ProductoSkuSnapshot = variante.Sku
             });
         }
+    }
+
+    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)
+    {
+        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)
+            ?? throw new BusinessRuleException("La variante seleccionada no existe.");
+        if (variante.ProductoId != productoId)
+            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");
+        if (exigirActiva && !variante.Activo)
+            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");
+        return variante;
     }
 
     public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)
     {
+        if (request.Detalles.Count == 0)
+            throw new BusinessRuleException("La venta debe tener al menos un producto.");
+
         var entradas = new List<DetalleCalculoInput>();
         foreach (var d in request.Detalles)
         {
-            var producto = await _productoRepository.GetByIdAsync(d.ProductoId);
+            if (d.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+
+            var producto = await _productoRepository.GetByIdAsync(d.ProductoId)
+                ?? throw new BusinessRuleException($"El producto con id {d.ProductoId} no existe.");
+            if (!producto.Activo)
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' está inactivo.");
+
+            ProductoVariante variante;
+            if (d.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(d.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else
+            {
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de cotizarlo.");
+            }
+
+            if (!variante.Precio.HasValue && d.PrecioUnitario <= 0)
+                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
+
             entradas.Add(new DetalleCalculoInput
             {
-                ProductoId = d.ProductoId,
-                CategoriaId = producto?.CategoriaId,
+                ProductoId = producto.Id,
+                CategoriaId = producto.CategoriaId,
                 Cantidad = d.Cantidad,
-                PrecioUnitario = d.PrecioUnitario
+                PrecioUnitario = variante.Precio ?? d.PrecioUnitario
             });
         }
 
-        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional);
+        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional, request.CostoEnvioId, request.EnvioExonerado, request.MotivoExoneracionEnvio);
     }
 
-    private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional)
+    private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional, int? costoEnvioId, bool envioExonerado, string? motivoExoneracionEnvio)
     {
         var entradas = venta.Detalles.Select(d => new DetalleCalculoInput
         {
             ProductoId = d.ProductoId,
-            CategoriaId = null, // se resuelve dentro del motor si se necesita por categoría
+            CategoriaId = null,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario
         }).ToList();
 
-        // Resolver CategoriaId real de cada producto para que el motor pueda
-        // evaluar descuentos/impuestos con alcance por categoría.
         foreach (var entrada in entradas)
         {
             var producto = await _productoRepository.GetByIdAsync(entrada.ProductoId);
@@ -490,11 +670,23 @@ public class VentaService : IVentaService
         }
 
         var resultado = await _calculoService.CalcularVentaAsync(
-            entradas, venta.ClienteId, _currentUser.RolId, codigoPromocional);
+            entradas, venta.ClienteId, _currentUser.RolId, codigoPromocional, costoEnvioId, envioExonerado, motivoExoneracionEnvio);
 
+        venta.ImporteBruto = resultado.ImporteBruto;
+        venta.ImporteProductos = resultado.ImporteProductos;
         venta.Subtotal = resultado.Subtotal;
         venta.Descuento = resultado.TotalDescuento;
         venta.Impuesto = resultado.TotalImpuesto;
+        venta.CostoEnvioId = resultado.CostoEnvioId;
+        venta.CostoEnvioNombreSnapshot = resultado.CostoEnvioNombre;
+        venta.CostoEnvioDepartamentoSnapshot = resultado.CostoEnvioDepartamento;
+        venta.CostoEnvioCiudadSnapshot = resultado.CostoEnvioCiudad;
+        venta.CostoEnvioZonaSnapshot = resultado.CostoEnvioZona;
+        venta.CostoEnvioModalidadSnapshot = resultado.CostoEnvioModalidad;
+        venta.CostoEnvioMontoSnapshot = resultado.CostoEnvio;
+        venta.CostoEnvio = resultado.CostoEnvio;
+        venta.EnvioExonerado = resultado.EnvioExonerado;
+        venta.MotivoExoneracionEnvio = resultado.MotivoExoneracionEnvio;
         venta.Total = resultado.Total;
         venta.CostoTotal = venta.Detalles.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad);
         venta.UtilidadBruta = venta.Detalles.Sum(d => d.UtilidadBruta) - venta.Descuento;
@@ -516,23 +708,40 @@ public class VentaService : IVentaService
             ImpuestoCodigoSnapshot = i.Codigo,
             TasaSnapshot = i.Tasa,
             BaseImponible = i.BaseImponible,
-            MontoAplicado = i.Monto
+            MontoAplicado = i.Monto,
+            IncluidoEnPrecioSnapshot = i.IncluidoEnPrecio
         }).ToList();
 
         if (venta.Total < 0)
             throw new BusinessRuleException("El total de la venta no puede ser negativo.");
     }
 
-    private async Task<string> GenerarNumeroVentaAsync()
+    private async Task<CatalogoMetodoPago> ResolverMetodoPagoAsync(string valor)
     {
-        var total = await _ventaRepository.ContarTodasAsync();
-        return $"VEN-{(total + 1):D6}";
+        if (string.IsNullOrWhiteSpace(valor))
+            throw new BusinessRuleException("El método de pago es obligatorio.");
+
+        var metodoPago = await _ventaRepository.GetMetodoPagoPorCodigoONombreAsync(valor.Trim());
+        return metodoPago
+            ?? throw new BusinessRuleException($"El método de pago '{valor.Trim()}' no existe en el catálogo.");
     }
 
-    private async Task<string> GenerarNumeroFacturaAsync()
+    private static MetodoPago DerivarMetodoPagoLegacy(CatalogoMetodoPago metodoPago)
     {
-        var total = await _facturaRepository.ContarTodasAsync();
-        return $"FAC-{(total + 1):D6}";
+        if (Enum.TryParse<MetodoPago>(metodoPago.Codigo, true, out var porCodigo))
+            return porCodigo;
+        if (Enum.TryParse<MetodoPago>(metodoPago.Nombre, true, out var porNombre))
+            return porNombre;
+
+        // Compatibilidad transitoria: un método administrable nuevo no representable por el enum
+        // se proyecta en la columna legacy como Otro. La FK MetodoPagoId sigue siendo la autoridad.
+        return MetodoPago.Otro;
+    }
+
+    private static string CrearNumeroTemporal(string prefijo)
+    {
+        var token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
+        return $"{prefijo}-TMP-{token}";
     }
 
     private static TEnum ParseEnum<TEnum>(string value, TEnum valorPorDefecto) where TEnum : struct =>
@@ -551,10 +760,21 @@ public class VentaService : IVentaService
         ClienteDireccion = v.ClienteDireccion,
         Estado = v.Estado.ToString(),
         EstadoPago = v.EstadoPago.ToString(),
-        MetodoPago = v.MetodoPago.ToString(),
+        MetodoPago = v.MetodoPagoCatalogo?.Nombre ?? string.Empty,
+        ImporteBruto = v.ImporteBruto,
+        ImporteProductos = v.ImporteProductos,
         Subtotal = v.Subtotal,
         Descuento = v.Descuento,
         Impuesto = v.Impuesto,
+        CostoEnvio = v.CostoEnvio,
+        CostoEnvioId = v.CostoEnvioId,
+        CostoEnvioNombre = v.CostoEnvioNombreSnapshot,
+        CostoEnvioDepartamento = v.CostoEnvioDepartamentoSnapshot,
+        CostoEnvioCiudad = v.CostoEnvioCiudadSnapshot,
+        CostoEnvioZona = v.CostoEnvioZonaSnapshot,
+        CostoEnvioModalidad = v.CostoEnvioModalidadSnapshot,
+        EnvioExonerado = v.EnvioExonerado,
+        MotivoExoneracionEnvio = v.MotivoExoneracionEnvio,
         Total = v.Total,
         CostoTotal = v.CostoTotal,
         UtilidadBruta = v.UtilidadBruta,
@@ -563,9 +783,14 @@ public class VentaService : IVentaService
         {
             Id = d.Id,
             ProductoId = d.ProductoId,
+            ProductoVarianteId = d.ProductoVarianteId,
             ProductoNombre = d.ProductoNombreSnapshot,
             ProductoMarca = d.ProductoMarcaSnapshot,
             ProductoModelo = d.ProductoModeloSnapshot,
+            ProductoColor = d.ProductoColorSnapshot,
+            ProductoTalla = d.ProductoTallaSnapshot,
+            ProductoSku = d.ProductoSkuSnapshot,
+            ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario,
             Subtotal = d.Subtotal,
@@ -587,7 +812,8 @@ public class VentaService : IVentaService
             Codigo = i.ImpuestoCodigoSnapshot,
             Tasa = i.TasaSnapshot,
             BaseImponible = i.BaseImponible,
-            Monto = i.MontoAplicado
+            Monto = i.MontoAplicado,
+            IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot
         }).ToList(),
         FacturaId = v.Factura?.Id,
         NumeroFactura = v.Factura?.NumeroFactura,

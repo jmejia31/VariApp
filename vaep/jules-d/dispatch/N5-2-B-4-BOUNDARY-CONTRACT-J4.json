@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-B-4-BOUNDARY-CONTRACT-J4",
+  "taskId": "N5.2.B.4.REPORT_EXTENSION_BOUNDARY_CONTRACT",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_EXTENSION_BOUNDARY.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.A architecture evidence. Resolve only extension-boundary contracts between existing inventory authorities, application services/controllers and Centro de Reportes: reuse seams, DTO boundary ownership and forbidden duplicate authorities. Make minimum coherent contract changes if required; otherwise document N/A with evidence. Do not implement API/UI ahead of N5.2.D/E. Two self-reviews; no production/secrets.",
+  "primaryBaseHead": "e250da9ed594db266ffc5d26422eef8033c1c6d9"
+}

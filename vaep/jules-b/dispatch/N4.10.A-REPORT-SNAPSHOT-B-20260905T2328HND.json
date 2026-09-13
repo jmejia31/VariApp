@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-SNAPSHOT-B-20260905T2328HND",
+  "taskId": "N4.10.A.24.FINANCIAL_REPORT_SNAPSHOT_CONSISTENCY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportSnapshotConsistencyTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Continue material N4.10.A financial-report groundwork without promoting a blocked parent. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportSnapshotConsistencyTests.cs. Add focused tests against current accounting/report mechanisms for snapshot consistency: same ledger inputs produce deterministic totals, historical entries are not mutated by later period state, and empty/zero ranges remain stable where supported. Reuse current entities/services; do not invent missing production APIs. If a production gap prevents a case, make the gap explicit and truthful rather than fabricating PASS. Run focused tests/build when possible and perform TWO distinct self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "d47a46b218c0d8488a7f234f1deeaddbdd10603a"
+}

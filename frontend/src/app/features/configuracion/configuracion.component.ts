@@ -15,13 +15,22 @@ import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service
 import { CAMPOS_TEMA, TemaVisual } from '../../core/models/tema-visual.model';
 import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.model';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
+import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
+import { EmpresaAdministracionCardComponent } from './empresa-administracion-card.component';
+import { EmpresaConfiguracionTenantCardComponent } from './empresa-configuracion-tenant-card.component';
+import { EmpresaConfiguracionPlantillasTenantCardComponent } from './empresa-configuracion-plantillas-tenant-card.component';
+import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.component';
+import { SuscripcionSaaSCardComponent } from './suscripcion-saas-card.component';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
+    EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
+    EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent,
+    SuscripcionSaaSCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
@@ -151,53 +160,29 @@ export class ConfiguracionComponent implements OnInit {
 
   guardar(): void {
     if (this.form.invalid) return;
-
     this.saving.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
-
     const v = this.form.getRawValue();
     this.empresaService.update({
-      nombreComercial: v.nombreComercial!,
-      razonSocial: v.razonSocial || undefined,
-      eslogan: v.eslogan || '',
-      rtn: v.rtn || undefined,
-      telefono: v.telefono || undefined,
-      correo: v.correo || undefined,
-      direccion: v.direccion || undefined,
-      sitioWeb: v.sitioWeb || undefined,
-      facebook: v.facebook || undefined,
-      instagram: v.instagram || undefined,
-      whatsApp: v.whatsApp || undefined,
-      nombreVisibleSistema: v.nombreVisibleSistema!,
-      descripcionSistema: v.descripcionSistema || '',
-      mensajeLogin: v.mensajeLogin || '',
-      copyright: v.copyright!,
-      mostrarCopyright: !!v.mostrarCopyright,
-      usarAnioAutomaticoCopyright: !!v.usarAnioAutomaticoCopyright,
-      encabezadoActivo: !!v.encabezadoActivo,
-      encabezadoTexto: v.encabezadoTexto || undefined,
-      piePaginaActivo: !!v.piePaginaActivo,
-      piePaginaTexto: v.piePaginaTexto || undefined,
-      moneda: v.moneda || 'HNL',
-      zonaHoraria: v.zonaHoraria || 'America/Tegucigalpa',
-      formatoFecha: v.formatoFecha || 'dd/MM/yyyy',
-      informacionFiscal: v.informacionFiscal || undefined,
-      textoLegal: v.textoLegal || undefined,
-      textoFactura: v.textoFactura || undefined,
-      textoReportes: v.textoReportes || undefined
+      nombreComercial: v.nombreComercial!, razonSocial: v.razonSocial || undefined, eslogan: v.eslogan || '',
+      rtn: v.rtn || undefined, telefono: v.telefono || undefined, correo: v.correo || undefined,
+      direccion: v.direccion || undefined, sitioWeb: v.sitioWeb || undefined, facebook: v.facebook || undefined,
+      instagram: v.instagram || undefined, whatsApp: v.whatsApp || undefined, nombreVisibleSistema: v.nombreVisibleSistema!,
+      descripcionSistema: v.descripcionSistema || '', mensajeLogin: v.mensajeLogin || '', copyright: v.copyright!,
+      mostrarCopyright: !!v.mostrarCopyright, usarAnioAutomaticoCopyright: !!v.usarAnioAutomaticoCopyright,
+      encabezadoActivo: !!v.encabezadoActivo, encabezadoTexto: v.encabezadoTexto || undefined,
+      piePaginaActivo: !!v.piePaginaActivo, piePaginaTexto: v.piePaginaTexto || undefined,
+      moneda: v.moneda || 'HNL', zonaHoraria: v.zonaHoraria || 'America/Tegucigalpa', formatoFecha: v.formatoFecha || 'dd/MM/yyyy',
+      informacionFiscal: v.informacionFiscal || undefined, textoLegal: v.textoLegal || undefined,
+      textoFactura: v.textoFactura || undefined, textoReportes: v.textoReportes || undefined
     }).subscribe({
       next: (res) => {
-        this.saving.set(false);
-        this.cargarEmpresa(res.data);
-        this.identidadService.refrescarDespuesDeGuardar(res.data);
+        this.saving.set(false); this.cargarEmpresa(res.data); this.identidadService.refrescarDespuesDeGuardar(res.data);
         this.successMessage.set('Configuración guardada correctamente.');
         this.snackBar.open('Configuración de empresa actualizada.', 'Cerrar', { duration: 4000 });
       },
-      error: (err) => {
-        this.saving.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la configuración.');
-      }
+      error: (err) => { this.saving.set(false); this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la configuración.'); }
     });
   }
 
@@ -205,119 +190,49 @@ export class ConfiguracionComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
     const permitidos = ['image/png', 'image/jpeg', 'image/webp'];
-    if (!permitidos.includes(file.type)) {
-      this.errorMessage.set('El logo debe ser PNG, JPG o WEBP.');
-      input.value = '';
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      this.errorMessage.set('El logo no puede superar 5 MB.');
-      input.value = '';
-      return;
-    }
-
-    this.logoSeleccionado = file;
-    this.logoPreview.set(URL.createObjectURL(file));
-    this.errorMessage.set(null);
+    if (!permitidos.includes(file.type)) { this.errorMessage.set('El logo debe ser PNG, JPG o WEBP.'); input.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { this.errorMessage.set('El logo no puede superar 5 MB.'); input.value = ''; return; }
+    this.logoSeleccionado = file; this.logoPreview.set(URL.createObjectURL(file)); this.errorMessage.set(null);
   }
 
   subirLogo(): void {
     if (!this.logoSeleccionado) return;
     this.uploadingLogo.set(true);
     this.empresaService.updateLogo(this.logoSeleccionado).subscribe({
-      next: (res) => {
-        this.uploadingLogo.set(false);
-        this.cargarEmpresa(res.data);
-        this.identidadService.refrescarDespuesDeGuardar(res.data);
-        this.snackBar.open('Logo actualizado correctamente.', 'Cerrar', { duration: 4000 });
-      },
-      error: (err) => {
-        this.uploadingLogo.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo actualizar el logo.');
-      }
+      next: (res) => { this.uploadingLogo.set(false); this.cargarEmpresa(res.data); this.identidadService.refrescarDespuesDeGuardar(res.data); this.snackBar.open('Logo actualizado correctamente.', 'Cerrar', { duration: 4000 }); },
+      error: (err) => { this.uploadingLogo.set(false); this.errorMessage.set(err.error?.message ?? 'No se pudo actualizar el logo.'); }
     });
   }
 
   async restaurarLogo(): Promise<void> {
-    if (!await this.alerts.confirmar({
-      titulo: 'Restaurar logo',
-      mensaje: 'Se reemplazará el logo actual por el logo predeterminado de VariStorehn.',
-      tipo: 'advertencia',
-      confirmarTexto: 'Restaurar logo'
-    })) return;
+    if (!await this.alerts.confirmar({ titulo: 'Restaurar logo', mensaje: 'Se reemplazará el logo actual por el logo predeterminado de VariStorehn.', tipo: 'advertencia', confirmarTexto: 'Restaurar logo' })) return;
     this.uploadingLogo.set(true);
     this.empresaService.restaurarLogo().subscribe({
-      next: (res) => {
-        this.uploadingLogo.set(false);
-        this.cargarEmpresa(res.data);
-        this.identidadService.refrescarDespuesDeGuardar(res.data);
-        this.snackBar.open('Logo restaurado correctamente.', 'Cerrar', { duration: 4000 });
-      },
-      error: (err) => {
-        this.uploadingLogo.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo restaurar el logo.');
-      }
+      next: (res) => { this.uploadingLogo.set(false); this.cargarEmpresa(res.data); this.identidadService.refrescarDespuesDeGuardar(res.data); this.snackBar.open('Logo restaurado correctamente.', 'Cerrar', { duration: 4000 }); },
+      error: (err) => { this.uploadingLogo.set(false); this.errorMessage.set(err.error?.message ?? 'No se pudo restaurar el logo.'); }
     });
   }
 
-  previsualizar(): void {
-    this.themeApplier.aplicar(this.tema);
-  }
+  previsualizar(): void { this.themeApplier.aplicar(this.tema); }
 
   async guardarTema(): Promise<void> {
-    if (!await this.alerts.confirmar({
-      titulo: 'Aplicar tema visual',
-      mensaje: 'Los nuevos colores se aplicarán a todo el sistema y a todos los usuarios.',
-      tipo: 'advertencia',
-      confirmarTexto: 'Aplicar colores'
-    })) return;
-
-    this.guardandoTema.set(true);
-    this.errorTema.set(null);
+    if (!await this.alerts.confirmar({ titulo: 'Aplicar tema visual', mensaje: 'Los nuevos colores se aplicarán a todo el sistema y a todos los usuarios.', tipo: 'advertencia', confirmarTexto: 'Aplicar colores' })) return;
+    this.guardandoTema.set(true); this.errorTema.set(null);
     this.temaVisualService.update(this.tema).subscribe({
-      next: (res) => {
-        this.guardandoTema.set(false);
-        this.tema = { ...res.data };
-        this.temaOriginal = { ...res.data };
-        this.themeApplier.aplicar(res.data);
-        this.snackBar.open('Tema visual actualizado para todo el sistema.', 'Cerrar', { duration: 4000 });
-      },
-      error: (err) => {
-        this.guardandoTema.set(false);
-        this.errorTema.set(err.error?.message ?? 'No se pudo guardar el tema.');
-      }
+      next: (res) => { this.guardandoTema.set(false); this.tema = { ...res.data }; this.temaOriginal = { ...res.data }; this.themeApplier.aplicar(res.data); this.snackBar.open('Tema visual actualizado para todo el sistema.', 'Cerrar', { duration: 4000 }); },
+      error: (err) => { this.guardandoTema.set(false); this.errorTema.set(err.error?.message ?? 'No se pudo guardar el tema.'); }
     });
   }
 
-  cancelarTema(): void {
-    this.tema = { ...this.temaOriginal };
-    this.themeApplier.aplicar(this.tema);
-  }
+  cancelarTema(): void { this.tema = { ...this.temaOriginal }; this.themeApplier.aplicar(this.tema); }
 
   async restaurarTema(): Promise<void> {
-    if (!await this.alerts.confirmar({
-      titulo: 'Restaurar tema',
-      mensaje: 'Se restaurarán los colores predeterminados del sistema para todos los usuarios.',
-      tipo: 'advertencia',
-      confirmarTexto: 'Restaurar colores'
-    })) return;
-
+    if (!await this.alerts.confirmar({ titulo: 'Restaurar tema', mensaje: 'Se restaurarán los colores predeterminados del sistema para todos los usuarios.', tipo: 'advertencia', confirmarTexto: 'Restaurar colores' })) return;
     this.restaurandoTema.set(true);
     this.temaVisualService.restaurar().subscribe({
-      next: (res) => {
-        this.restaurandoTema.set(false);
-        this.tema = { ...res.data };
-        this.temaOriginal = { ...res.data };
-        this.themeApplier.aplicar(res.data);
-        this.snackBar.open('Tema visual restaurado a los valores predeterminados.', 'Cerrar', { duration: 4000 });
-      },
-      error: (err) => {
-        this.restaurandoTema.set(false);
-        this.errorTema.set(err.error?.message ?? 'No se pudo restaurar el tema.');
-      }
+      next: (res) => { this.restaurandoTema.set(false); this.tema = { ...res.data }; this.temaOriginal = { ...res.data }; this.themeApplier.aplicar(res.data); this.snackBar.open('Tema visual restaurado a los valores predeterminados.', 'Cerrar', { duration: 4000 }); },
+      error: (err) => { this.restaurandoTema.set(false); this.errorTema.set(err.error?.message ?? 'No se pudo restaurar el tema.'); }
     });
   }
 }

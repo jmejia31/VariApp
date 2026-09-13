@@ -1,0 +1,19 @@
+{
+  "dispatchId": "N6-3-G-1-SUCURSALES-EMPRESA-QA-REGRESSION-CI-J6-R2-20260911T1253Z",
+  "taskId": "N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI",
+  "semanticFacet": "SUCURSALES_EMPRESA_QA_REGRESSION_CI",
+  "parent": "N6.3.G",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "primaryBaseHead": "94fefb309c2ae498c25d25ece83f034f80ccb168",
+  "dependency": "N6.3.F_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json",
+  "supersedesDispatchId": "N6-3-G-1-SUCURSALES-EMPRESA-QA-REGRESSION-CI-J5-A1-20260911T1240Z",
+  "supersededRunId": "34600203395",
+  "supersededJobId": "103265359475",
+  "recoveryReason": "J5 ATTEMPT1 canonical run exceeded PARENT_STALL_NO_PROGRESS_MINUTES=10 in Execute VAEP/Jules MASTER after transport-preflight and Reserve NEXT passed, with no correlated sessionId, result artifact, accessible terminal job logs, or other fresh useful technical activity observable at 2026-09-11T12:51:54Z. FIRST_DETECTOR_OWNS_RECOVERY revokes J5 authoritative write ownership; any late J5 result is EVIDENCE_ONLY. This is the single permitted R2 material attempt for the logical task; R3 is prohibited.",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/**;frontend/src/app/features/sucursales/**;frontend/e2e/**;.github/workflows/**;docs/**;vaep/evidence/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate fresh Desarrollo HEAD before editing. This is ATTEMPT2, the single material R2 recovery for task N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI after J5 ATTEMPT1 run 34600203395/job 103265359475 exceeded the 10-minute no-progress threshold in Execute MASTER without observable sessionId/artifact/useful activity. J5 authoritative ownership is revoked; any late J5 output is evidence-only. Preserve the same semantic scope and do not create a parallel or renamed task. Execute only the material QA/regression/CI coverage required by docs/N6.3_SUCURSALES_EMPRESA_PREFLIGHT.md: one Empresa with multiple Sucursales; two Empresas with independent Sucursales; nonexistent/inactive owner; null/non-positive EmpresaId on writes; legacy nullable reads during rollout; reassignment contract; code uniqueness per N6.3.B/C; FK/migration/precheck/postcheck/effective EF snapshot; API filters/pagination; frontend Empresa selector/filter/accessibility; applicable audit and permissions. Prefer existing tests/gates and add/correct tests or code only for real uncovered gaps. Preserve concurrent commits and do not touch unrelated varistorehn/home work. Do not implement N6.4 memberships/roles or N6.5 global anti-leakage. Run proportional gates and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2; require P0=0/P1=0 in your own delivery evidence. Return an exact patch/artifact for independent controller REVIEW_FIRST. If this ATTEMPT2 is defective, controller/QA takeover is mandatory; never create or request R3. No main, Produccion, production data, secrets, deploy, merge/auto-merge PR#2, filler, false ACTIVE/PASS/LISTO_REAL.",
+  "acceptance": "N6.3.G QA/regression/CI materially covers the certified Sucursales-by-Empresa contract across applicable backend/frontend/migration/security/audit paths; any real regression found is fixed within N6.3 scope; proportional gates and two self-reviews are evidenced; P0=0/P1=0 in worker evidence; no unrelated scope, N6.4/N6.5 expansion, main/Produccion/secrets/deploy/PR2 merge, filler or fabricated status; patch/artifact ready for independent REVIEW_FIRST."
+}

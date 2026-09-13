@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-EF-SNAPSHOT-REPAIR-A-20260905T1147Z",
+  "taskId": "N4.9.C.EF_SNAPSHOT_REPAIR",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9f7c539a6b607d9e30227ae017fbaa066b860f3d",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs only; 20260905093000_N4_9_PeriodoContablePersistencia.cs, PeriodoContableConfiguration.cs, AppDbContext.cs and domain entity READ_ONLY; no B/C/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.C was reopened by VAEP REVIEW_FIRST because exact-head migration 20260905093000_N4_9_PeriodoContablePersistencia.cs exists but canonical backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs does not contain PeriodoContable. Repair ONLY AppDbContextModelSnapshot.cs so it canonically matches the current AppDbContext/PeriodoContableConfiguration/migration for PeriodosContables, including columns, max lengths, MySQL types/charset/value generation, indexes and check constraints as EF Core snapshot semantics require. Do not alter the migration, DbContext, entity, configuration, API, tests, or unrelated model blocks. Validate with the strongest available dotnet/EF build or migration/model-diff checks; report exact commands and results. Emit two substantive independent self-reviews before COMPLETED. No plan.md/temp files. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST; COMPLETED is not LISTO_REAL."
+}

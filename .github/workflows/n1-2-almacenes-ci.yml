@@ -1,0 +1,194 @@
+name: ERP-N1.2 - Certificación Almacenes
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/n1-2-almacenes-ci.yml
+      - backend/src/API/Controllers/AlmacenesController.cs
+      - backend/src/API/Filters/MedirRendimientoBusquedaFilter.cs
+      - backend/src/API/Program.cs
+      - backend/src/Application/Common/CatalogoPermisosBase.cs
+      - backend/src/Application/DTOs/Almacen*.cs
+      - backend/src/Application/Interfaces/IAlmacen*.cs
+      - backend/src/Application/Services/AlmacenService.cs
+      - backend/src/Application/Validators/AlmacenValidators.cs
+      - backend/src/Domain/Entities/Almacen.cs
+      - backend/src/Domain/Enums/ModuloSistema.cs
+      - backend/src/Domain/Enums/TipoAlmacen.cs
+      - backend/src/Infrastructure/Migrations/*N1_2_Almacen*.cs
+      - backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+      - backend/src/Infrastructure/Persistence/Configurations/AlmacenConfiguration.cs
+      - backend/src/Infrastructure/Repositories/AlmacenRepository.cs
+      - backend/src/Infrastructure/Repositories/AuditoriaRepository.cs
+      - backend/tests/InventoryApp.Tests/Almacen*.cs
+      - frontend/src/app/app.component.ts
+      - frontend/src/app/app.config.ts
+      - frontend/src/app/core/models/almacen.model.ts
+      - frontend/src/app/features/almacenes/**
+      - frontend/src/app/services/almacen.service.ts
+      - frontend/e2e/n1-2-almacenes.spec.ts
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/n1-2-almacenes-ci.yml
+      - backend/src/**/Almacen*.cs
+      - backend/src/Domain/Enums/TipoAlmacen.cs
+      - backend/src/API/Filters/MedirRendimientoBusquedaFilter.cs
+      - backend/src/Infrastructure/Repositories/AuditoriaRepository.cs
+      - backend/tests/InventoryApp.Tests/Almacen*.cs
+      - frontend/src/app/features/almacenes/**
+      - frontend/src/app/core/models/almacen.model.ts
+      - frontend/src/app/services/almacen.service.ts
+      - frontend/e2e/n1-2-almacenes.spec.ts
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n1-2-almacenes-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  almacenes:
+    name: API, jerarquía, RBAC, auditoría, MySQL, Angular y E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_n12_almacenes
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      PORT: '5005'
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_n12_almacenes;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+      Database__ServerVersion: '8.4.0'
+      Database__ApplyMigrationsOnStartup: 'true'
+      Jwt__Secret: 'N12-Almacenes-E2E-Only-Secret-With-More-Than-32-Characters-2026'
+      Jwt__Issuer: 'InventoryApp.API'
+      Jwt__Audience: 'InventoryApp.Frontend'
+      Jwt__ExpiraMinutos: '120'
+      Security__LoginRateLimitPerMinute: '300'
+      SeedAdmin__Username: 'e2e_admin'
+      SeedAdmin__Password: 'E2E.Admin#2026!'
+      Cors__AllowedOrigins__0: 'http://127.0.0.1:4201'
+      Cors__AllowedOrigins__1: 'http://localhost:4201'
+      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
+      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      Cloudinary__CloudName: 'e2e-not-used'
+      Cloudinary__ApiKey: 'e2e-not-used'
+      Cloudinary__ApiSecret: 'e2e-not-used'
+      PHASE7_API_URL: 'http://127.0.0.1:5005'
+      PHASE7_ADMIN_USERNAME: 'e2e_admin'
+      PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
+      PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4201'
+
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restaurar, compilar y probar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore -warnaserror
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+
+      - name: Iniciar API con migraciones MySQL
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup dotnet run \
+            --project src/API/InventoryApp.API.csproj \
+            --configuration Release \
+            --no-build \
+            --no-launch-profile \
+            > n12-almacenes-api.log 2>&1 &
+          echo $! > n12-almacenes-api.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
+               curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
+              echo 'API N1.2 lista y MySQL conectado.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat n12-almacenes-api.log >&2 || true
+          exit 1
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Instalar, lint y build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+          npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular
+        working-directory: frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm start -- --host 127.0.0.1 --port 4201 > n12-almacenes-frontend.log 2>&1 &
+          echo $! > n12-almacenes-frontend.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4201/login > /dev/null; then
+              echo 'Angular N1.2 listo.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat n12-almacenes-frontend.log >&2 || true
+          exit 1
+
+      - name: Ejecutar E2E Almacenes
+        working-directory: frontend
+        run: npx playwright test e2e/n1-2-almacenes.spec.ts --config=playwright.config.ts
+
+      - name: Publicar evidencia N1.2
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n1-2-almacenes-evidence
+          path: |
+            backend/n12-almacenes-api.log
+            frontend/n12-almacenes-frontend.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: warn
+          retention-days: 14

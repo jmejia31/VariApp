@@ -15,23 +15,26 @@ public class ClienteRepository : IClienteRepository
     }
 
     public async Task<Cliente?> GetByIdAsync(int id) =>
-        await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+        await _context.Clientes.Include(c => c.TipoCliente).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<Cliente?> GetByIdConVentasAsync(int id) =>
-        await _context.Clientes.Include(c => c.Ventas).FirstOrDefaultAsync(c => c.Id == id);
+        await _context.Clientes.Include(c => c.Ventas).Include(c => c.TipoCliente).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<List<Cliente>> GetAllAsync() =>
-        await _context.Clientes.Include(c => c.Ventas).OrderBy(c => c.Nombre).ToListAsync();
+        await _context.Clientes.Include(c => c.Ventas).Include(c => c.TipoCliente).OrderBy(c => c.Nombre).ToListAsync();
 
     public async Task<List<Cliente>> GetActivosAsync() =>
-        await _context.Clientes.Where(c => c.Activo).OrderBy(c => c.Nombre).ToListAsync();
+        await _context.Clientes.Include(c => c.TipoCliente).Where(c => c.Activo).OrderBy(c => c.Nombre).ToListAsync();
 
     public async Task<List<Cliente>> BuscarActivosAsync(string termino, int limite = 10)
     {
         var normalizado = termino.Trim().ToLower();
         if (string.IsNullOrWhiteSpace(normalizado)) return new List<Cliente>();
+        limite = Math.Clamp(limite, 1, 30);
 
         return await _context.Clientes
+            .AsNoTracking()
+            .Include(c => c.TipoCliente)
             .Where(c => c.Activo && (
                 c.Nombre.ToLower().Contains(normalizado) ||
                 (c.IdentidadORTN != null && c.IdentidadORTN.ToLower().Contains(normalizado)) ||
@@ -49,19 +52,50 @@ public class ClienteRepository : IClienteRepository
         var tel = NormalizarDocumento(telefono);
         var nom = NormalizarTexto(nombre);
 
-        return await _context.Clientes
-            .Where(c => c.Activo)
-            .OrderBy(c => c.Nombre)
-            .FirstOrDefaultAsync(c =>
-                (!string.IsNullOrEmpty(identidad) && c.IdentidadORTN != null && c.IdentidadORTN.Replace("-", "").Replace(" ", "").ToLower() == identidad) ||
-                (!string.IsNullOrEmpty(email) && c.Correo != null && c.Correo.ToLower() == email) ||
-                (!string.IsNullOrEmpty(tel) && c.Telefono != null && c.Telefono.Replace("-", "").Replace(" ", "").ToLower() == tel) ||
-                (!string.IsNullOrEmpty(nom) && c.Nombre.ToLower() == nom));
+        var query = _context.Clientes.Include(c => c.TipoCliente).Where(c => c.Activo);
+
+        if (!string.IsNullOrEmpty(identidad))
+        {
+            var porIdentidad = await query.FirstOrDefaultAsync(c =>
+                c.IdentidadORTN != null && c.IdentidadORTN.Replace("-", "").Replace(" ", "").ToLower() == identidad);
+            if (porIdentidad is not null) return porIdentidad;
+        }
+
+        if (!string.IsNullOrEmpty(email))
+        {
+            var porCorreo = await query.FirstOrDefaultAsync(c => c.Correo != null && c.Correo.ToLower() == email);
+            if (porCorreo is not null) return porCorreo;
+        }
+
+        if (!string.IsNullOrEmpty(tel))
+        {
+            var porTelefono = await query.FirstOrDefaultAsync(c =>
+                c.Telefono != null && c.Telefono.Replace("-", "").Replace(" ", "").ToLower() == tel);
+            if (porTelefono is not null) return porTelefono;
+        }
+
+        // El nombre solo funciona como último recurso cuando no se recibió ningún
+        // identificador más fuerte; dos personas pueden compartir el mismo nombre.
+        if (string.IsNullOrEmpty(identidad) && string.IsNullOrEmpty(email) && string.IsNullOrEmpty(tel) && !string.IsNullOrEmpty(nom))
+            return await query.OrderBy(c => c.Id).FirstOrDefaultAsync(c => c.Nombre.ToLower() == nom);
+
+        return null;
     }
 
     public async Task<bool> ExisteNombreAsync(string nombre, int? excluirId = null) =>
         await _context.Clientes.AnyAsync(c =>
             c.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || c.Id != excluirId));
+
+    public async Task<bool> ExisteIdentidadAsync(string identidadORTN, int? excluirId = null)
+    {
+        var normalizada = NormalizarDocumento(identidadORTN);
+        if (string.IsNullOrEmpty(normalizada)) return false;
+
+        return await _context.Clientes.AnyAsync(c =>
+            c.IdentidadORTN != null &&
+            c.IdentidadORTN.Replace("-", "").Replace(" ", "").ToLower() == normalizada &&
+            (excluirId == null || c.Id != excluirId));
+    }
 
     public async Task AddAsync(Cliente cliente) =>
         await _context.Clientes.AddAsync(cliente);

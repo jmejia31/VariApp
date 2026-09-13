@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-18-CANCEL-B",
+  "taskId": "N4.10.F.18.SERVICE_CANCELLATION_SECURITY_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.cancellation-security.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test cancellation/network abort paths return deterministic safe state without leaking transport details. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "759430dc26af909ae1d0fefae1d4e63c8bc0aa3d"
+}

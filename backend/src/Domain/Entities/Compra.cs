@@ -1,5 +1,6 @@
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Domain.Entities;
 
@@ -8,9 +9,6 @@ public class Compra : ConfirmableEntity
     public string NumeroCompra { get; set; } = string.Empty;
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
-    /// Referencia al proveedor registrado (opcional: permite compras rápidas sin
-    /// crear un proveedor formal). Los campos de abajo son snapshot del proveedor
-    /// al momento de la compra, para no alterar el historial si el proveedor cambia después.
     public int? ProveedorId { get; set; }
     public Proveedor? Proveedor { get; set; }
 
@@ -21,12 +19,24 @@ public class Compra : ConfirmableEntity
 
     public EstadoDocumento Estado { get; set; } = EstadoDocumento.Borrador;
     public EstadoPago EstadoPago { get; set; } = EstadoPago.Pendiente;
+
+    // Snapshot/bridge ERP-N0: se conserva mientras los contratos legacy sigan
+    // necesitando un valor representable por enum. No es la autoridad relacional.
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
+
+    // Autoridad relacional materializada en N0.8.C. Permanece nullable a nivel de
+    // transición hasta que N0.8.D migre todas las escrituras de aplicación.
+    public int? MetodoPagoId { get; set; }
+    public CatalogoMetodoPago? MetodoPagoCatalogo { get; set; }
 
     public decimal Subtotal { get; set; }
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
     public decimal Total { get; set; }
+
+    public bool Eliminado { get; set; }
+    public DateTime? FechaEliminacion { get; set; }
+    public int? EliminadoPorUsuarioId { get; set; }
 
     public string? Notas { get; set; }
 

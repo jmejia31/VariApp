@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-A-2-DEPS-B",
+  "taskId": "N4.11.A.2.DEPENDENCY_MAP",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_DEPENDENCIES.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.11.A. Map CentroCosto dependencies and integration boundaries from current code, especially Sucursal/Departamento/Proyecto/UnidadNegocio references where present. Evidence-only preflight; no implementation. TWO self-reviews.",
+  "primaryBaseHead": "57aa78f2492455ca44c7f058193773eb026aaa34"
+}

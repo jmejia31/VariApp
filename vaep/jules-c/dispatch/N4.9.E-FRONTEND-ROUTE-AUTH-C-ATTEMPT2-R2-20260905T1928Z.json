@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-FRONTEND-ROUTE-AUTH-C-ATTEMPT2-R2-20260905T1928Z",
+  "taskId": "N4.9.E.FRONTEND_ROUTE_AUTH",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "45a0deb80ead2311b6249e349e46195836534371",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/app.routes.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is 45a0deb80ead2311b6249e349e46195836534371; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. This is R2 and FINAL Jules attempt for task N4.9.E.FRONTEND_ROUTE_AUTH; no R3. The PeriodosContablesComponent is now integrated at FUNCTIONAL_HEAD, so remove the prior dependency blocker. REVIEW_FIRST confirms app.routes.ts still has no /periodos-contables route. Add the minimal standalone/lazy route using the repository's real auth and permission guard patterns and existing Configuracion/Ver authority. Own ONLY frontend/src/app/app.routes.ts. Do not edit app.component.ts, periodos-contables feature/model/service/spec/e2e, backend, main, Produccion, secrets, deploy, branches, PR merge or force-push. Do not alter unrelated routes or redirects. Validate as far as possible and report exact evidence. Return material patch, changed files, validation and risks; no status-only response."
+}

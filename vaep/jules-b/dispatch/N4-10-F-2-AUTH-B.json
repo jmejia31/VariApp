@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-2-AUTH-B",
+  "taskId": "N4.10.F.2.SERVICE_AUTH_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.auth.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, add service authorization/error tests for 401/403 handling without leaking backend details. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "a336b3ec2de037a8863c227abdfd292006cba154"
+}

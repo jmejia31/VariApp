@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-16-OPS-D-R2-20260908T172603Z-4474",
+  "taskId": "N4.11.H.16.OPERATIONS_CHECKLIST",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_OPERATIONS.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified operational checks without deploy actions; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=122c00e6cf9aff39dee6067c71d18d1628f5e21e requested=8e204fe41de967f3445cda571a0e72648b1bc748. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "fc5172931abc9902fb84f53a71e83371f0b3c258"
+}

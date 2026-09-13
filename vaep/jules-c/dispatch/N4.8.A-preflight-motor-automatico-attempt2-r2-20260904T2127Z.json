@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.A-PREFLIGHT-R2-20260904T2127Z",
+  "taskId": "N4.8.A",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b42f811b0580b1c9ebabef54e3762b8d5322f633",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/**; read-only inspection of Backend/** and Frontend/** as needed; do not edit TASKS.md or CHANGELOG_AI.md; no product implementation",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. This is the unique and final ATTEMPT2/R2 for N4.8.A after REVIEW_FIRST rejected ATTEMPT1. Correct only the causal defects: ATTEMPT1 tried to self-declare CLOSED/PASS/LISTO-equivalent state that only VAEP Controller may certify, and it did not provide sufficient explicit evidence for the acceptance contract. Produce a preflight deliverable only, with NO claim of PASS, LISTO, closure or controller certification. Inspect the repository at the exact base and identify: (1) exact reusable accounting entities/tables/services/controllers/configuration actually present; (2) exact integration seams for sales, purchases, collections, payments, inventory, cost of goods sold, returns, adjustments, cash and bank; (3) dependencies and safe implementation boundaries for the next dependency-valid slice; (4) transaction, idempotency, concurrency, audit, RBAC/security and data-integrity risks supported by code evidence; (5) explicit rollback strategy; (6) explicit test/validation matrix; (7) explicit in-scope and out-of-scope items; and (8) files inspected plus validations actually run/not run. Do not invent paths or capabilities: cite exact repository paths/symbols found. Do not implement N4.8 product behavior. Do not modify TASKS.md or CHANGELOG_AI.md. Before COMPLETED, perform and report two independent self-reviews as SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, each with distinct checks and findings. Return patch/artifact for VAEP REVIEW_FIRST. No branch/PR/push/merge/deploy; never touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. R3 is prohibited."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-7-A11Y-REG-C",
+  "taskId": "N4.10.G.7.A11Y_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.a11y-regression.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add accessibility regression coverage. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "e124ec75a8db4efb1fb10a9e0714e451a9a07465"
+}

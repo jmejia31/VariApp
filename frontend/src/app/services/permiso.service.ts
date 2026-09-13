@@ -20,8 +20,8 @@ export class PermisoService {
     return this.http.put<ApiResponse<PermisoMatrizItem[]>>(`${this.apiUrl}/matriz/${rolId}`, { permisos });
   }
 
-  getMisPermisos(): Observable<ApiResponse<MisPermisos>> {
-    return this.http.get<ApiResponse<MisPermisos>>(`${this.apiUrl}/mis-permisos`);
+  getMisPermisos(empresaId: number): Observable<ApiResponse<MisPermisos>> {
+    return this.http.get<ApiResponse<MisPermisos>>(`${this.apiUrl}/mis-permisos/empresa/${empresaId}`);
   }
 
   // ---- Catálogo de permisos (sección 5) ----

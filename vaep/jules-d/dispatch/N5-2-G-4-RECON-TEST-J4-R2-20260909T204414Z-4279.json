@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-4-RECON-TEST-J4-R2-20260909T204414Z-4279",
+  "taskId": "N5.2.G.4.RECONCILIATION_TEST_CI",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioReconciliacion*Tests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only reconciliation traceability/audit/contract regression coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "23b1c53e5d62844afebf5386bef279fd1a3574e1"
+}

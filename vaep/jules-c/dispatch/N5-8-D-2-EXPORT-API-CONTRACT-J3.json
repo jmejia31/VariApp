@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-8-D-2-EXPORT-API-CONTRACT-J3",
+  "taskId": "N5.8.D.2.EXPORT_API_CONTRACT",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Controllers/ReportesAdministrativosController.cs;backend/tests/InventoryApp.Tests/N58DExportApiContractTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as MASTER, then docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md and the accepted N5.8.B, N5.8.C and N5.8.D.1 REVIEW_FIRST evidence. Work only on N5.8.D.2 API-contract verification. Inspect the existing ReportesAdministrativosController export endpoint against the now-implemented csv/xlsx/pdf service contract. Preserve current RBAC, administrator guard, audit logging, filters and File(...) response semantics. Verify that PDF content-type/filename from the service pass through correctly, invalid formats remain fail-closed through the existing service/controller behavior, and no new persistence or endpoint family is introduced. Change the controller only if a real contract defect exists; otherwise prefer narrowly directed tests/evidence proving the current endpoint is already correct. Keep changes limited to the declared scope, run relevant backend build/tests, provide terminal evidence and two self-reviews. Do not touch frontend, database/migrations, main, Produccion, secrets, or PR #2. Do not duplicate D1 implementation or create another writer for N5.8.D.1.",
+  "primaryBaseHead": "fbe2fe1f9714372a444975e81f8277f5ff05fa82"
+}

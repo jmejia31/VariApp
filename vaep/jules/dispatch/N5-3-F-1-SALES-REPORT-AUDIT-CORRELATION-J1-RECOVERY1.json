@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1-RECOVERY1",
+  "taskId": "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "vaep/jules/dispatch/N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1.json",
+  "recoveryReason": "ATTEMPT1_TRANSPORT_INVARIANT_FAILED_BEFORE_SESSION__PRIMARY_BASE_HEAD_RACE__NO_CONTENT_ATTEMPT_CONSUMED",
+  "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Recover the same N5.3.F.1 semantic facet after a pre-session PRIMARY_BASE_HEAD transport race; content attempt remains ATTEMPT1. Add bounded read-audit/correlation integration to ReportesVentasController using the existing IAuditoriaService pattern already used by inventory reports. Preserve [Authorize], Ventas/Ver RequierePermiso, report query validation, response contracts and data semantics. Keep the write scope to this controller only; do not touch main, Production, secrets or merge PR #2. Run proportional backend build/tests and perform two self-reviews before terminal handoff.",
+  "primaryBaseHead": "58ae4c72a9c6f0ca557f7163d489bce594adfcb2"
+}

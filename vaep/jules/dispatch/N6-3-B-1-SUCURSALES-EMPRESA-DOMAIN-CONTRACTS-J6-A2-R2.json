@@ -1,0 +1,16 @@
+{
+  "dispatchId": "N6-3-B-1-SUCURSALES-EMPRESA-DOMAIN-CONTRACTS-J6-A2-R2",
+  "taskId": "N6.3.B.1.SUCURSALES_EMPRESA_DOMAIN_CONTRACTS",
+  "semanticFacet": "SUCURSALES_EMPRESA_DOMAIN_CONTRACTS",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "primaryBaseHead": "c50ffeb2af3780e37846a6823d70bde9cf2f84de",
+  "dependency": "N6.3.A_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.A_LISTO_REAL_20260911T0701Z.json",
+  "recoveryOfDispatchId": "N6-3-B-1-SUCURSALES-EMPRESA-DOMAIN-CONTRACTS-J1-A1",
+  "recoveryReason": "ATTEMPT1 transport exceeded 10 minutes without observable correlated sessionId, artifact, or fresh useful technical activity; local ownership revoked per VAEP ACTIVE_REAL/timeout rules; late J1 result is evidence-only.",
+  "fileScopeHint": "backend/src/Domain/Entities/Empresa.cs;backend/src/Domain/Entities/Sucursal.cs;backend/tests/**/Sucursal*;backend/tests/**/*N63B*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo HEAD plus N6.3.A LISTO_REAL before editing. This is the single authorized material R2 for task N6.3.B.1.SUCURSALES_EMPRESA_DOMAIN_CONTRACTS after J1 ATTEMPT1 transport exceeded the ACTIVE_REAL timeout without observable sessionId/useful activity. Preserve the same taskId and execute only N6.3.B DOMAIN/CONTRACTS for Empresa -> multiple Sucursales using docs/N6.3_SUCURSALES_EMPRESA_PREFLIGHT.md. Define the minimum coherent domain invariants and ownership/reassignment contract, preserve Almacen -> Sucursal -> Empresa derivation, and make Codigo uniqueness semantics explicit at domain-contract level without implementing persistence/index changes here. Do not implement EF mapping, migrations/backfill, repositories/services/controllers/API, frontend, N6.4 memberships/roles, N6.5 anti-leakage enforcement, workflows, deployment, secrets, main or PR #2. Add directed domain tests only for invariants introduced. Run proportional tests, complete SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, report tests/omissions/risks and P0/P1, and return terminal patch/evidence for independent REVIEW_FIRST. No filler, no duplicate scope and R3 is prohibited.",
+  "acceptance": "N6.3.B domain contracts explicitly support one Empresa owning multiple Sucursales, define owner/reassignment invariants and Codigo uniqueness semantics without persistence/API/frontend/security spillover, preserve the unique derived ownership path for Almacen through Sucursal, include directed tests for introduced invariants, complete two self-reviews with P0=0/P1=0, and return a reviewable patch/evidence; no schema/migration/API/frontend/N6.4/N6.5/main/Produccion/secrets/PR2 changes."
+}

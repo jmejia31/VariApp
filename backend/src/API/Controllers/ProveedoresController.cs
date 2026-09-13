@@ -71,6 +71,24 @@ public class ProveedoresController : ControllerBase
         return Ok(ApiResponse<ProveedorDto>.Ok(actualizado, "Proveedor actualizado correctamente."));
     }
 
+    [HttpPatch("{id:int}/activar")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Activar)]
+    public async Task<IActionResult> Activar(int id)
+    {
+        var proveedor = await _service.CambiarEstadoAsync(id, true);
+        if (proveedor is null) return NotFound(ApiResponse<object>.Fail("Proveedor no encontrado."));
+        return Ok(ApiResponse<ProveedorDto>.Ok(proveedor, "Proveedor activado correctamente."));
+    }
+
+    [HttpPatch("{id:int}/desactivar")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Desactivar)]
+    public async Task<IActionResult> Desactivar(int id)
+    {
+        var proveedor = await _service.CambiarEstadoAsync(id, false);
+        if (proveedor is null) return NotFound(ApiResponse<object>.Fail("Proveedor no encontrado."));
+        return Ok(ApiResponse<ProveedorDto>.Ok(proveedor, "Proveedor desactivado correctamente."));
+    }
+
     [HttpDelete("{id:int}")]
     [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)

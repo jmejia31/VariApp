@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-FRONTEND-CONTRACTS-C-20260906T0314Z",
+  "taskId": "N4.10.A.7.FRONTEND_REPORT_CONTRACTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/reportes-financieros.model.ts; frontend/src/app/services/reportes-financieros.service.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.A. Implement the material frontend contract/client foundation identified by the completed frontend preflight. Own ONLY frontend/src/app/core/models/reportes-financieros.model.ts and frontend/src/app/services/reportes-financieros.service.ts. Define typed models and HttpClient methods for Balance General, Estado de Resultados, Balance de Comprobacion, Libro Mayor, Libro Diario and Flujo de Efectivo, including period/date filters and Blob export methods, following current Angular service conventions. Do not create routes/components yet and do not touch app.routes.ts. Run focused TypeScript/build/tests if available, perform TWO distinct self-reviews, no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "aff0001b25abeb4a9725b21a60f3cb03b7327e0c"
+}

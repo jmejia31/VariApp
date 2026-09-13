@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-DATE-RANGE-B-NEXT-20260906T0559Z",
+  "taskId": "N4.10.A.31.FINANCIAL_REPORT_DATE_RANGE_VALIDATION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDateRangeValidationTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Material NEXT_SAFE work for N4.10.A only; do not promote N4.10.A while predecessor closure remains unresolved. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDateRangeValidationTests.cs. Add focused tests for date/period range validation already exposed by current reporting/accounting code: same-day range, reversed range rejection, inclusive/exclusive boundaries as implemented, month/year rollover, and timezone-neutral deterministic handling where applicable. Do not invent report APIs. Run focused tests/build when possible and perform TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "8ffed166ab85738664cdf6b38a838c391d456d67"
+}

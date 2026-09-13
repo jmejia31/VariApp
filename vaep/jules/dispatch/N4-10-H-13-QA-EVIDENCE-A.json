@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-H-13-QA-EVIDENCE-A",
+  "taskId": "N4.10.H.13.QA_EVIDENCE_INDEX",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_QA_EVIDENCE.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Build a QA evidence index for N4.10 referencing only real commits/tests/runs/artifacts and unresolved gaps. Do not certify LISTO. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "e223a403684f798cb67242fa9576beebfb17f14d"
+}

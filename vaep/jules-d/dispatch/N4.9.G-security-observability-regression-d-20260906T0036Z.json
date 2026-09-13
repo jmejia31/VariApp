@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-SECURITY-OBSERVABILITY-REGRESSION-D-20260906T0036Z",
+  "taskId": "N4.9.G.SECURITY_OBSERVABILITY_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableSecurityObservabilityTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Your prior H release-readiness support is terminal; this is a NEW distinct current-parent regression scope. Add ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableSecurityObservabilityTests.cs. Cover fail-closed authorization boundary, audit/correlation propagation expectations visible from current contracts, no secret/error leakage, and secure failure semantics for create/close/list/get without modifying production code. Do not edit migrations, frontend, workflows, manifests, main, Produccion, secrets or deploy. Run focused dotnet tests/build and two independent self-reviews. Return material patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "6299aebaeea3732323cfe067600acfbb65985513"
+}

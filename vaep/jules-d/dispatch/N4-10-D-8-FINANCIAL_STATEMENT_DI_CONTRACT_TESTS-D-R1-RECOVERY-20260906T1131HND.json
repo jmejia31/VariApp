@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-8-FINANCIAL_STATEMENT_DI_CONTRACT_TESTS-D-R1-RECOVERY-20260906T1131HND",
+  "taskId": "N4.10.D.8.FINANCIAL_STATEMENT_DI_CONTRACT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Recovery of SAME N4.10.D.8.FINANCIAL_STATEMENT_DI_CONTRACT_TESTS; prior manifest never produced a Jules workflow/session, so attempt 1 was not consumed. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs. Add focused DI contract tests proving IEstadoFinancieroService resolves through the approved implementation and no duplicate/incorrect registration is introduced. No production changes. Run proportional focused tests/build and perform TWO independent self-reviews. No workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "c7ae244dc7bf1c5feeaf0c763bcf08fc27b633f5"
+}

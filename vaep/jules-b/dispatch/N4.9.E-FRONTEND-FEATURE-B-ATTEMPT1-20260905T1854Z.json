@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 3,
+  "taskId": "N4.9.E_ATTEMPT1_FRONTEND_FEATURE",
+  "attemptId": "N4.9.E-FRONTEND-FEATURE-B-ATTEMPT1-20260905T1854Z",
+  "title": "N4.9.E ATTEMPT1 — UI de periodos contables",
+  "priority": "P0",
+  "projectId": "N4.9",
+  "primaryRepo": "jmejia31/VariApp",
+  "primaryBranch": "Desarrollo",
+  "primaryBaseHead": "c630003561e59010447c35b9a574672fbd173b68",
+  "requiredBaseHead": "d514b4354efeabbc914383399a521725b6441c5a",
+  "rebaseRequiredOnHeadChange": false,
+  "readableRepos": ["jmejia31/VariApp", "jmejia31/VariApp-MCP", "jmejia31/VAAP"],
+  "editableRepos": ["jmejia31/VariApp"],
+  "objective": "Implementar el feature Angular de Periodos contables sobre la API N4.9.D certificada: listado paginado/filtrado, estados, crear y cerrar, sin tocar cliente core ni rutas.",
+  "inScope": [
+    "frontend/src/app/features/periodos-contables/periodos-contables.component.ts",
+    "frontend/src/app/features/periodos-contables/periodos-contables.component.html",
+    "frontend/src/app/features/periodos-contables/periodos-contables.component.scss"
+  ],
+  "outOfScope": [
+    "frontend/src/app/core/**",
+    "frontend/src/app/app.routes.ts",
+    "frontend/e2e/**",
+    "**/*.spec.ts",
+    "backend/**",
+    "vaep/** excepto resultado de lane"
+  ],
+  "acceptance": [
+    "Vista standalone consistente con patrones Angular existentes del repositorio.",
+    "Listado soporta filtros/paginacion y estados Abierto/Cerrado usando PeriodoContableService, sin duplicar acceso HTTP.",
+    "Crear periodo valida fechas/entrada y refleja ProblemDetails 400/409 de forma accionable.",
+    "Cerrar periodo requiere confirmacion y actualiza la vista sin permitir transiciones inválidas.",
+    "Estados loading/empty/error y controles deshabilitados durante mutaciones están presentes.",
+    "No inventar permisos; respetar autorización backend y patrones de PermisosRuntime existentes."
+  ],
+  "requiredValidations": [
+    "cd frontend && npm run build"
+  ],
+  "implementationRules": [
+    "Leer docs/VAEP_AUTHORITY.md primero.",
+    "Desarrollo only; no main/Produccion/secrets/deploy.",
+    "No tocar modelo/servicio core, rutas ni tests; ownership exclusivo de tres archivos del feature.",
+    "Consumir el contrato esperado de A; si aún no está materializado, mantener imports convencionales y documentar dependencia, sin editar su scope.",
+    "FUNCTIONAL_HEAD=d514b4354efeabbc914383399a521725b6441c5a; c630003 y posteriores vaep-only son control-plane equivalent.",
+    "No status-only: devolver patch material y validaciones reales."
+  ],
+  "expectedOutput": {"format": "unified_diff", "mustIncludeChangedFiles": true, "mustIncludeValidations": true, "mustIncludeRisks": true},
+  "ownership": {"files": ["frontend/src/app/features/periodos-contables/periodos-contables.component.ts", "frontend/src/app/features/periodos-contables/periodos-contables.component.html", "frontend/src/app/features/periodos-contables/periodos-contables.component.scss"]},
+  "lease": {"minutes": 30},
+  "createdAt": "2026-09-05T18:54:00Z",
+  "createdBy": "ChatGPT",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "lane": "B",
+  "attempt": 1
+}

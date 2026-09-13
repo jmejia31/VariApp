@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-ACCESSIBILITY-REGRESSION-C-R2-20260906T0149Z",
+  "taskId": "N4.9.G.ACCESSIBILITY_FRONTEND_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "722371a50ef7f6a4aca2c12a564612bec91cd031",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/periodos-contables/periodos-contables.accessibility.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Final R2, no R3. Prior artifact 9980161956 had a useful one-file accessibility test patch, but the required two genuinely independent self-reviews were not corroborated; marker echoes are insufficient. Re-run against CURRENT frontend state and write ONLY frontend/src/app/features/periodos-contables/periodos-contables.accessibility.spec.ts. Preserve/repair tests for roles/names, keyboard reachability, permission-hidden/disabled controls, loading/error/empty announcements, pagination limits. Do not touch package-lock.json, plan.md or any other file. Run focused Angular/Vitest tests/typecheck. Perform TWO distinct self-review passes with separate checklists/findings and record both in activity evidence. Return material patch/artifact. No R3."
+}

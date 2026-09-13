@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-21-LOADING-C",
+  "taskId": "N4.10.E.21.LOADING_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.loading.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused loading-state tests including disabled duplicate generation and eventual result/error transition. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "4ef8f4604e1c245d08fa310629a68d0477100e16"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-3-SENSITIVE-C-INCIDENT-RECOVERY",
+  "taskId": "N4.10.F.3.SENSITIVE_ERROR_UI_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.error-redaction.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.error-redaction.spec.ts. Verify UI errors never expose stack traces or internal server details. Run proportional tests and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "4a14f7e9505911a3ffcd0f28ef8d32361d429c09"
+}

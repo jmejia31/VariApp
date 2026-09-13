@@ -1,5 +1,3 @@
-using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -9,75 +7,55 @@ namespace InventoryApp.Tests;
 
 public class PermisoSeedServiceTests
 {
-    [Fact]
-    public async Task SeedDefaults_CreaPermisosDeAdministrador_YRespetaAsignacionesExplicitas()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+    private static AppDbContext CrearContexto() => new(
+        new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+            .Options);
 
-        await using var context = new AppDbContext(options);
+    [Fact]
+    public async Task SeedDefaults_CreaGrantsExplicitosAdministrador_SinBypassNiFilasDenegadas()
+    {
+        await using var context = CrearContexto();
+        var service = new SeedPermisoService(context);
 
-        context.RolPermisos.Add(new RolPermiso
-        {
-            Rol = RolUsuario.Vendedor,
-            Modulo = ModuloSistema.Productos,
-            Accion = AccionPermiso.Ver,
-            Permitido = true
-        });
+        await service.SeedDefaultsAsync();
 
-        await context.SaveChangesAsync();
+        var administrador = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.EsAdministrador);
+        var vendedor = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.NombreNormalizado == "VENDEDOR");
+        var permisosActivos = await context.Permisos.IgnoreQueryFilters().CountAsync(p => p.Activo && !p.Eliminado);
 
-        var seedService = new SeedPermisoService(context);
-        await seedService.SeedDefaultsAsync();
+        var grantsAdmin = await context.RolPermisos.CountAsync(rp => rp.RolId == administrador.Id);
+        var grantsVendedor = await context.RolPermisos.CountAsync(rp => rp.RolId == vendedor.Id);
 
-        var permisos = await context.RolPermisos
-            .Where(p => p.Rol == RolUsuario.Vendedor || p.Rol == RolUsuario.Administrador)
-            .OrderBy(p => p.Rol)
-            .ThenBy(p => p.Modulo)
-            .ThenBy(p => p.Accion)
-            .ToListAsync();
-
-        Assert.Contains(permisos, p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Ver && p.Permitido);
-        Assert.DoesNotContain(permisos, p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Compras && p.Accion == AccionPermiso.Crear);
-        Assert.Contains(permisos, p => p.Rol == RolUsuario.Administrador && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Crear && p.Permitido);
-
-        var vendedorProductosVer = permisos.Count(p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Ver);
-        Assert.Equal(1, vendedorProductosVer);
-
-        Assert.Contains(await context.Permisos.ToListAsync(), p =>
-            p.Modulo == ModuloSistema.Configuracion &&
-            p.Accion == AccionPermiso.Editar &&
-            p.Activo &&
-            p.EsSistema);
+        Assert.True(permisosActivos > 0);
+        Assert.Equal(permisosActivos, grantsAdmin);
+        Assert.Equal(0, grantsVendedor);
+        Assert.Equal(grantsAdmin, await context.RolPermisos
+            .Where(rp => rp.RolId == administrador.Id)
+            .Select(rp => new { rp.RolId, rp.PermisoId })
+            .Distinct()
+            .CountAsync());
     }
 
     [Fact]
-    public async Task SeedDefaults_NoReactivaPermisosDesactivadosManualmente()
+    public async Task SeedDefaults_EsIdempotente_YRestauraGrantAdministradorEliminado()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        await using var context = CrearContexto();
+        var service = new SeedPermisoService(context);
+        await service.SeedDefaultsAsync();
 
-        await using var context = new AppDbContext(options);
+        var administrador = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.EsAdministrador);
+        var grant = await context.RolPermisos.FirstAsync(rp => rp.RolId == administrador.Id);
+        var permisoId = grant.PermisoId;
 
-        context.RolPermisos.Add(new RolPermiso
-        {
-            Rol = RolUsuario.Vendedor,
-            Modulo = ModuloSistema.Ventas,
-            Accion = AccionPermiso.Crear,
-            Permitido = false
-        });
+        context.RolPermisos.Remove(grant);
         await context.SaveChangesAsync();
+        Assert.False(await context.RolPermisos.AnyAsync(rp => rp.RolId == administrador.Id && rp.PermisoId == permisoId));
 
-        var seedService = new SeedPermisoService(context);
-        await seedService.SeedDefaultsAsync();
+        await service.SeedDefaultsAsync();
+        await service.SeedDefaultsAsync();
 
-        var permiso = await context.RolPermisos.SingleAsync(p =>
-            p.Rol == RolUsuario.Vendedor &&
-            p.Modulo == ModuloSistema.Ventas &&
-            p.Accion == AccionPermiso.Crear);
-
-        Assert.False(permiso.Permitido);
+        Assert.Equal(1, await context.RolPermisos.CountAsync(rp =>
+            rp.RolId == administrador.Id && rp.PermisoId == permisoId));
     }
 }

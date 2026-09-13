@@ -37,13 +37,10 @@ public class PermisoRepository : IPermisoRepository
             !p.Eliminado && p.Modulo == modulo && p.Accion == accion && (excluirId == null || p.Id != excluirId));
 
     public async Task<int> ContarAsignacionesAsync(int permisoId) =>
-        await _context.RolPermisos.CountAsync(rp => rp.PermisoId == permisoId && rp.Permitido);
+        await _context.RolPermisos.CountAsync(rp => rp.PermisoId == permisoId);
 
     public async Task AddAsync(Permiso permiso) => await _context.Permisos.AddAsync(permiso);
-
     public void Update(Permiso permiso) => _context.Permisos.Update(permiso);
-
     public void Remove(Permiso permiso) => _context.Permisos.Remove(permiso);
-
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 }

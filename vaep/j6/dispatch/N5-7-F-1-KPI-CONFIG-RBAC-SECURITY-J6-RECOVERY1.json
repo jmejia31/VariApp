@@ -1,0 +1,14 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "dispatchId": "N5-7-F-1-KPI-CONFIG-RBAC-SECURITY-J6-RECOVERY1",
+  "taskId": "N5.7.F.1.KPI_CONFIG_RBAC_SECURITY",
+  "workerId": "J6",
+  "taskAttempt": 1,
+  "plannedParent": "N5.7.F",
+  "primaryBaseHead": "94c5a96c5ca8d13baca38d5ecd88019e15d7914f",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionSecurityTests.cs;backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionOwnershipTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational authority. Recover N5.7.F RBAC/ownership/audit/security verification after the prior canonical J6 workflow failed before any Jules session or patch. Add source-backed tests that prove a user cannot read/write another user's KPI configuration, role visibility does not broaden existing dashboard access, unknown metric keys fail closed, and auditable ownership rules remain enforced. Use the accepted N5.7 dashboard KPI contract and current repository patterns; do not invent formulas or unrelated security work. No Production, secrets, main, PR #2 merge, or unrelated changes.",
+  "dependencyReceipt": "vaep/evidence/fragments/N5.7.E_LISTO_REAL_20260910T1256Z.json",
+  "recoveryOf": "N5-7-F-1-KPI-CONFIG-RBAC-SECURITY-J6",
+  "recoveryReason": "PRE_SESSION_WORKFLOW_FAILURE_AFTER_NON_CANONICAL_DUPLICATE_CLEANUP__TASK_ATTEMPT_NOT_CONSUMED"
+}

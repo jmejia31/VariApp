@@ -1,5 +1,4 @@
 using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -12,24 +11,39 @@ namespace InventoryApp.Tests;
 public class ClienteServiceTests
 {
     private readonly Mock<IClienteRepository> _repoMock = new();
+    private readonly Mock<ITipoClienteRepository> _tipoClienteRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
+    private readonly Mock<ITipoClientePredeterminadoResolver> _predeterminadoResolverMock = new();
     private readonly ClienteService _service;
 
     public ClienteServiceTests()
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new ClienteService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
+
+        var fallback = new TipoCliente { Id = 1, Codigo = "SIN_CLASIFICAR", Nombre = "Sin clasificar", ColorHex = "#9E9E9E", Activo = true };
+        _tipoClienteRepoMock.Setup(r => r.GetActivosAsync()).ReturnsAsync(new List<TipoCliente> { fallback });
+        _tipoClienteRepoMock.Setup(r => r.GetByCodigoAsync("SIN_CLASIFICAR")).ReturnsAsync(fallback);
+        _tipoClienteRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(fallback);
+        _predeterminadoResolverMock.Setup(r => r.ResolverIdPredeterminadoAsync()).ReturnsAsync(1);
+
+        _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) => new Cliente { Id = id, Nombre = "Test", TipoClienteId = 1, TipoCliente = fallback });
+
+        _service = new ClienteService(_repoMock.Object, _tipoClienteRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object, _predeterminadoResolverMock.Object);
     }
 
     [Fact]
-    public async Task CreateAsync_Nombre_Duplicado_Lanza_Excepcion()
+    public async Task CreateAsync_Nombre_Duplicado_Es_Permitido()
     {
         _repoMock.Setup(r => r.ExisteNombreAsync("Juan Pérez", null)).ReturnsAsync(true);
+        _repoMock.Setup(r => r.AddAsync(It.IsAny<Cliente>())).Returns(Task.CompletedTask);
+        _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.CreateAsync(new CreateClienteDto { Nombre = "Juan Pérez" }));
+        await _service.CreateAsync(new CreateClienteDto { Nombre = "Juan Pérez" });
+
+        _repoMock.Verify(r => r.AddAsync(It.Is<Cliente>(c => c.Nombre == "Juan Pérez")), Times.Once);
+        _repoMock.Verify(r => r.ExisteIdentidadAsync(It.IsAny<string>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]

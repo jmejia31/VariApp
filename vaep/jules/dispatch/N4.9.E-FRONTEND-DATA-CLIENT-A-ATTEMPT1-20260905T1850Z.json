@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 3,
+  "taskId": "N4.9.E_ATTEMPT1_FRONTEND_DATA_CLIENT",
+  "attemptId": "N4.9.E-FRONTEND-DATA-CLIENT-A-ATTEMPT1-20260905T1850Z",
+  "title": "N4.9.E ATTEMPT1 — modelo y cliente Angular de periodos contables",
+  "priority": "P0",
+  "projectId": "N4.9",
+  "primaryRepo": "jmejia31/VariApp",
+  "primaryBranch": "Desarrollo",
+  "primaryBaseHead": "d514b4354efeabbc914383399a521725b6441c5a",
+  "requiredBaseHead": "d514b4354efeabbc914383399a521725b6441c5a",
+  "rebaseRequiredOnHeadChange": false,
+  "readableRepos": ["jmejia31/VariApp", "jmejia31/VariApp-MCP", "jmejia31/VAAP"],
+  "editableRepos": ["jmejia31/VariApp"],
+  "objective": "Implementar el contrato frontend y cliente HTTP de PeriodoContable contra la API N4.9.D ya certificada, manteniendo FUNCTIONAL_HEAD d514b435 por CONTROL_PLANE_HEAD_EQUIVALENCE.",
+  "inScope": [
+    "frontend/src/app/core/models/periodo-contable.model.ts",
+    "frontend/src/app/core/services/periodo-contable.service.ts",
+    "frontend/src/app/core/services/periodo-contable.service.spec.ts"
+  ],
+  "outOfScope": [
+    "frontend/src/app/features/**",
+    "frontend/src/app/app.routes.ts",
+    "frontend/e2e/**",
+    "backend/**",
+    "vaep/** excepto resultado de lane"
+  ],
+  "acceptance": [
+    "Modelar PeriodoContable y PagedResult/filtros requeridos por el contrato GET paginado certificado.",
+    "Cliente Angular soporta listar con filtros/paginacion, crear y cerrar periodos usando endpoints reales de N4.9.D.",
+    "No inventar endpoints ni permisos; derivarlos del controller y contratos backend actuales.",
+    "Errores HTTP permanecen observables para que la UI gestione ProblemDetails 400/404/409.",
+    "Tests unitarios del servicio cubren URL, query params y operaciones create/close."
+  ],
+  "requiredValidations": [
+    "cd frontend && npm test -- --watch=false",
+    "cd frontend && npm run build"
+  ],
+  "implementationRules": [
+    "Leer docs/VAEP_AUTHORITY.md primero.",
+    "Desarrollo only; no main/Produccion/secrets/deploy.",
+    "No tocar rutas ni componentes UI; ownership exclusivo de archivos inScope.",
+    "FUNCTIONAL_HEAD=d514b4354efeabbc914383399a521725b6441c5a; commits vaep posteriores son control-plane equivalent.",
+    "No status-only: devolver patch material y validaciones reales."
+  ],
+  "expectedOutput": {"format": "unified_diff", "mustIncludeChangedFiles": true, "mustIncludeValidations": true, "mustIncludeRisks": true},
+  "ownership": {"files": ["frontend/src/app/core/models/periodo-contable.model.ts", "frontend/src/app/core/services/periodo-contable.service.ts", "frontend/src/app/core/services/periodo-contable.service.spec.ts"]},
+  "lease": {"minutes": 30},
+  "createdAt": "2026-09-05T18:50:00Z",
+  "createdBy": "ChatGPT",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "lane": "A",
+  "attempt": 1
+}

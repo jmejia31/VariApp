@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-E-6-PROFITABILITY-PAGE-ROUTE-TESTS-J6",
+  "taskId": "N5.4.E.6.PROFITABILITY_PAGE_ROUTE_TESTS",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/rentabilidad/rentabilidad.component.ts;frontend/src/app/features/rentabilidad/rentabilidad.component.html;frontend/src/app/features/rentabilidad/rentabilidad.component.scss;frontend/src/app/features/rentabilidad/rentabilidad.component.spec.ts;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.rentabilidad.spec.ts",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and current Desarrollo. E1-E5 are REVIEW_FIRST accepted/integrated. Compose the profitability page using ReporteRentabilidadService, RentabilidadFiltrosComponent, RentabilidadAgrupacionComponent, RentabilidadResultadosTablaComponent and RentabilidadDisclosureComponent. Add the guarded report route using the existing Ventas/Ver permission pattern and focused route/page tests. Preserve loading/empty/error/accessibility behavior. Use the canonical camelCase ReporteRentabilidadDto contract. Do not calculate or expose margin percentage and do not invent header-discount allocation. No backend changes. One writer for this taskId; return patch/artifact only.",
+  "primaryBaseHead": "6248e5e91c4afced01c0c3e2360e47b104a3eeaa"
+}

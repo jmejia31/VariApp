@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-15-TABLE-SEMANTICS-A",
+  "taskId": "N4.10.E.15.TABLE_SEMANTICS_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.table-semantics.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused tests for result table headers, line ordering presentation and totals emphasis without changing production files. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "288e75ff58152a02a96465ff266ae16c53d7d3d6"
+}

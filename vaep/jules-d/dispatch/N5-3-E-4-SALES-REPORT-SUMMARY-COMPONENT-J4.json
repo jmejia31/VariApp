@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-E-4-SALES-REPORT-SUMMARY-COMPONENT-J4",
+  "taskId": "N5.3.E.4.SALES_REPORT_SUMMARY_COMPONENT",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-ventas/resumen/**",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, the accepted N5.3.E.1 frontend contracts, accepted N5.3.E.2 typed HTTP service, and live Desarrollo state. Implement the bounded sales-report summary view using the typed service/contracts, including loading, empty, error, accessible and responsive states. Do not own detail table, routing, HTTP service, backend, control-plane, main, Production, secrets or merge PR #2. Run proportional frontend lint/build/tests as applicable and perform two self-reviews before terminal handoff.",
+  "primaryBaseHead": "2915377bee777aae2630c332561f271a6d1e9de8"
+}

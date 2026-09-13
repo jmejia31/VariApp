@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-G-2-SERVICE-TEST-B",
+  "taskId": "N4.11.G.2.SERVICE_REGRESSION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/centro-costo.service.spec.ts",
+  "prompt": "Add focused CentroCosto frontend service regression; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "fe0a12cadb15537e9bcd215cb89bce6aa12882ef"
+}

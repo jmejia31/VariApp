@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-5-F-1-PURCHASE-REPORT-AUDIT-CORRELATION-J1",
+  "taskId": "N5.5.F.1.PURCHASE_REPORT_AUDIT_CORRELATION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Controllers/ReportesComprasController.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to ReportesComprasController using the existing optional IAuditoriaService pattern already established by ReportesVentasController. Preserve [Authorize], Compras/Ver RequierePermiso, existing filter validation/service contract and fail-closed scope. Record correlation/report metadata only; never log purchase payloads, prices, supplier details or other sensitive business data. Keep write scope to this controller only. Run proportional backend build/tests and two independent self-reviews before terminal handoff. Do not touch main, Production, secrets or merge PR #2.",
+  "primaryBaseHead": "d3f04a715f914a389b575582d3d84f9b978783a2"
+}

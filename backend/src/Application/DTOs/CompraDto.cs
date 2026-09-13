@@ -4,9 +4,14 @@ public class CompraDetalleDto
 {
     public int Id { get; set; }
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
+    public string? ProductoColor { get; set; }
+    public string? ProductoTalla { get; set; }
+    public string? ProductoSku { get; set; }
+    public string? ProductoImagenPrincipalUrl { get; set; }
     public int Cantidad { get; set; }
     public decimal CostoUnitario { get; set; }
     public decimal Subtotal { get; set; }
@@ -45,6 +50,7 @@ public class CompraDto
 public class CompraDetalleInputDto
 {
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public int Cantidad { get; set; }
     public decimal CostoUnitario { get; set; }
 }
@@ -58,12 +64,6 @@ public class CreateCompraDto
     public string? DocumentoReferencia { get; set; }
     public string MetodoPago { get; set; } = "Efectivo";
     public string EstadoPago { get; set; } = "Pendiente";
-
-    /// OBSOLETO / IGNORADO POR EL BACKEND (sección 13). Se conserva en el DTO
-    /// solo para no romper clientes viejos; el backend siempre recalcula
-    /// Impuesto desde el catálogo real vía ICalculoService. Descuento en
-    /// compras no está implementado todavía (ver limitación documentada en
-    /// CompraService.CalcularTotalesAsync).
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
     public string? Notas { get; set; }

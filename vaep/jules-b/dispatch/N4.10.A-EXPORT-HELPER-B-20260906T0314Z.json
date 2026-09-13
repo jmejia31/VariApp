@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-EXPORT-HELPER-B-20260906T0314Z",
+  "taskId": "N4.10.A.6.EXPORT_HELPER_REFACTOR",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Reporting/ExportacionArchivoHelper.cs; backend/src/Application/Services/ReporteAdministrativoService.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.A. Implement the material reusable export foundation identified by the N4.10.A security/export preflight. Own ONLY backend/src/Infrastructure/Reporting/ExportacionArchivoHelper.cs and backend/src/Application/Services/ReporteAdministrativoService.cs. Extract/reuse CSV/XLSX generation primitives so future financial reports can share them without duplicating ClosedXML/CSV formatting. Preserve existing ReporteAdministrativo behavior and public contracts; no controller/RBAC/frontend changes. Add focused tests only if they can live inside the existing owned file scope; otherwise report test gap. Run focused build/tests if available, perform TWO distinct self-reviews, no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "fb942ffc1eaf02a3dedbf4eaf09970112f7fe45e"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-CI-PROVENANCE-EVIDENCE-B-20260906T0129Z",
+  "taskId": "N4.9.G.CI_PROVENANCE_EVIDENCE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_CI_PROVENANCE_EVIDENCE.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Own ONLY docs/qa/N4_9_G_CI_PROVENANCE_EVIDENCE.md. Cross-review CI, persistence migration and rollback evidence relevant to PeriodoContable N4.9.G. Distinguish exact-head causal gates from legacy/global/non-causal noise, cite exact run/check names and repository evidence when observable, document gaps explicitly, and do not invent PASS. Do not modify production code, tests, migrations, workflows, manifests, main, Produccion, secrets or deploy. Perform two independent self-reviews before COMPLETED and return a material artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "a07c8a8da1a7b7ade30ac8a667618f3b48526c4f"
+}

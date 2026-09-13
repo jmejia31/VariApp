@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-62-FINANCIAL_REPORT_MALFORMED_INPUT_SECURITY_TESTS-D-AUTO",
+  "taskId": "N4.10.A.62.FINANCIAL_REPORT_MALFORMED_INPUT_SECURITY_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMalformedInputSecurityTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMalformedInputSecurityTests.cs. Add focused backend security regression tests for malformed current report inputs and fail-closed validation/error responses without inventing endpoints. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "dbbce72a1629bf589edf6569abcb1e73e83da5cd"
+}

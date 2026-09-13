@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-163-SENSITIVE_ERROR_REDACTION-TESTS-D-AUTO",
+  "taskId": "N4.10.A.163.SENSITIVE_ERROR_REDACTION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportSENSITIVEERRORREDACTION163Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportSENSITIVEERRORREDACTION163Tests.cs. Add a focused regression for the current behavior identified by SENSITIVE_ERROR_REDACTION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "c3335b8de4f3b6176c23b32d6e030a13c4afc5d5"
+}

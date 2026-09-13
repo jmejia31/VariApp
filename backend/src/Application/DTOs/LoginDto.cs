@@ -12,5 +12,6 @@ public class LoginResponseDto
     public string NombreUsuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public string Rol { get; set; } = string.Empty;
+    public string? FotoPerfilUrl { get; set; }
     public DateTime ExpiraEn { get; set; }
 }

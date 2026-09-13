@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.H-CERTIFICATION-A-ATTEMPT2-R2-20260906T0332Z",
+  "taskId": "N4.9.H.CERTIFICATION_A",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/VAEP_N4.9_H_CERTIFICATION.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.H. This is the single allowed ATTEMPT2/R2 for the H certification scope after R1 artifact 9981146944 was rejected as stale/out-of-scope and used forbidden generate_draft.sh. Own ONLY docs/VAEP_N4.9_H_CERTIFICATION.md. Produce truthful final certification evidence for N4.9 Periodos contables from current repository state: implemented scope, applicable tests/CI already present, rollback/runbook considerations, exact remaining blockers if any, and explicit no-invention/no-false-PASS statements. Do NOT run or create helper generation scripts. Do not modify production code, workflows, other docs, manifests or dependency files. Perform TWO distinct self-reviews. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "8e4f0866e81adc12037d76e421e755a02e9ec35b"
+}

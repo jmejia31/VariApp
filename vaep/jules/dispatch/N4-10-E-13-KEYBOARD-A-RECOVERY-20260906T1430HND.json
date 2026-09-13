@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-13-KEYBOARD-A-RECOVERY-20260906T1430HND",
+  "taskId": "N4.10.E.13.KEYBOARD_NAVIGATION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.keyboard.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused keyboard-navigation tests for financial-statement filters, generate action and result table. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews. RECOVERY: prior controller dispatch failed before Execute VAEP/Jules MASTER because catalog-floor syntax failed; no Jules attempt was consumed.",
+  "primaryBaseHead": "ca67f90e9b2210d167524e161973a9cdcbc34781"
+}

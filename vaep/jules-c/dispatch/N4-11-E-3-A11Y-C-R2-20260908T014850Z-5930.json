@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-E-3-A11Y-C-R2-20260908T014850Z-5930",
+  "taskId": "N4.11.E.3.ACCESSIBLE_UX",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.html",
+  "prompt": "After N4.11.D LISTO, implement accessible CentroCosto form/table states.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=7bc72d47ddaa1bdc70b7b631e20d55bd164887f7 requested=be036cec780b2bf6ae6581f5b0e544e8c4e28440. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "4bfb3d34c72f6d5900b3351ccf6d249fe4594ef2"
+}

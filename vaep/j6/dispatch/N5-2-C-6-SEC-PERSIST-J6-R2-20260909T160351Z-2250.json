@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-C-6-SEC-PERSIST-J6-R2-20260909T160351Z-2250",
+  "taskId": "N5.2.C.6.SECURITY_PERSISTENCE_REQUIREMENTS",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_SECURITY.md",
+  "prompt": "Only after N5.2.B LISTO_REAL, map audit/security persistence requirements, retention and isolation tests. No Production execution; no privilege expansion.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "630636962c6f0ec5a04040d31c79a48fac8a68e6"
+}

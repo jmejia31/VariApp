@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-24-INTERACTION-C",
+  "taskId": "N4.10.E.24.INTERACTION_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.interaction.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add interaction tests for switching statement type and regenerating with preserved valid filter state. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "01a82ec077c1e7088b4d23c250bde7c45bd8f68a"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-D-2-KARDEX-API-J2-R2-20260909T170513Z-6463",
+  "taskId": "N5.2.D.2.KARDEX_BACKEND_API",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/ReportesInventario/Kardex/**;backend/src/Infrastructure/ReportesInventario/Kardex/**;backend/src/API/Controllers/ReportesInventarioKardexController.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.B/N5.2.C Kardex decisions first. Implement only Kardex/movement-history application/repository/API, including deterministic (Fecha,Id) ordering, bounded server-side pagination and accepted legacy/history semantics. Do not implement valuation, stock-health, reconciliation or common shell. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=6462a4ee1a3c3c6cc562d82c4ff05e8b06963cbe requested=cdc80e50b9d3704fdd9b1ba511b34b98c60e4f0a. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "1a25fe9fb91eedd82b4915db501ead34089dfad0"
+}

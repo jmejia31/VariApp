@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-RBAC-SECURITY-B-R2-20260905T0318Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "82d43b3b36f8972750c3cf24397b7b3683a9ce1d",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Controllers/ContabilizacionController.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionRbacSecurityTests.cs; no migration/snapshot/audit-service/observability files; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. FINAL JULES R2 for CURRENT_PARENT N4.8.F RBAC/security. ATTEMPT1 N4.8.F-RBAC-SECURITY-B-20260905T0308Z was superseded after bootstrap/no-progress watchdog without ACTIVE_REAL evidence; do not revive or integrate it. Review POST /contabilizacion/eventos and materially close only a demonstrated RBAC/security gap, preserving authenticated-only behavior, relational ModuloSistema.Finanzas + AccionPermiso.Crear, no bypass/AllowAnonymous, no secret exposure, stable route/response contract. Add focused fail-closed tests; change controller only if a real gap exists. Do not touch EF snapshot/migrations, audit writer/service, correlation middleware/Program.cs. Run backend build/focused tests and two independent self-reviews. This is taskAttempt 2/2: unresolved blocker transfers to ChatGPT/VAEP QA_TAKEOVER; no R3. No branch/PR/push/merge/deploy; no main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact only."
+}

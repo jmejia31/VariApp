@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-B-5-SHIPPING-COST-CONTRACT-J5",
+  "taskId": "N5.4.B.5.SHIPPING_COST_CONTRACT",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve whether shipping cost participates in the source-backed N5.4 profitability/gross-margin contract. Inspect existing sale calculations, reporting tests and documentation. Write only docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md with the authoritative rule if proven; otherwise identify the exact unresolved contract and keep implementation dependency-gated. Do not invent treatment or implement C+. Desarrollo only.",
+  "primaryBaseHead": "7fd9eb9c9139002432afbb917f18273449306c01"
+}
