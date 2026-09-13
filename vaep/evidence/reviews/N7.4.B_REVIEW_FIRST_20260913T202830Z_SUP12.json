@@ -1,0 +1,112 @@
+{
+  "schema": "vaep-review-first/v1",
+  "parent": "N7.4.B",
+  "parent_scope": "N7.4 — Idempotencia e integraciones externas — MODEL",
+  "stage": "MODEL",
+  "branch": "Desarrollo",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "reviewed_at": "2026-09-13T20:28:30Z",
+  "automation": "Tarea Supervision :12",
+  "dependency": {
+    "parent": "N7.4.A",
+    "status": "LISTO_REAL",
+    "receipt": "vaep/evidence/receipts/N7.4.A_LISTO_REAL_20260913T202730Z.json",
+    "receipt_commit": "164975f5dccf9623760fa1122d84f36ce54b44f9",
+    "result": "PASS"
+  },
+  "functional_candidate_head": "aba717bfc2034221134ca0e9596f9603a659235d",
+  "directed_inspection": {
+    "files": [
+      {
+        "path": "backend/src/Domain/Entities/MensajeOutbox.cs",
+        "blob": "b970800c7ea9c996a5cce40f57250585b308e3ea",
+        "facts": [
+          "EmpresaId is mandatory and positive.",
+          "ClaveIdempotencia is mandatory, trimmed, bounded to 200 characters and immutable after creation.",
+          "EventoId is generated as a durable event identity.",
+          "The state machine prevents terminal Delivered/DeadLetter messages from being claimed again."
+        ]
+      },
+      {
+        "path": "backend/tests/InventoryApp.Tests/Domain/MensajeOutboxTests.cs",
+        "blob": "d252beb28ba7b2d6d5b471c28d53958cd97da7f8",
+        "facts": [
+          "Directed tests reject missing tenant and blank idempotency key.",
+          "Directed tests verify normalization and terminal/retry invariants."
+        ]
+      },
+      {
+        "path": "backend/src/Infrastructure/Persistence/Configurations/MensajeOutboxConfiguration.cs",
+        "blob": "a56141a489f59034df65e91b7146dfe74a644d4b",
+        "facts": [
+          "Persistence enforces unique EmpresaId + ClaveIdempotencia.",
+          "Persistence enforces unique EventoId."
+        ]
+      }
+    ],
+    "global_rescan": false
+  },
+  "model_contract": {
+    "tenant_scope": "EmpresaId is part of the idempotency boundary.",
+    "durable_key": "ClaveIdempotencia is required and normalized once when the durable intent is created.",
+    "duplicate_semantics": "Within the same EmpresaId, a repeated ClaveIdempotencia represents the same idempotency identity and must not create a second durable intent; a conflicting attempt is rejected rather than silently creating a new effect.",
+    "provider_contract_boundary": "The existing domain model already carries the durable identity required by an external provider. Propagation/translation into a concrete provider request is an Application/Infrastructure responsibility for N7.4.D, not a missing DOMAIN invariant.",
+    "retry_contract": "Retries reuse the same MensajeOutbox and therefore the same ClaveIdempotencia; no retry should mint a new provider idempotency identity."
+  },
+  "implementation_disposition": "SATISFIED_NA_IMPLEMENTATION",
+  "reason_no_product_patch": "The required MODEL invariants already exist and are covered by directed domain tests; adding a duplicate value object or parallel identity field would create filler without changing the acceptance contract.",
+  "risks_carried_forward": [
+    "N7.4.D must prove a concrete dispatcher/provider adapter forwards the durable key.",
+    "N7.4.G must prove replay after provider success/local confirmation failure produces one external effect."
+  ],
+  "review_first": {
+    "p0": 0,
+    "p1": 0,
+    "result": "PASS",
+    "notes": "MODEL acceptance is already satisfied by existing durable tenant+key invariants. The unproven provider-side propagation identified by N7.4.A belongs to the integration implementation/test stages and is not a missing domain invariant."
+  },
+  "causal_gates": [
+    {
+      "gate": "AUTHORITY_REREAD",
+      "required": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "DEPENDENCY_N7_4_A_RECEIPT",
+      "required": true,
+      "status": "PASS",
+      "evidence": "164975f5dccf9623760fa1122d84f36ce54b44f9"
+    },
+    {
+      "gate": "DIRECTED_DOMAIN_SOURCE_INSPECTION",
+      "required": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "DIRECTED_DOMAIN_TEST_COVERAGE_INSPECTION",
+      "required": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "PRODUCT_PATCH_INTEGRATION",
+      "required": false,
+      "status": "NOT_APPLICABLE_ALREADY_SATISFIED"
+    },
+    {
+      "gate": "BROAD_FUNCTIONAL_CI",
+      "required": false,
+      "status": "NOT_APPLICABLE_EVIDENCE_ONLY_NO_PRODUCT_DELTA"
+    },
+    {
+      "gate": "CONTROL_PLANE_WRITE",
+      "required": false,
+      "status": "DEBT_OPEN_NON_MATERIAL"
+    }
+  ],
+  "candidate_stable": true,
+  "production_files_changed": 0,
+  "schema_changed": false,
+  "frontend_changed": false,
+  "falsePass": false,
+  "falseListo": false
+}
