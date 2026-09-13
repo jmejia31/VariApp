@@ -87,7 +87,6 @@ public static class PoliticaModulosSaaS
         int empresaContextoId,
         int empresaObjetivoId,
         Suscripcion? suscripcion,
-        int planIdEfectivo,
         Plan? planEfectivo,
         IEnumerable<PlanModulo>? reglas,
         string? moduloClave,
@@ -110,12 +109,12 @@ public static class PoliticaModulosSaaS
             return DecisionModuloSaaS.Deshabilitar(MotivoDecisionModuloSaaS.SuscripcionNoVigente);
         }
 
-        if (planIdEfectivo <= 0 || planEfectivo is null || !planEfectivo.Activo)
+        if (planEfectivo is null || planEfectivo.Id <= 0 || !planEfectivo.Activo)
         {
             return DecisionModuloSaaS.Deshabilitar(MotivoDecisionModuloSaaS.PlanNoDisponible);
         }
 
-        if (suscripcion.PlanId != planIdEfectivo)
+        if (suscripcion.PlanId != planEfectivo.Id)
         {
             return DecisionModuloSaaS.Deshabilitar(MotivoDecisionModuloSaaS.PlanNoCoincide);
         }
@@ -127,7 +126,7 @@ public static class PoliticaModulosSaaS
 
         var habilitado = reglas?.Any(regla =>
             regla.Activo &&
-            regla.PlanId == planIdEfectivo &&
+            regla.PlanId == planEfectivo.Id &&
             string.Equals(regla.ModuloClave, moduloNormalizado, StringComparison.Ordinal)) == true;
 
         return habilitado
