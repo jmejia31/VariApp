@@ -1,88 +1,23 @@
 {
-  "schema": "vaep-listo-real/v1",
+  "schema": "vaep-evidence-tombstone/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "parent": "N7.1.D",
-  "stage": "BACKEND_API",
   "branch": "Desarrollo",
-  "result": "LISTO_REAL",
-  "closed_at": "2026-09-13T06:48:00Z",
-  "countsTowardRolling60": true,
-  "dependency": {
-    "parent": "N7.1.C",
-    "receipt": "vaep/evidence/fragments/N7.1.C_LISTO_REAL_20260913T055530Z.json",
-    "commit": "349c5d657d098dc93a46aad74201dc9cac3eff12",
-    "status": "PASS"
-  },
-  "functional_head": "a122d1a4bdf5097979a44e786e51be7ec29ff7ea",
-  "review_head": "80492c608b251667d34b4ffd34596f8ed27f1148",
-  "review_evidence": "vaep/evidence/reviews/N7.1.D_REVIEW_FIRST_20260913T064540Z.json",
-  "review_result": "PASS",
-  "p0_count": 0,
-  "p1_count": 0,
-  "dod": "PASS",
-  "candidate_frozen": true,
-  "functional_equivalence_after_candidate": "PASS__REVIEW_AND_RECEIPT_EVIDENCE_ONLY",
-  "acceptance": {
-    "repository_implementation": "PASS",
-    "repository_dependency_injection": "PASS",
-    "application_use_case_service": "PASS",
-    "tenant_scoped_authority": "PASS",
-    "tenant_scoped_idempotency": "PASS",
-    "http_api_problem_details_contract": "PASS",
-    "persistence_race_conflict_scoped": "PASS",
-    "directed_regression_coverage": "PASS",
-    "production_execution": "NOT_PERFORMED"
-  },
-  "causal_gate_matrix": [
-    {
-      "gate": "REVIEW_FIRST",
-      "required": true,
-      "causal": true,
-      "status": "PASS",
-      "review_head": "80492c608b251667d34b4ffd34596f8ed27f1148",
-      "evidence": "vaep/evidence/reviews/N7.1.D_REVIEW_FIRST_20260913T064540Z.json; P0=0; P1=0; DoD=PASS"
-    },
-    {
-      "gate": "STATIC_CONTRACTS_TESTS_PRODUCTION_BUILD",
-      "required": true,
-      "causal": true,
-      "status": "PASS",
-      "functional_head": "a122d1a4bdf5097979a44e786e51be7ec29ff7ea",
-      "run_id": 34742719377,
-      "job_id": 103685054601
-    },
-    {
-      "gate": "BACKEND_RELEASE_AND_TESTS",
-      "required": true,
-      "causal": true,
-      "status": "PASS",
-      "functional_head": "a122d1a4bdf5097979a44e786e51be7ec29ff7ea",
-      "run_id": 34742719407,
-      "job_id": 103685073407
-    },
-    {
-      "gate": "UNRELATED_LONG_RUNNING_WORKFLOW",
-      "required": false,
-      "causal": false,
-      "status": "NONBLOCKING"
-    },
-    {
-      "gate": "DEPLOY_PRODUCTION",
-      "required": false,
-      "causal": false,
-      "status": "OUT_OF_SCOPE"
-    }
-  ],
+  "status": "SUPERSEDED_DUPLICATE_RACE",
+  "countsTowardRolling60": false,
+  "canonicalReceipt": "vaep/evidence/fragments/N7.1.D_LISTO_REAL_20260913T064600Z.json",
+  "canonicalCommit": "84f4659de415330f3d44cf2ceeb01f3ac4fbb58b",
+  "reason": "A concurrent closer persisted the canonical N7.1.D LISTO_REAL receipt first. This later receipt was created from the same functional candidate/review during a read-write race and is neutralized immediately. It is historical evidence only and MUST NOT count as a second close, promotion, retry, manifest or ownership event.",
+  "functionalCandidateHead": "a122d1a4bdf5097979a44e786e51be7ec29ff7ea",
+  "reviewHead": "80492c608b251667d34b4ffd34596f8ed27f1148",
   "guards": {
+    "duplicateOwnership": false,
+    "secondClose": false,
+    "promotion": false,
     "filler": false,
-    "false_pass": false,
-    "false_listo": false,
-    "main_untouched": true,
-    "production_untouched": true,
-    "deploy_untouched": true,
-    "secrets_untouched": true,
-    "pr2_not_merged": true,
-    "git_destructive": false
-  },
-  "next_action": "PROMOTE_NEXT_DEPENDENCY_VALID_PARENT_ONLY_AFTER_FRESH_STATE_REREAD"
+    "mainUntouched": true,
+    "productionUntouched": true,
+    "deployUntouched": true,
+    "secretsUntouched": true
+  }
 }
