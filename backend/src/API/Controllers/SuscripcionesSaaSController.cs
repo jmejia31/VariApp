@@ -1,15 +1,19 @@
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Services;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InventoryApp.API.Controllers;
 
 /// <summary>
 /// Superficie API mínima N6.9.D. empresaId expresa selección de tenant, no
-/// autoridad; ISuscripcionesSaaSService debe verificar membresía server-side antes
-/// de consultar o mutar persistencia.
+/// autoridad; ISuscripcionesSaaSService verifica membresía server-side antes de
+/// consultar o mutar persistencia.
 /// </summary>
 [ApiController]
 [Authorize]
@@ -18,6 +22,23 @@ public sealed class SuscripcionesSaaSController : ControllerBase
 {
     private readonly ISuscripcionesSaaSService _service;
 
+    /// <summary>
+    /// Composition root explícito N6.9.D usando dependencias ya registradas en el
+    /// host. Se marca para que ActivatorUtilities no elija el constructor de tests.
+    /// </summary>
+    [ActivatorUtilitiesConstructor]
+    public SuscripcionesSaaSController(
+        AppDbContext db,
+        IUsuarioScopeService usuarioScopeService)
+        : this(new SuscripcionesSaaSService(
+            new SuscripcionesSaaSRepository(db),
+            usuarioScopeService))
+    {
+    }
+
+    /// <summary>
+    /// Constructor inyectable para pruebas dirigidas del contrato HTTP.
+    /// </summary>
     public SuscripcionesSaaSController(ISuscripcionesSaaSService service)
     {
         _service = service;

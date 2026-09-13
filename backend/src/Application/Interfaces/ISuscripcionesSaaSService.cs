@@ -14,6 +14,10 @@ public interface ISuscripcionesSaaSRepository
         string codigo,
         CancellationToken cancellationToken = default);
 
+    Task<Plan?> ObtenerPlanPorIdAsync(
+        int planId,
+        CancellationToken cancellationToken = default);
+
     Task<Suscripcion?> ObtenerVigenteAsync(
         int empresaId,
         DateTime instanteUtc,
