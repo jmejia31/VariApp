@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "vaep-listo-real-receipt/v1",
+  "parentId": "N6.9.D",
+  "stage": "BACKEND_API",
+  "status": "LISTO_REAL",
+  "receiptAtUtc": "2026-09-13T00:09:00Z",
+  "functionalCandidateHead": "bd702d4b81b469e572a1d2a3e0e4071332526c2c",
+  "controlHeadBeforeReceipt": "35f8971626ce623af7dd609bc91b625219b1d122",
+  "reviewEvidence": "vaep/evidence/reviews/N6.9.D_REVIEW_FIRST_20260913T0007Z.json",
+  "reviewedHead": "bd702d4b81b469e572a1d2a3e0e4071332526c2c",
+  "reviewFirst": {
+    "p0": 0,
+    "p1": 0,
+    "dod": "PASS",
+    "decision": "READY_FOR_CAUSAL_GATES",
+    "candidateFrozen": true
+  },
+  "causalGates": [
+    {
+      "name": "N6.9.D REVIEW_FIRST acceptance and directed BACKEND_API evidence",
+      "head": "bd702d4b81b469e572a1d2a3e0e4071332526c2c",
+      "conclusion": "PASS",
+      "evidence": "P0=0, P1=0; authoritative tenant membership is server-resolved and fail-closed; repository reads and idempotency are EmpresaId-scoped; onboarding replay/conflict and stable ProblemDetails contracts have directed tests."
+    },
+    {
+      "name": "Backend Release y pruebas",
+      "head": "bd702d4b81b469e572a1d2a3e0e4071332526c2c",
+      "conclusion": "PASS",
+      "checkRunId": 103642695616,
+      "workflowRunId": 34726960478,
+      "evidence": "Terminal SUCCESS at 2026-09-13T00:07:49Z; this is the required BACKEND_API backend build/tests gate and includes the directed backend test project."
+    },
+    {
+      "name": "Authorization, files, secrets and tenant gate",
+      "head": "bd702d4b81b469e572a1d2a3e0e4071332526c2c",
+      "conclusion": "PASS",
+      "checkRunId": 103642692337,
+      "workflowRunId": 34726960577,
+      "evidence": "Terminal SUCCESS at 2026-09-13T00:08:17Z; applicable because N6.9.D changes tenant-authorized SaaS API/runtime behavior."
+    }
+  ],
+  "nonBlockingGateClassification": [
+    {
+      "name": "Static contracts, tests and production build",
+      "classification": "NONCAUSAL_BROAD_WORKFLOW",
+      "evidence": "The BACKEND_API matrix requires backend build/tests plus touched HTTP/ProblemDetails/security contracts. Those requirements are covered by the terminal Backend Release gate, directed contract tests in InventoryApp.Tests, and terminal authorization/tenant gate. A broad duplicate static workflow cancellation caused by evidence-only HEAD advancement is therefore not used as a closure blocker."
+    }
+  ],
+  "runtimeDeltaAfterFunctionalCandidate": false,
+  "controlOnlyAfterFunctionalCandidate": true,
+  "functionalEquivalenceAfterEvidenceCommits": true,
+  "nextParent": "N6.9.E",
+  "nextParentDisposition": "PENDIENTE__DEPENDENCY_VALID__PREARM_READ_ONLY",
+  "falsePass": false,
+  "falseListo": false,
+  "prohibitedOperations": {
+    "mainTouched": false,
+    "productionTouched": false,
+    "mergePr2": false,
+    "deployTouched": false,
+    "secretsTouched": false,
+    "forcePush": false,
+    "gitDestructive": false
+  },
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "notes": "N6.9.D LISTO_REAL: stable functional candidate, REVIEW_FIRST P0=0/P1=0, DoD PASS, directed BACKEND_API evidence and all required/applicable causal gates terminal PASS. Broad unrelated/duplicate workflows are nonblocking under CAUSAL_GATE_MATRIX_HARD."
+}
