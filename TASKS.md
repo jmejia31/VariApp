@@ -123,8 +123,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` sobre `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` sobre `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
@@ -403,7 +403,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 - [x] REVIEW_FIRST de migración F0-F6 detectó una regresión concreta: el overlay de admisión de Fase 1 había sido retirado anteriormente por no estar definido en MASTER. Fase 7 lo corrigió sin crear autoridad paralela: `docs/VAEP_AUTHORITY.md` ahora define explícitamente `vaep/control/dispatch-admission.json` y `.github/scripts/vaep-jules-master.sh` lo consume fail-closed.
 - [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `VariApp CI=SKIPPED` excluido de PASS.
-- [x] Admisión probada por self-test: `NO_OP`, múltiples manifests fail-closed, `FROZEN`, `OPEN`, valor inválido, clave desconocida y state ausente. `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones ACTIVE_REAL preexistentes.
+- [x] Admisión probada por self-test: `NO_OP`, múltiples manifests fail-closed, `FROZEN`, `OPEN`, valor inválido, clave desconocida y state ausente. `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones `ACTIVE_REAL` preexistentes.
 - [x] Política MASTER: exactamente un bloque parseable con seis claves; parser fail-closed sin `source`/`eval`; hash determinístico del bloque preservado; runtime emite `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
 - [x] Runtime Jules final: `NO_OP=PASS`, budget interno desde MASTER, safety-net externo 25m, timeout supersession, ownership revoke, lane release, durable evidence y late-result guard.
 - [x] Cleanup final: documentos protocolarios versionados activos=0; manifests históricos JSON en rutas activas=0; `.vaep/jules/dispatch`=0; historical publishers/writers=0; `ci.yml` conserva producto con permisos read-only y sin commit/push.
@@ -480,3 +480,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.2.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.2.H. NEXT_PARENT_PREARMED=N7.3.A. No se promueve N7.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.3 — Dead-letter del Outbox — ROLLUP DOCUMENTAL 2026-09-13
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.3.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.3.G — candidate funcional final `2c19221fdbb0a3cdfdcf8afdc839999bf8e80265`; gates causales `34776343835/103775053849`, `34776340372/103775044416` y `34776340372/103775044622` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.3.G_LISTO_REAL_20260913T191310Z.json`.
+- [x] N7.3.H — certificación canónica `docs/CERTIFICACION_N7_3_DEAD_LETTER.md` publicada en `c7c0d449991419bc7e1dd9c13b9a70ab5a15764c`.
+- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
+- [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
+
+**CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
