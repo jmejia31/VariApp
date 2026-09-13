@@ -1,0 +1,43 @@
+name: N7.2.D - Outbox retry exact-head
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - "backend/src/Application/Interfaces/IMensajeOutboxRepository.cs"
+      - "backend/src/Application/Services/OutboxRetryPolicy.cs"
+      - "backend/src/Application/Services/OutboxRetryProcessor.cs"
+      - "backend/src/Infrastructure/Repositories/MensajeOutboxRepository.cs"
+      - "backend/tests/InventoryApp.Tests/N71DOutboxApplicationApiTests.cs"
+      - "backend/tests/InventoryApp.Tests/N72DOutboxRetryPolicyTests.cs"
+      - "backend/tests/InventoryApp.Tests/N72DOutboxRetryProcessorTests.cs"
+      - "backend/tests/InventoryApp.Tests/N72DOutboxRepositoryClaimTests.cs"
+      - ".github/workflows/vaep-n72d-outbox-retry-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vaep-n72d-outbox-retry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-retry:
+    name: Build and directed retry tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Restore
+        run: dotnet restore backend/InventoryApp.sln
+      - name: Build Release
+        run: dotnet build backend/InventoryApp.sln -c Release --no-restore
+      - name: Directed N7.2.D tests
+        run: dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj -c Release --no-build --filter "FullyQualifiedName~N72DOutbox"
