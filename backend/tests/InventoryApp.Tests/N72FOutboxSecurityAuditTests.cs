@@ -1,7 +1,10 @@
 using System.Text.Json;
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -88,30 +91,70 @@ public sealed class N72FOutboxSecurityAuditTests
         public string DetalleJson { get; private set; } = string.Empty;
 
         public Task RegistrarAsync(
-            string usuario,
-            string accion,
-            string entidad,
-            string entidadId,
-            object? detalle = null,
-            CancellationToken cancellationToken = default)
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null)
         {
-            Accion = accion;
+            Accion = descripcion;
             Entidad = entidad;
-            DetalleJson = JsonSerializer.Serialize(detalle);
+            DetalleJson = JsonSerializer.Serialize(valoresNuevos);
             return Task.CompletedTask;
         }
+
+        public Task RegistrarEstrictoAsync(
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null) =>
+            RegistrarAsync(modulo, accion, descripcion, referenciaId, entidad, valoresAnteriores, valoresNuevos, motivo, resultado, error);
+
+        public Task<PagedResult<RegistroAuditoriaDto>> GetFilteredAsync(AuditoriaFiltroDto filtro) =>
+            Task.FromException<PagedResult<RegistroAuditoriaDto>>(new NotSupportedException());
     }
 
     private sealed class ThrowingAuditoria : IAuditoriaService
     {
         public Task RegistrarAsync(
-            string usuario,
-            string accion,
-            string entidad,
-            string entidadId,
-            object? detalle = null,
-            CancellationToken cancellationToken = default) =>
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null) =>
             Task.FromException(new InvalidOperationException("audit-store-down"));
+
+        public Task RegistrarEstrictoAsync(
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null) =>
+            Task.FromException(new InvalidOperationException("audit-store-down"));
+
+        public Task<PagedResult<RegistroAuditoriaDto>> GetFilteredAsync(AuditoriaFiltroDto filtro) =>
+            Task.FromException<PagedResult<RegistroAuditoriaDto>>(new InvalidOperationException("audit-store-down"));
     }
 
     private sealed class FakeRepository : IMensajeOutboxRepository
