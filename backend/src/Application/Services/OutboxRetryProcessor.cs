@@ -63,15 +63,20 @@ public sealed record OutboxRetryBatchResult(
 /// </summary>
 public sealed class OutboxRetryProcessor
 {
+    private const string AuditUsuario = "outbox-worker";
+    private const string AuditEntidad = "MensajeOutbox";
+
     private readonly IMensajeOutboxRepository _repository;
     private readonly OutboxRetryProcessorOptions _options;
     private readonly OutboxRetryPolicy _policy;
     private readonly Func<double> _jitterSample;
+    private readonly IAuditoriaService? _auditoria;
 
     public OutboxRetryProcessor(
         IMensajeOutboxRepository repository,
         OutboxRetryProcessorOptions options,
-        Func<double>? jitterSample = null)
+        Func<double>? jitterSample = null,
+        IAuditoriaService? auditoria = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _options = (options ?? throw new ArgumentNullException(nameof(options))).Validar();
@@ -81,6 +86,7 @@ public sealed class OutboxRetryProcessor
             _options.MaxDelay,
             _options.JitterRatio);
         _jitterSample = jitterSample ?? Random.Shared.NextDouble;
+        _auditoria = auditoria;
     }
 
     public async Task<OutboxRetryBatchResult> ProcesarLoteAsync(
@@ -128,9 +134,25 @@ public sealed class OutboxRetryProcessor
                     ahoraUtc,
                     cancellationToken);
                 if (confirmado)
+                {
                     entregados++;
+                    await AuditarAsync(
+                        "OUTBOX_RETRY_DELIVERED",
+                        empresaId,
+                        mensaje,
+                        "DELIVERED",
+                        cancellationToken);
+                }
                 else
+                {
                     supersedidos++;
+                    await AuditarAsync(
+                        "OUTBOX_RETRY_SUPERSEDED",
+                        empresaId,
+                        mensaje,
+                        "CLAIM_SUPERSEDED",
+                        cancellationToken);
+                }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -139,7 +161,7 @@ public sealed class OutboxRetryProcessor
             catch
             {
                 // No persistimos Exception.Message, payload ni datos del proveedor.
-                // La telemetría detallada pertenece a SEC_AUDIT con redacción.
+                // La auditoria SEC_AUDIT usa exclusivamente campos allow-listed.
                 var decision = _policy.EvaluarDespuesDeFallo(
                     mensaje.Intentos,
                     ahoraUtc,
@@ -157,13 +179,35 @@ public sealed class OutboxRetryProcessor
                 if (!confirmado)
                 {
                     supersedidos++;
+                    await AuditarAsync(
+                        "OUTBOX_RETRY_SUPERSEDED",
+                        empresaId,
+                        mensaje,
+                        "CLAIM_SUPERSEDED",
+                        cancellationToken);
                     continue;
                 }
 
                 if (decision.DeadLetter)
+                {
                     deadLetter++;
+                    await AuditarAsync(
+                        "OUTBOX_RETRY_DEAD_LETTER",
+                        empresaId,
+                        mensaje,
+                        "DEAD_LETTER",
+                        cancellationToken);
+                }
                 else
+                {
                     reprogramados++;
+                    await AuditarAsync(
+                        "OUTBOX_RETRY_RESCHEDULED",
+                        empresaId,
+                        mensaje,
+                        "DELIVERY_FAILED",
+                        cancellationToken);
+                }
             }
         }
 
@@ -174,5 +218,34 @@ public sealed class OutboxRetryProcessor
             reprogramados,
             deadLetter,
             supersedidos);
+    }
+
+    private Task AuditarAsync(
+        string accion,
+        int empresaId,
+        MensajeOutbox mensaje,
+        string resultado,
+        CancellationToken cancellationToken)
+    {
+        if (_auditoria is null)
+            return Task.CompletedTask;
+
+        // SEC_AUDIT: allow-list estricta. Nunca payload, ClaveIdempotencia,
+        // Exception.Message ni datos del proveedor en la evidencia de auditoria.
+        var detalle = new
+        {
+            EmpresaId = empresaId,
+            MensajeId = mensaje.Id,
+            Intento = mensaje.Intentos,
+            Resultado = resultado
+        };
+
+        return _auditoria.RegistrarAsync(
+            AuditUsuario,
+            accion,
+            AuditEntidad,
+            mensaje.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            detalle,
+            cancellationToken);
     }
 }
