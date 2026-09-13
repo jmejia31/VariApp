@@ -1,6 +1,8 @@
 using InventoryApp.API.Controllers;
+using InventoryApp.API.Filters;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -58,6 +60,25 @@ public class SuscripcionesSaaSBackendApiContractTests
         Assert.NotNull(idempotencia);
         Assert.Equal("empresaId", vigente!.GetParameters()[0].Name);
         Assert.Equal("empresaId", idempotencia!.GetParameters()[0].Name);
+    }
+
+    [Theory]
+    [InlineData(nameof(SuscripcionesSaaSController.Onboarding), ModuloSistema.Configuracion, AccionPermiso.Crear)]
+    [InlineData(nameof(SuscripcionesSaaSController.ObtenerActual), ModuloSistema.Configuracion, AccionPermiso.Ver)]
+    [InlineData(nameof(SuscripcionesSaaSController.ObtenerLimites), ModuloSistema.Configuracion, AccionPermiso.Ver)]
+    public void Endpoints_ExigenPermisoRelacional(
+        string methodName,
+        ModuloSistema modulo,
+        AccionPermiso accion)
+    {
+        var method = typeof(SuscripcionesSaaSController).GetMethod(methodName);
+        Assert.NotNull(method);
+
+        var permiso = Assert.Single(method!.GetCustomAttributesData()
+            .Where(x => x.AttributeType == typeof(RequierePermisoAttribute)));
+
+        Assert.Equal((int)modulo, Convert.ToInt32(permiso.ConstructorArguments[0].Value));
+        Assert.Equal((int)accion, Convert.ToInt32(permiso.ConstructorArguments[1].Value));
     }
 
     [Fact]
