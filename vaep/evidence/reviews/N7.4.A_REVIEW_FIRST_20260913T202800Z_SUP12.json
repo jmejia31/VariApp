@@ -1,0 +1,122 @@
+{
+  "schema": "vaep-review-first/v1",
+  "parent": "N7.4.A",
+  "parent_scope": "N7.4 — Idempotencia e integraciones externas — Inspeccion dirigida + revision",
+  "stage": "PRE",
+  "branch": "Desarrollo",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "reviewed_at": "2026-09-13T20:28:00Z",
+  "automation": "Tarea Supervision :12",
+  "dependency": {
+    "parent": "N7.3.H",
+    "status": "LISTO_REAL",
+    "receipt": "vaep/evidence/receipts/N7.3.H_LISTO_REAL_20260913T201216Z.json",
+    "receipt_head": "aba717bfc2034221134ca0e9596f9603a659235d",
+    "result": "PASS"
+  },
+  "functional_candidate_head": "aba717bfc2034221134ca0e9596f9603a659235d",
+  "pre_evidence_head": "9d4567aaea7f3b37212f79053c7334160c80c226",
+  "pre_evidence": "vaep/evidence/reviews/N7.4.A_PRE_20260913T202100Z_SUP12.json",
+  "acceptance": "Confirmar estado real, alcance/fuera de alcance, componentes afectados, dependencias, riesgos, criterios de aceptacion, rollback y estrategia de pruebas para idempotencia e integraciones externas sin implementar cambios grandes en PRE.",
+  "directed_inspection": {
+    "files": [
+      "backend/src/Application/Services/MensajeOutboxService.cs",
+      "backend/src/Application/Services/OutboxRetryProcessor.cs",
+      "backend/src/Infrastructure/Persistence/Configurations/MensajeOutboxConfiguration.cs",
+      "backend/src/Infrastructure/Repositories/MensajeOutboxRepository.cs",
+      "backend/src/API/Controllers/MensajesOutboxController.cs",
+      "backend/src/Infrastructure/Migrations/20260913050800_N71COutboxPersistence.cs"
+    ],
+    "facts": [
+      "Application already requires, trims and tenant-binds Idempotency-Key before staging.",
+      "Database mapping already enforces unique EmpresaId + ClaveIdempotencia and unique EventoId.",
+      "Retry processor is tenant-bound and its dispatcher contract requires propagating ClaveIdempotencia to the provider.",
+      "End-to-end provider-side idempotency is not yet proven by a concrete provider adapter in the inspected exact-head integration surface."
+    ],
+    "global_rescan": false
+  },
+  "scope_decision": {
+    "in_scope": [
+      "Formalize external-provider idempotency semantics and durable identity propagation.",
+      "Implement or prove a concrete provider adapter/dispatcher that forwards the durable key.",
+      "Verify retry/crash replay produces one external effect.",
+      "Audit tenant isolation and safe provider error handling.",
+      "Document operational recovery and rollback semantics."
+    ],
+    "out_of_scope": [
+      "main, Produccion, deploy, secrets and PR #2.",
+      "New migration when existing persistence is sufficient and no causal model gap is proven.",
+      "Frontend work unless a later stage demonstrates a causal user-visible requirement.",
+      "Large implementation in PRE."
+    ],
+    "affected_components": [
+      "MensajeOutboxService",
+      "OutboxRetryProcessor/IOutboxEffectDispatcher",
+      "MensajeOutbox persistence/repository",
+      "external integration adapter(s)",
+      "directed regression tests"
+    ]
+  },
+  "risks": [
+    "Provider effect can succeed before local delivery confirmation; a retry can dispatch again unless provider-side idempotency is honored.",
+    "Tenant identity or idempotency key must never be accepted from an untrusted cross-tenant source.",
+    "Provider errors must not leak payload, credentials or secret material into audit evidence.",
+    "Adding schema/UI without a demonstrated causal need would be filler and is prohibited."
+  ],
+  "rollback_strategy": "N7.4.A changes no production behavior or schema. Evidence-only commits are functionally equivalent to the dependency head. Downstream implementation must use normal forward commits for rollback; no reset/force-push.",
+  "test_strategy": [
+    "MODEL: same-key/same-intent and same-key/different-intent contract tests.",
+    "BACKEND_API: verify provider adapter forwards the durable idempotency key and preserves tenant scope.",
+    "SEC_AUDIT: verify allow-listed errors and no secret/payload leakage.",
+    "TEST_CI: simulate provider-success followed by local-confirmation failure, retry, concurrency and tenant isolation; assert a single external effect."
+  ],
+  "review_first": {
+    "p0": 0,
+    "p1": 0,
+    "result": "PASS",
+    "notes": "The PRE microtask is complete: the implementation risk is explicitly identified and directed to N7.4.B-H. The downstream provider-idempotency gap is not an unresolved P1 of PRE itself, because PRE acceptance is inspection, scope and directed planning rather than implementation."
+  },
+  "causal_gates": [
+    {
+      "gate": "AUTHORITY_REREAD",
+      "required": true,
+      "status": "PASS"
+    },
+    {
+      "gate": "DEPENDENCY_N7_3_H_RECEIPT",
+      "required": true,
+      "status": "PASS",
+      "evidence": "aba717bfc2034221134ca0e9596f9603a659235d"
+    },
+    {
+      "gate": "SHEET_SCHEMA_GUARD_CURRENT_PARENT",
+      "required": true,
+      "status": "PASS",
+      "row": 568,
+      "columns": 26
+    },
+    {
+      "gate": "DIRECTED_SOURCE_INSPECTION",
+      "required": true,
+      "status": "PASS",
+      "files_inspected": 6
+    },
+    {
+      "gate": "BROAD_FUNCTIONAL_CI",
+      "required": false,
+      "status": "NOT_APPLICABLE_PRE_EVIDENCE_ONLY"
+    },
+    {
+      "gate": "CONTROL_PLANE_WRITE",
+      "required": false,
+      "status": "DEBT_OPEN_NON_MATERIAL",
+      "error": "This tool call was blocked by OpenAI's safety checks. Please double check what you are sending."
+    }
+  ],
+  "candidate_stable": true,
+  "production_files_changed": 0,
+  "schema_changed": false,
+  "frontend_changed": false,
+  "falsePass": false,
+  "falseListo": false
+}
