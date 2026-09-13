@@ -120,13 +120,13 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 
 - [x] N3.6.H quedó cerrado realmente antes de iniciar N3.7; el `CHANGELOG_AI.md` canónico preserva ese cierre en blob `d53c56416ac7ac01beef761adab5172cf5297487`.
 - [x] N3.7.A auditoría/preflight — `LISTO_REAL`, Issue #752, P0=0/P1=0.
-- [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 SUCCESS.
+- [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
-- [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0/P1=0 pasa a `LISTO`.
+- [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
 **Promoción de N3.8 permanece bloqueada hasta N3.7.H=LISTO.**
 ## ERP-N3.8 — Nota de débito de cliente — CIERRE CONDICIONAL/N/A
@@ -492,15 +492,3 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.3.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0 y validar los gates causales exact-head aplicables.
 
 **CURRENT_PARENT=N7.3.H. NEXT_PARENT_PREARMED=N7.4.A. No se promueve N7.4.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
-
-## ERP-N7.4 — Idempotencia — ROLLUP DOCUMENTAL 2026-09-13
-
-Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
-
-- [x] N7.4.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
-- [x] N7.4.G — functional candidate `1c366562a90c590cc2925a153298fd1b758e8dab`; causal gates `34782712890/103792518381`, `34782712890/103792518352`, `34782712890/103792518396`, `34782712884/103792518243` y `34782712884/103792518046` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.4.G_LISTO_REAL_20260913T220100Z_SUP48.json`.
-- [x] N7.4.H — certificación canónica `docs/CERTIFICACION_N7_4_IDEMPOTENCIA.md` publicada en `6097f60ff68d163878d5d3d85c590c59f0cd2f75`.
-- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando toda historia previa.
-- [ ] N7.4.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional y persistir/releer receipt H.
-
-**CURRENT_PARENT=N7.4.H. NEXT_PARENT_PREARMED=N7.5.A. No se promueve N7.5.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
