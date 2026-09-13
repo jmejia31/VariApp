@@ -234,10 +234,18 @@ public sealed class OutboxRetryProcessor
         // Exception.Message ni datos del proveedor en la evidencia de auditoria.
         var detalle = new
         {
+            // Se conservan los aliases historicos y se agregan los nombres
+            // canonicos exigidos por la evidencia N7.3 para reconstruccion.
             EmpresaId = empresaId,
             MensajeId = mensaje.Id,
+            TenantId = empresaId,
+            OutboxId = mensaje.Id,
+            CorrelationId = mensaje.CorrelationId,
             Intento = mensaje.Intentos,
-            Resultado = resultado
+            Resultado = resultado,
+            Error = resultado is "DEAD_LETTER" or "DELIVERY_FAILED"
+                ? "DELIVERY_FAILED"
+                : null
         };
 
         try
