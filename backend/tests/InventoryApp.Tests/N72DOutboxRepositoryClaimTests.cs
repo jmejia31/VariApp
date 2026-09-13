@@ -1,0 +1,131 @@
+using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Repositories;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
+
+namespace InventoryApp.Tests;
+
+public sealed class N72DOutboxRepositoryClaimTests
+{
+    private static readonly DateTime AhoraUtc = new(2026, 9, 13, 10, 50, 0, DateTimeKind.Utc);
+
+    [Fact]
+    public async Task SegundoClaim_No_Obtiene_Mensaje_Y_Outcome_Queda_Guardado_Por_Intento()
+    {
+        await using var harness = await Harness.CreateAsync();
+        var id = await harness.InsertAsync("idem-claim");
+
+        await using var db1 = harness.NewContext();
+        await using var db2 = harness.NewContext();
+        var repo1 = new MensajeOutboxRepository(db1);
+        var repo2 = new MensajeOutboxRepository(db2);
+
+        var primero = await repo1.ClaimDisponiblesAsync(7, AhoraUtc, 10);
+        var segundo = await repo2.ClaimDisponiblesAsync(7, AhoraUtc, 10);
+
+        var claimed = Assert.Single(primero);
+        Assert.Empty(segundo);
+        Assert.Equal(id, claimed.Id);
+        Assert.Equal(1, claimed.Intentos);
+        Assert.Equal(EstadoMensajeOutbox.Procesando, claimed.Estado);
+
+        Assert.True(await repo1.MarcarEntregadoAsync(7, id, 1, AhoraUtc.AddSeconds(1)));
+        Assert.False(await repo2.MarcarEntregadoAsync(7, id, 1, AhoraUtc.AddSeconds(2)));
+
+        await using var verify = harness.NewContext();
+        var persisted = await verify.Set<MensajeOutbox>().AsNoTracking().SingleAsync(x => x.Id == id);
+        Assert.Equal(EstadoMensajeOutbox.Entregado, persisted.Estado);
+        Assert.Equal(AhoraUtc.AddSeconds(1), persisted.EntregadoEnUtc);
+    }
+
+    [Fact]
+    public async Task StaleRecovery_Invalida_Outcome_Del_Worker_Viejo_Y_Permite_Reclaim()
+    {
+        await using var harness = await Harness.CreateAsync();
+        var id = await harness.InsertAsync("idem-stale");
+
+        await using var db = harness.NewContext();
+        var repo = new MensajeOutboxRepository(db);
+        var first = Assert.Single(await repo.ClaimDisponiblesAsync(7, AhoraUtc, 10));
+        Assert.Equal(1, first.Intentos);
+
+        var recoveryTime = AhoraUtc.AddMinutes(11);
+        var recovered = await repo.RecuperarProcesandoStaleAsync(
+            7,
+            AhoraUtc.AddMinutes(10),
+            recoveryTime,
+            10);
+
+        Assert.Equal(1, recovered);
+        Assert.False(await repo.MarcarEntregadoAsync(7, id, 1, recoveryTime.AddSeconds(1)));
+
+        var second = Assert.Single(await repo.ClaimDisponiblesAsync(7, recoveryTime, 10));
+        Assert.Equal(id, second.Id);
+        Assert.Equal(2, second.Intentos);
+        Assert.Equal(EstadoMensajeOutbox.Procesando, second.Estado);
+    }
+
+    [Fact]
+    public async Task Claim_Esta_Aislado_Por_Tenant()
+    {
+        await using var harness = await Harness.CreateAsync();
+        await harness.InsertAsync("idem-tenant", empresaId: 8);
+
+        await using var db = harness.NewContext();
+        var repo = new MensajeOutboxRepository(db);
+
+        Assert.Empty(await repo.ClaimDisponiblesAsync(7, AhoraUtc, 10));
+        Assert.Single(await repo.ClaimDisponiblesAsync(8, AhoraUtc, 10));
+    }
+
+    private sealed class Harness : IAsyncDisposable
+    {
+        private readonly SqliteConnection _keeper;
+        private readonly string _connectionString;
+
+        private Harness(SqliteConnection keeper, string connectionString)
+        {
+            _keeper = keeper;
+            _connectionString = connectionString;
+        }
+
+        public static async Task<Harness> CreateAsync()
+        {
+            var name = $"n72d-{Guid.NewGuid():N}";
+            var connectionString = $"Data Source=file:{name}?mode=memory&cache=shared";
+            var keeper = new SqliteConnection(connectionString);
+            await keeper.OpenAsync();
+            var harness = new Harness(keeper, connectionString);
+            await using var db = harness.NewContext();
+            await db.Database.EnsureCreatedAsync();
+            return harness;
+        }
+
+        public AppDbContext NewContext()
+        {
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlite(_connectionString)
+                .Options;
+            return new AppDbContext(options);
+        }
+
+        public async Task<int> InsertAsync(string idempotencyKey, int empresaId = 7)
+        {
+            await using var db = NewContext();
+            var mensaje = MensajeOutbox.Crear(
+                empresaId,
+                "inventory.changed",
+                "{\"safe\":true}",
+                idempotencyKey,
+                creadoEnUtc: AhoraUtc.AddMinutes(-1));
+            db.Add(mensaje);
+            await db.SaveChangesAsync();
+            return mensaje.Id;
+        }
+
+        public async ValueTask DisposeAsync() => await _keeper.DisposeAsync();
+    }
+}
