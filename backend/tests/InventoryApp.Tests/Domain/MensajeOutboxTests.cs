@@ -86,6 +86,27 @@ public class MensajeOutboxTests
     }
 
     [Fact]
+    public void FalloConReintentoEnPasado_NoMutaMensaje()
+    {
+        var mensaje = CrearValido();
+        var intento = Creado.AddMinutes(1);
+        mensaje.MarcarProcesando(intento);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            mensaje.RegistrarFallo(
+                "timeout SMTP",
+                intento.AddSeconds(5),
+                intento.AddSeconds(4),
+                maximoIntentos: 3));
+
+        Assert.Equal(EstadoMensajeOutbox.Procesando, mensaje.Estado);
+        Assert.Equal(1, mensaje.Intentos);
+        Assert.Equal(intento, mensaje.ProcesandoDesdeUtc);
+        Assert.Null(mensaje.UltimoError);
+        Assert.Equal(Creado, mensaje.DisponibleDesdeUtc);
+    }
+
+    [Fact]
     public void AgotarIntentos_MueveADeadLetterYBloqueaNuevoClaim()
     {
         var mensaje = CrearValido();
