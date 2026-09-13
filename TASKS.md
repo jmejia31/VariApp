@@ -342,7 +342,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Timeout revoca ownership, marca `SUPERSEDED`, bloquea late-result automatic integration, libera lane y entrega `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`.
 - [x] Supersession queda durable en artifact estructurado + Issue `[VAEP-JULES-SUPERSEDED]`; el worker consulta ese ledger antes de iniciar/reanudar y antes de publicar resultado.
 - [x] Auxiliares stop/session-health/feedback/diagnostic quedaron MASTER-bound y sin writer de producto/LISTO_REAL.
-- [x] Se corrigió el YAML heredoc preexistente de `vaep-jules-diagnostic.yml`; el workflow volvió a crear jobs y el run PR `33911803009` terminó `SUCCESS`.
+- [x] Se corrigió el YAML heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el workflow volvió a crear jobs y el run PR `33911803009` terminó `SUCCESS`.
 - [x] Gate runtime causal: `VAEP engine lightweight checks` push `33911698939` = `SUCCESS` sobre `b130d044497af09ad81ed33ec4e182bad1a8769f`; cambio posterior `8310372f...` es únicamente reparación del workflow diagnóstico y su check propio quedó SUCCESS.
 - [x] `VariApp CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
@@ -370,7 +370,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 ## VAEP Fase 5 — Cleanup documental y manifests — 2026-09-04
 
-- [x] Semantic-diff de `docs/VAEP_V320_RETRY_CAP.md`, `docs/VAEP_V320_SPRINT40_QUEUE.md`, `docs/VAEP_V321_PARENT40_QUEUE.md` y `docs/VAEP_V321_PARENT_CLOSURE.md` contra `docs/VAEP_AUTHORITY.md`: `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`. Las reglas aún vigentes (retry cap, pre-session no consume attempt, doble self-review, parent-close, zero-idle/failover, QA takeover y seguridad) ya están incorporadas en MASTER; Sprint40/Rolling40/version labels/checkpoints antiguos son historia expirada, no autoridad activa.
+- [x] Semantic-diff de `docs/VAEP_V320_RETRY_CAP.md`, `docs/VAEP_V320_SPRINT40_QUEUE.md`, `docs/VAEP_V321_PARENT40_QUEUE.md` y `docs/VAEP_V321_PARENT_CLOSURE.md` contra `docs/VAEP_AUTHORITY.md`: `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`. Las reglas aún vigentes (retry cap, pre-session no consume attempt, doble self-review, parent-close, zero-idle/failover, QA takeover y seguridad) ya están incorporadas por MASTER; Sprint40/Rolling40/version labels/checkpoints antiguos son historia expirada, no autoridad activa.
 - [x] Eliminados del árbol activo los cuatro documentos versionados; Git conserva su historia completa.
 - [x] Ledger previo de manifests activos: A=780, B=693, C=656, D=663, `.vaep/jules/dispatch`=3; total=2795.
 - [x] Clasificación: los manifests ya estaban comprometidos/disparados y por tanto son transporte consumido/histórico; `N4.7.A-G=LISTO_REAL` según estado vigente y el manifest Jules B de `N4.7.H.DOC_CERT` ya produjo terminal `COMPLETED` (Issue #2654) y quedó sujeto a REVIEW_FIRST del controller. No se conserva ningún manifest JSON histórico dentro de las rutas activas.
@@ -382,8 +382,8 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - C `33913519551=SUCCESS`
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
-- [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
+- [x] No se usó `[skip ci]` como mecanismo de seguridad.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
