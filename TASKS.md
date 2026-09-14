@@ -80,7 +80,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
 - [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
-**ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura / Auditoría y preflight`.**
+**ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
 
@@ -226,7 +226,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Certificación canónica publicada: `docs/CERTIFICACION_N4_5_CUENTAS_POR_PAGAR.md`.
 - [x] Baseline funcional certificado: `541ec12b72912c769c6f54b8821771e509818375`; el HEAD posterior contiene únicamente documentación y manifests de coordinación VAEP/Jules.
 - [x] P0 abiertos=0; P1 abiertos=0 para el alcance A-G según la evidencia canónica revisada.
-- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0.
+- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0/P1=0.
 
 **CURRENT_PARENT=N4.5.H. CLOSABLE_NOW=NO hasta completar la reconciliación documental y los gates exact-head. `N4.6.A` permanece `PREARMED/PROMOTION_HELD`; no se promueve antes del cierre real de N4.5.H.**
 
