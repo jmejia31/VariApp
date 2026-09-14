@@ -100,6 +100,7 @@ public sealed class TiendaController : ControllerBase
 
         if (dto.Items.Any(item =>
                 item.ProductoId <= 0
+                || item.ProductoVarianteId is <= 0
                 || item.Unidades <= 0
                 || item.Unidades > MaxUnidadesPorLinea
                 || (item.ModeloNombre?.Length ?? 0) > MaxLongitudIdentidadVariante
@@ -112,6 +113,7 @@ public sealed class TiendaController : ControllerBase
             .GroupBy(item => new
             {
                 item.ProductoId,
+                item.ProductoVarianteId,
                 item.ModeloId,
                 ModeloNombre = string.IsNullOrEmpty(item.ModeloNombre) ? null : item.ModeloNombre,
                 MarcaNombre = string.IsNullOrEmpty(item.MarcaNombre) ? null : item.MarcaNombre
@@ -119,6 +121,7 @@ public sealed class TiendaController : ControllerBase
             .Select(grupo => new CheckoutTiendaItemRequestDto
             {
                 ProductoId = grupo.Key.ProductoId,
+                ProductoVarianteId = grupo.Key.ProductoVarianteId,
                 ModeloId = grupo.Key.ModeloId,
                 ModeloNombre = grupo.Key.ModeloNombre,
                 MarcaNombre = grupo.Key.MarcaNombre,
@@ -138,6 +141,8 @@ public sealed class TiendaController : ControllerBase
                 return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Uno de los productos ya no está disponible. Actualiza el carrito antes de continuar."));
 
             var variantesActivas = producto.Variantes.Where(variante => variante.Activo).ToList();
+            int? productoVarianteId = null;
+            int? modeloId = solicitud.ModeloId;
             int stock;
             decimal precio;
             string? modelo;
@@ -145,30 +150,51 @@ public sealed class TiendaController : ControllerBase
 
             if (variantesActivas.Count > 0)
             {
-                var variantesModelo = variantesActivas
-                    .Where(variante =>
-                        variante.ModeloId == solicitud.ModeloId
-                        && string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)
-                        && string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal))
-                    .ToList();
+                ProductoVarianteDto? varianteSeleccionada = null;
 
-                if (variantesModelo.Count == 0)
-                    return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Una variante seleccionada ya no está disponible. Actualiza el carrito antes de continuar."));
+                if (solicitud.ProductoVarianteId.HasValue)
+                {
+                    varianteSeleccionada = variantesActivas.FirstOrDefault(variante =>
+                        variante.Id == solicitud.ProductoVarianteId.Value
+                        && variante.ProductoId == producto.Id);
 
-                stock = variantesModelo.Sum(variante => Math.Max(0, variante.Cantidad));
-                precio = variantesModelo
-                    .Where(variante => variante.Precio > 0)
-                    .Select(variante => variante.Precio)
-                    .DefaultIfEmpty(0)
-                    .Min();
-                modelo = variantesModelo.Select(variante => variante.ModeloNombre).FirstOrDefault(nombre => !string.IsNullOrWhiteSpace(nombre));
-                var skus = variantesModelo.Select(variante => variante.Sku).Where(valor => !string.IsNullOrWhiteSpace(valor)).Distinct().ToList();
-                sku = skus.Count == 1 ? skus[0] : null;
+                    if (varianteSeleccionada is null)
+                        return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La variante exacta seleccionada ya no está disponible. Actualiza el carrito antes de continuar."));
+                }
+                else
+                {
+                    var variantesModelo = variantesActivas
+                        .Where(variante =>
+                            variante.ModeloId == solicitud.ModeloId
+                            && string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)
+                            && string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal))
+                        .ToList();
+
+                    if (variantesModelo.Count == 0)
+                        return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Una variante seleccionada ya no está disponible. Actualiza el carrito antes de continuar."));
+
+                    if (variantesModelo.Count > 1)
+                        return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La selección corresponde a más de una variante física. Actualiza el carrito y selecciona una variante exacta."));
+
+                    varianteSeleccionada = variantesModelo[0];
+                }
+
+                productoVarianteId = varianteSeleccionada.Id;
+                modeloId = varianteSeleccionada.ModeloId;
+                stock = Math.Max(0, varianteSeleccionada.Cantidad);
+                precio = varianteSeleccionada.Precio;
+                modelo = varianteSeleccionada.ModeloNombre;
+                sku = varianteSeleccionada.Sku;
             }
             else
             {
-                if (solicitud.ModeloId is not null || solicitud.ModeloNombre is not null || solicitud.MarcaNombre is not null)
+                if (solicitud.ProductoVarianteId is not null
+                    || solicitud.ModeloId is not null
+                    || solicitud.ModeloNombre is not null
+                    || solicitud.MarcaNombre is not null)
+                {
                     return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La variante seleccionada ya no existe. Actualiza el carrito antes de continuar."));
+                }
 
                 stock = Math.Max(0, producto.Cantidad);
                 precio = producto.PrecioMinimo > 0 ? producto.PrecioMinimo : producto.Precio;
@@ -186,7 +212,8 @@ public sealed class TiendaController : ControllerBase
             lineas.Add(new CheckoutTiendaLineaDto
             {
                 ProductoId = producto.Id,
-                ModeloId = solicitud.ModeloId,
+                ProductoVarianteId = productoVarianteId,
+                ModeloId = modeloId,
                 Nombre = producto.Nombre,
                 Modelo = modelo,
                 Sku = sku,
@@ -260,11 +287,11 @@ public sealed class TiendaController : ControllerBase
                 })
                 .ToList(),
             Modelos = variantesActivas
-                .GroupBy(v => new { v.ModeloId, v.ModeloNombre, v.MarcaNombre })
-                .OrderBy(g => g.Key.ModeloNombre)
-                .Select(g =>
+                .OrderBy(v => v.ModeloNombre)
+                .ThenBy(v => v.Id)
+                .Select(v =>
                 {
-                    var imagenesEspecificas = g.SelectMany(v => v.Imagenes)
+                    var imagenesEspecificas = v.Imagenes
                         .Where(i => !string.IsNullOrWhiteSpace(i.Url))
                         .OrderBy(i => i.Orden)
                         .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal })
@@ -275,16 +302,16 @@ public sealed class TiendaController : ControllerBase
                         .GroupBy(i => i.Url)
                         .Select(grupo => grupo.First())
                         .ToList();
-                    var skus = g.Select(v => v.Sku).Where(sku => !string.IsNullOrWhiteSpace(sku)).Distinct().ToList();
-                    var cantidad = g.Sum(v => Math.Max(0, v.Cantidad));
+                    var cantidad = Math.Max(0, v.Cantidad);
 
                     return new ModeloCatalogoPublicoDto
                     {
-                        ModeloId = g.Key.ModeloId,
-                        ModeloNombre = g.Key.ModeloNombre,
-                        MarcaNombre = g.Key.MarcaNombre,
-                        Sku = skus.Count == 1 ? skus[0] : null,
-                        Precio = g.Where(v => v.Precio > 0).Select(v => v.Precio).DefaultIfEmpty().Min(),
+                        ProductoVarianteId = v.Id,
+                        ModeloId = v.ModeloId,
+                        ModeloNombre = v.ModeloNombre,
+                        MarcaNombre = v.MarcaNombre,
+                        Sku = v.Sku,
+                        Precio = Math.Max(0, v.Precio),
                         CantidadDisponible = cantidad,
                         EstaAgotado = cantidad <= 0,
                         Imagenes = imagenes
