@@ -86,6 +86,41 @@ public sealed class N78DPagoOnlineServiceTests
     }
 
     [Fact]
+    public async Task IniciarAsync_UrlHttpProveedor_RechazaCheckoutNoSeguro()
+    {
+        PagoOnline? guardado = null;
+        var repository = CrearRepositoryBase(() => guardado);
+        repository
+            .Setup(x => x.AgregarAsync(It.IsAny<PagoOnline>(), It.IsAny<CancellationToken>()))
+            .Callback<PagoOnline, CancellationToken>((pago, _) =>
+            {
+                pago.Id = 93;
+                guardado = pago;
+            })
+            .Returns(Task.CompletedTask);
+
+        var provider = new Mock<IPagoOnlineProvider>();
+        provider.SetupGet(x => x.Codigo).Returns("provider-test");
+        provider
+            .Setup(x => x.IniciarAsync(It.IsAny<SolicitudInicioPagoOnline>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ResultadoInicioPagoOnline(
+                "ref-http-93",
+                new Uri("http://payments.example.test/p/93"),
+                EstadoPagoOnline.Pendiente));
+
+        var service = CrearService(repository.Object, provider.Object);
+        var solicitud = new IniciarPagoOnlineDto(7, 41, "provider-test", 75m, "HNL");
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            service.IniciarAsync(solicitud, "idem-N78F-http-00000001"));
+
+        Assert.NotNull(guardado);
+        Assert.Equal(EstadoPagoOnline.Fallido, guardado!.Estado);
+        Assert.Equal("PROVIDER_INIT_FAILED", guardado.UltimoError);
+        Assert.Null(guardado.UrlPago);
+    }
+
+    [Fact]
     public async Task IniciarAsync_ProveedorNoConfigurado_NoCreaIntentoNiAlmacenaDatosDeTarjeta()
     {
         PagoOnline? guardado = null;
