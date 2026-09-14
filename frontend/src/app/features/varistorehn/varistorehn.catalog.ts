@@ -155,7 +155,12 @@ export function restaurarCarrito(valor: unknown, productos: ProductoTienda[]): I
     if (!ref || !Number.isInteger(ref.productoId) || typeof ref.modeloClave !== 'string'
       || !Number.isInteger(ref.unidades) || ref.unidades <= 0) continue;
     const producto = productos.find(p => p.id === ref.productoId);
-    const modelo = producto?.modelos.find(m => m.clave === ref.modeloClave && m.disponible);
+    const modelosDisponibles = producto?.modelos.filter(m => m.disponible) ?? [];
+    const exacto = modelosDisponibles.find(m => m.clave === ref.modeloClave);
+    const legacy = exacto ? [] : modelosDisponibles.filter(m =>
+      JSON.stringify([m.modeloId ?? null, m.nombre ?? '', m.marca ?? '']) === ref.modeloClave);
+    // A legacy tuple is upgraded only when it maps unambiguously to one physical variant.
+    const modelo = exacto ?? (legacy.length === 1 ? legacy[0] : undefined);
     if (!producto || !modelo) continue;
     const item = crearItem(producto, modelo, ref.unidades);
     const anterior = resultado.get(item.clave);
