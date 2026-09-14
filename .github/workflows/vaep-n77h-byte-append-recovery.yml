@@ -1,0 +1,74 @@
+name: VAEP N7.7.H byte append recovery
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n77h-byte-append-recovery.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n77h-byte-append-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Recover N7.7.H append-only docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Verify exact blobs and append bytes
+        shell: bash
+        env:
+          TASKS_B64: CiMjIEVSUC1ONy43IOKAlCBFbWFpbCBlbXByZXNhcmlhbCDigJQgUk9MTFVQIERPQ1VNRU5UQUwgMjAyNi0wOS0xNAoKRXN0ZSBibG9xdWUgZXMgZXN0cmljdGFtZW50ZSBhZGl0aXZvL2hpc3RvcnktcHJlc2VydmluZyB5IHN1cGVyc2VkZSDDum5pY2FtZW50ZSBzbmFwc2hvdHMgb3BlcmF0aXZvcyBzdGFsZTsgbGEgYXV0b3JpZGFkIHZpdmEgY29udGluw7phIGVuIGBDT05GSUcvQ09MQWAgYmFqbyBgZG9jcy9WQUVQX0FVVEhPUklUWS5tZGAuCgotIFt4XSBONy43LkEtRyDigJQgYExJU1RPX1JFQUxgIGNvbiByZWNlaXB0cy9ldmlkZW5jaWEgVkFFUCB5IFAwL1AxIGF0cmlidWlibGVzIGNvbm9jaWRvcz0wLgotIFt4XSBONy43Lkcg4oCUIGZ1bmN0aW9uYWwgY2FuZGlkYXRlIGA3YTA3NjVhYTM3NTMzYjhkZjJlNTI4MDdmMGE2MzgwMDg3MmMwMDlkYDsgcmVjZWlwdCBgdmFlcC9ldmlkZW5jZS9yZWNlaXB0cy9ONy43LkdfTElTVE9fUkVBTF8yMDI2MDkxNFQxODE3MzRaX1NVUDEyLmpzb25gLgotIFt4XSBONy43Lkgg4oCUIGNlcnRpZmljYWNpw7NuIGNhbsOzbmljYSBgZG9jcy9DRVJUSUZJQ0FDSU9OX043XzdfRU1BSUxfRU1QUkVTQVJJQUwubWRgIHB1YmxpY2FkYSB5IHJlbGXDrWRhLgotIFt4XSBFc3RlIHJvbGx1cCByZXN1ZWx2ZSBgVEFTS1NfQURESVRJVkVfU1RBVEVfUkVDT05DSUxJQVRJT05gIHByZXNlcnZhbmRvIGJ5dGUtZm9yLWJ5dGUgdG9kYSBoaXN0b3JpYSBwcmV2aWEuCi0gWyBdIE43LjcuSCBzw7NsbyBwYXNhIGEgYExJU1RPX1JFQUxgIGRlc3B1w6lzIGRlIGNvbXBsZXRhciB0YW1iacOpbiBgQ0hBTkdFTE9HX0FJX0FERElUSVZFX1JFQ09OQ0lMSUFUSU9OYCwgcmVwZXRpciBSRVZJRVdfRklSU1QgY29uIFAwPTAvUDE9MCwgZGVtb3N0cmFyIGVxdWl2YWxlbmNpYSBmdW5jaW9uYWwgY29udHJhIGA3YTA3NjVhYTM3NTMzYjhkZjJlNTI4MDdmMGE2MzgwMDg3MmMwMDlkYCB5IHBlcnNpc3Rpci9yZWxlZXIgcmVjZWlwdCBILgoKKipDVVJSRU5UX1BBUkVOVD1ONy43LkguIE5FWFRfUEFSRU5UX1BSRUFSTUVEPU43LjguQS4gTm8gc2UgcHJvbXVldmUgTjcuOC5BIGFudGVzIGRlbCBjaWVycmUgcmVhbCBkZSBILiBGQUxTRV9QQVNTPU5PLiBGQUxTRV9MSVNUTz1OTy4qKgo=
+          CHANGELOG_B64: CiMjIDIwMjYtMDktMTQg4oCUIEVSUC1ONy43IEVtYWlsIGVtcHJlc2FyaWFsIOKAlCByZWNvbmNpbGlhY2nDs24gZG9jdW1lbnRhbCBhcHBlbmQtb25seQoKKipSZXNwb25zYWJsZToqKiBWQUVQIC8gRE9DX0NFUlQgTjcuNy5ILgoKKipPYmpldGl2by9hbGNhbmNlOioqIGNlcnJhciBkb2N1bWVudGFsbWVudGUgTjcuNyBzaW4gcmVhYnJpciBsw7NnaWNhIHlhIGNlcnRpZmljYWRhIG5pIGFtcGxpYXIgYWxjYW5jZS4gRXN0YSBlbnRyYWRhIHkgZWwgcm9sbHVwIGRlIGBUQVNLUy5tZGAgcHJlc2VydmFuIGJ5dGUtZm9yLWJ5dGUgc3VzIGhpc3TDs3JpY29zIHByZXZpb3MuCgoqKkV2aWRlbmNpYSBmdW5jaW9uYWw6KiogTjcuNy5BLUc9YExJU1RPX1JFQUxgOyBjYW5kaWRhdGUgZnVuY2lvbmFsIGA3YTA3NjVhYTM3NTMzYjhkZjJlNTI4MDdmMGE2MzgwMDg3MmMwMDlkYDsgcmVjZWlwdCBHIGB2YWVwL2V2aWRlbmNlL3JlY2VpcHRzL043LjcuR19MSVNUT19SRUFMXzIwMjYwOTE0VDE4MTczNFpfU1VQMTIuanNvbmA7IGNlcnRpZmljYWNpw7NuIGBkb2NzL0NFUlRJRklDQUNJT05fTjdfN19FTUFJTF9FTVBSRVNBUklBTC5tZGAuIE43LjcuSCBubyBpbnRyb2R1Y2UgZGVsdGEgZGUgcHJvZHVjdG8gbmkgc2NoZW1hLgoKKipDb250cm9sOioqIGVzdGEgcHVibGljYWNpw7NuIHJlc3VlbHZlIGxvcyBQMSBkb2N1bWVudGFsZXMgbWVkaWFudGUgYXBwZW5kIGJ5dGUtZXhhY3RvLiBObyBkZWNsYXJhIHBvciBzw60gc29sYSBgTjcuNy5IPUxJU1RPX1JFQUxgOiBleGlnZSBoYXJkIHZlcmlmeSBkZSBwcmVmaWpvL3RhbWHDsW8sIFJFVklFV19GSVJTVCBmcmVzY28gUDA9MC9QMT0wLCBlcXVpdmFsZW5jaWEgZnVuY2lvbmFsIHkgcmVjZWlwdCBIIHBlcnNpc3RpZG8vcmVsZcOtZG8gYW50ZXMgZGUgcHJvbW92ZXIgTjcuOC5BLiBTaW4gY2FtYmlvcyBhIGBtYWluYCwgUHJvZHVjY2nDs24sIGRlcGxveXMsIHNlY3JldG9zIG5pIFBSICMyLgo=
+        run: |
+          set -euo pipefail
+          test "$(git hash-object TASKS.md)" = "1c4c278a72373add857ae866315f217178075471"
+          test "$(git hash-object CHANGELOG_AI.md)" = "8411f5dcd0f5f9f9811c85474f98aab29023929a"
+          cp TASKS.md /tmp/TASKS.before
+          cp CHANGELOG_AI.md /tmp/CHANGELOG.before
+          tasks_last="$(tail -c 1 /tmp/TASKS.before | od -An -t x1 | tr -d ' \n')"
+          changelog_last="$(tail -c 1 /tmp/CHANGELOG.before | od -An -t x1 | tr -d ' \n')"
+          printf '%s' "$TASKS_B64" | base64 -d >> TASKS.md
+          printf '%s' "$CHANGELOG_B64" | base64 -d >> CHANGELOG_AI.md
+          tasks_before_size="$(wc -c < /tmp/TASKS.before)"
+          changelog_before_size="$(wc -c < /tmp/CHANGELOG.before)"
+          cmp -n "$tasks_before_size" /tmp/TASKS.before TASKS.md
+          cmp -n "$changelog_before_size" /tmp/CHANGELOG.before CHANGELOG_AI.md
+          test "$(wc -c < TASKS.md)" -gt "$tasks_before_size"
+          test "$(wc -c < CHANGELOG_AI.md)" -gt "$changelog_before_size"
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
+          for f in TASKS.md CHANGELOG_AI.md; do
+            stats="$(git diff --numstat -- "$f")"
+            adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$stats" | awk '{print $2}')"
+            test -n "$adds" && test "$adds" -gt 0
+            if [ "$dels" -ne 0 ]; then
+              if [ "$f" = "TASKS.md" ]; then old_last="$tasks_last"; else old_last="$changelog_last"; fi
+              test "$old_last" != "0a"
+              test "$dels" -le 1
+            fi
+          done
+          git diff --check
+
+      - name: Commit rollups and retire recovery workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "VAEP Recovery"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/vaep-n77h-byte-append-recovery.yml
+          git add TASKS.md CHANGELOG_AI.md
+          git diff --cached --check
+          git commit -m "docs(n7.7.h): append byte-safe closure rollups"
+          git push origin HEAD:Desarrollo
