@@ -1033,3 +1033,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.4.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_4_IDEMPOTENCIA.md` en `6097f60ff68d163878d5d3d85c590c59f0cd2f75`; functional candidate `1c366562a90c590cc2925a153298fd1b758e8dab`; causal gates `34782712890/103792518381`, `34782712890/103792518352`, `34782712890/103792518396`, `34782712884/103792518243` y `34782712884/103792518046` en `SUCCESS`; receipt G `vaep/evidence/receipts/N7.4.G_LISTO_REAL_20260913T220100Z_SUP48.json`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.4.H` no se declara `LISTO_REAL` hasta resolver también `TASKS_ADDITIVE_STATE_RECONCILIATION`, repetir REVIEW_FIRST con `P0=0/P1=0`, demostrar equivalencia funcional y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-14 — ERP-N7.5 Webhooks seguros — reconciliación documental append-only
+
+**Responsable:** CHATGPT_VAEP / recovery byte-exacto N7.5.H.
+
+**Objetivo/alcance:** resolver `TASKS_ADDITIVE_STATE_RECONCILIATION` y `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.5.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime de webhooks ni adelantar `N7.6`.
+
+**Evidencia:** `N7.5.A-G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md`; functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; gates causales exact-head `34800735379/103842737649=SUCCESS` y `34800735411/103842739664=SUCCESS`; receipt G `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`. El probe off-ref `350f27db5040be75f7d84e78cbaa8e802f5cbf20` fue rechazado y nunca publicado porque mutaba historia; este recovery usa append de bytes al EOF sobre los blobs exactos vigentes.
+
+**Control:** esta publicación resuelve únicamente los dos P1 documentales mediante append byte-exacto. No declara por sí sola `N7.5.H=LISTO_REAL`: exige REVIEW_FIRST fresco `P0=0/P1=0`, equivalencia funcional, compare de `TASKS.md` y `CHANGELOG_AI.md` con `additions>0/deletions=0`, receipt H persistido/releído y sólo entonces promoción de `N7.6.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.

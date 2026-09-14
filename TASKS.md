@@ -504,3 +504,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.4.H no pasa a `LISTO_REAL` hasta completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional y persistir/releer receipt H.
 
 **CURRENT_PARENT=N7.4.H. NEXT_PARENT_PREARMED=N7.5.A. No se promueve N7.5.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.5 — Webhooks seguros — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.5.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.5.G — functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; causal gates `34800735379/103842737649` y `34800735411/103842739664` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`.
+- [x] N7.5.H — certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md` persistida y releída.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; la reconciliación `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
+- [ ] N7.5.H sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `dbd515909d98893f4924bb73d0a48f74fe9b97c3`, verificación de ambos compares con additions>0/deletions=0 y receipt H persistido/releído.
+
+**CURRENT_PARENT=N7.5.H. NEXT_PARENT_PREARMED=N7.6.A. No se promueve N7.6.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
