@@ -54,7 +54,7 @@ export interface CategoriaCatalogoPublico {
 
 export interface ModeloTienda {
   clave: string;
-  productoVarianteId: number | null;
+  productoVarianteId?: number | null;
   modeloId: number | null;
   nombre: string;
   marca: string;
@@ -101,7 +101,7 @@ export interface CategoriaTienda {
 export interface ItemCarrito {
   clave: string;
   productoId: number;
-  productoVarianteId: number | null;
+  productoVarianteId?: number | null;
   modeloClave: string;
   modeloId: number | null;
   nombre: string;
@@ -125,7 +125,7 @@ export interface ReferenciaCarrito {
  */
 export interface CheckoutItemRequest {
   productoId: number;
-  productoVarianteId: number | null;
+  productoVarianteId?: number | null;
   modeloId: number | null;
   modeloNombre: string | null;
   marcaNombre: string | null;
@@ -138,7 +138,7 @@ export interface CheckoutValidarRequest {
 
 export interface CheckoutLineaValidada {
   productoId: number;
-  productoVarianteId: number | null;
+  productoVarianteId?: number | null;
   modeloId: number | null;
   nombre: string;
   modelo?: string | null;
