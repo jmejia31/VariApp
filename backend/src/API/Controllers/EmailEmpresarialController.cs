@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InventoryApp.API.Controllers;
 
 /// <summary>
-/// N7.7.D: contrato HTTP tenant-safe para cola de correo empresarial durable.
+/// N7.7.D/N7.7.F: contrato HTTP tenant-safe para cola de correo empresarial durable.
 /// El tenant autorizado por el filtro debe coincidir con la ruta y la capa de
 /// aplicación vuelve a comprobar membresía server-side antes de persistir.
 /// </summary>
@@ -26,13 +26,15 @@ public sealed class EmailEmpresarialController : ControllerBase
     private const string IndiceIdempotencia = "UX_EmailsEmpresariales_Empresa_Idempotencia";
     private readonly IEmailEmpresarialService _service;
 
-    // La API ya registra AppDbContext e IUsuarioScopeService. La composición
-    // explícita mantiene N7.7.D acotado sin ampliar el bootstrap global.
-    public EmailEmpresarialController(AppDbContext db, IUsuarioScopeService usuarioScopeService)
+    public EmailEmpresarialController(
+        AppDbContext db,
+        IUsuarioScopeService usuarioScopeService,
+        IAuditoriaService auditoriaService)
     {
         _service = new EmailEmpresarialService(
             new EmailEmpresarialRepository(db),
-            usuarioScopeService);
+            usuarioScopeService,
+            auditoriaService);
     }
 
     [HttpPost]
