@@ -20,7 +20,8 @@ public sealed record SolicitudInicioPagoOnline(
     int FacturaId,
     decimal Monto,
     string Moneda,
-    string ReferenciaFactura);
+    string ReferenciaFactura,
+    string ClaveIdempotencia = "");
 
 public sealed record ResultadoInicioPagoOnline(
     string ReferenciaProveedor,
