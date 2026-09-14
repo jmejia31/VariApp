@@ -59,6 +59,7 @@ describe('N7.7.E correo empresarial UX', () => {
     const component = createComponent();
     component.destinatario = 'cliente@example.com';
     component.asunto = 'Factura lista';
+    component.cuerpoHtml = '<p>Su factura está disponible.</p>';
     component.cuerpoTexto = 'Su factura está disponible.';
     const originalKey = component.claveIdempotencia();
 
