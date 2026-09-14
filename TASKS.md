@@ -123,8 +123,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` sobre `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607f3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
@@ -142,13 +142,13 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 
 Este bloque es aditivo y no reescribe estados históricos anteriores.
 
-- [x] N3.9.A — `LISTO_REAL`.
-- [x] N3.9.B — `LISTO_REAL`; `Factura` + `FacturaPago` permanecen autoridad y CxC es read-model, no segundo ledger.
-- [x] N3.9.C — `LISTO_REAL / N_A_CERTIFIED`; no se creó tabla, migración ni backfill CxC.
-- [x] N3.9.D — `LISTO_REAL` sobre `59e0c41362fe3a63765d9218a9817272ce6a7602`; GET-only `/cuentas-por-cobrar`, `[Authorize]` + `Facturacion/Ver`; Development #33019598078, Acceptance #33019598096, Fase8 #33019598185 y M13 #33019598074 SUCCESS.
-- [x] N3.9.E — `LISTO_REAL` sobre `9b0db22c26bce42f42f97ba1e0c6124c54d86af9`; Issue #843 cerrado.
-- [x] N3.9.F — `LISTO_REAL / QA_TAKEOVER_CERTIFIED` sobre `0d621920f8ebd0a7bb3f1b3af30ffbadd0f91f9c`; Issue #851 cerrado, P0/P1=0.
-- [x] N3.9.G — `LISTO_REAL / QA_REGRESSION_CERTIFIED`; Issue #858 cerrado, P0/P1=0.
+- [x] N3.9.A auditoría/preflight — `LISTO_REAL`.
+- [x] N3.9.B dominio/contratos — `LISTO_REAL`; `Factura` + `FacturaPago` permanecen autoridad y CxC es read-model, no segundo ledger.
+- [x] N3.9.C persistencia/migración/datos — `LISTO_REAL / N_A_CERTIFIED`; no se creó tabla, migración ni backfill CxC.
+- [x] N3.9.D Application/API — `LISTO_REAL` sobre `59e0c41362fe3a63765d9218a9817272ce6a7602`; GET-only `/cuentas-por-cobrar`, `[Authorize]` + `Facturacion/Ver`; Development #33019598078, Acceptance #33019598096, Fase8 #33019598185 y M13 #33019598074 SUCCESS.
+- [x] N3.9.E Frontend/UX — `LISTO_REAL` sobre `9b0db22c26bce42f42f97ba1e0c6124c54d86af9`; Issue #843 cerrado.
+- [x] N3.9.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL / QA_TAKEOVER_CERTIFIED` sobre `0d621920f8ebd0a7bb3f1b3af30ffbadd0f91f9c`; Issue #851 cerrado, P0/P1=0.
+- [x] N3.9.G QA/regresión/CI — `LISTO_REAL / QA_REGRESSION_CERTIFIED`; Issue #858 cerrado, P0/P1=0.
 - [x] Certificación canónica publicada: `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`.
 - [ ] N3.9.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving, verificar checks aplicables y P0/P1=0.
 
@@ -156,7 +156,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 ## ERP-N3.10 — Crédito de cliente — ROLLUP SUPERSEDING 2026-08-27
 
-Este bloque es aditivo y supersede únicamente el estado operativo stale anterior de N3.9/N3.10 registrado arriba; no elimina ni reescribe historia previa.
+Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9/N3.10 registrado arriba; no elimina ni reescribe historia previa.
 
 - [x] N3.9.H quedó cerrado formalmente antes de N3.10; `CHANGELOG_AI.md` contiene el cierre canónico history-preserving.
 - [x] N3.10.A auditoría/preflight — `LISTO_REAL`.
@@ -362,7 +362,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-variapp`.
 - [x] Auditoría exhaustiva de los 38 workflows restantes: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`.
 - [x] `PRODUCT_CI_PRESERVED=PASS`.
-- [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS`; `VAEP Jules Diagnostic #33912398627=SUCCESS`.
+- [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic` run `33912398627` = `SUCCESS`.
 - [x] `VariApp CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
 
@@ -384,7 +384,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
 - [x] No se usó `[skip ci]` para proteger la limpieza.
 - [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
-- [x] PR #2 permanece `OPEN+DRAFT`, merged=false; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
+- [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
@@ -532,15 +532,3 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.6.H sólo pasa a `LISTO_REAL` después de comprobar que los blobs históricos completos son prefijo byte-exacto, crecimiento de tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.6.H. NEXT_PARENT_PREARMED=N7.7.A. No se promueve N7.7.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
-
-## ERP-N7.7 — Email empresarial — ROLLUP DOCUMENTAL 2026-09-14
-
-Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
-
-- [x] N7.7.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
-- [x] N7.7.G — functional candidate `7a0765aa37533b8df2e52807f0a63800872c009d`; receipt `vaep/evidence/receipts/N7.7.G_LISTO_REAL_20260914T181734Z_SUP12.json`.
-- [x] N7.7.H — certificación canónica `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md` publicada en `2c3b4352f2593f0b0cb1f08f8bb51724836c64fe`.
-- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
-- [ ] N7.7.H sólo pasa a `LISTO_REAL` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con `P0=0/P1=0`, demostrar equivalencia funcional contra `7a0765aa37533b8df2e52807f0a63800872c009d` y persistir/releer receipt H.
-
-**CURRENT_PARENT=N7.7.H. NEXT_PARENT_PREARMED=N7.8.A. No se promueve N7.8.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
