@@ -1053,3 +1053,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia funcional:** `N7.6.A-G=LISTO_REAL`; candidate funcional final `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b`; receipts B-G en `vaep/evidence/receipts/`. El alcance certificado incluye configuración tenant-scoped con referencias opacas a secretos, persistencia/migración, boundary API fail-closed, frontend con tenant verificado/RBAC reactivo/estado truthful, controles de seguridad y regresión exact-head. N7.6.G certificó gates `34864310838/104044575850`, `34864310860/104044621837`, `34864311032/104044562880`, `34864310684/104044559652` y `34864310645/104044379586` en `SUCCESS`, reutilizando además la migración causal N7.6.C `34841294854` sin schema delta posterior.
 
 **Control:** esta publicación resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` y `CHANGELOG_AI_ADDITIVE_RECONCILIATION` mediante append byte-exacto. No declara por sí sola `N7.6.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, certificación canónica releída y receipt H persistido/releído antes de promover `N7.7.A`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+
+## 2026-09-14 — ERP-N7.7 Email empresarial — reconciliación documental append-only
+
+**Responsable:** VAEP / DOC_CERT N7.7.H.
+
+**Objetivo/alcance:** cerrar documentalmente N7.7 sin reabrir lógica ya certificada ni ampliar alcance. Esta entrada y el rollup de `TASKS.md` preservan byte-for-byte sus históricos previos.
+
+**Evidencia funcional:** N7.7.A-G=`LISTO_REAL`; candidate funcional `7a0765aa37533b8df2e52807f0a63800872c009d`; receipt G `vaep/evidence/receipts/N7.7.G_LISTO_REAL_20260914T181734Z_SUP12.json`; certificación `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md`. N7.7.H no introduce delta de producto ni schema.
+
+**Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.7.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover N7.8.A. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.

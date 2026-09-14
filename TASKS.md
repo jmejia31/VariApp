@@ -532,3 +532,15 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.6.H sólo pasa a `LISTO_REAL` después de comprobar que los blobs históricos completos son prefijo byte-exacto, crecimiento de tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.6.H. NEXT_PARENT_PREARMED=N7.7.A. No se promueve N7.7.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.7 — Email empresarial — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.7.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.7.G — functional candidate `7a0765aa37533b8df2e52807f0a63800872c009d`; receipt `vaep/evidence/receipts/N7.7.G_LISTO_REAL_20260914T181734Z_SUP12.json`.
+- [x] N7.7.H — certificación canónica `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md` publicada y releída.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
+- [ ] N7.7.H sólo pasa a `LISTO_REAL` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional contra `7a0765aa37533b8df2e52807f0a63800872c009d` y persistir/releer receipt H.
+
+**CURRENT_PARENT=N7.7.H. NEXT_PARENT_PREARMED=N7.8.A. No se promueve N7.8.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
