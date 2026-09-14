@@ -43,9 +43,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     table.PrimaryKey("PK_ConfiguracionesWhatsAppEmpresa", x => x.Id);
                     table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_EmpresaId_Positivo", "`EmpresaId` > 0");
                     table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Numero_E164", "`NumeroTelefonoE164` REGEXP '^\\+[0-9]{8,15}$'");
-                    table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Token_Referencia", "LOCATE('://', `TokenSecretoReferencia`) > 1");
+                    table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Token_Referencia", "INSTR(`TokenSecretoReferencia`, '://') > 1");
                     table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Version_Positiva", "`Version` > 0");
-                    table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Webhook_Referencia", "LOCATE('://', `WebhookSecretoReferencia`) > 1");
+                    table.CheckConstraint("CK_ConfiguracionesWhatsAppEmpresa_Webhook_Referencia", "INSTR(`WebhookSecretoReferencia`, '://') > 1");
                     table.ForeignKey(
                         name: "FK_ConfiguracionesWhatsAppEmpresa_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
