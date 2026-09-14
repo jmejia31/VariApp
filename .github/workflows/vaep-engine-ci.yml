@@ -85,7 +85,8 @@ jobs:
           )
           for path in "${forbidden[@]}"; do test ! -e "$path" || { echo "RETIRED_RUNTIME_PATH_FOUND=$path" >&2; exit 1; }; done
           test ! -d vaep/jules || { echo 'RETIRED_RUNTIME_DIR_FOUND=vaep/jules' >&2; exit 1; }
-          if grep -R -En 'secrets\.JULES_|jules.googleapis.com|VAEP J[1-6] Trusted Worker' .github/workflows .github/scripts scripts/vaep vaep/control 2>/dev/null; then
+          external_worker_pattern='secrets\.'JULES_'|jules.'googleapis'\.com|VAEP J''[1-6] Trusted Worker'
+          if grep -R -En "$external_worker_pattern" .github/workflows .github/scripts scripts/vaep vaep/control 2>/dev/null; then
             echo 'EXTERNAL_WORKER_RUNTIME_REFERENCE_FOUND' >&2
             exit 1
           fi
