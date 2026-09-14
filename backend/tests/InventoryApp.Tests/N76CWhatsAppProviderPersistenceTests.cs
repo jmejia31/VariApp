@@ -29,7 +29,7 @@ public class N76CWhatsAppProviderPersistenceTests
             foreignKey.Name == "FK_ConfiguracionesWhatsAppEmpresa_Empresas_EmpresaId");
         Assert.Equal(new[] { "EmpresaId" }, fk.Columns);
         Assert.Equal("Empresas", fk.PrincipalTable);
-        Assert.Equal(System.Data.ReferentialAction.Restrict, fk.OnDelete);
+        Assert.Equal(ReferentialAction.Restrict, fk.OnDelete);
 
         var tenantUnique = builder.Operations
             .OfType<CreateIndexOperation>()
