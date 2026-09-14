@@ -54,6 +54,7 @@ public sealed class InboundWebhooksController : ControllerBase
             Request.Body,
             Encoding.UTF8,
             detectEncodingFromByteOrderMarks: false,
+            bufferSize: 1024,
             leaveOpen: true);
         var rawBody = await reader.ReadToEndAsync(cancellationToken);
         Request.Body.Position = 0;
@@ -123,7 +124,6 @@ public sealed class InboundWebhookIngressService
         string? correlationId,
         CancellationToken cancellationToken)
     {
-        // Firma primero: una solicitud no autenticada no debe producir lecturas/escrituras de persistencia.
         if (!IsValidSignature(rawBody, suppliedSignature))
             return InboundWebhookIngressResult.InvalidSignature();
 
@@ -195,7 +195,6 @@ public sealed class InboundWebhookIngressService
         }
         catch (DbUpdateException)
         {
-            // Carrera por el índice UNIQUE tenant+proveedor+evento: releer y clasificar sin filtrar detalle del proveedor.
             _db.Entry(entity).State = EntityState.Detached;
             var concurrente = await _db.Set<WebhookEntrante>()
                 .AsNoTracking()
