@@ -79,8 +79,8 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] Frontend/UX N3.4.E certificado sobre `a167434880eab07c3b08ca651ae9309da964c23b` con M13 `#32809392404` SUCCESS.
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
-- [x] Runbook canónico: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
-**ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
+- [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
+**ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura / Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
 
@@ -279,7 +279,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Rutas Vercel protegidas explícitamente; AntiG no puede modificar `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
 - [x] Handoffs inválidos en cuarentena; errores transitorios retryables sin avance de watermark.
 - [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
-- [x] Rollback del instalador restaura XML de una tarea previa, o elimina únicamente una tarea nueva durante rollback.
+- [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
 - [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
 - [x] AntiG RESERVED_INACTIVE: instalación/scheduler/handoff processing están bloqueados fail-closed; futura reincorporación exige autorización explícita.
 
@@ -409,7 +409,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Cleanup final: documentos protocolarios versionados activos=0; manifests históricos JSON en rutas activas=0; `.vaep/jules/dispatch`=0; historical publishers/writers=0; `ci.yml` conserva producto con permisos read-only y sin commit/push.
 - [x] AntiG preservado como `RESERVED_INACTIVE`: seis componentes presentes; scheduler deshabilitado; handoff processing deshabilitado; sin LISTO_REAL; reincorporación futura solo mediante autorización explícita + cambio del mismo MASTER.
 - [x] Cinco automatizaciones operativas verificadas ENABLED: `VAEP MASTER 00/15/30/45/55`; todas leen `docs/VAEP_AUTHORITY.md` y sus prompts activos no usan protocolos numéricos como autoridad. Telemetría de ejecución reciente presente en las cinco.
-- [x] Flujo end-to-end certificado con evidencia real: dispatch N4.7.H `0014e8f1...` -> Jules B run `33892158842` -> artifact `9944920873` -> Issue #2654 `COMPLETED` + controller handoff -> REVIEW_FIRST/CI registrados en BITACORA -> `N4.7.H LISTO_REAL` -> handoff `N4.8.A`.
+- [x] Flujo end-to-end certificado con evidencia real: dispatch N4.7.H `0014e8f1...` -> Jules B run `33892158842=SUCCESS` -> artifact `9944920873` -> Issue #2654 `COMPLETED` + controller handoff -> REVIEW_FIRST/CI registrados en BITACORA -> `N4.7.H LISTO_REAL` -> handoff `N4.8.A`.
 - [x] Reconciliación de estado: COLA/BITACORA frescas prevalecen sobre snapshots de fase anteriores. `N4.7.H=LISTO_REAL RE-CERTIFIED`; `CURRENT_PARENT=N4.8.A`; A/B/C/D `ACTIVE_REAL=NO` hasta sesión+actividad útil correlacionada.
 - [x] Retorno operativo autorizado: `vaep/control/dispatch-admission.json` cambia a `OPEN` únicamente después del gate causal de implementación PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`, merged=false; `main`, Producción, Vercel, secretos, dominios, certificados y BD productiva intactos.
@@ -420,8 +420,8 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 - [x] Eliminado `vaep/jules-a/dispatch/`: 54 manifests históricos residuales retirados del árbol activo; historia preservada por Git.
 - [x] `TASKS.md` marcado explícitamente como historial/no machine-readable para `CURRENT_PARENT`, `NEXT_ACTION` y estado operativo; consumidores deben leer `CONFIG/COLA/BITACORA` frescos.
-- [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE` y `VAEP_CHECKPOINTS`.
-- [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se retiró el literal runtime de checkpoints.
+- [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE`, `VAEP_CHECKPOINTS`.
+- [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se eliminó el literal runtime de checkpoints.
 - [x] Gate exact-head de hardening `09ee682712ba29d79d235a62415de20c308db7c9`: `VAEP engine lightweight checks #33920294318=SUCCESS`; `VAEP Jules Diagnostic #33920294338=SUCCESS`; `VariApp CI=SKIPPED` no se usa como PASS.
 - [x] Existencia/habilitación de `VAEP MASTER 00/15/30/45/55` verificada externamente en el control-plane de automatizaciones; no depende de que existan cinco cron equivalentes en Git.
 - [x] La limitación local de Bash reportada por Codex es de su entorno Windows y no se usa como PASS; la validación causal se tomó de GitHub Actions.
