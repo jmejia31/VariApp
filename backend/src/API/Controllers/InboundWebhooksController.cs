@@ -14,15 +14,19 @@ namespace InventoryApp.Api.Controllers;
 public sealed class InboundWebhooksController : ControllerBase
 {
     private const string SignatureHeader = "X-Webhook-Signature";
-    private const string CorrelationHeader = "X-Correlation-Id";
 
     private readonly AppDbContext _db;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<InboundWebhooksController> _logger;
 
-    public InboundWebhooksController(AppDbContext db, IConfiguration configuration)
+    public InboundWebhooksController(
+        AppDbContext db,
+        IConfiguration configuration,
+        ILogger<InboundWebhooksController> logger)
     {
         _db = db;
         _configuration = configuration;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -43,6 +47,12 @@ public sealed class InboundWebhooksController : ControllerBase
         var secret = _configuration[$"Webhooks:{empresaId}:{normalizedProvider}:Secret"];
         if (string.IsNullOrWhiteSpace(secret))
         {
+            _logger.LogWarning(
+                "Webhook rechazado por configuración ausente para tenant {EmpresaId}, proveedor {Proveedor}. Correlación {CorrelationId}",
+                empresaId,
+                normalizedProvider,
+                HttpContext.TraceIdentifier);
+
             return Problem(
                 statusCode: StatusCodes.Status503ServiceUnavailable,
                 title: "Webhook no configurado.",
@@ -60,9 +70,7 @@ public sealed class InboundWebhooksController : ControllerBase
         Request.Body.Position = 0;
 
         var signature = Request.Headers[SignatureHeader].ToString();
-        var correlationId = Request.Headers[CorrelationHeader].ToString();
-        if (string.IsNullOrWhiteSpace(correlationId))
-            correlationId = HttpContext.TraceIdentifier;
+        var correlationId = HttpContext.TraceIdentifier;
 
         var service = new InboundWebhookIngressService(_db, secret);
         var result = await service.ReceiveAsync(
@@ -72,6 +80,8 @@ public sealed class InboundWebhooksController : ControllerBase
             signature,
             correlationId,
             cancellationToken);
+
+        LogOutcome(result, empresaId, normalizedProvider, correlationId);
 
         return result.Kind switch
         {
@@ -100,6 +110,26 @@ public sealed class InboundWebhooksController : ControllerBase
                 title: "Solicitud de webhook inválida.",
                 detail: "El cuerpo del webhook no cumple el contrato de entrada.")
         };
+    }
+
+    private void LogOutcome(
+        InboundWebhookIngressResult result,
+        int empresaId,
+        string normalizedProvider,
+        string correlationId)
+    {
+        var level = result.Kind is InboundWebhookIngressKind.Accepted or InboundWebhookIngressKind.Duplicate
+            ? LogLevel.Information
+            : LogLevel.Warning;
+
+        _logger.Log(
+            level,
+            "Webhook entrante procesado con resultado {Resultado} para tenant {EmpresaId}, proveedor {Proveedor}, webhook {WebhookId}. Correlación {CorrelationId}",
+            result.Kind,
+            empresaId,
+            normalizedProvider,
+            result.WebhookId,
+            correlationId);
     }
 }
 
