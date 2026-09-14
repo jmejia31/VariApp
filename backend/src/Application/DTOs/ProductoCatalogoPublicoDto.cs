@@ -38,6 +38,7 @@ public sealed class ProductoImagenPublicaDto
 
 public sealed class ModeloCatalogoPublicoDto
 {
+    public int ProductoVarianteId { get; init; }
     public int? ModeloId { get; init; }
     public string? ModeloNombre { get; init; }
     public string? MarcaNombre { get; init; }
