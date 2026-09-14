@@ -17,6 +17,8 @@ namespace InventoryApp.Tests.API;
 public sealed class InboundWebhookIngressTests
 {
     private const string Secret = "n75d-test-secret";
+    private const string OtherTenantSecret = "n75g-other-tenant-secret";
+    private const int MaxPayloadBytes = 256 * 1024;
 
     [Fact]
     public async Task Invalid_signature_is_rejected_before_persistence()
@@ -34,6 +36,26 @@ public sealed class InboundWebhookIngressTests
             CancellationToken.None);
 
         Assert.Equal(InboundWebhookIngressKind.InvalidSignature, result.Kind);
+        Assert.Empty(await db.Set<WebhookEntrante>().ToListAsync());
+    }
+
+    [Fact]
+    public async Task Stale_timestamp_is_rejected_before_persistence()
+    {
+        await using var db = await CreateDbAsync();
+        var now = new DateTime(2026, 9, 14, 2, 48, 0, DateTimeKind.Utc);
+        var service = new InboundWebhookIngressService(db, Secret, () => now);
+        var body = Body("evt-stale", "inventory.updated", now.AddMinutes(-6));
+
+        var result = await service.ReceiveAsync(
+            1,
+            "provider-a",
+            body,
+            Signature(body),
+            "corr-stale",
+            CancellationToken.None);
+
+        Assert.Equal(InboundWebhookIngressKind.InvalidRequest, result.Kind);
         Assert.Empty(await db.Set<WebhookEntrante>().ToListAsync());
     }
 
@@ -102,6 +124,86 @@ public sealed class InboundWebhookIngressTests
     }
 
     [Fact]
+    public async Task Tenant_route_signed_with_another_tenant_secret_is_rejected_without_persistence()
+    {
+        await using var db = await CreateDbAsync();
+        var otherTenant = new Empresa("Tenant N7.5.G Other");
+        db.Set<Empresa>().Add(otherTenant);
+        await db.SaveChangesAsync();
+
+        var body = Body("evt-tenant-mismatch", "inventory.updated");
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [$"Webhooks:{otherTenant.Id}:provider-a:Secret"] = OtherTenantSecret
+            })
+            .Build();
+
+        var httpContext = new DefaultHttpContext
+        {
+            TraceIdentifier = "corr-tenant-mismatch"
+        };
+        httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        httpContext.Request.ContentLength = Encoding.UTF8.GetByteCount(body);
+        httpContext.Request.Headers["X-Webhook-Signature"] = Signature(body);
+
+        var controller = new InboundWebhooksController(
+            db,
+            configuration,
+            new CaptureLogger<InboundWebhooksController>())
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var action = await controller.ReceiveAsync(otherTenant.Id, "provider-a", CancellationToken.None);
+
+        var rejected = Assert.IsType<ObjectResult>(action);
+        Assert.Equal(StatusCodes.Status401Unauthorized, rejected.StatusCode);
+        Assert.Empty(await db.Set<WebhookEntrante>().ToListAsync());
+    }
+
+    [Fact]
+    public async Task Oversized_payload_is_rejected_before_persistence()
+    {
+        await using var db = await CreateDbAsync();
+        var body = new string('x', MaxPayloadBytes + 1);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Webhooks:1:provider-a:Secret"] = Secret
+            })
+            .Build();
+
+        var httpContext = new DefaultHttpContext
+        {
+            TraceIdentifier = "corr-oversize"
+        };
+        httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        httpContext.Request.ContentLength = Encoding.UTF8.GetByteCount(body);
+        httpContext.Request.Headers["X-Webhook-Signature"] = Signature(body);
+
+        var controller = new InboundWebhooksController(
+            db,
+            configuration,
+            new CaptureLogger<InboundWebhooksController>())
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var action = await controller.ReceiveAsync(1, "provider-a", CancellationToken.None);
+
+        var rejected = Assert.IsType<ObjectResult>(action);
+        Assert.Equal(StatusCodes.Status413PayloadTooLarge, rejected.StatusCode);
+        Assert.Empty(await db.Set<WebhookEntrante>().ToListAsync());
+    }
+
+    [Fact]
     public async Task Controller_uses_trace_identifier_and_logs_without_sensitive_material()
     {
         await using var db = await CreateDbAsync();
@@ -156,12 +258,12 @@ public sealed class InboundWebhookIngressTests
         return db;
     }
 
-    private static string Body(string eventId, string eventType) =>
+    private static string Body(string eventId, string eventType, DateTime? emittedAtUtc = null) =>
         JsonSerializer.Serialize(new
         {
             eventoExternoId = eventId,
             tipoEvento = eventType,
-            emitidoEnUtc = new DateTime(2026, 9, 14, 1, 30, 0, DateTimeKind.Utc),
+            emitidoEnUtc = emittedAtUtc ?? DateTime.UtcNow,
             data = new { sku = "ABC-1", quantity = 2 }
         });
 
