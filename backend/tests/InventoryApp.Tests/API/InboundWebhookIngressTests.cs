@@ -5,7 +5,11 @@ using InventoryApp.Api.Controllers;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace InventoryApp.Tests.API;
@@ -97,6 +101,50 @@ public sealed class InboundWebhookIngressTests
         Assert.Single(await db.Set<WebhookEntrante>().ToListAsync());
     }
 
+    [Fact]
+    public async Task Controller_uses_trace_identifier_and_logs_without_sensitive_material()
+    {
+        await using var db = await CreateDbAsync();
+        var body = Body("evt-observable", "inventory.updated");
+        var signature = Signature(body);
+        var logger = new CaptureLogger<InboundWebhooksController>();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Webhooks:1:provider-a:Secret"] = Secret
+            })
+            .Build();
+
+        var httpContext = new DefaultHttpContext
+        {
+            TraceIdentifier = "corr-safe-123"
+        };
+        httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        httpContext.Request.Headers["X-Webhook-Signature"] = signature;
+        httpContext.Request.Headers["X-Correlation-Id"] = new string('!', 200);
+
+        var controller = new InboundWebhooksController(db, configuration, logger)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var action = await controller.ReceiveAsync(1, "provider-a", CancellationToken.None);
+
+        Assert.IsType<AcceptedResult>(action);
+        var stored = Assert.Single(await db.Set<WebhookEntrante>().ToListAsync());
+        Assert.Equal("corr-safe-123", stored.CorrelationId);
+
+        var log = Assert.Single(logger.Messages);
+        Assert.Contains("Accepted", log, StringComparison.Ordinal);
+        Assert.Contains("corr-safe-123", log, StringComparison.Ordinal);
+        Assert.DoesNotContain(Secret, log, StringComparison.Ordinal);
+        Assert.DoesNotContain(signature, log, StringComparison.Ordinal);
+        Assert.DoesNotContain(body, log, StringComparison.Ordinal);
+    }
+
     private static async Task<AppDbContext> CreateDbAsync()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -121,5 +169,30 @@ public sealed class InboundWebhookIngressTests
     {
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(Secret));
         return "sha256=" + Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(body)));
+    }
+
+    private sealed class CaptureLogger<T> : ILogger<T>
+    {
+        public List<string> Messages { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => NoopScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            Messages.Add(formatter(state, exception));
+        }
+
+        private sealed class NoopScope : IDisposable
+        {
+            public static NoopScope Instance { get; } = new();
+            public void Dispose() { }
+        }
     }
 }
