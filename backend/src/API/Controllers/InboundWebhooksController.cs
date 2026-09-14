@@ -242,8 +242,17 @@ public sealed class InboundWebhookIngressService
         if (signature.Length != 64)
             return false;
 
-        Span<byte> suppliedBytes = stackalloc byte[32];
-        if (!Convert.TryFromHexString(signature, suppliedBytes, out var bytesWritten) || bytesWritten != 32)
+        byte[] suppliedBytes;
+        try
+        {
+            suppliedBytes = Convert.FromHexString(signature);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+
+        if (suppliedBytes.Length != 32)
             return false;
 
         using var hmac = new HMACSHA256(_secret);
