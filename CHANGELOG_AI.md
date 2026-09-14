@@ -1074,3 +1074,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia funcional:** N7.8.A-G=`LISTO_REAL`; candidate funcional `b217cc00bfa9bfc452674f0bdacbef52e50186a7`; receipt G `vaep/evidence/receipts/N7.8.G_LISTO_REAL_20260914T212600Z_SUP48.json`; certificación `docs/CERTIFICACION_N7_8_PAGOS_ONLINE.md`. N7.8.F resolvió el P1 de checkout inseguro exigiendo URL absoluta HTTPS y añadió prueba negativa dirigida. N7.8.G certificó los gates aplicables; el fallo del run integral `34896693703` quedó probado no causal por pertenecer a suites legacy/global de frontend sin delta frontend atribuible a N7.8. N7.8.H no introduce delta de producto ni schema.
 
 **Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.8.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover el sucesor dependency-valid. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+
+## 2026-09-14 — ERP-N7.9 Ecommerce — reconciliación documental append-only
+
+**Responsable:** VAEP / DOC_CERT N7.9.H.
+
+**Objetivo/alcance:** cerrar documentalmente N7.9 sin reabrir lógica ya certificada ni ampliar alcance. Esta entrada y el rollup de `TASKS.md` preservan byte-for-byte sus históricos previos.
+
+**Evidencia funcional:** N7.9.A-G=`LISTO_REAL`; functional candidate final `5de96492290218639f18c1648668215339c34a1e`; receipt G `vaep/evidence/receipts/N7.9.G_LISTO_REAL_20260914T230920Z_SUP00.json`; REVIEW_FIRST G P0=0/P1=0/P2=0. El workflow causal `34905794077` terminó con backend Release/pruebas, Docker, frontend producción, higiene y MySQL/migraciones en `SUCCESS`; backend registró 2245 passed, 0 failed, 0 skipped. Los commits posteriores al candidate hasta el receipt G son exclusivamente evidencia y no introducen delta funcional de producto/schema.
+
+**Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.9.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover `N7.10.A`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
