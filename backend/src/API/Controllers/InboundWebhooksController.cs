@@ -62,29 +62,45 @@ public sealed class InboundWebhooksController : ControllerBase
 
         if (Request.ContentLength is > MaxPayloadBytes)
         {
-            return Problem(
-                statusCode: StatusCodes.Status413PayloadTooLarge,
-                title: "Payload de webhook demasiado grande.",
-                detail: "El cuerpo excede el límite permitido para este endpoint.");
+            return PayloadTooLarge();
         }
 
         Request.EnableBuffering();
-        using var reader = new StreamReader(
-            Request.Body,
-            Encoding.UTF8,
-            detectEncodingFromByteOrderMarks: false,
-            bufferSize: 1024,
-            leaveOpen: true);
-        var rawBody = await reader.ReadToEndAsync(cancellationToken);
-        Request.Body.Position = 0;
+        var initialCapacity = Request.ContentLength is > 0
+            ? (int)Request.ContentLength.Value
+            : 0;
+        using var bodyBuffer = new MemoryStream(initialCapacity);
+        var readBuffer = new byte[8192];
+        var totalBytes = 0;
 
-        if (Encoding.UTF8.GetByteCount(rawBody) > MaxPayloadBytes)
+        while (true)
         {
-            return Problem(
-                statusCode: StatusCodes.Status413PayloadTooLarge,
-                title: "Payload de webhook demasiado grande.",
-                detail: "El cuerpo excede el límite permitido para este endpoint.");
+            var remainingProbeBytes = MaxPayloadBytes + 1 - totalBytes;
+            var requestedBytes = Math.Min(readBuffer.Length, remainingProbeBytes);
+            var bytesRead = await Request.Body.ReadAsync(
+                readBuffer.AsMemory(0, requestedBytes),
+                cancellationToken);
+
+            if (bytesRead == 0)
+                break;
+
+            totalBytes += bytesRead;
+            if (totalBytes > MaxPayloadBytes)
+            {
+                Request.Body.Position = 0;
+                return PayloadTooLarge();
+            }
+
+            await bodyBuffer.WriteAsync(
+                readBuffer.AsMemory(0, bytesRead),
+                cancellationToken);
         }
+
+        Request.Body.Position = 0;
+        var rawBody = Encoding.UTF8.GetString(
+            bodyBuffer.GetBuffer(),
+            0,
+            checked((int)bodyBuffer.Length));
 
         var signature = Request.Headers[SignatureHeader].ToString();
         var correlationId = HttpContext.TraceIdentifier;
@@ -128,6 +144,11 @@ public sealed class InboundWebhooksController : ControllerBase
                 detail: "El cuerpo del webhook no cumple el contrato de entrada.")
         };
     }
+
+    private ObjectResult PayloadTooLarge() => Problem(
+        statusCode: StatusCodes.Status413PayloadTooLarge,
+        title: "Payload de webhook demasiado grande.",
+        detail: "El cuerpo excede el límite permitido para este endpoint.");
 
     private void LogOutcome(
         InboundWebhookIngressResult result,
