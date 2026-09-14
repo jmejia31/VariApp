@@ -1,25 +1,30 @@
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
 /// <summary>
-/// Caso de uso N7.7.D para registrar y consultar correo empresarial durable.
-/// Toda autoridad tenant se vuelve a comprobar server-side y la idempotencia
-/// queda acotada por EmpresaId + Idempotency-Key.
+/// Caso de uso N7.7.D/N7.7.F para registrar y consultar correo empresarial durable.
+/// Toda autoridad tenant se vuelve a comprobar server-side, la idempotencia
+/// queda acotada por EmpresaId + Idempotency-Key y los registros de creación
+/// se auditan sin persistir destinatarios, cuerpo ni claves de idempotencia.
 /// </summary>
 public sealed class EmailEmpresarialService : IEmailEmpresarialService
 {
     private readonly IEmailEmpresarialRepository _repository;
     private readonly IUsuarioScopeService _usuarioScopeService;
+    private readonly IAuditoriaService _auditoriaService;
 
     public EmailEmpresarialService(
         IEmailEmpresarialRepository repository,
-        IUsuarioScopeService usuarioScopeService)
+        IUsuarioScopeService usuarioScopeService,
+        IAuditoriaService auditoriaService)
     {
         _repository = repository;
         _usuarioScopeService = usuarioScopeService;
+        _auditoriaService = auditoriaService;
     }
 
     public async Task<EmailEmpresarialResultado> RegistrarAsync(
@@ -53,6 +58,22 @@ public sealed class EmailEmpresarialService : IEmailEmpresarialService
 
         await _repository.AddAsync(candidato, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
+
+        await _auditoriaService.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Crear,
+            "Correo empresarial registrado en cola durable.",
+            entidad: "EmailEmpresarial",
+            valoresNuevos: new
+            {
+                candidato.MensajeId,
+                candidato.EmpresaId,
+                candidato.Estado,
+                candidato.PlantillaCodigo,
+                candidato.PlantillaVersion,
+                candidato.CorrelationId
+            });
+
         return Mapear(candidato);
     }
 
