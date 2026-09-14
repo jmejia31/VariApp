@@ -21,6 +21,7 @@ import { EmpresaConfiguracionTenantCardComponent } from './empresa-configuracion
 import { EmpresaConfiguracionPlantillasTenantCardComponent } from './empresa-configuracion-plantillas-tenant-card.component';
 import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.component';
 import { SuscripcionSaaSCardComponent } from './suscripcion-saas-card.component';
+import { WhatsappBusinessCardComponent } from './whatsapp-business-card.component';
 
 @Component({
   selector: 'app-configuracion',
@@ -30,7 +31,7 @@ import { SuscripcionSaaSCardComponent } from './suscripcion-saas-card.component'
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
     EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
     EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent,
-    SuscripcionSaaSCardComponent
+    SuscripcionSaaSCardComponent, WhatsappBusinessCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
