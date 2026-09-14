@@ -204,6 +204,46 @@ public sealed class InboundWebhookIngressTests
     }
 
     [Fact]
+    public async Task Chunked_oversized_payload_is_rejected_without_reading_past_limit_probe()
+    {
+        await using var db = await CreateDbAsync();
+        var payload = Enumerable.Repeat((byte)'x', MaxPayloadBytes + 4096).ToArray();
+        await using var guardedBody = new ReadLimitStream(payload, MaxPayloadBytes + 1);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Webhooks:1:provider-a:Secret"] = Secret
+            })
+            .Build();
+
+        var httpContext = new DefaultHttpContext
+        {
+            TraceIdentifier = "corr-chunked-oversize"
+        };
+        httpContext.Request.Body = guardedBody;
+        httpContext.Request.ContentLength = null;
+        httpContext.Request.Headers["X-Webhook-Signature"] = "sha256=" + new string('0', 64);
+
+        var controller = new InboundWebhooksController(
+            db,
+            configuration,
+            new CaptureLogger<InboundWebhooksController>())
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var action = await controller.ReceiveAsync(1, "provider-a", CancellationToken.None);
+
+        var rejected = Assert.IsType<ObjectResult>(action);
+        Assert.Equal(StatusCodes.Status413PayloadTooLarge, rejected.StatusCode);
+        Assert.Equal(MaxPayloadBytes + 1, guardedBody.TotalBytesRead);
+        Assert.Empty(await db.Set<WebhookEntrante>().ToListAsync());
+    }
+
+    [Fact]
     public async Task Controller_uses_trace_identifier_and_logs_without_sensitive_material()
     {
         await using var db = await CreateDbAsync();
@@ -271,6 +311,85 @@ public sealed class InboundWebhookIngressTests
     {
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(Secret));
         return "sha256=" + Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(body)));
+    }
+
+    private sealed class ReadLimitStream : Stream
+    {
+        private readonly MemoryStream _inner;
+        private readonly int _maxReadableBytes;
+
+        public ReadLimitStream(byte[] content, int maxReadableBytes)
+        {
+            _inner = new MemoryStream(content, writable: false);
+            _maxReadableBytes = maxReadableBytes;
+        }
+
+        public int TotalBytesRead { get; private set; }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            var read = _inner.Read(buffer, offset, count);
+            RegisterRead(read);
+            return read;
+        }
+
+        public override async ValueTask<int> ReadAsync(
+            Memory<byte> buffer,
+            CancellationToken cancellationToken = default)
+        {
+            var read = await _inner.ReadAsync(buffer, cancellationToken);
+            RegisterRead(read);
+            return read;
+        }
+
+        public override async Task<int> ReadAsync(
+            byte[] buffer,
+            int offset,
+            int count,
+            CancellationToken cancellationToken)
+        {
+            var read = await _inner.ReadAsync(buffer.AsMemory(offset, count), cancellationToken);
+            RegisterRead(read);
+            return read;
+        }
+
+        private void RegisterRead(int bytesRead)
+        {
+            TotalBytesRead += bytesRead;
+            if (TotalBytesRead > _maxReadableBytes)
+            {
+                throw new InvalidOperationException(
+                    $"Request body read exceeded the allowed probe of {_maxReadableBytes} bytes.");
+            }
+        }
+
+        public override void Flush() => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _inner.Dispose();
+            base.Dispose(disposing);
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            await _inner.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
     }
 
     private sealed class CaptureLogger<T> : ILogger<T>
