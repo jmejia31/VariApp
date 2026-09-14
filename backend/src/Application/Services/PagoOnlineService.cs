@@ -219,8 +219,7 @@ public sealed class PagoOnlineService : IPagoOnlineService
     {
         if (string.IsNullOrWhiteSpace(resultado.ReferenciaProveedor) || resultado.ReferenciaProveedor.Trim().Length > 160)
             throw new BusinessRuleException("El proveedor devolvió una referencia inválida.");
-        if (!resultado.UrlPago.IsAbsoluteUri ||
-            (resultado.UrlPago.Scheme != Uri.UriSchemeHttps && resultado.UrlPago.Scheme != Uri.UriSchemeHttp))
+        if (!resultado.UrlPago.IsAbsoluteUri || resultado.UrlPago.Scheme != Uri.UriSchemeHttps)
             throw new BusinessRuleException("El proveedor devolvió una URL de pago inválida.");
         if (!Enum.IsDefined(resultado.Estado))
             throw new BusinessRuleException("El proveedor devolvió un estado de pago inválido.");
