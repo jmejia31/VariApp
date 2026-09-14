@@ -22,10 +22,10 @@ public sealed class ConfiguracionWhatsAppEmpresaConfiguration : IEntityTypeConfi
                 "`NumeroTelefonoE164` REGEXP '^\\+[0-9]{8,15}$'");
             table.HasCheckConstraint(
                 "CK_ConfiguracionesWhatsAppEmpresa_Token_Referencia",
-                "LOCATE('://', `TokenSecretoReferencia`) > 1");
+                "INSTR(`TokenSecretoReferencia`, '://') > 1");
             table.HasCheckConstraint(
                 "CK_ConfiguracionesWhatsAppEmpresa_Webhook_Referencia",
-                "LOCATE('://', `WebhookSecretoReferencia`) > 1");
+                "INSTR(`WebhookSecretoReferencia`, '://') > 1");
             table.HasCheckConstraint(
                 "CK_ConfiguracionesWhatsAppEmpresa_Version_Positiva",
                 "`Version` > 0");
