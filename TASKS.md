@@ -544,3 +544,16 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.7.H sólo pasa a `LISTO_REAL` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional contra `7a0765aa37533b8df2e52807f0a63800872c009d` y persistir/releer receipt H.
 
 **CURRENT_PARENT=N7.7.H. NEXT_PARENT_PREARMED=N7.8.A. No se promueve N7.8.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+
+## ERP-N7.8 — Pagos online — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.8.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.8.G — functional candidate `b217cc00bfa9bfc452674f0bdacbef52e50186a7`; receipt `vaep/evidence/receipts/N7.8.G_LISTO_REAL_20260914T212600Z_SUP48.json`; gates causales aplicables exact-head en SUCCESS.
+- [x] N7.8.H — certificación canónica `docs/CERTIFICACION_N7_8_PAGOS_ONLINE.md` publicada y releída.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
+- [ ] N7.8.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `b217cc00bfa9bfc452674f0bdacbef52e50186a7` y receipt H persistido/releído.
+
+**CURRENT_PARENT=N7.8.H. No se promueve el sucesor antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**

@@ -1063,3 +1063,14 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia funcional:** N7.7.A-G=`LISTO_REAL`; candidate funcional `7a0765aa37533b8df2e52807f0a63800872c009d`; receipt G `vaep/evidence/receipts/N7.7.G_LISTO_REAL_20260914T181734Z_SUP12.json`; certificación `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md`. N7.7.H no introduce delta de producto ni schema.
 
 **Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.7.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover N7.8.A. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+
+
+## 2026-09-14 — ERP-N7.8 Pagos online — reconciliación documental append-only
+
+**Responsable:** VAEP / DOC_CERT N7.8.H.
+
+**Objetivo/alcance:** cerrar documentalmente N7.8 sin reabrir lógica ya certificada ni ampliar alcance. Esta entrada y el rollup de `TASKS.md` preservan byte-for-byte sus históricos previos.
+
+**Evidencia funcional:** N7.8.A-G=`LISTO_REAL`; candidate funcional `b217cc00bfa9bfc452674f0bdacbef52e50186a7`; receipt G `vaep/evidence/receipts/N7.8.G_LISTO_REAL_20260914T212600Z_SUP48.json`; certificación `docs/CERTIFICACION_N7_8_PAGOS_ONLINE.md`. N7.8.F resolvió el P1 de checkout inseguro exigiendo URL absoluta HTTPS y añadió prueba negativa dirigida. N7.8.G certificó los gates aplicables; el fallo del run integral `34896693703` quedó probado no causal por pertenecer a suites legacy/global de frontend sin delta frontend atribuible a N7.8. N7.8.H no introduce delta de producto ni schema.
+
+**Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.8.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover el sucesor dependency-valid. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
