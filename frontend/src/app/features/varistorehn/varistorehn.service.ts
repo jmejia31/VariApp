@@ -85,6 +85,7 @@ export class VaristorehnService {
   validarCheckout(items: CheckoutItemRequest[]): Observable<CheckoutValidado> {
     const referencias = items.map(item => ({
       productoId: item.productoId,
+      productoVarianteId: item.productoVarianteId,
       modeloId: item.modeloId,
       modeloNombre: item.modeloNombre,
       marcaNombre: item.marcaNombre,
@@ -129,6 +130,7 @@ export class VaristorehnService {
       && data.lineas.length > 0
       && data.lineas.every(linea => Number.isSafeInteger(linea.productoId)
         && linea.productoId > 0
+        && (linea.productoVarianteId === null || (Number.isSafeInteger(linea.productoVarianteId) && linea.productoVarianteId > 0))
         && (linea.modeloId === null || (Number.isSafeInteger(linea.modeloId) && linea.modeloId > 0))
         && Number.isSafeInteger(linea.unidades)
         && linea.unidades > 0
