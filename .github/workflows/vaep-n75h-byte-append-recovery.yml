@@ -2,10 +2,9 @@ name: VAEP N7.5.H byte append recovery
 
 on:
   push:
-    branches:
-      - Desarrollo
+    branches: [Desarrollo]
     paths:
-      - .github/workflows/vaep-n75h-byte-append-recovery.yml
+      - '.github/workflows/vaep-n75h-byte-append-recovery.yml'
 
 permissions:
   contents: write
@@ -16,7 +15,9 @@ concurrency:
 
 jobs:
   recover:
+    name: Recover N7.5.H append-only docs
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
@@ -24,63 +25,21 @@ jobs:
           ref: Desarrollo
           fetch-depth: 0
 
-      - name: Append N7.5 rollups byte-exact
+      - name: Verify exact blobs and append bytes
         shell: bash
+        env:
+          TASKS_B64: CgojIyBFUlAtTjcuNSDigJQgV2ViaG9va3Mgc2VndXJvcyDigJQgUk9MTFVQIERPQ1VNRU5UQUwgMjAyNi0wOS0xNAoKRXN0ZSBibG9xdWUgZXMgZXN0cmljdGFtZW50ZSBhZGl0aXZvL2hpc3RvcnktcHJlc2VydmluZyB5IHN1cGVyc2VkZSDDum5pY2FtZW50ZSBzbmFwc2hvdHMgb3BlcmF0aXZvcyBzdGFsZTsgbGEgYXV0b3JpZGFkIHZpdmEgY29udGluw7phIGVuIGBDT05GSUcvQ09MQWAgYmFqbyBgZG9jcy9WQUVQX0FVVEhPUklUWS5tZGAuCgotIFt4XSBONy41LkEtRyDigJQgYExJU1RPX1JFQUxgIGNvbiByZWNlaXB0cy9ldmlkZW5jaWEgVkFFUCB5IFAwL1AxIGF0cmlidWlibGVzIGNvbm9jaWRvcz0wLgotIFt4XSBONy41Lkcg4oCUIGZ1bmN0aW9uYWwgY2FuZGlkYXRlIGBkYmQ1MTU5MDlkOTg4OTNmNDkyNGJiNzNkMGE0OGY3NGZlOWI5N2MzYDsgY2F1c2FsIGdhdGVzIGAzNDgwMDczNTM3OS8xMDM4NDI3Mzc2NDlgIHkgYDM0ODAwNzM1NDExLzEwMzg0MjczOTY2NGAgZW4gYFNVQ0NFU1NgOyByZWNlaXB0IGB2YWVwL2V2aWRlbmNlL3JlY2VpcHRzL043LjUuR19MSVNUT19SRUFMXzIwMjYwOTE0VDAzMDI1MFpfU1VQMzYuanNvbmAuCi0gW3hdIE43LjUuSCDigJQgY2VydGlmaWNhY2nDs24gY2Fuw7NuaWNhIGBkb2NzL0NFUlRJRklDQUNJT05fTjdfNV9XRUJIT09LUy5tZGAgcGVyc2lzdGlkYSB5IHJlbGXDrWRhLgotIFt4XSBFc3RlIHJvbGx1cCByZXN1ZWx2ZSBgVEFTS1NfQURESVRJVkVfU1RBVEVfUkVDT05DSUxJQVRJT05gIHByZXNlcnZhbmRvIGJ5dGUtZm9yLWJ5dGUgdG9kYSBoaXN0b3JpYSBwcmV2aWE7IGxhIHJlY29uY2lsaWFjacOzbiBgQ0hBTkdFTE9HX0FJX0FERElUSVZFX1JFQ09OQ0lMSUFUSU9OYCBzZSBwdWJsaWNhIGVuIGVsIG1pc21vIHJlY292ZXJ5IGNvbW1pdCBtZWRpYW50ZSBhcHBlbmQgYnl0ZS1leGFjdG8uCi0gWyBdIE43LjUuSCBzw7NsbyBwYXNhIGEgYExJU1RPX1JFQUxgIGRlc3B1w6lzIGRlIFJFVklFV19GSVJTVCBmcmVzY28gUDA9MC9QMT0wLCBlcXVpdmFsZW5jaWEgZnVuY2lvbmFsIGNvbnRyYSBgZGJkNTE1OTA5ZDk4ODkzZjQ5MjRiYjczZDBhNDhmNzRmZTliOTdjM2AsIHZlcmlmaWNhY2nDs24gZGUgYW1ib3MgY29tcGFyZXMgY29uIGFkZGl0aW9ucz4wL2RlbGV0aW9ucz0wIHkgcmVjZWlwdCBIIHBlcnNpc3RpZG8vcmVsZcOtZG8uCgoqKkNVUlJFTlRfUEFSRU5UPU43LjUuSC4gTkVYVF9QQVJFTlRfUFJFQVJNRUQ9TjcuNi5BLiBObyBzZSBwcm9tdWV2ZSBONy42LkEgYW50ZXMgZGVsIGNpZXJyZSByZWFsIGRlIEguIEZBTFNFX1BBU1M9Tk8uIEZBTFNFX0xJU1RPPU5PLioqCg==
+          CHANGELOG_B64: CgojIyAyMDI2LTA5LTE0IOKAlCBFUlAtTjcuNSBXZWJob29rcyBzZWd1cm9zIOKAlCByZWNvbmNpbGlhY2nDs24gZG9jdW1lbnRhbCBhcHBlbmQtb25seQoKKipSZXNwb25zYWJsZToqKiBDSEFUR1BUX1ZBRVAgLyByZWNvdmVyeSBieXRlLWV4YWN0byBONy41LkguCgoqKk9iamV0aXZvL2FsY2FuY2U6KiogcmVzb2x2ZXIgYFRBU0tTX0FERElUSVZFX1NUQVRFX1JFQ09OQ0lMSUFUSU9OYCB5IGBDSEFOR0VMT0dfQUlfQURESVRJVkVfUkVDT05DSUxJQVRJT05gIGRlIGBONy41LkhgIGRlIGZvcm1hIGVzdHJpY3RhbWVudGUgYWRpdGl2YS9oaXN0b3J5LXByZXNlcnZpbmcsIHNpbiByZWFicmlyIHJ1bnRpbWUgZGUgd2ViaG9va3MgbmkgYWRlbGFudGFyIGBONy42YC4KCioqRXZpZGVuY2lhOioqIGBONy41LkEtRz1MSVNUT19SRUFMYDsgY2VydGlmaWNhY2nDs24gY2Fuw7NuaWNhIGBkb2NzL0NFUlRJRklDQUNJT05fTjdfNV9XRUJIT09LUy5tZGA7IGZ1bmN0aW9uYWwgY2FuZGlkYXRlIGBkYmQ1MTU5MDlkOTg4OTNmNDkyNGJiNzNkMGE0OGY3NGZlOWI5N2MzYDsgZ2F0ZXMgY2F1c2FsZXMgZXhhY3QtaGVhZCBgMzQ4MDA3MzUzNzkvMTAzODQyNzM3NjQ5PVNVQ0NFU1NgIHkgYDM0ODAwNzM1NDExLzEwMzg0MjczOTY2ND1TVUNDRVNTYDsgcmVjZWlwdCBHIGB2YWVwL2V2aWRlbmNlL3JlY2VpcHRzL043LjUuR19MSVNUT19SRUFMXzIwMjYwOTE0VDAzMDI1MFpfU1VQMzYuanNvbmAuIEVsIHByb2JlIG9mZi1yZWYgYDM1MGYyN2RiNTA0MGJlNzVmN2Q4NGU3OGNiYWE4ZTgwMmY1Y2JmMjBgIGZ1ZSByZWNoYXphZG8geSBudW5jYSBwdWJsaWNhZG8gcG9ycXVlIG11dGFiYSBoaXN0b3JpYTsgZXN0ZSByZWNvdmVyeSB1c2EgYXBwZW5kIGRlIGJ5dGVzIGFsIEVPRiBzb2JyZSBsb3MgYmxvYnMgZXhhY3RvcyB2aWdlbnRlcy4KCioqQ29udHJvbDoqKiBlc3RhIHB1YmxpY2FjacOzbiByZXN1ZWx2ZSDDum5pY2FtZW50ZSBsb3MgZG9zIFAxIGRvY3VtZW50YWxlcyBtZWRpYW50ZSBhcHBlbmQgYnl0ZS1leGFjdG8uIE5vIGRlY2xhcmEgcG9yIHPDrSBzb2xhIGBONy41Lkg9TElTVE9fUkVBTGA6IGV4aWdlIFJFVklFV19GSVJTVCBmcmVzY28gYFAwPTAvUDE9MGAsIGVxdWl2YWxlbmNpYSBmdW5jaW9uYWwsIGNvbXBhcmUgZGUgYFRBU0tTLm1kYCB5IGBDSEFOR0VMT0dfQUkubWRgIGNvbiBgYWRkaXRpb25zPjAvZGVsZXRpb25zPTBgLCByZWNlaXB0IEggcGVyc2lzdGlkby9yZWxlw61kbyB5IHPDs2xvIGVudG9uY2VzIHByb21vY2nDs24gZGUgYE43LjYuQWAuIFNpbiBjYW1iaW9zIGEgYG1haW5gLCBQcm9kdWNjacOzbiwgc2VjcmV0b3MsIGRlcGxveXMgbmkgUFIgIzIuCg==
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import subprocess
-
-          expected = {
-              "TASKS.md": "367af7e6fa3201d09f5a123c32d616dce7566042",
-              "CHANGELOG_AI.md": "ab4307cdd14e6ce6f88c60cff6e3adfcde2aa360",
-          }
-
-          tasks_append = """
-
-## ERP-N7.5 — Webhooks seguros — ROLLUP DOCUMENTAL 2026-09-14
-
-Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
-
-- [x] N7.5.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
-- [x] N7.5.G — functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; causal gates `34800735379/103842737649` y `34800735411/103842739664` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`.
-- [x] N7.5.H — certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md` persistida y releída.
-- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; la reconciliación `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
-- [ ] N7.5.H sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `dbd515909d98893f4924bb73d0a48f74fe9b97c3`, verificación de ambos compares con additions>0/deletions=0 y receipt H persistido/releído.
-
-**CURRENT_PARENT=N7.5.H. NEXT_PARENT_PREARMED=N7.6.A. No se promueve N7.6.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
-"""
-
-          changelog_append = """
-
-## 2026-09-14 — ERP-N7.5 Webhooks seguros — reconciliación documental append-only
-
-**Responsable:** CHATGPT_VAEP / recovery byte-exacto N7.5.H.
-
-**Objetivo/alcance:** resolver `TASKS_ADDITIVE_STATE_RECONCILIATION` y `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.5.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime de webhooks ni adelantar `N7.6`.
-
-**Evidencia:** `N7.5.A-G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md`; functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; gates causales exact-head `34800735379/103842737649=SUCCESS` y `34800735411/103842739664=SUCCESS`; receipt G `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`. El probe off-ref `350f27db5040be75f7d84e78cbaa8e802f5cbf20` fue rechazado y nunca publicado porque mutaba historia; este recovery usa append de bytes al EOF sobre los blobs exactos vigentes.
-
-**Control:** esta publicación resuelve únicamente los dos P1 documentales mediante append byte-exacto. No declara por sí sola `N7.5.H=LISTO_REAL`: exige REVIEW_FIRST fresco `P0=0/P1=0`, equivalencia funcional, compare de `TASKS.md` y `CHANGELOG_AI.md` con `additions>0/deletions=0`, receipt H persistido/releído y sólo entonces promoción de `N7.6.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
-"""
-
-          appends = {"TASKS.md": tasks_append, "CHANGELOG_AI.md": changelog_append}
-          for path, expected_sha in expected.items():
-              p = Path(path)
-              before = p.read_bytes()
-              actual_sha = subprocess.check_output(["git", "hash-object", path], text=True).strip()
-              if actual_sha != expected_sha:
-                  raise SystemExit(f"FAIL_CLOSED {path}: expected blob {expected_sha}, got {actual_sha}")
-              with p.open("ab") as f:
-                  f.write(appends[path].encode("utf-8"))
-              after = p.read_bytes()
-              if after[:len(before)] != before:
-                  raise SystemExit(f"FAIL_CLOSED {path}: prefix mutation detected")
-              if len(after) <= len(before):
-                  raise SystemExit(f"FAIL_CLOSED {path}: no append produced")
-          PY
-
+          test "$(git hash-object TASKS.md)" = "367af7e6fa3201d09f5a123c32d616dce7566042"
+          test "$(git hash-object CHANGELOG_AI.md)" = "ab4307cdd14e6ce6f88c60cff6e3adfcde2aa360"
+          cp TASKS.md /tmp/TASKS.before
+          cp CHANGELOG_AI.md /tmp/CHANGELOG.before
+          printf '%s' "$TASKS_B64" | base64 -d >> TASKS.md
+          printf '%s' "$CHANGELOG_B64" | base64 -d >> CHANGELOG_AI.md
+          cmp -n "$(wc -c < /tmp/TASKS.before)" /tmp/TASKS.before TASKS.md
+          cmp -n "$(wc -c < /tmp/CHANGELOG.before)" /tmp/CHANGELOG.before CHANGELOG_AI.md
           for f in TASKS.md CHANGELOG_AI.md; do
             stats="$(git diff --numstat -- "$f")"
             adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
@@ -88,11 +47,10 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
             test -n "$adds" && test "$adds" -gt 0
             test -n "$dels" && test "$dels" -eq 0
           done
-
           changed="$(git diff --name-only)"
           test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
 
-      - name: Commit recovery and retire writer
+      - name: Commit rollups and retire recovery workflow
         shell: bash
         run: |
           set -euo pipefail
