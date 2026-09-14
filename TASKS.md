@@ -226,7 +226,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Certificación canónica publicada: `docs/CERTIFICACION_N4_5_CUENTAS_POR_PAGAR.md`.
 - [x] Baseline funcional certificado: `541ec12b72912c769c6f54b8821771e509818375`; el HEAD posterior contiene únicamente documentación y manifests de coordinación VAEP/Jules.
 - [x] P0 abiertos=0; P1 abiertos=0 para el alcance A-G según la evidencia canónica revisada.
-- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0/P1=0.
+- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0.
 
 **CURRENT_PARENT=N4.5.H. CLOSABLE_NOW=NO hasta completar la reconciliación documental y los gates exact-head. `N4.6.A` permanece `PREARMED/PROMOTION_HELD`; no se promueve antes del cierre real de N4.5.H.**
 
@@ -532,10 +532,3 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.6.H sólo pasa a `LISTO_REAL` después de comprobar que los blobs históricos completos son prefijo byte-exacto, crecimiento de tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.6.H. NEXT_PARENT_PREARMED=N7.7.A. No se promueve N7.7.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
-
-## ERP-N7.7 — Email empresarial — cierre documental 2026-09-14
-
-- [x] N7.7.A-G están certificados `LISTO_REAL`; candidate funcional `7a0765aa37533b8df2e52807f0a63800872c009d`.
-- [x] Certificación canónica: `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md`.
-- [x] Reconciliación `TASKS.md` publicada de forma append-only para el cierre H.
-- [ ] N7.7.H requiere todavía reconciliar `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0 y receipt antes de promover N7.8.A.
