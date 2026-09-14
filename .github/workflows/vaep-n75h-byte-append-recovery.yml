@@ -1,0 +1,105 @@
+name: VAEP N7.5.H byte append recovery
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n75h-byte-append-recovery.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n75h-byte-append-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Append N7.5 rollups byte-exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          expected = {
+              "TASKS.md": "367af7e6fa3201d09f5a123c32d616dce7566042",
+              "CHANGELOG_AI.md": "ab4307cdd14e6ce6f88c60cff6e3adfcde2aa360",
+          }
+
+          tasks_append = """
+
+## ERP-N7.5 — Webhooks seguros — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.5.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.5.G — functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; causal gates `34800735379/103842737649` y `34800735411/103842739664` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`.
+- [x] N7.5.H — certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md` persistida y releída.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; la reconciliación `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
+- [ ] N7.5.H sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `dbd515909d98893f4924bb73d0a48f74fe9b97c3`, verificación de ambos compares con additions>0/deletions=0 y receipt H persistido/releído.
+
+**CURRENT_PARENT=N7.5.H. NEXT_PARENT_PREARMED=N7.6.A. No se promueve N7.6.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+"""
+
+          changelog_append = """
+
+## 2026-09-14 — ERP-N7.5 Webhooks seguros — reconciliación documental append-only
+
+**Responsable:** CHATGPT_VAEP / recovery byte-exacto N7.5.H.
+
+**Objetivo/alcance:** resolver `TASKS_ADDITIVE_STATE_RECONCILIATION` y `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.5.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime de webhooks ni adelantar `N7.6`.
+
+**Evidencia:** `N7.5.A-G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md`; functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; gates causales exact-head `34800735379/103842737649=SUCCESS` y `34800735411/103842739664=SUCCESS`; receipt G `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`. El probe off-ref `350f27db5040be75f7d84e78cbaa8e802f5cbf20` fue rechazado y nunca publicado porque mutaba historia; este recovery usa append de bytes al EOF sobre los blobs exactos vigentes.
+
+**Control:** esta publicación resuelve únicamente los dos P1 documentales mediante append byte-exacto. No declara por sí sola `N7.5.H=LISTO_REAL`: exige REVIEW_FIRST fresco `P0=0/P1=0`, equivalencia funcional, compare de `TASKS.md` y `CHANGELOG_AI.md` con `additions>0/deletions=0`, receipt H persistido/releído y sólo entonces promoción de `N7.6.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+"""
+
+          appends = {"TASKS.md": tasks_append, "CHANGELOG_AI.md": changelog_append}
+          for path, expected_sha in expected.items():
+              p = Path(path)
+              before = p.read_bytes()
+              actual_sha = subprocess.check_output(["git", "hash-object", path], text=True).strip()
+              if actual_sha != expected_sha:
+                  raise SystemExit(f"FAIL_CLOSED {path}: expected blob {expected_sha}, got {actual_sha}")
+              with p.open("ab") as f:
+                  f.write(appends[path].encode("utf-8"))
+              after = p.read_bytes()
+              if after[:len(before)] != before:
+                  raise SystemExit(f"FAIL_CLOSED {path}: prefix mutation detected")
+              if len(after) <= len(before):
+                  raise SystemExit(f"FAIL_CLOSED {path}: no append produced")
+          PY
+
+          for f in TASKS.md CHANGELOG_AI.md; do
+            stats="$(git diff --numstat -- "$f")"
+            adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$stats" | awk '{print $2}')"
+            test -n "$adds" && test "$adds" -gt 0
+            test -n "$dels" && test "$dels" -eq 0
+          done
+
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
+
+      - name: Commit recovery and retire writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "VAEP Recovery"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/vaep-n75h-byte-append-recovery.yml
+          git add TASKS.md CHANGELOG_AI.md
+          git diff --cached --check
+          git commit -m "docs(n7.5.h): append byte-safe closure rollups"
+          git push origin HEAD:Desarrollo
