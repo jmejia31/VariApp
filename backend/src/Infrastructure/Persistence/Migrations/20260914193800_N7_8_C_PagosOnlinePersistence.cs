@@ -32,6 +32,8 @@ public sealed class N7_8_C_PagosOnlinePersistence : Migration
                 `CreadoUtc` datetime(6) NOT NULL,
                 `ConfirmadoUtc` datetime(6) NULL,
                 `UltimoError` varchar(2000) CHARACTER SET utf8mb4 NULL,
+                `FechaCreacion` datetime(6) NOT NULL,
+                `FechaActualizacion` datetime(6) NOT NULL,
                 `CreadoPorUsuarioId` int NULL,
                 `CreadoPorNombreUsuario` varchar(200) CHARACTER SET utf8mb4 NULL,
                 `ActualizadoPorUsuarioId` int NULL,
