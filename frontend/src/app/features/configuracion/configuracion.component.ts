@@ -16,6 +16,7 @@ import { CAMPOS_TEMA, TemaVisual } from '../../core/models/tema-visual.model';
 import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.model';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
+import { EmailEmpresarialCardComponent } from './email-empresarial-card.component';
 import { EmpresaAdministracionCardComponent } from './empresa-administracion-card.component';
 import { EmpresaConfiguracionTenantCardComponent } from './empresa-configuracion-tenant-card.component';
 import { EmpresaConfiguracionPlantillasTenantCardComponent } from './empresa-configuracion-plantillas-tenant-card.component';
@@ -29,7 +30,7 @@ import { WhatsappBusinessCardComponent } from './whatsapp-business-card.componen
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
-    EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
+    EmailEmpresarialCardComponent, EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
     EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent,
     SuscripcionSaaSCardComponent, WhatsappBusinessCardComponent
   ],
