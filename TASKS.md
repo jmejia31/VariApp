@@ -516,3 +516,19 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.5.H sólo pasa a `LISTO_REAL` después de REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `dbd515909d98893f4924bb73d0a48f74fe9b97c3`, verificación de ambos compares con additions>0/deletions=0 y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.5.H. NEXT_PARENT_PREARMED=N7.6.A. No se promueve N7.6.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.6 — Integración API de WhatsApp Business — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.6.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.6.B — modelo tenant-scoped `ConfiguracionWhatsAppEmpresa` con teléfono E.164 y referencias opacas a secretos, sin credenciales en claro; receipt `vaep/evidence/receipts/N7.6.B_LISTO_REAL_20260914T112812Z_SUP12.json`.
+- [x] N7.6.C — persistencia/migración de configuración WhatsApp certificada sobre candidate `1492e1cd6fb915ceebf9c360134c84db8d29405a`; receipt `vaep/evidence/receipts/N7.6.C_LISTO_REAL_20260914T122316Z_SUP12.json`.
+- [x] N7.6.D — boundary Application/API seguro certificado sobre `987e07e2f2d328ad21aa1558f1674e67048970b6`; receipt `vaep/evidence/receipts/N7.6.D_LISTO_REAL_20260914T142400Z_SUP00.json`.
+- [x] N7.6.E — frontend/UX de configuración WhatsApp certificado con tenant verificado, RBAC reactivo y estados truthful; receipt `vaep/evidence/receipts/N7.6.E_LISTO_REAL_20260914T153315Z_SUP12.json`.
+- [x] N7.6.F — seguridad/RBAC/auditoría certificada sin exposición de secretos; receipt `vaep/evidence/receipts/N7.6.F_LISTO_REAL_20260914T154700Z_SUP24.json`.
+- [x] N7.6.G — QA/regresión/CI certificado sobre functional candidate `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b`; receipt `vaep/evidence/receipts/N7.6.G_LISTO_REAL_20260914T155920Z_SUP48.json` y gates exact-head terminales en SUCCESS.
+- [x] N7.6.H — certificación canónica `docs/CERTIFICACION_N7_6_WHATSAPP_BUSINESS.md` y reconciliación documental append-only preparadas para cierre mediante hard verify byte-prefix.
+- [ ] N7.6.H sólo pasa a `LISTO_REAL` después de comprobar que los blobs históricos completos son prefijo byte-exacto, crecimiento de tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b` y receipt H persistido/releído.
+
+**CURRENT_PARENT=N7.6.H. NEXT_PARENT_PREARMED=N7.7.A. No se promueve N7.7.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**

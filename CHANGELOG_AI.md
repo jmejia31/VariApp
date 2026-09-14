@@ -1043,3 +1043,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.5.A-G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md`; functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`; gates causales exact-head `34800735379/103842737649=SUCCESS` y `34800735411/103842739664=SUCCESS`; receipt G `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`. El probe off-ref `350f27db5040be75f7d84e78cbaa8e802f5cbf20` fue rechazado y nunca publicado porque mutaba historia; este recovery usa append de bytes al EOF sobre los blobs exactos vigentes.
 
 **Control:** esta publicación resuelve únicamente los dos P1 documentales mediante append byte-exacto. No declara por sí sola `N7.5.H=LISTO_REAL`: exige REVIEW_FIRST fresco `P0=0/P1=0`, equivalencia funcional, compare de `TASKS.md` y `CHANGELOG_AI.md` con `additions>0/deletions=0`, receipt H persistido/releído y sólo entonces promoción de `N7.6.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
+
+## 2026-09-14 — ERP-N7.6 Integración API de WhatsApp Business — reconciliación documental append-only
+
+**Responsable:** VAEP / DOC_CERT N7.6.H.
+
+**Objetivo/alcance:** cerrar documentalmente la cadena N7.6 sin reabrir lógica ya certificada ni ampliar alcance. La reconciliación preserva byte-for-byte toda historia previa de `TASKS.md` y `CHANGELOG_AI.md`; el estado machine-readable continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+**Evidencia funcional:** `N7.6.A-G=LISTO_REAL`; candidate funcional final `abb4a3bfdbe0d2896abcf33e5c9547e1dfc1016b`; receipts B-G en `vaep/evidence/receipts/`. El alcance certificado incluye configuración tenant-scoped con referencias opacas a secretos, persistencia/migración, boundary API fail-closed, frontend con tenant verificado/RBAC reactivo/estado truthful, controles de seguridad y regresión exact-head. N7.6.G certificó gates `34864310838/104044575850`, `34864310860/104044621837`, `34864311032/104044562880`, `34864310684/104044559652` y `34864310645/104044379586` en `SUCCESS`, reutilizando además la migración causal N7.6.C `34841294854` sin schema delta posterior.
+
+**Control:** esta publicación resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` y `CHANGELOG_AI_ADDITIVE_RECONCILIATION` mediante append byte-exacto. No declara por sí sola `N7.6.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, certificación canónica releída y receipt H persistido/releído antes de promover `N7.7.A`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
