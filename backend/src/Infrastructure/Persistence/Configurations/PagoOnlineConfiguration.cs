@@ -59,8 +59,8 @@ public sealed class PagoOnlineConfiguration : IEntityTypeConfiguration<PagoOnlin
         builder.Property(x => x.UltimoError)
             .HasMaxLength(2000);
 
-        builder.Property(x => x.CreatedBy).HasMaxLength(200);
-        builder.Property(x => x.UpdatedBy).HasMaxLength(200);
+        builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(200);
+        builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(200);
 
         builder.HasIndex(x => new { x.EmpresaId, x.FacturaId, x.CreadoUtc })
             .HasDatabaseName("IX_PagosOnline_Empresa_Factura_Creado");
