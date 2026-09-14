@@ -9,16 +9,16 @@ namespace InventoryApp.Infrastructure.Repositories;
 public sealed class PagoOnlineRepository : IPagoOnlineRepository
 {
     private readonly AppDbContext _db;
+    private readonly IFacturaRepository _facturas;
 
-    public PagoOnlineRepository(AppDbContext db)
+    public PagoOnlineRepository(AppDbContext db, IFacturaRepository facturas)
     {
         _db = db;
+        _facturas = facturas;
     }
 
     public Task<Factura?> ObtenerFacturaAsync(int facturaId, CancellationToken cancellationToken = default) =>
-        _db.Facturas
-            .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Id == facturaId, cancellationToken);
+        _facturas.GetByIdAsync(facturaId);
 
     public Task<PagoOnline?> ObtenerPorIdAsync(
         int empresaId,
