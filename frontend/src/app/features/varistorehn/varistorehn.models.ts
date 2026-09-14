@@ -9,6 +9,7 @@ export interface ImagenCatalogo {
 }
 
 export interface ModeloCatalogoPublico {
+  productoVarianteId?: number;
   modeloId?: number;
   modeloNombre?: string;
   marcaNombre?: string;
@@ -53,6 +54,7 @@ export interface CategoriaCatalogoPublico {
 
 export interface ModeloTienda {
   clave: string;
+  productoVarianteId: number | null;
   modeloId: number | null;
   nombre: string;
   marca: string;
@@ -99,6 +101,7 @@ export interface CategoriaTienda {
 export interface ItemCarrito {
   clave: string;
   productoId: number;
+  productoVarianteId: number | null;
   modeloClave: string;
   modeloId: number | null;
   nombre: string;
@@ -117,11 +120,12 @@ export interface ReferenciaCarrito {
 }
 
 /**
- * Identidad mínima de la selección. Modelo/marca no son autoridad comercial:
- * solo desambiguan la misma agrupación que publicó el servidor.
+ * Identidad mínima de la selección. ProductoVarianteId es la autoridad cuando existe;
+ * modelo/marca quedan como compatibilidad fail-closed para catálogos legacy sin identidad física.
  */
 export interface CheckoutItemRequest {
   productoId: number;
+  productoVarianteId: number | null;
   modeloId: number | null;
   modeloNombre: string | null;
   marcaNombre: string | null;
@@ -134,6 +138,7 @@ export interface CheckoutValidarRequest {
 
 export interface CheckoutLineaValidada {
   productoId: number;
+  productoVarianteId: number | null;
   modeloId: number | null;
   nombre: string;
   modelo?: string | null;
