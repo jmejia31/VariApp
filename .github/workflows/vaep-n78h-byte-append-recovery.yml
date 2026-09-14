@@ -1,0 +1,74 @@
+name: VAEP N7.8.H byte append recovery
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n78h-byte-append-recovery.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n78h-byte-append-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Recover N7.8.H append-only docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Verify exact blobs and append bytes
+        shell: bash
+        env:
+          TASKS_B64: CgojIyBFUlAtTjcuOCDigJQgUGFnb3Mgb25saW5lIOKAlCBST0xMVVAgRE9DVU1FTlRBTCAyMDI2LTA5LTE0CgpFc3RlIGJsb3F1ZSBlcyBlc3RyaWN0YW1lbnRlIGFkaXRpdm8vaGlzdG9yeS1wcmVzZXJ2aW5nIHkgc3VwZXJzZWRlIMO6bmljYW1lbnRlIHNuYXBzaG90cyBvcGVyYXRpdm9zIHN0YWxlOyBsYSBhdXRvcmlkYWQgdml2YSBjb250aW7DumEgZW4gYENPTkZJRy9DT0xBYCBiYWpvIGBkb2NzL1ZBRVBfQVVUSE9SSVRZLm1kYC4KCi0gW3hdIE43LjguQS1HIOKAlCBgTElTVE9fUkVBTGAgY29uIHJlY2VpcHRzL2V2aWRlbmNpYSBWQUVQIHkgUDAvUDEgYXRyaWJ1aWJsZXMgY29ub2NpZG9zPTAuCi0gW3hdIE43LjguRyDigJQgZnVuY3Rpb25hbCBjYW5kaWRhdGUgYGIyMTdjYzAwYmZhOWJmYzQ1MjY3NGYwYmRhY2JlZjUyZTUwMTg2YTdgOyByZWNlaXB0IGB2YWVwL2V2aWRlbmNlL3JlY2VpcHRzL043LjguR19MSVNUT19SRUFMXzIwMjYwOTE0VDIxMjYwMFpfU1VQNDguanNvbmA7IGdhdGVzIGNhdXNhbGVzIGFwbGljYWJsZXMgZXhhY3QtaGVhZCBlbiBTVUNDRVNTLgotIFt4XSBONy44Lkgg4oCUIGNlcnRpZmljYWNpw7NuIGNhbsOzbmljYSBgZG9jcy9DRVJUSUZJQ0FDSU9OX043XzhfUEFHT1NfT05MSU5FLm1kYCBwdWJsaWNhZGEgeSByZWxlw61kYS4KLSBbeF0gRXN0ZSByb2xsdXAgcmVzdWVsdmUgYFRBU0tTX0FERElUSVZFX1NUQVRFX1JFQ09OQ0lMSUFUSU9OYCBwcmVzZXJ2YW5kbyBieXRlLWZvci1ieXRlIHRvZGEgaGlzdG9yaWEgcHJldmlhOyBgQ0hBTkdFTE9HX0FJX0FERElUSVZFX1JFQ09OQ0lMSUFUSU9OYCBzZSBwdWJsaWNhIGVuIGVsIG1pc21vIHJlY292ZXJ5IGNvbW1pdCBtZWRpYW50ZSBhcHBlbmQgYnl0ZS1leGFjdG8uCi0gWyBdIE43LjguSCBzw7NsbyBwYXNhIGEgYExJU1RPX1JFQUxgIGRlc3B1w6lzIGRlIGhhcmQgdmVyaWZ5IGRlIHByZWZpam8vdGFtYcOxbywgUkVWSUVXX0ZJUlNUIGZyZXNjbyBQMD0wL1AxPTAsIGVxdWl2YWxlbmNpYSBmdW5jaW9uYWwgY29udHJhIGBiMjE3Y2MwMGJmYTliZmM0NTI2NzRmMGJkYWNiZWY1MmU1MDE4NmE3YCB5IHJlY2VpcHQgSCBwZXJzaXN0aWRvL3JlbGXDrWRvLgoKKipDVVJSRU5UX1BBUkVOVD1ONy44LkguIE5vIHNlIHByb211ZXZlIGVsIHN1Y2Vzb3IgYW50ZXMgZGVsIGNpZXJyZSByZWFsIGRlIEguIEZBTFNFX1BBU1M9Tk8uIEZBTFNFX0xJU1RPPU5PLioqCg==
+          CHANGELOG_B64: CgojIyAyMDI2LTA5LTE0IOKAlCBFUlAtTjcuOCBQYWdvcyBvbmxpbmUg4oCUIHJlY29uY2lsaWFjacOzbiBkb2N1bWVudGFsIGFwcGVuZC1vbmx5CgoqKlJlc3BvbnNhYmxlOioqIFZBRVAgLyBET0NfQ0VSVCBONy44LkguCgoqKk9iamV0aXZvL2FsY2FuY2U6KiogY2VycmFyIGRvY3VtZW50YWxtZW50ZSBONy44IHNpbiByZWFicmlyIGzDs2dpY2EgeWEgY2VydGlmaWNhZGEgbmkgYW1wbGlhciBhbGNhbmNlLiBFc3RhIGVudHJhZGEgeSBlbCByb2xsdXAgZGUgYFRBU0tTLm1kYCBwcmVzZXJ2YW4gYnl0ZS1mb3ItYnl0ZSBzdXMgaGlzdMOzcmljb3MgcHJldmlvcy4KCioqRXZpZGVuY2lhIGZ1bmNpb25hbDoqKiBONy44LkEtRz1gTElTVE9fUkVBTGA7IGNhbmRpZGF0ZSBmdW5jaW9uYWwgYGIyMTdjYzAwYmZhOWJmYzQ1MjY3NGYwYmRhY2JlZjUyZTUwMTg2YTdgOyByZWNlaXB0IEcgYHZhZXAvZXZpZGVuY2UvcmVjZWlwdHMvTjcuOC5HX0xJU1RPX1JFQUxfMjAyNjA5MTRUMjEyNjAwWl9TVVA0OC5qc29uYDsgY2VydGlmaWNhY2nDs24gYGRvY3MvQ0VSVElGSUNBQ0lPTl9ON184X1BBR09TX09OTElORS5tZGAuIE43LjguRiByZXNvbHZpw7MgZWwgUDEgZGUgY2hlY2tvdXQgaW5zZWd1cm8gZXhpZ2llbmRvIFVSTCBhYnNvbHV0YSBIVFRQUyB5IGHDsWFkacOzIHBydWViYSBuZWdhdGl2YSBkaXJpZ2lkYS4gTjcuOC5HIGNlcnRpZmljw7MgbG9zIGdhdGVzIGFwbGljYWJsZXM7IGVsIGZhbGxvIGRlbCBydW4gaW50ZWdyYWwgYDM0ODk2NjkzNzAzYCBxdWVkw7MgcHJvYmFkbyBubyBjYXVzYWwgcG9yIHBlcnRlbmVjZXIgYSBzdWl0ZXMgbGVnYWN5L2dsb2JhbCBkZSBmcm9udGVuZCBzaW4gZGVsdGEgZnJvbnRlbmQgYXRyaWJ1aWJsZSBhIE43LjguIE43LjguSCBubyBpbnRyb2R1Y2UgZGVsdGEgZGUgcHJvZHVjdG8gbmkgc2NoZW1hLgoKKipDb250cm9sOioqIGVzdGEgcHVibGljYWNpw7NuIHJlc3VlbHZlIGxvcyBQMSBkb2N1bWVudGFsZXMgbWVkaWFudGUgYXBwZW5kIGJ5dGUtZXhhY3RvLiBObyBkZWNsYXJhIHBvciBzw60gc29sYSBgTjcuOC5IPUxJU1RPX1JFQUxgOiBleGlnZSBoYXJkIHZlcmlmeSBkZSBwcmVmaWpvL3RhbWHDsW8sIFJFVklFV19GSVJTVCBmcmVzY28gUDA9MC9QMT0wLCBlcXVpdmFsZW5jaWEgZnVuY2lvbmFsIHkgcmVjZWlwdCBIIHBlcnNpc3RpZG8vcmVsZcOtZG8gYW50ZXMgZGUgcHJvbW92ZXIgZWwgc3VjZXNvciBkZXBlbmRlbmN5LXZhbGlkLiBTaW4gY2FtYmlvcyBhIGBtYWluYCwgUHJvZHVjY2nDs24sIGRlcGxveXMsIHNlY3JldG9zIG5pIFBSICMyLgo=
+        run: |
+          set -euo pipefail
+          test "$(git hash-object TASKS.md)" = "65e8067e58e899799590a73ec4791d22014a5bbb"
+          test "$(git hash-object CHANGELOG_AI.md)" = "568f2a6a2b1181202295b5c817ec66d9973a3acb"
+          cp TASKS.md /tmp/TASKS.before
+          cp CHANGELOG_AI.md /tmp/CHANGELOG.before
+          tasks_last="$(tail -c 1 /tmp/TASKS.before | od -An -t x1 | tr -d ' \n')"
+          changelog_last="$(tail -c 1 /tmp/CHANGELOG.before | od -An -t x1 | tr -d ' \n')"
+          printf '%s' "$TASKS_B64" | base64 -d >> TASKS.md
+          printf '%s' "$CHANGELOG_B64" | base64 -d >> CHANGELOG_AI.md
+          tasks_before_size="$(wc -c < /tmp/TASKS.before)"
+          changelog_before_size="$(wc -c < /tmp/CHANGELOG.before)"
+          cmp -n "$tasks_before_size" /tmp/TASKS.before TASKS.md
+          cmp -n "$changelog_before_size" /tmp/CHANGELOG.before CHANGELOG_AI.md
+          test "$(wc -c < TASKS.md)" -gt "$tasks_before_size"
+          test "$(wc -c < CHANGELOG_AI.md)" -gt "$changelog_before_size"
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
+          for f in TASKS.md CHANGELOG_AI.md; do
+            stats="$(git diff --numstat -- "$f")"
+            adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$stats" | awk '{print $2}')"
+            test -n "$adds" && test "$adds" -gt 0
+            if [ "$dels" -ne 0 ]; then
+              if [ "$f" = "TASKS.md" ]; then old_last="$tasks_last"; else old_last="$changelog_last"; fi
+              test "$old_last" != "0a"
+              test "$dels" -le 1
+            fi
+          done
+          git diff --check
+
+      - name: Commit rollups and retire recovery workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "VAEP Recovery"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/vaep-n78h-byte-append-recovery.yml
+          git add TASKS.md CHANGELOG_AI.md
+          git diff --cached --check
+          git commit -m "docs(n7.8.h): append byte-safe closure rollups"
+          git push origin HEAD:Desarrollo
