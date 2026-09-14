@@ -14,6 +14,7 @@ namespace InventoryApp.Api.Controllers;
 public sealed class InboundWebhooksController : ControllerBase
 {
     private const string SignatureHeader = "X-Webhook-Signature";
+    private const int MaxPayloadBytes = 256 * 1024;
 
     private readonly AppDbContext _db;
     private readonly IConfiguration _configuration;
@@ -59,6 +60,14 @@ public sealed class InboundWebhooksController : ControllerBase
                 detail: "No existe una configuración activa para este origen.");
         }
 
+        if (Request.ContentLength is > MaxPayloadBytes)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status413PayloadTooLarge,
+                title: "Payload de webhook demasiado grande.",
+                detail: "El cuerpo excede el límite permitido para este endpoint.");
+        }
+
         Request.EnableBuffering();
         using var reader = new StreamReader(
             Request.Body,
@@ -68,6 +77,14 @@ public sealed class InboundWebhooksController : ControllerBase
             leaveOpen: true);
         var rawBody = await reader.ReadToEndAsync(cancellationToken);
         Request.Body.Position = 0;
+
+        if (Encoding.UTF8.GetByteCount(rawBody) > MaxPayloadBytes)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status413PayloadTooLarge,
+                title: "Payload de webhook demasiado grande.",
+                detail: "El cuerpo excede el límite permitido para este endpoint.");
+        }
 
         var signature = Request.Headers[SignatureHeader].ToString();
         var correlationId = HttpContext.TraceIdentifier;
@@ -136,14 +153,18 @@ public sealed class InboundWebhooksController : ControllerBase
 public sealed class InboundWebhookIngressService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly TimeSpan MaxEventAge = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan MaxFutureSkew = TimeSpan.FromMinutes(1);
 
     private readonly AppDbContext _db;
     private readonly byte[] _secret;
+    private readonly Func<DateTime> _utcNow;
 
-    public InboundWebhookIngressService(AppDbContext db, string secret)
+    public InboundWebhookIngressService(AppDbContext db, string secret, Func<DateTime>? utcNow = null)
     {
         _db = db;
         _secret = Encoding.UTF8.GetBytes(secret ?? throw new ArgumentNullException(nameof(secret)));
+        _utcNow = utcNow ?? (() => DateTime.UtcNow);
     }
 
     public async Task<InboundWebhookIngressResult> ReceiveAsync(
@@ -171,6 +192,16 @@ public sealed class InboundWebhookIngressService
             string.IsNullOrWhiteSpace(envelope.EventoExternoId) ||
             string.IsNullOrWhiteSpace(envelope.TipoEvento) ||
             envelope.EmitidoEnUtc.Kind != DateTimeKind.Utc)
+        {
+            return InboundWebhookIngressResult.InvalidRequest();
+        }
+
+        var receivedAtUtc = _utcNow();
+        if (receivedAtUtc.Kind != DateTimeKind.Utc)
+            receivedAtUtc = receivedAtUtc.ToUniversalTime();
+
+        if (envelope.EmitidoEnUtc < receivedAtUtc - MaxEventAge ||
+            envelope.EmitidoEnUtc > receivedAtUtc + MaxFutureSkew)
         {
             return InboundWebhookIngressResult.InvalidRequest();
         }
@@ -209,7 +240,7 @@ public sealed class InboundWebhookIngressService
                 payloadHash,
                 correlationId,
                 envelope.EmitidoEnUtc,
-                DateTime.UtcNow);
+                receivedAtUtc);
         }
         catch (ArgumentException)
         {
