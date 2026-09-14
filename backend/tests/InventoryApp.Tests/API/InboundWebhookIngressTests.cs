@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using InventoryApp.Api.Controllers;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
@@ -108,9 +109,13 @@ public sealed class InboundWebhookIngressTests
     }
 
     private static string Body(string eventId, string eventType) =>
-        $$"""
-        {"eventoExternoId":"{{eventId}}","tipoEvento":"{{eventType}}","emitidoEnUtc":"2026-09-14T01:30:00Z","data":{"sku":"ABC-1","quantity":2}}
-        """;
+        JsonSerializer.Serialize(new
+        {
+            eventoExternoId = eventId,
+            tipoEvento = eventType,
+            emitidoEnUtc = new DateTime(2026, 9, 14, 1, 30, 0, DateTimeKind.Utc),
+            data = new { sku = "ABC-1", quantity = 2 }
+        });
 
     private static string Signature(string body)
     {
