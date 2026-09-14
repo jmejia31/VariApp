@@ -4,7 +4,7 @@
   "phase": "FRONTEND_UX",
   "initiative": "Email empresarial: frontend y UX tenant-safe con idempotencia",
   "result": "PASS",
-  "reviewed_at_utc": "2026-09-14T17:48:30Z",
+  "reviewed_at_utc": "2026-09-14T17:49:31Z",
   "reviewer": "Tarea Supervisión :12",
   "branch": "Desarrollo",
   "authority": "docs/VAEP_AUTHORITY.md",
@@ -24,8 +24,8 @@
     "verified tenant is sourced only from TenantContextService.empresaIdVerificada",
     "read/create UI permission checks fail closed before HTTP writes",
     "Idempotency-Key is preserved after retryable failure and rotated only after durable success",
-    "direct draft requires bounded recipient, subject and HTML body before submission",
-    "attachment count and aggregate size are bounded before staging",
+    "direct draft requires recipient, subject and HTML body before submission and applies bounded UI input lengths",
+    "template mode requires code, positive version and variables payload before submission",
     "queue listing uses bounded pagination, optional state filter and normalized correlation filter",
     "loading, empty, success and controlled error states are rendered without secret material",
     "email enterprise card is integrated into Configuracion and has a directed exact-scope test wired into the push quality workflow"
@@ -38,16 +38,22 @@
     "frontend/src/app/features/configuracion/email-empresarial-card.component.ts"
   ],
   "first_detector_recovery": {
-    "detected": "retryable-error fixture populated cuerpoTexto but omitted the HTML body now required by direct-draft validation, so the test could exit before exercising the POST boundary",
-    "recovery_commit": "ce6e805c3c7cd21c0d82f64b41bf79f7a1f78314",
-    "resolution": "aligned the directed fixture with a valid direct draft by adding cuerpoHtml while preserving the intended idempotency retry assertion",
+    "product_fixture_defect": {
+      "detected": "retryable-error fixture populated cuerpoTexto but omitted the HTML body now required by direct-draft validation, so the test could exit before exercising the POST boundary",
+      "recovery_commit": "ce6e805c3c7cd21c0d82f64b41bf79f7a1f78314",
+      "resolution": "aligned the directed fixture with a valid direct draft by adding cuerpoHtml while preserving the intended idempotency retry assertion"
+    },
+    "evidence_scope_defect": {
+      "detected": "initial review text mentioned attachment bounds although the N7.7.E candidate does not implement an attachment control",
+      "resolution": "removed the unsupported statement and re-read the candidate source before closure"
+    },
     "resolved_same_run": true
   },
   "static_review": {
     "tenant_isolation": "PASS__VERIFIED_TENANT_ONLY__NO_REQUESTED_TENANT_FROM_LOCALSTORAGE",
     "ui_permissions": "PASS__VIEW_CREATE_FAIL_CLOSED",
     "idempotency": "PASS__KEY_PRESERVED_ON_FAILURE__ROTATES_AFTER_SUCCESS",
-    "payload_bounds": "PASS__DIRECT_DRAFT_AND_ATTACHMENTS_BOUNDED_CLIENT_SIDE",
+    "draft_contract": "PASS__DIRECT_AND_TEMPLATE_MODES_FAIL_CLOSED_ON_REQUIRED_FIELDS",
     "controlled_errors": "PASS__PROBLEM_DETAIL_OR_CONTROLLED_FALLBACK",
     "secret_exposure": "NONE",
     "scope_expansion": "NONE"
