@@ -111,12 +111,12 @@ interface EstadoOpcion {
                 <input type="text" [(ngModel)]="asunto" [disabled]="sending() || !puedeCrear()" maxlength="998">
               </label>
               <label>
-                <span>Contenido de texto</span>
-                <textarea [(ngModel)]="cuerpoTexto" [disabled]="sending() || !puedeCrear()" rows="4" maxlength="65535"></textarea>
+                <span>Contenido HTML</span>
+                <textarea [(ngModel)]="cuerpoHtml" [disabled]="sending() || !puedeCrear()" rows="4" maxlength="65535"></textarea>
               </label>
               <label>
-                <span>Contenido HTML <small>(opcional)</small></span>
-                <textarea [(ngModel)]="cuerpoHtml" [disabled]="sending() || !puedeCrear()" rows="4" maxlength="65535"></textarea>
+                <span>Contenido de texto <small>(opcional)</small></span>
+                <textarea [(ngModel)]="cuerpoTexto" [disabled]="sending() || !puedeCrear()" rows="4" maxlength="65535"></textarea>
               </label>
             } @else {
               <div class="two-columns">
@@ -300,7 +300,7 @@ export class EmailEmpresarialCardComponent implements OnInit {
     if (this.modo() === 'plantilla') {
       return Boolean(this.plantillaCodigo.trim() && this.plantillaVersion > 0 && this.variablesJson.trim());
     }
-    return Boolean(this.asunto.trim() && (this.cuerpoTexto.trim() || this.cuerpoHtml.trim()));
+    return Boolean(this.asunto.trim() && this.cuerpoHtml.trim());
   }
 
   cambiarModo(modo: ModoEnvio): void {
@@ -414,7 +414,7 @@ export class EmailEmpresarialCardComponent implements OnInit {
     return {
       destinatario: this.destinatario.trim(),
       asunto: this.asunto.trim(),
-      cuerpoHtml: this.cuerpoHtml.trim() || undefined,
+      cuerpoHtml: this.cuerpoHtml.trim(),
       cuerpoTexto: this.cuerpoTexto.trim() || undefined,
       correlationId
     };
