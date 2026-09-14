@@ -1,0 +1,117 @@
+using InventoryApp.API.Filters;
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InventoryApp.API.Controllers;
+
+/// <summary>
+/// N7.8.D — boundary provider-agnostic para pagos online.
+/// La API opera sólo con referencias opacas del proveedor; no recibe ni persiste PAN/CVV.
+/// </summary>
+[ApiController]
+[Authorize]
+[Route("pagos-online")]
+public sealed class PagosOnlineController : ControllerBase
+{
+    private readonly IPagoOnlineService _service;
+    private readonly IUsuarioScopeService _usuarioScope;
+
+    public PagosOnlineController(IPagoOnlineService service, IUsuarioScopeService usuarioScope)
+    {
+        _service = service;
+        _usuarioScope = usuarioScope;
+    }
+
+    [HttpPost("iniciar")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Aplicar)]
+    public async Task<IActionResult> Iniciar(
+        [FromBody] IniciarPagoOnlineDto solicitud,
+        CancellationToken cancellationToken)
+    {
+        if (!await TieneScopeTenantAsync(solicitud.EmpresaId, cancellationToken))
+            return Forbid();
+
+        var claveIdempotencia = Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
+        if (string.IsNullOrWhiteSpace(claveIdempotencia) || claveIdempotencia.Length is < 16 or > 128)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Idempotency-Key inválida.",
+                detail: "Debe enviar una Idempotency-Key de entre 16 y 128 caracteres.");
+        }
+
+        var resultado = await _service.IniciarAsync(solicitud, claveIdempotencia, cancellationToken);
+        if (resultado.Reutilizado)
+        {
+            Response.Headers["Idempotency-Replayed"] = "true";
+            return Ok(ApiResponse<InicioPagoOnlineResultadoDto>.Ok(
+                resultado,
+                "La solicitud ya había sido procesada con la misma clave de idempotencia."));
+        }
+
+        return CreatedAtAction(
+            nameof(Obtener),
+            new { id = resultado.Pago.Id, empresaId = solicitud.EmpresaId },
+            ApiResponse<InicioPagoOnlineResultadoDto>.Ok(resultado, "Pago online iniciado."));
+    }
+
+    [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
+    public async Task<IActionResult> Obtener(
+        int id,
+        [FromQuery] int empresaId,
+        CancellationToken cancellationToken)
+    {
+        if (!await TieneScopeTenantAsync(empresaId, cancellationToken))
+            return Forbid();
+
+        var pago = await _service.ObtenerAsync(empresaId, id, cancellationToken);
+        if (pago is null)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Pago online no encontrado.",
+                detail: "No existe un pago online con ese identificador dentro de la empresa indicada.");
+        }
+
+        return Ok(ApiResponse<PagoOnlineDto>.Ok(pago));
+    }
+
+    [HttpGet]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
+    public async Task<IActionResult> Listar(
+        [FromQuery] int empresaId,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 25,
+        [FromQuery] EstadoPagoOnline? estado = null,
+        [FromQuery] int? facturaId = null,
+        [FromQuery] string? proveedor = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!await TieneScopeTenantAsync(empresaId, cancellationToken))
+            return Forbid();
+
+        var resultado = await _service.ListarAsync(
+            empresaId,
+            pagina,
+            tamanoPagina,
+            estado,
+            facturaId,
+            proveedor,
+            cancellationToken);
+
+        return Ok(ApiResponse<PaginaPagosOnlineDto>.Ok(resultado));
+    }
+
+    private async Task<bool> TieneScopeTenantAsync(int empresaId, CancellationToken cancellationToken)
+    {
+        if (empresaId <= 0)
+            return false;
+
+        return await _usuarioScope.ObtenerActualAsync(empresaId, cancellationToken) is not null;
+    }
+}
