@@ -8,6 +8,7 @@ public sealed class ValidarCheckoutTiendaDto
 public sealed class CheckoutTiendaItemRequestDto
 {
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public int? ModeloId { get; set; }
     public string? ModeloNombre { get; set; }
     public string? MarcaNombre { get; set; }
@@ -26,6 +27,7 @@ public sealed class CheckoutTiendaValidadoDto
 public sealed class CheckoutTiendaLineaDto
 {
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public int? ModeloId { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string? Modelo { get; set; }
