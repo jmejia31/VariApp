@@ -1,7 +1,11 @@
+using System.Text.Json;
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -12,7 +16,7 @@ public sealed class EmailEmpresarialServiceTests
     public async Task RegistrarAsync_ReplayMismoTenantYMismaSolicitud_NoDuplica()
     {
         var repo = new FakeEmailRepository();
-        var service = new EmailEmpresarialService(repo, new FakeScope(7));
+        var service = new EmailEmpresarialService(repo, new FakeScope(7), new FakeAuditoria());
         var request = new RegistrarEmailEmpresarialRequest(
             "cliente@example.com",
             "Factura disponible",
@@ -32,7 +36,7 @@ public sealed class EmailEmpresarialServiceTests
     public async Task RegistrarAsync_MismaClavePayloadDistinto_FallaCerrado()
     {
         var repo = new FakeEmailRepository();
-        var service = new EmailEmpresarialService(repo, new FakeScope(7));
+        var service = new EmailEmpresarialService(repo, new FakeScope(7), new FakeAuditoria());
 
         await service.RegistrarAsync(
             7,
@@ -57,7 +61,8 @@ public sealed class EmailEmpresarialServiceTests
     public async Task RegistrarAsync_ScopeDeOtroTenant_FallaAntesDePersistir()
     {
         var repo = new FakeEmailRepository();
-        var service = new EmailEmpresarialService(repo, new FakeScope(8));
+        var audit = new FakeAuditoria();
+        var service = new EmailEmpresarialService(repo, new FakeScope(8), audit);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.RegistrarAsync(
             7,
@@ -69,6 +74,35 @@ public sealed class EmailEmpresarialServiceTests
 
         Assert.Empty(repo.Items);
         Assert.Equal(0, repo.SaveCount);
+        Assert.Empty(audit.Calls);
+    }
+
+    [Fact]
+    public async Task RegistrarAsync_AuditaMetadatosSinDestinatarioCuerpoNiClaveIdempotencia()
+    {
+        var repo = new FakeEmailRepository();
+        var audit = new FakeAuditoria();
+        var service = new EmailEmpresarialService(repo, new FakeScope(7), audit);
+
+        await service.RegistrarAsync(
+            7,
+            new RegistrarEmailEmpresarialRequest(
+                "secreto-destino@example.com",
+                "Asunto sensible",
+                "<p>cuerpo-secreto</p>",
+                "texto-secreto",
+                CorrelationId: "corr-segura"),
+            "idem-secreta-004");
+
+        var call = Assert.Single(audit.Calls);
+        Assert.Equal(ModuloSistema.Configuracion, call.Modulo);
+        Assert.Equal(AccionPermiso.Crear, call.Accion);
+        Assert.Equal("EmailEmpresarial", call.Entidad);
+        Assert.Contains("corr-segura", call.ValoresNuevosJson);
+        Assert.DoesNotContain("secreto-destino@example.com", call.ValoresNuevosJson);
+        Assert.DoesNotContain("cuerpo-secreto", call.ValoresNuevosJson);
+        Assert.DoesNotContain("texto-secreto", call.ValoresNuevosJson);
+        Assert.DoesNotContain("idem-secreta-004", call.ValoresNuevosJson);
     }
 
     [Fact]
@@ -82,7 +116,7 @@ public sealed class EmailEmpresarialServiceTests
         repo.Items.Add(EmailEmpresarial.CrearDirecto(
             7, "c@example.com", "C", "<p>C</p>", "c", correlationId: "otra"));
 
-        var service = new EmailEmpresarialService(repo, new FakeScope(7));
+        var service = new EmailEmpresarialService(repo, new FakeScope(7), new FakeAuditoria());
         var pagina = await service.ListarAsync(
             7,
             EstadoEntregaEmail.Pendiente,
@@ -114,6 +148,57 @@ public sealed class EmailEmpresarialServiceTests
             Task.FromResult<UsuarioTenantScopeActual?>(
                 new UsuarioTenantScopeActual(1, _empresaId, 1, "Test", false));
     }
+
+    private sealed class FakeAuditoria : IAuditoriaService
+    {
+        public List<AuditCall> Calls { get; } = new();
+
+        public Task RegistrarAsync(
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null)
+        {
+            Calls.Add(new AuditCall(
+                modulo,
+                accion,
+                entidad,
+                valoresNuevos is null ? string.Empty : JsonSerializer.Serialize(valoresNuevos)));
+            return Task.CompletedTask;
+        }
+
+        public Task RegistrarEstrictoAsync(
+            ModuloSistema modulo,
+            AccionPermiso accion,
+            string descripcion,
+            int? referenciaId = null,
+            string? entidad = null,
+            object? valoresAnteriores = null,
+            object? valoresNuevos = null,
+            string? motivo = null,
+            string resultado = "Exito",
+            string? error = null) =>
+            RegistrarAsync(modulo, accion, descripcion, referenciaId, entidad, valoresAnteriores, valoresNuevos, motivo, resultado, error);
+
+        public Task<PagedResult<RegistroAuditoriaDto>> GetFilteredAsync(AuditoriaFiltroDto filtro) =>
+            Task.FromResult(new PagedResult<RegistroAuditoriaDto>
+            {
+                Page = filtro.Page,
+                PageSize = filtro.PageSize
+            });
+    }
+
+    private sealed record AuditCall(
+        ModuloSistema Modulo,
+        AccionPermiso Accion,
+        string? Entidad,
+        string ValoresNuevosJson);
 
     private sealed class FakeEmailRepository : IEmailEmpresarialRepository
     {
