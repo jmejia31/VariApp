@@ -1,9 +1,0 @@
-{
-  "stopId": "STOP-N5-2-D-1-J1-20260909T1806Z",
-  "dispatchId": "N5-2-D-1-VALUATION-API-J1-T1B-20260909T1704Z",
-  "taskId": "N5.2.D.1.VALUATION_BACKEND_API",
-  "sessionName": "sessions/2946568283340926761",
-  "workerId": "J1",
-  "expectedBranch": "Desarrollo",
-  "reason": "J1 terminal handoff is QA_TAKEOVER_REQUIRED and the valuation controller takeover already landed on Desarrollo; this stale AWAITING_USER_FEEDBACK session must not resume and create conflicting late work."
-}
