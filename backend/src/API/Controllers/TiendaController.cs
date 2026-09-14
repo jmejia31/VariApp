@@ -3,11 +3,13 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace InventoryApp.API.Controllers;
 
 [ApiController]
 [AllowAnonymous]
+[EnableRateLimiting("AuthLogin")]
 [Route("tienda")]
 public sealed class TiendaController : ControllerBase
 {
