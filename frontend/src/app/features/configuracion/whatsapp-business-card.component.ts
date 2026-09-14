@@ -4,6 +4,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { TenantContextService } from '../../core/auth/tenant-context.service';
 
 interface WhatsAppSessionStatus {
   status: string;
@@ -38,7 +39,7 @@ interface WhatsAppSessionStatus {
         <div class="summary-grid" aria-label="Resumen de WhatsApp Business">
           <div><span class="label">Empresa activa</span><strong>#{{ empresaId() }}</strong></div>
           <div><span class="label">Número</span><strong>{{ estado()?.numeroTelefonoE164 || 'Pendiente de consulta' }}</strong></div>
-          <div><span class="label">Proveedor de sesión</span><strong>{{ estado()?.requiereProveedorSesion ? 'Requerido' : 'Listo' }}</strong></div>
+          <div><span class="label">Proveedor de sesión</span><strong>{{ etiquetaProveedor() }}</strong></div>
         </div>
 
         @if (loading()) {
@@ -131,22 +132,26 @@ interface WhatsAppSessionStatus {
 export class WhatsappBusinessCardComponent {
   private readonly http = inject(HttpClient);
   private readonly permisos = inject(PermisosRuntimeService);
-  private readonly empresaStorageKey = 'inventoryapp_empresa_solicitada_id';
+  private readonly tenantContext = inject(TenantContextService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly estado = signal<WhatsAppSessionStatus | null>(null);
-  readonly empresaId = signal(this.leerEmpresaActiva());
-  readonly puedeEditar = signal(this.permisos.puede('Configuracion', 'Editar'));
+  readonly empresaId = computed(() => this.tenantContext.empresaIdVerificada());
+  readonly puedeEditar = computed(() => this.permisos.puede('Configuracion', 'Editar'));
   readonly etiquetaEstado = computed(() => this.estado()?.status || 'SIN CONSULTAR');
+  readonly etiquetaProveedor = computed(() => {
+    const actual = this.estado();
+    if (!actual) return 'Pendiente de consulta';
+    return actual.requiereProveedorSesion ? 'Requerido' : 'Listo';
+  });
   readonly qrSeguro = computed(() => {
     const qr = this.estado()?.qr?.trim();
     return qr?.startsWith('data:image/') ? qr : null;
   });
 
   consultarEstado(): void {
-    const empresaId = this.leerEmpresaActiva();
-    this.empresaId.set(empresaId);
+    const empresaId = this.empresaId();
     this.error.set(null);
 
     if (!empresaId) {
@@ -174,11 +179,5 @@ export class WhatsappBusinessCardComponent {
         this.error.set(detail || 'No se pudo consultar el estado de WhatsApp Business.');
       }
     });
-  }
-
-  private leerEmpresaActiva(): number | null {
-    const raw = localStorage.getItem(this.empresaStorageKey);
-    const value = Number(raw);
-    return Number.isInteger(value) && value > 0 ? value : null;
   }
 }
