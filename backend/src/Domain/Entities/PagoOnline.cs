@@ -17,6 +17,12 @@ public class PagoOnline : AuditableEntity
     public string? ReferenciaProveedor { get; set; }
     public string? ProviderEventId { get; set; }
 
+    /// <summary>
+    /// SHA-256 hexadecimal de Idempotency-Key. La clave enviada por el cliente no
+    /// se persiste en claro y la unicidad tenant+provider hace durable el replay.
+    /// </summary>
+    public string? ClaveIdempotenciaHash { get; set; }
+
     public decimal Monto { get; set; }
     public string Moneda { get; set; } = "HNL";
     public EstadoPagoOnline Estado { get; set; } = EstadoPagoOnline.Pendiente;
