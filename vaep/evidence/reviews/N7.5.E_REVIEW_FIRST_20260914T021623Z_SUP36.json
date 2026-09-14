@@ -9,12 +9,13 @@
     "blob_sha": "16ac1887d6b45b825f77ce190c800b0ac09a5b71"
   },
   "reviewed_at_utc": "2026-09-14T02:16:23Z",
+  "corrected_at_utc": "2026-09-14T02:19:51Z",
   "reviewer": "Tarea Supervision :36",
   "candidate_base_head": "24ad37c02af02ffd64937f8747900d7369427668",
   "dependency": {
     "task_id": "N7.5.D",
     "state": "LISTO_REAL",
-    "receipt": "vaep/evidence/receipts/N7.5.D_LISTO_REAL_20260914T020524Z_SUP48.json",
+    "receipt": "vaep/evidence/receipts/N7.5.D_LISTO_REAL_20260914T020500Z_SUP36.json",
     "receipt_commit": "24ad37c02af02ffd64937f8747900d7369427668"
   },
   "acceptance_scope": "Implement UI/forms/tables/selectors/UI permissions/loading-empty-error/responsive-accessibility when applicable; point scope is webhook signature, validation, replay protection, idempotency and logging; if frontend does not apply, document N/A.",
@@ -45,7 +46,7 @@
   "no_filler": true,
   "decision": "READY_FOR_CAUSAL_GATES__FRONTEND_NA",
   "closure_preconditions": [
-    "candidate-head remains stable after this REVIEW_FIRST artifact is persisted",
+    "candidate-head remains stable after this corrected REVIEW_FIRST artifact is persisted",
     "applicable exact-head causal gates are terminal PASS",
     "LISTO_REAL receipt is created and read back before COLA state changes to LISTO"
   ]
