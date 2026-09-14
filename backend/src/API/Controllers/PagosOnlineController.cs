@@ -2,7 +2,10 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +23,20 @@ public sealed class PagosOnlineController : ControllerBase
     private readonly IPagoOnlineService _service;
     private readonly IUsuarioScopeService _usuarioScope;
 
-    public PagosOnlineController(IPagoOnlineService service, IUsuarioScopeService usuarioScope)
+    public PagosOnlineController(
+        AppDbContext db,
+        IFacturaRepository facturas,
+        IEnumerable<IPagoOnlineProvider> providers,
+        ICurrentUserService currentUser,
+        IUsuarioScopeService usuarioScope)
     {
-        _service = service;
+        // Composición local deliberada: el puerto de proveedor puede permanecer vacío
+        // hasta que una integración externa sea configurada; no requiere secretos ni
+        // registros DI de proveedores inexistentes para consultar/listar pagos.
+        _service = new PagoOnlineService(
+            new PagoOnlineRepository(db, facturas),
+            providers,
+            currentUser);
         _usuarioScope = usuarioScope;
     }
 
