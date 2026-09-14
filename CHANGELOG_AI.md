@@ -241,7 +241,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Trazabilidad A–G:** A `c7d39903eb978337d501a37c4d9c32b506c450f3`; B `c20151391d696ebe1d172ae3341e579cc371c35f`; C `b7b1db8746beac2a6e3f25c68afcafd8768383c8`; D cierre dirigido `633d8fc36e2b825a6362f418c01254c8886f37fe`; E `4693502282f54e3adfeee97669e0ca7ffa10b3ae`; G/funcional final `369158761ad05671b9a1859d17796c8ca4a09bf8`. La regresión específica `frontend/e2e/n0-8-compras-metodos-pago-regresion.spec.ts` cubre método administrable dinámico y catálogo no disponible fail-closed.
 
-**Validación final sobre `369158761ad05671b9a1859d17796c8ca4a09bf8`:** CI principal `31821172124` SUCCESS completo; M10 `31821172381` SUCCESS; Fase 8 `31821172230` SUCCESS; aceptación integral `31821172223` SUCCESS incluido Playwright/SMTP/PDF; M13 `31821172341` SUCCESS completo incluido historial MySQL, integración, SQL forward, upgrade histórico, preservación histórica, frontend, seguridad HTTP, Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS. No quedan P0/P1 conocidos atribuibles a ERP-N0.8.
+**Validación final sobre `369158761ad05671b9a1859d17796c8ca4a09bf8`:** CI principal `31821172124` SUCCESS completo; M10 `31821172381` SUCCESS; Fase 8 `31821172230` SUCCESS; aceptación integral `31821172223` SUCCESS incluido Playwright/SMTP/PDF; M13 `31821172341` SUCCESS completo incluido historial MySQL, integración, SQL forward, upgrade histórico, frontend, seguridad HTTP, Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS. No quedan P0/P1 conocidos atribuibles a ERP-N0.8.
 
 **Documentación/control:** fuente final `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA.md`; preflight `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA_PREFLIGHT.md`; `TASKS.md`, CHANGELOG y tablero VAEP se reconcilian en N0.8.H. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas. El siguiente foco debe seleccionarse únicamente desde el gate/dependencias VAEP.
 
@@ -1033,13 +1033,3 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia:** `N7.4.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_4_IDEMPOTENCIA.md` en `6097f60ff68d163878d5d3d85c590c59f0cd2f75`; functional candidate `1c366562a90c590cc2925a153298fd1b758e8dab`; causal gates `34782712890/103792518381`, `34782712890/103792518352`, `34782712890/103792518396`, `34782712884/103792518243` y `34782712884/103792518046` en `SUCCESS`; receipt G `vaep/evidence/receipts/N7.4.G_LISTO_REAL_20260913T220100Z_SUP48.json`.
 
 **Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.4.H` no se declara `LISTO_REAL` hasta resolver también `TASKS_ADDITIVE_STATE_RECONCILIATION`, repetir REVIEW_FIRST con `P0=0/P1=0`, demostrar equivalencia funcional y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
-
-## 2026-09-13 — ERP-N7.5 Webhooks — reconciliación documental append-only
-
-**Responsable:** CHATGPT_VAEP / Tarea Supervisión :00.
-
-**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N7.5.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime, schema ni adelantar `N7.6`.
-
-**Evidencia:** `N7.5.A–G=LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N7_5_WEBHOOKS.md`; N7.5.G functional candidate `dbd515909d98893f4924bb73d0a48f74fe9b97c3`, REVIEW_FIRST P0=0/P1=0 y gates exact-head `34800735379/103842737649` y `34800735411/103842739664` en `SUCCESS`; receipt `vaep/evidence/receipts/N7.5.G_LISTO_REAL_20260914T030250Z_SUP36.json`. `TASKS.md` quedó reconciliado aditivamente durante el mismo cierre DOC_CERT.
-
-**Control:** esta publicación resuelve únicamente el P1 de `CHANGELOG_AI.md`. `N7.5.H` no se declara `LISTO_REAL` hasta repetir REVIEW_FIRST con `P0=0/P1=0`, demostrar equivalencia funcional contra `dbd515909d98893f4924bb73d0a48f74fe9b97c3` y persistir/releer receipt H. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
