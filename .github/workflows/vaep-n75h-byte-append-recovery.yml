@@ -36,19 +36,34 @@ jobs:
           test "$(git hash-object CHANGELOG_AI.md)" = "ab4307cdd14e6ce6f88c60cff6e3adfcde2aa360"
           cp TASKS.md /tmp/TASKS.before
           cp CHANGELOG_AI.md /tmp/CHANGELOG.before
+          tasks_last="$(tail -c 1 /tmp/TASKS.before | od -An -t x1 | tr -d ' \n')"
+          changelog_last="$(tail -c 1 /tmp/CHANGELOG.before | od -An -t x1 | tr -d ' \n')"
+          printf 'TASKS_LAST_BYTE=%s\n' "$tasks_last"
+          printf 'CHANGELOG_LAST_BYTE=%s\n' "$changelog_last"
           printf '%s' "$TASKS_B64" | base64 -d >> TASKS.md
           printf '%s' "$CHANGELOG_B64" | base64 -d >> CHANGELOG_AI.md
-          cmp -n "$(wc -c < /tmp/TASKS.before)" /tmp/TASKS.before TASKS.md
-          cmp -n "$(wc -c < /tmp/CHANGELOG.before)" /tmp/CHANGELOG.before CHANGELOG_AI.md
+          tasks_before_size="$(wc -c < /tmp/TASKS.before)"
+          changelog_before_size="$(wc -c < /tmp/CHANGELOG.before)"
+          cmp -n "$tasks_before_size" /tmp/TASKS.before TASKS.md
+          cmp -n "$changelog_before_size" /tmp/CHANGELOG.before CHANGELOG_AI.md
+          test "$(wc -c < TASKS.md)" -gt "$tasks_before_size"
+          test "$(wc -c < CHANGELOG_AI.md)" -gt "$changelog_before_size"
+          changed="$(git diff --name-only)"
+          printf 'CHANGED_FILES=%s\n' "$changed"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
           for f in TASKS.md CHANGELOG_AI.md; do
             stats="$(git diff --numstat -- "$f")"
+            printf 'NUMSTAT %s %s\n' "$f" "$stats"
             adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
             dels="$(printf '%s\n' "$stats" | awk '{print $2}')"
             test -n "$adds" && test "$adds" -gt 0
-            test -n "$dels" && test "$dels" -eq 0
+            if [ "$dels" -ne 0 ]; then
+              if [ "$f" = "TASKS.md" ]; then old_last="$tasks_last"; else old_last="$changelog_last"; fi
+              test "$old_last" != "0a"
+              test "$dels" -le 1
+            fi
           done
-          changed="$(git diff --name-only)"
-          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
+          git diff --check
 
       - name: Commit rollups and retire recovery workflow
         shell: bash
