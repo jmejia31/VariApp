@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace InventoryApp.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// N7.8.C — persistencia tenant-bound para pagos iniciados mediante proveedores externos.
+/// N7.8.C/D — persistencia tenant-bound para pagos iniciados mediante proveedores externos.
 /// Guarda referencias opacas del proveedor e idempotencia durable; nunca PAN, CVV ni
 /// credenciales del proveedor.
 /// </summary>
@@ -37,6 +37,9 @@ public sealed class PagoOnlineConfiguration : IEntityTypeConfiguration<PagoOnlin
 
         builder.Property(x => x.ProviderEventId)
             .HasMaxLength(200);
+
+        builder.Property(x => x.ClaveIdempotenciaHash)
+            .HasMaxLength(64);
 
         builder.Property(x => x.Monto)
             .HasPrecision(18, 2)
@@ -75,6 +78,10 @@ public sealed class PagoOnlineConfiguration : IEntityTypeConfiguration<PagoOnlin
         builder.HasIndex(x => new { x.EmpresaId, x.Proveedor, x.ProviderEventId })
             .IsUnique()
             .HasDatabaseName("UX_PagosOnline_Empresa_Proveedor_Evento");
+
+        builder.HasIndex(x => new { x.EmpresaId, x.Proveedor, x.ClaveIdempotenciaHash })
+            .IsUnique()
+            .HasDatabaseName("UX_PagosOnline_Empresa_Proveedor_Idempotencia");
 
         builder.HasOne<Empresa>()
             .WithMany()
