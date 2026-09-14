@@ -42,9 +42,14 @@ export function mapearProducto(producto: ProductoCatalogoPublico): ProductoTiend
   const modelos: ModeloTienda[] = (producto.modelos ?? []).map(modelo => {
     const fotos = listaImagenes(modelo.imagenes);
     const stock = stockSeguro(modelo.cantidadDisponible);
+    const productoVarianteId = Number.isSafeInteger(modelo.productoVarianteId) && (modelo.productoVarianteId ?? 0) > 0
+      ? modelo.productoVarianteId!
+      : null;
     return {
-      // The public API groups by model AND brand, including null model IDs.
-      clave: JSON.stringify([modelo.modeloId ?? null, modelo.modeloNombre ?? '', modelo.marcaNombre ?? '']),
+      clave: productoVarianteId !== null
+        ? `variante:${productoVarianteId}`
+        : JSON.stringify([modelo.modeloId ?? null, modelo.modeloNombre ?? '', modelo.marcaNombre ?? '']),
+      productoVarianteId,
       modeloId: modelo.modeloId ?? null,
       nombre: modelo.modeloNombre || 'Modelo general',
       marca: modelo.marcaNombre || producto.marcaNombre || '',
@@ -56,7 +61,7 @@ export function mapearProducto(producto: ProductoCatalogoPublico): ProductoTiend
     };
   });
   if (!modelos.length) modelos.push({
-    clave: 'base', modeloId: null, nombre: producto.modeloNombre || 'Modelo general',
+    clave: 'base', productoVarianteId: null, modeloId: null, nombre: producto.modeloNombre || 'Modelo general',
     marca: producto.marcaNombre || '', sku: producto.sku?.trim() || '',
     precio: precioValido(producto.precio) ? producto.precio : 0,
     stock: stockProducto,
@@ -121,8 +126,8 @@ export function precioVenta(producto: ProductoTienda, modelo: ModeloTienda): num
 
 export function crearItem(producto: ProductoTienda, modelo: ModeloTienda, unidades = 1): ItemCarrito {
   return {
-    clave: `${producto.id}:${modelo.clave}`, productoId: producto.id, modeloClave: modelo.clave,
-    modeloId: modelo.modeloId, nombre: producto.nombre, modelo: modelo.nombre,
+    clave: `${producto.id}:${modelo.clave}`, productoId: producto.id, productoVarianteId: modelo.productoVarianteId,
+    modeloClave: modelo.clave, modeloId: modelo.modeloId, nombre: producto.nombre, modelo: modelo.nombre,
     precio: precioVenta(producto, modelo), stock: modelo.stock,
     unidades: Math.max(1, Math.min(stockSeguro(unidades), modelo.stock)),
     imagen: modelo.imagenes[0] || '', ilustracion: producto.ilustracion || 'paquete'
@@ -208,8 +213,8 @@ export function crearCatalogoEjemplo(): ProductoTienda[] {
       estaAgotado: cantidadDisponible === 0,
       imagenes: [],
       modelos: indice === 0 ? [
-        { modeloId: 101, modeloNombre: '8 GB / 256 GB', marcaNombre: 'Demo', precio, cantidadDisponible: 5, estaAgotado: false, imagenes: [] },
-        { modeloId: 102, modeloNombre: '16 GB / 512 GB', marcaNombre: 'Demo', precio: precio + 2500, cantidadDisponible: 3, estaAgotado: false, imagenes: [] }
+        { productoVarianteId: 10001, modeloId: 101, modeloNombre: '8 GB / 256 GB', marcaNombre: 'Demo', precio, cantidadDisponible: 5, estaAgotado: false, imagenes: [] },
+        { productoVarianteId: 10002, modeloId: 102, modeloNombre: '16 GB / 512 GB', marcaNombre: 'Demo', precio: precio + 2500, cantidadDisponible: 3, estaAgotado: false, imagenes: [] }
       ] : []
     });
     return { ...producto, ilustracion };
