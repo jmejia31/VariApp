@@ -1,5 +1,6 @@
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Domain.Fiscal;
 using InventoryApp.Infrastructure.Persistence;
@@ -62,28 +63,66 @@ public sealed class FacturacionFiscalController : ControllerBase
         if (tenant is null)
             return Forbid();
 
-        // Factura aún es una entidad legacy sin EmpresaId directo. Para impedir que un
-        // caller enlace una factura de otro tenant, se exige que el creador de la venta
-        // posea una membresía activa en la misma empresa solicitada. Si el histórico no
-        // puede demostrar esa pertenencia, el endpoint falla cerrado.
-        var facturaPerteneceAlTenant = await (
-            from factura in _db.Facturas.AsNoTracking()
-            join venta in _db.Ventas.AsNoTracking() on factura.VentaId equals venta.Id
-            where factura.Id == solicitud.FacturaId &&
-                  venta.CreadoPorUsuarioId.HasValue &&
-                  _db.UsuarioEmpresas.Any(membresia =>
-                      membresia.UsuarioId == venta.CreadoPorUsuarioId.Value &&
-                      membresia.EmpresaId == request.EmpresaId &&
-                      membresia.Activa)
-            select factura.Id)
-            .AnyAsync(cancellationToken);
+        // La identidad fiscal del tenant se toma de Empresa, no del payload. Para una
+        // emisión fiscal exigimos una identidad legal verificable; un tenant sin RTN
+        // no puede usar este endpoint hasta completar su configuración.
+        var empresaRtn = await _db.Set<Empresa>()
+            .AsNoTracking()
+            .Where(x => x.Id == request.EmpresaId && x.Activa)
+            .Select(x => x.Rtn)
+            .SingleOrDefaultAsync(cancellationToken);
 
-        if (!facturaPerteneceAlTenant)
+        if (string.IsNullOrWhiteSpace(empresaRtn))
+        {
+            return Conflict(new
+            {
+                error = "EMPRESA_SIN_IDENTIDAD_FISCAL",
+                mensaje = "La empresa activa no tiene una identidad fiscal verificable configurada."
+            });
+        }
+
+        if (request.SucursalId.HasValue)
+        {
+            var sucursalValida = await _db.Set<Sucursal>()
+                .AsNoTracking()
+                .AnyAsync(x =>
+                    x.Id == request.SucursalId.Value &&
+                    x.EmpresaId == request.EmpresaId &&
+                    x.Activa &&
+                    !x.Eliminado,
+                    cancellationToken);
+
+            if (!sucursalValida)
+            {
+                return NotFound(new
+                {
+                    error = "SUCURSAL_NO_DISPONIBLE_EN_TENANT",
+                    mensaje = "La sucursal no existe, no está activa o no pertenece a la empresa solicitada."
+                });
+            }
+        }
+
+        // Factura es una entidad legacy sin EmpresaId directo. El creador de una venta
+        // puede pertenecer a múltiples empresas y por sí solo NO demuestra ownership.
+        // Para cerrar ese bypass, la factura sólo es elegible cuando su snapshot fiscal
+        // de RTN coincide exactamente (normalizado) con la identidad legal del tenant.
+        var facturaScope = await _db.Facturas
+            .AsNoTracking()
+            .Where(x => x.Id == solicitud.FacturaId)
+            .Select(x => new { x.Id, x.EmpresaRTN })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (facturaScope is null ||
+            string.IsNullOrWhiteSpace(facturaScope.EmpresaRTN) ||
+            !string.Equals(
+                NormalizarIdentidadFiscal(facturaScope.EmpresaRTN),
+                NormalizarIdentidadFiscal(empresaRtn),
+                StringComparison.Ordinal))
         {
             return NotFound(new
             {
                 error = "FACTURA_NO_DISPONIBLE_EN_TENANT",
-                mensaje = "La factura no existe o no puede demostrarse que pertenece a la empresa solicitada."
+                mensaje = "La factura no existe o su identidad fiscal no coincide con la empresa solicitada."
             });
         }
 
@@ -125,6 +164,9 @@ public sealed class FacturacionFiscalController : ControllerBase
             });
         }
     }
+
+    private static string NormalizarIdentidadFiscal(string value) =>
+        new(value.Where(char.IsLetterOrDigit).Select(char.ToUpperInvariant).ToArray());
 }
 
 public sealed record EmitirDocumentoFiscalRequest(
