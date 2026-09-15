@@ -1,0 +1,92 @@
+name: N8.12.D - Aplicar observabilidad acotada
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/n8-12-d-observability-patch.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: n8-12-d-observability-patch-Desarrollo
+  cancel-in-progress: false
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Apply exact observability wiring
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+
+          program_path = Path('backend/src/API/Program.cs')
+          program = program_path.read_text(encoding='utf-8')
+
+          old = 'using InventoryApp.API.Middleware;\n'
+          new = 'using InventoryApp.API.Middleware;\nusing InventoryApp.API.Observability;\n'
+          if new not in program:
+              if old not in program:
+                  raise SystemExit('Program.cs middleware using anchor not found')
+              program = program.replace(old, new, 1)
+
+          old = 'builder.Services.AddHttpContextAccessor();\n'
+          new = ('builder.Services.AddHttpContextAccessor();\n'
+                 'builder.Services.Configure<ObservabilityOptions>(builder.Configuration.GetSection("Observability"));\n'
+                 'builder.Services.AddSingleton<RequestObservability>();\n')
+          if 'builder.Services.AddSingleton<RequestObservability>();' not in program:
+              if old not in program:
+                  raise SystemExit('Program.cs service-registration anchor not found')
+              program = program.replace(old, new, 1)
+
+          old = 'app.UseMiddleware<CorrelationIdMiddleware>();\napp.UseMiddleware<ExceptionHandlingMiddleware>();\n'
+          new = ('app.UseMiddleware<CorrelationIdMiddleware>();\n'
+                 'app.UseMiddleware<RequestObservabilityMiddleware>();\n'
+                 'app.UseMiddleware<ExceptionHandlingMiddleware>();\n')
+          if 'app.UseMiddleware<RequestObservabilityMiddleware>();' not in program:
+              if old not in program:
+                  raise SystemExit('Program.cs middleware pipeline anchor not found')
+              program = program.replace(old, new, 1)
+
+          program_path.write_text(program, encoding='utf-8')
+
+          settings_path = Path('backend/src/API/appsettings.json')
+          settings = json.loads(settings_path.read_text(encoding='utf-8'))
+          settings['Observability'] = {
+              'SlowRequestThresholdMs': 2000,
+              'ErrorAlertStatusCode': 500,
+              'EnableAlertLogs': True
+          }
+          settings_path.write_text(json.dumps(settings, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+      - name: Validate targeted observability tests
+        run: dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj --filter FullyQualifiedName~RequestObservabilityTests --configuration Release
+
+      - name: Commit exact causal delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          if git diff --quiet -- backend/src/API/Program.cs backend/src/API/appsettings.json; then
+            echo 'No wiring delta required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/API/Program.cs backend/src/API/appsettings.json
+          git commit -m 'feat(n8.12.d): wire request observability'
+          git push origin HEAD:Desarrollo
