@@ -91,6 +91,7 @@ public sealed class N31CotizacionApplicationTests
         {
             Id = 10,
             Nombre = "Producto",
+            Precio = 50m,
             Activo = true
         });
 
@@ -115,7 +116,7 @@ public sealed class N31CotizacionApplicationTests
                 {
                     ProductoId = 10,
                     Cantidad = 2,
-                    PrecioUnitario = 50
+                    PrecioUnitario = 999999
                 }
             ]
         };

@@ -1220,3 +1220,12 @@ El despliegue de `ac46085e` completó y permitió confirmar en el bundle remoto 
 globales y el primer ajuste. El commit final `74743586` fue rechazado por el límite de
 despliegues de Vercel; la evidencia queda marcada `N_A` hasta que ese bundle esté publicado.
 
+## 2026-09-15 — Integridad server-authoritative de precios
+
+Ventas y cotizaciones dejaron de confiar en `PrecioUnitario` enviado por el navegador.
+El backend resuelve el precio vigente de variante/producto, rechaza catálogos sin precio y
+persiste el valor aplicado como snapshot de la venta/cotización. Los controles de precio de
+ventas y cotizaciones son de solo lectura y la prueba de aplicación cubre una manipulación
+de L. 1 frente a un catálogo de L. 200. La regla canónica quedó en
+`docs/REGLA_INTEGRIDAD_PRECIOS_VENTAS.md`.
+

@@ -238,4 +238,77 @@ public class VentaServiceTests
 
         Assert.Equal("https://res.cloudinary.com/demo/image/upload/producto-venta.webp", resultado!.Detalles.Single().ProductoImagenPrincipalUrl);
     }
+
+    [Fact]
+    public async Task CalcularVistaPreviaAsync_Usa_Precio_Autorizado_EIgnora_Precio_Cliente()
+    {
+        var producto = ProductoDePrueba();
+        var variante = new ProductoVariante
+        {
+            Id = 8,
+            ProductoId = producto.Id,
+            Sku = "M185-BLK",
+            Precio = 200m,
+            Cantidad = 10,
+            Activo = true
+        };
+        producto.Variantes.Add(variante);
+        _productoRepoMock.Setup(r => r.GetByIdAsync(producto.Id)).ReturnsAsync(producto);
+        _varianteRepoMock.Setup(r => r.GetByIdAsync(variante.Id)).ReturnsAsync(variante);
+        _calculoMock.Setup(c => c.CalcularVentaAsync(
+                It.Is<List<DetalleCalculoInput>>(d => d.Count == 1 && d[0].PrecioUnitario == 200m),
+                It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<string?>()))
+            .ReturnsAsync(new ResultadoCalculoDto { Subtotal = 200m, Total = 200m });
+
+        await _service.CalcularVistaPreviaAsync(new CalcularVentaRequest
+        {
+            Detalles =
+            {
+                new VentaDetalleInputDto
+                {
+                    ProductoId = producto.Id,
+                    ProductoVarianteId = variante.Id,
+                    Cantidad = 1,
+                    PrecioUnitario = 1m
+                }
+            }
+        });
+
+        _calculoMock.Verify(c => c.CalcularVentaAsync(
+            It.Is<List<DetalleCalculoInput>>(d => d.Single().PrecioUnitario == 200m),
+            It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CalcularVistaPreviaAsync_Rechaza_Producto_Sin_Precio_Vigente()
+    {
+        var producto = ProductoDePrueba();
+        producto.Precio = 0m;
+        var variante = new ProductoVariante
+        {
+            Id = 8,
+            ProductoId = producto.Id,
+            Sku = "M185-BLK",
+            Precio = null,
+            Cantidad = 10,
+            Activo = true
+        };
+        producto.Variantes.Add(variante);
+        _productoRepoMock.Setup(r => r.GetByIdAsync(producto.Id)).ReturnsAsync(producto);
+        _varianteRepoMock.Setup(r => r.GetByIdAsync(variante.Id)).ReturnsAsync(variante);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.CalcularVistaPreviaAsync(new CalcularVentaRequest
+        {
+            Detalles =
+            {
+                new VentaDetalleInputDto
+                {
+                    ProductoId = producto.Id,
+                    ProductoVarianteId = variante.Id,
+                    Cantidad = 1,
+                    PrecioUnitario = 999999m
+                }
+            }
+        }));
+    }
 }

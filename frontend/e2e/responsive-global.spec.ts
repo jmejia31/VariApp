@@ -245,6 +245,13 @@ async function certifyRoute(page: Page, route: string, mobile: boolean, errors: 
   if (route !== '/' && !route.startsWith('/varistorehn') && route !== '/login') {
     await auditGeometry(page, route, mobile);
     await auditFirstSelectOverlay(page, route);
+    if (route === '/ventas/nueva') {
+      const priceInputs = page.locator('main input[formcontrolname="precioUnitario"]');
+      for (let index = 0; index < await priceInputs.count(); index += 1) {
+        await expect(priceInputs.nth(index), 'El precio unitario debe ser solo lectura').toHaveAttribute('readonly', '');
+        await expect(priceInputs.nth(index), 'El precio unitario debe declarar lectura').toHaveAttribute('aria-readonly', 'true');
+      }
+    }
   }
   expect(errors, `Errores de consola en ${route}: ${errors.join(' | ')}`).toEqual([]);
 }

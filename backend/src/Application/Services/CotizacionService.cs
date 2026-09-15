@@ -156,18 +156,13 @@ public sealed class CotizacionService : ICotizacionService
                         ?? throw new BusinessRuleException(
                             $"El detalle {detalleDto.Id.Value} no pertenece a la cotización {cotizacion.Id}.");
 
-                    if (existente.ProductoId != detalleDto.ProductoId ||
-                        existente.ProductoVarianteId != detalleDto.ProductoVarianteId)
-                    {
-                        var snapshot = await CrearDetalleDesdeDtoAsync(
-                            detalleDto.ProductoId,
-                            detalleDto.ProductoVarianteId,
-                            detalleDto.Cantidad,
-                            detalleDto.PrecioUnitario);
-                        CopiarIdentidadProducto(snapshot, existente);
-                    }
-
-                    existente.EstablecerValores(detalleDto.Cantidad, detalleDto.PrecioUnitario);
+                    var snapshot = await CrearDetalleDesdeDtoAsync(
+                        detalleDto.ProductoId,
+                        detalleDto.ProductoVarianteId,
+                        detalleDto.Cantidad,
+                        detalleDto.PrecioUnitario);
+                    CopiarIdentidadProducto(snapshot, existente);
+                    existente.EstablecerValores(snapshot.Cantidad, snapshot.PrecioUnitario);
                 }
                 else
                 {
@@ -414,7 +409,14 @@ public sealed class CotizacionService : ICotizacionService
             ProductoTallaSnapshot = variante?.Talla?.Nombre
         };
 
-        detalle.EstablecerValores(cantidad, precioUnitario);
+        var precioAutorizado = variante?.Precio ?? producto.Precio;
+        if (precioAutorizado <= 0)
+            throw new BusinessRuleException(
+                $"El producto '{producto.Nombre}' no tiene un precio de venta vigente configurado.");
+
+        // precioUnitario se conserva en la firma para compatibilidad de contrato,
+        // pero nunca es fuente de verdad del precio comercial.
+        detalle.EstablecerValores(cantidad, precioAutorizado);
         return detalle;
     }
 

@@ -549,9 +549,6 @@ public class VentaService : IVentaService
         {
             if (input.Cantidad <= 0)
                 throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
-            if (input.PrecioUnitario <= 0)
-                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
-
             var producto = await _productoRepository.GetByIdAsync(input.ProductoId)
                 ?? throw new BusinessRuleException($"El producto con id {input.ProductoId} no existe.");
 
@@ -574,7 +571,7 @@ public class VentaService : IVentaService
                     $"Stock insuficiente para '{producto.Nombre}' / '{variante.Sku}': disponible {variante.Cantidad}, solicitado {input.Cantidad}.");
 
             var costoUnitario = variante.Costo ?? 0m;
-            var precioUnitario = variante.Precio ?? input.PrecioUnitario;
+            var precioUnitario = ResolverPrecioAutorizado(producto, variante);
             var subtotal = input.Cantidad * precioUnitario;
             var costoTotal = input.Cantidad * costoUnitario;
 
@@ -638,19 +635,27 @@ public class VentaService : IVentaService
                     ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de cotizarlo.");
             }
 
-            if (!variante.Precio.HasValue && d.PrecioUnitario <= 0)
-                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
+            var precioUnitario = ResolverPrecioAutorizado(producto, variante);
 
             entradas.Add(new DetalleCalculoInput
             {
                 ProductoId = producto.Id,
                 CategoriaId = producto.CategoriaId,
                 Cantidad = d.Cantidad,
-                PrecioUnitario = variante.Precio ?? d.PrecioUnitario
+                PrecioUnitario = precioUnitario
             });
         }
 
         return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional, request.CostoEnvioId, request.EnvioExonerado, request.MotivoExoneracionEnvio);
+    }
+
+    private static decimal ResolverPrecioAutorizado(Producto producto, ProductoVariante variante)
+    {
+        var precio = variante.Precio ?? producto.Precio;
+        if (precio <= 0)
+            throw new BusinessRuleException(
+                $"El producto '{producto.Nombre}' no tiene un precio de venta vigente configurado.");
+        return precio;
     }
 
     private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional, int? costoEnvioId, bool envioExonerado, string? motivoExoneracionEnvio)
