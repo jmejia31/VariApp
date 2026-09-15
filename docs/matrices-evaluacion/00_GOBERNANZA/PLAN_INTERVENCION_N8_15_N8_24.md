@@ -1,18 +1,29 @@
 # Intervención obligatoria N8.15–N8.24
 
 ## Motivo
-El flujo normal se pausa para eliminar deuda de especificación/arquitectura y revalidar cierres operativos sensibles antes de continuar. No se reescribe historia: los cierres previos permanecen como hechos históricos y son objeto de revalidación forense cuando corresponda.
+El flujo normal se pausa para eliminar deuda de especificación/arquitectura y revalidar cierres operativos sensibles antes de continuar el resto del plan. No se reescribe historia: los cierres previos permanecen como hechos históricos y son objeto de revalidación forense cuando corresponda.
 
 La especificación ejecutable y los DoD detallados de esta intervención viven en:
 
 `docs/matrices-evaluacion/00_GOBERNANZA/ESPECIFICACION_EJECUCION_N8_15_N8_24.md`
 
-## Frontera y gate HARD
+## Posición física HARD en COLA
 
-- Entrada causal: `N8.6.F`.
+- Fila ancla: `640`.
+- La fila `640` contiene `N8.3.A`.
+- La primera microtarea de la intervención DEBE iniciar en la fila `641` con `N8.15.A`.
+- Las 80 microtareas `N8.15.A` → `N8.24.H` ocupan consecutivamente las filas `641` → `720`.
+- El plan histórico se reanuda físicamente en la fila `721` con `N8.3.B`.
+- `N8.15.A` depende de `N8.3.A`.
+- `N8.3.B` queda gateada por `N8.24.H`.
+- No dejar una copia duplicada de N8.15–N8.24 al final o en otra zona de `COLA`.
+
+## Gate HARD
+
+- Entrada causal inmediata: `N8.3.A`.
 - Intervención obligatoria: `N8.15.A` → ... → `N8.24.H`.
-- Reentrada: revalidar/promover desde `N8.6.G` según el resultado forense de N8.19.
-- `N8.6.G` no debe volver a ser elegible materialmente antes del cierre de `N8.24.H`.
+- Reentrada del plan anterior: `N8.3.B`.
+- La auditoría forense de `N8.19` conserva su scope especial desde `N8.6.G/H`, `N8.7`, `N8.8` y todo avance posterior; ese scope no altera la posición física de la intervención.
 - `GATE-N8` debe incluir `N8.15.H`–`N8.24.H` como prerequisitos formales.
 - Las diez automatizaciones permanecen pausadas hasta reactivación explícita del propietario; la pausa del propietario prevalece sobre liveness recovery.
 
@@ -30,7 +41,7 @@ Crear y completar una matriz por cada pantalla/ruta, diálogo de negocio, widget
 Implementar la jerarquía padre→hijo en frontend/backend/docs y contratos de datos; consolidar alertas/modales reutilizables; retirar únicamente dead code/duplicados/stale docs demostrados. Regression completa; cero eliminación especulativa. DDL destructivo de BD queda bloqueado hasta certificar backup/restore en N8.21; los candidatos se cierran allí, no se olvidan.
 
 ### N8.19 — Auditoría forense desde N8.6.G
-Ejecutar la FASE 0 del prompt maestro: N8.6.G/H, N8.7 A–H, N8.8 A–H y todo lo posterior que haya avanzado. Clasificar evidencia real; investigar timestamps/N/A; reabrir lo que corresponda sin fabricar PASS.
+Ejecutar la FASE 0 de la misión pre-go-live: N8.6.G/H, N8.7 A–H, N8.8 A–H y todo lo posterior que haya avanzado. Clasificar evidencia real; investigar timestamps/N/A; reabrir lo que corresponda sin fabricar PASS.
 
 ### N8.20 — Motor/proveedor real de BD DEV
 Identificar runtime real, versión, proveedor, plan y capacidades backup/PITR/retention/restore sin exponer secretos.
@@ -61,7 +72,7 @@ Orden obligatorio:
 El contrato arquitectónico se define antes de las matrices; la reestructuración física se ejecuta después de las matrices para que código y limpieza se midan contra un objetivo verificable.
 
 ## Handoff
-La cadena de intervención depende materialmente de N8.6.F. Al cerrar N8.24.H se revalida/promueve N8.6.G como checkpoint histórico-causal y se reconcilia todo avance posterior. El trabajo que ya ocurrió después de N8.6.F no se borra ni se da por inválido automáticamente: N8.19 decide causalmente qué se confirma, reabre o queda superseded.
+Al cerrar `N8.24.H`, el sucesor físico y causal del plan vuelve a ser `N8.3.B`. Desde ahí se continúa el plan anterior en su orden real. La auditoría N8.19 decide causalmente qué evidencia histórica posterior se confirma, reabre o queda superseded; no se borra ni se da por válida automáticamente.
 
 ## Restricciones
 - Rama: `Desarrollo`.
