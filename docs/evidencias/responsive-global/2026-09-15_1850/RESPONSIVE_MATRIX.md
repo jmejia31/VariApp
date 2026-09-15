@@ -1,6 +1,8 @@
 # Responsive matrix — 2026-09-15 18:50 CST
 
-Estado de la corrida: N_A para la validación del bundle nuevo. El commit `8a0552e3` está en `origin/Desarrollo`, pero el check de Vercel reporta `Deployment rate limited — retry in 24 hours`; por eso la URL remota sigue sirviendo el bundle anterior. No se marca PASS ni se fabrican capturas del estado corregido.
+Estado de la corrida: N_A para la validación del bundle final. `ac46085e` sí completó
+deployment, pero el commit final `74743586` quedó con `Deployment rate limited — retry in
+24 hours`; por eso no se marca PASS del estado final ni se fabrican capturas.
 
 | Ruta | 320 | 360 | 375 | 390 | 412 | 430 | 768 | 1024 | 1440 | Body overflow | Element clipping | Sidebar | Acciones | Resultado |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

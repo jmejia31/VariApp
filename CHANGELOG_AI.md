@@ -1216,3 +1216,7 @@ La plantilla móvil ahora reserva una columna táctil estable para cantidad y de
 en la columna flexible; el ajuste es transversal al componente reutilizado y no cambia
 ningún flujo transaccional.
 
+El despliegue de `ac46085e` completó y permitió confirmar en el bundle remoto las reglas
+globales y el primer ajuste. El commit final `74743586` fue rechazado por el límite de
+despliegues de Vercel; la evidencia queda marcada `N_A` hasta que ese bundle esté publicado.
+
