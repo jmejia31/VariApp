@@ -156,6 +156,10 @@ export class ExistenciaVarianteFormComponent implements OnInit {
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id') ?? 0);
     this.editando.set(this.id > 0);
+
+    const productoSolicitado = Number(this.route.snapshot.queryParamMap.get('productoId') ?? 0);
+    const varianteSolicitada = Number(this.route.snapshot.queryParamMap.get('productoVarianteId') ?? 0);
+
     forkJoin({
       productos: this.productoService.getPaged({ page: 1, pageSize: 200, activo: true, sortBy: 'nombre', sortDirection: 'asc' }),
       almacenes: this.almacenService.getActivos()
@@ -163,8 +167,17 @@ export class ExistenciaVarianteFormComponent implements OnInit {
       next: ({ productos, almacenes }) => {
         this.productos.set(productos.data.items);
         this.almacenes.set(almacenes.data);
-        if (this.editando()) this.cargarExistencia();
-        else this.loading.set(false);
+        if (this.editando()) {
+          this.cargarExistencia();
+          return;
+        }
+
+        if (Number.isInteger(productoSolicitado) && productoSolicitado > 0 && this.productos().some(p => p.id === productoSolicitado)) {
+          this.productoId = productoSolicitado;
+          this.productoVarianteId = Number.isInteger(varianteSolicitada) && varianteSolicitada > 0 ? varianteSolicitada : null;
+          this.cargarVariantes(productoSolicitado);
+        }
+        this.loading.set(false);
       },
       error: err => {
         this.loading.set(false);
@@ -278,7 +291,15 @@ export class ExistenciaVarianteFormComponent implements OnInit {
   private cargarVariantes(productoId: number): void {
     this.cargandoVariantes.set(true);
     this.productoService.getVariantes(productoId, false).pipe(finalize(() => this.cargandoVariantes.set(false))).subscribe({
-      next: response => this.variantes.set((response.data ?? []).filter(v => v.activo)),
+      next: response => {
+        const activas = (response.data ?? []).filter(v => v.activo);
+        this.variantes.set(activas);
+        if (this.productoVarianteId) {
+          const preseleccionada = activas.find(v => v.id === this.productoVarianteId);
+          if (preseleccionada) this.stockMinimo = preseleccionada.umbralStockBajo;
+          else this.productoVarianteId = null;
+        }
+      },
       error: err => this.error.set(this.extraerError(err, 'No fue posible cargar las variantes activas.'))
     });
   }
