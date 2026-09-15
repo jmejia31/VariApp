@@ -1146,3 +1146,6 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 
 - Evidence JSON normalization follow-up for the authenticated delegated UAT capture (same browser observations; syntax corrected before consumption).
 
+
+- Sheet reconciliation remains pending at exact evidence head 1700accb50edf550123b1e2e794b1dc8fb664ea4 (2026-09-15T15:12:40.8585093Z); no connector or external readback was available, and the Finance/payment mismatch plus unconfigured providers are recorded without synthetic state changes. Evidence: vaep/evidence/reconciliations/N8.1_G_H_SHEET_RECONCILIATION_PENDING_20260915T151240Z.json.
+
