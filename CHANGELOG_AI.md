@@ -23,6 +23,8 @@ El flujo de factura conserva el enlace `wa.me` seguro y lo muestra como fallback
 
 Se corrigió el doble enmascarado: factura envía el teléfono normalizado de forma transitoria y el backend aplica la máscara una sola vez antes de persistir. Se añadió manejo visible de error de auditoría y cobertura frontend/backend del contrato. No se enviaron mensajes reales ni se tocaron `N8.7.A` o las automatizaciones.
 
+El receipt correctivo quedó fijado al HEAD funcional exacto de la corrección.
+
 ## 2026-09-15 — WhatsApp — handoff canónico sin API de proveedor
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
