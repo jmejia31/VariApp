@@ -2,6 +2,7 @@ using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.Api.Controllers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Xunit;
@@ -37,8 +38,8 @@ public sealed class SecurityBoundaryContractTests
 
         Assert.NotNull(requestLimit);
         Assert.NotNull(formLimit);
-        Assert.InRange(requestLimit!.Bytes, 1, 10 * 1024 * 1024);
-        Assert.InRange(formLimit!.MultipartBodyLengthLimit, 1, 10 * 1024 * 1024);
+        Assert.InRange(((IRequestSizeLimitMetadata)requestLimit!).MaxRequestBodySize!.Value, 1L, 10L * 1024 * 1024);
+        Assert.InRange(formLimit!.MultipartBodyLengthLimit, 1L, 10L * 1024 * 1024);
     }
 
     [Fact]
