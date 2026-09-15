@@ -118,6 +118,10 @@
   }
 </div>
 
+@if (factura(); as f) {
+  <app-factura-fiscal-emision [factura]="f" />
+}
+
 @if (mostrarPanelCorreo() && puedeCompartir()) {
   <div class="card panel-correo no-print">
     <h3><mat-icon>email</mat-icon> Enviar por correo</h3>
