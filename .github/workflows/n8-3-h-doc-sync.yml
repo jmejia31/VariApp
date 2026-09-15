@@ -1,0 +1,78 @@
+name: N8.3.H - Reconciliar historial documental
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/n8-3-h-doc-sync.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: n8-3-h-doc-sync-Desarrollo
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Append history-preserving N8.3 documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Fast-forward and append canonical history
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin Desarrollo
+
+          if ! grep -Fq 'ERP-N8.3 — Compatibilidad de navegadores — ROLLUP DOCUMENTAL 2026-09-15' TASKS.md; then
+            cat >> TASKS.md <<'EOF'
+
+          ## ERP-N8.3 — Compatibilidad de navegadores — ROLLUP DOCUMENTAL 2026-09-15
+
+          Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+          - [x] N8.3.A-G cerraron `LISTO_REAL` con receipts/evidencia VAEP y P0/P1/P2 atribuibles conocidos=0.
+          - [x] Functional candidate `b833e44a976f92a426fff7f969a3f3f757234f20` incorpora el gate causal de compatibilidad en Chromium, Firefox y WebKit.
+          - [x] Workflow `N8.3 - Compatibilidad de navegadores`, run `34943377733`, job `104296994230`, terminó `success`; npm ci, lint, build producción, instalación de navegadores, arranque Angular, regresión cross-browser y publicación de evidencia quedaron PASS.
+          - [x] N8.3.F certificó seguridad/observabilidad sin delta de runtime de auth/RBAC/auditoría, sin secretos y con permisos `contents: read`.
+          - [x] N8.3.G certificó QA/regresión/CI con equivalencia funcional demostrada y sin P0/P1/P2 abiertos.
+          - [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
+
+          N8.3.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.
+          EOF
+          fi
+
+          if ! grep -Fq 'ERP-N8.3 Compatibilidad de navegadores — reconciliación documental H' CHANGELOG_AI.md; then
+            cat >> CHANGELOG_AI.md <<'EOF'
+
+          ## 2026-09-15 — ERP-N8.3 Compatibilidad de navegadores — reconciliación documental H
+
+          **Responsable:** Tarea Supervisión :48 bajo `docs/VAEP_AUTHORITY.md`.
+
+          Se cerró la cobertura causal de compatibilidad del storefront en Chromium, Firefox y WebKit sobre el functional candidate `b833e44a976f92a426fff7f969a3f3f757234f20`. El workflow `N8.3 - Compatibilidad de navegadores`, run `34943377733`, job `104296994230`, terminó `success`; lint, build de producción y Playwright dirigido quedaron PASS en los tres motores.
+
+          N8.3.F y N8.3.G quedaron `LISTO_REAL` con REVIEW_FIRST P0=0/P1=0/P2=0. El workflow usa permisos `contents: read`, no consume secretos y sirve Angular únicamente en `127.0.0.1`. N8.3 no introduce delta backend, persistencia, migraciones, autenticación, RBAC, Producción ni deploy. La certificación canónica se materializó en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
+
+          Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
+          EOF
+          fi
+
+          if git diff --quiet -- TASKS.md CHANGELOG_AI.md; then
+            echo 'No documentary delta required.'
+            exit 0
+          fi
+
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add TASKS.md CHANGELOG_AI.md
+          git commit -m 'docs(n8.3.h): reconcile TASKS and CHANGELOG history'
+          git push origin HEAD:Desarrollo
