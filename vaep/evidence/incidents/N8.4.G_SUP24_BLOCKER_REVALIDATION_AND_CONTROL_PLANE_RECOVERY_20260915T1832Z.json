@@ -30,7 +30,13 @@
   },
   "control_plane_recovery": {
     "detected": "Released lease state still carried stale owner/acquired/heartbeat/base/token metadata",
-    "action": "SUP24 acquired a safe closer lease to revalidate the blocker; final reconciliation clears stale lease ownership metadata and releases control without disabling any automation",
+    "action": "SUP24 acquired a safe closer lease to revalidate the blocker, then released it cleanly",
+    "final_lease_status": "RELEASED__BLOCKER_EXTERNAL_CAUSAL_PHYSICAL_HARDWARE_REQUIRED",
+    "final_lease_owner": "",
+    "final_lease_heartbeat": "",
+    "final_lease_base_head": "",
+    "final_lease_token": "",
+    "control_tower_readback_clean": true,
     "first_detector_owns_recovery": true
   },
   "canonical_liveness_recovery": {
@@ -39,7 +45,17 @@
     "observed_is_enabled": false,
     "action": "Automations.update(is_enabled=true)",
     "schedule_changed": false,
-    "final_readback_required": true
+    "final_readback_is_enabled": true,
+    "final_canonical_enabled_count": 10,
+    "final_canonical_expected_count": 10
+  },
+  "sheet_reconciliation": {
+    "config_current_parent": "N8.4.G",
+    "cola_existing_row_only": "N8.4.G",
+    "cola_status": "BLOQUEADO",
+    "next_parent": "N8.4.H",
+    "next_parent_promoted": false,
+    "append_insert_delete_used": false
   },
   "outcome": "BLOCKER_EXTERNAL_CAUSAL_PHYSICAL_HARDWARE_REQUIRED",
   "next_action": "Provide real USB barcode scanner and ESC/POS USB printer on the required Windows physical host, then execute the designated physical evidence workflow and consume the generated report; do not substitute emulated ports or simulated hardware.",
