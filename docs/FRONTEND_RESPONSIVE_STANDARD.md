@@ -28,6 +28,36 @@ Las features deben componer primero estas clases del design system:
 
 Las reglas específicas de dominio deben ser pequeñas y no imponer `min-width` al viewport.
 
+### Ejemplo mínimo de una página nueva
+
+Una pantalla nueva debe montar las primitivas compartidas y dejar que el sistema resuelva
+el ancho disponible:
+
+```html
+<section class="app-page-content app-container">
+  <header class="app-page-header">
+    <h1>Clientes</h1>
+    <div class="app-responsive-stack">
+      <button type="button">Nuevo cliente</button>
+    </div>
+  </header>
+
+  <form class="app-form-grid">
+    <label>Nombre <input name="nombre" /></label>
+    <label>Identidad <input name="identidad" /></label>
+  </form>
+
+  <div class="app-table-shell">
+    <table><!-- datos --></table>
+  </div>
+</section>
+```
+
+No se agregan `min-width` al `body`, a la página ni a una tarjeta para resolver un caso
+particular. Si el contenido necesita más espacio, se usa la primitiva correspondiente
+(`app-form-grid`, `app-responsive-stack` o `app-table-shell`) y el gate responsive valida
+la nueva ruta en todos los viewports definidos.
+
 ## Formularios, tablas y diálogos
 
 - Los controles de texto ocupan el ancho disponible y nunca exceden su contenedor.

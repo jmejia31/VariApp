@@ -1201,3 +1201,12 @@ Se reescribió el README de cierre con saltos de línea limpios y se verificó q
 
 El README diferencia capturas observadas inline de archivos realmente almacenados; se mantienen PASS funcionales sin afirmar que existan PNG locales inexistentes.
 
+## 2026-09-15 — Estándar responsive global y evidencia de despliegue
+
+Se documentó un ejemplo mínimo de composición con las primitivas responsive reutilizables.
+La matriz de evidencia `docs/evidencias/responsive-global/2026-09-15_1850/` registra la
+cobertura configurada para 155 rutas y nueve viewports. La validación visual del bundle
+corregido queda en `N_A` porque Vercel reportó `Deployment rate limited — retry in 24 hours`
+para el commit `8a0552e3`; la URL remota continúa sirviendo el bundle anterior. No se
+fabricaron capturas ni resultados PASS para esa corrida.
+
