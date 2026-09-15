@@ -1,18 +1,29 @@
 # Especificación de ejecución — intervención N8.15–N8.24
 
-## 0. Propósito y frontera certificada
+## 0. Propósito, posición y frontera
 
-Esta intervención crea un paréntesis obligatorio en el Plan Maestro después de `N8.6.F` y antes de continuar materialmente con `N8.6.G` y el resto de N8/N9.
+Esta intervención crea un paréntesis obligatorio en el Plan Maestro y en `COLA` exactamente después de la fila 640.
 
-Frontera aceptada para iniciar la intervención:
+Posición física canónica:
 
-- `N8.6.F` = último checkpoint histórico considerado certificado para el orden de reentrada.
-- Todo cierre histórico desde `N8.6.G` en adelante se preserva como historia y evidencia, pero debe someterse a la auditoría forense de `N8.19`; no se borra, no se invalida automáticamente y tampoco se usa como autoridad autosuficiente.
+- `COLA` fila `640` = `N8.3.A`.
+- `COLA` fila `641` = `N8.15.A`, primera microtarea de la intervención.
+- `N8.15.A` → `N8.24.H` ocupan consecutivamente las filas `641` → `720`.
+- `COLA` fila `721` = `N8.3.B`, primer punto del plan histórico que se retoma después de la intervención.
+- No se permite conservar una segunda copia de N8.15–N8.24 al final o en otra zona de `COLA`.
+
+Frontera causal inmediata:
+
+- `N8.3.A` es el predecessor de `N8.15.A`.
+- `N8.3.B` queda gateada por `N8.24.H`.
+- Todo trabajo histórico posterior se preserva como historia/evidencia; no se borra, no se invalida automáticamente y tampoco se usa como autoridad autosuficiente.
 - Las diez automatizaciones canónicas permanecen pausadas hasta reactivación explícita del propietario.
 
-Regla de reentrada:
+Regla de ejecución/reentrada:
 
-`N8.6.F -> N8.15 -> N8.16 -> N8.17 -> N8.18 -> N8.19 -> N8.20 -> N8.21 -> N8.22 -> N8.23 -> N8.24 -> revalidación/promoción desde N8.6.G`
+`N8.3.A -> N8.15 -> N8.16 -> N8.17 -> N8.18 -> N8.19 -> N8.20 -> N8.21 -> N8.22 -> N8.23 -> N8.24 -> N8.3.B`
+
+La auditoría forense de `N8.19` conserva un scope especial sobre `N8.6.G/H`, `N8.7.A-H`, `N8.8.A-H` y cualquier avance posterior; ese scope no cambia el ancla física ni el sucesor de reentrada.
 
 Mientras el modo de intervención esté activo, `UNRELATED_WORKFLOW_BLOCKING_PROHIBITED` NO autoriza saltar a trabajo ajeno al paréntesis: no se trata de un blocker causal, sino de una prioridad/gate deliberado del propietario.
 
@@ -280,6 +291,8 @@ Casos mínimos de prueba:
 Antes del handoff, releer desde cero repo + PLAN_MAESTRO + COLA + CONFIG + CONTROL_TOWER y exigir:
 
 - todos N8.15–N8.24 cerrados causalmente;
+- `COLA!641:720` contiene exactamente N8.15.A–N8.24.H una sola vez y en secuencia;
+- `COLA!721` vuelve a `N8.3.B`;
 - catálogo de matrices sin contratos materiales omitidos;
 - cero `TBD`/`UNKNOWN` injustificado;
 - cero `REMOVE_SAFE` pendiente;
@@ -291,7 +304,7 @@ Antes del handoff, releer desde cero repo + PLAN_MAESTRO + COLA + CONFIG + CONTR
 - Production write=0;
 - secrets exposed=0;
 - GATE-N8 depende también de la intervención;
-- determinar el primer checkpoint real a revalidar desde N8.6.G según N8.19, sin repetir trabajo confirmado ni proteger cierres inválidos.
+- determinar la reentrada real en `N8.3.B`, utilizando N8.19 para no repetir trabajo histórico confirmado ni proteger cierres inválidos.
 
 Sólo entonces desactivar el modo de intervención y permitir reentrada al flujo normal.
 
