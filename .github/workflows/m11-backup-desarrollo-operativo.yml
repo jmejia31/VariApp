@@ -54,30 +54,17 @@ jobs:
           grep -q 'productionInScope' scripts/m11_backup_desarrollo.sh
           grep -q 'productionTouched' scripts/m11_restore_desarrollo.sh
 
-  backup-desarrollo:
-    name: Backup cifrado de Desarrollo real + restore/drill same-artifact
+  certificar-proveedor:
+    name: Certificar motor y proveedor de Desarrollo sin secretos
     if: >-
       ${{
         github.event_name == 'workflow_dispatch' ||
         (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
-        (github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-BACKUP-REAL]'))
+        (github.event_name == 'push' && (contains(github.event.head_commit.message, '[M11-PROVIDER-PROBE]') || contains(github.event.head_commit.message, '[M11-BACKUP-REAL]')))
       }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     environment: "Desarrollo - variapp-api-desarrollo"
-
-    services:
-      mysql-m11-restore:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: m11-ci-root-only
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pm11-ci-root-only --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=12
 
     steps:
       - name: Checkout Desarrollo
@@ -110,6 +97,100 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Consultar motor y proveedor sin secretos
+        shell: bash
+        env:
+          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export MYSQL_PWD="$DB_PASSWORD"
+          M11_DB_VERSION="$(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4 --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names -e 'SELECT VERSION();' | head -n 1)"
+          unset MYSQL_PWD
+          test -n "$M11_DB_VERSION"
+          M11_HOST_SUFFIX="$(python3 - <<'PY'
+          import os
+          labels = [part for part in os.environ['DB_HOST'].strip().lower().split('.') if part]
+          print('*.' + '.'.join(labels[-2:]) if len(labels) >= 2 else 'NON_DNS_HOST')
+          PY
+          )"
+          case "$M11_HOST_SUFFIX" in
+            '*.aivencloud.com') M11_PROVIDER='AIVEN' ;;
+            *) M11_PROVIDER='UNCLASSIFIED_MANAGED_MYSQL' ;;
+          esac
+          export M11_DB_VERSION M11_HOST_SUFFIX M11_PROVIDER
+          certificate="$RUNNER_TEMP/m11-provider-certificate.json"
+          python3 - "$certificate" <<'PY'
+          import json, os, sys
+          from datetime import datetime, timezone
+          report = {
+              'databaseEngine': 'MySQL',
+              'databaseVersion': os.environ['M11_DB_VERSION'],
+              'provider': os.environ['M11_PROVIDER'],
+              'hostSuffix': os.environ['M11_HOST_SUFFIX'],
+              'connectionTls': 'REQUIRED',
+              'plan': 'NOT_AVAILABLE_FROM_DATABASE_CONNECTION',
+              'automaticBackup': 'NOT_PROBED',
+              'pitr': 'NOT_PROBED',
+              'restoreCapability': 'LOGICAL_SAME_ARTIFACT_DRILL',
+              'createdAtUtc': datetime.now(timezone.utc).isoformat(),
+              'secretsExposed': 0,
+              'productionTouched': False,
+          }
+          with open(sys.argv[1], 'w', encoding='utf-8') as out:
+              json.dump(report, out, ensure_ascii=False, indent=2)
+              out.write('\n')
+          PY
+          unset DB_PASSWORD
+          cat "$certificate"
+          echo "Certificado seguro guardado para este run."
+
+      - name: Publicar certificado seguro de proveedor
+        uses: actions/upload-artifact@v4
+        with:
+          name: m11-provider-certificate-${{ github.run_id }}
+          path: ${{ runner.temp }}/m11-provider-certificate.json
+          if-no-files-found: error
+          retention-days: 14
+
+  backup-desarrollo:
+    name: Backup cifrado de Desarrollo real + restore/drill same-artifact
+    needs: certificar-proveedor
+    if: >-
+      ${{
+        needs.certificar-proveedor.result == 'success' &&
+        (
+          github.event_name == 'workflow_dispatch' ||
+          (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-BACKUP-REAL]'))
+        )
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: "Desarrollo - variapp-api-desarrollo"
+
+    services:
+      mysql-m11-restore:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: m11-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pm11-ci-root-only --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
 
       - name: Crear backup cifrado de Desarrollo
         id: backup

@@ -73,7 +73,7 @@ export MYSQL_PWD="$DB_PASSWORD"
 MYSQL=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4 "--ssl-mode=$DB_SSL_MODE")
 MYSQL_DB=("${MYSQL[@]}" "$DB_NAME")
 
-log "Validando conectividad con la base autorizada '$DB_NAME' usando SSL_MODE=$DB_SSL_MODE..."
+log "Validando conectividad con la base autorizada usando SSL_MODE=$DB_SSL_MODE..."
 "${MYSQL_DB[@]}" --batch --skip-column-names -e 'SELECT 1;' | grep -qx '1' || fail "No se pudo validar la conexión MySQL."
 
 MYSQL_VERSION="$("${MYSQL_DB[@]}" --batch --skip-column-names -e 'SELECT VERSION();' | head -n 1)"
@@ -234,7 +234,8 @@ public = {
     "backupId": "${BACKUP_ID}",
     "createdAtUtc": datetime.now(timezone.utc).isoformat(),
     "environment": "${VARIAPP_ENVIRONMENT}",
-    "databaseName": "${DB_NAME}",
+    "databaseNameRedacted": True,
+    "databaseServerVersion": "${MYSQL_VERSION}",
     "databaseSslMode": "${DB_SSL_MODE}",
     "gitCommit": "${GIT_SHA}",
     "retentionDays": int("${RETENTION_DAYS}"),

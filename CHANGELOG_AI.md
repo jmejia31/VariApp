@@ -1280,3 +1280,11 @@ la prueba dirigida actual (4/4). La corrección append-only de N8.7.E actualizó
 blocker auténtico de workload autenticado no productivo; N8.8.G se reabre para
 certificar el proveedor y un backup/restore fresco mediante la ruta M11 existente.
 La evidencia completa está en `docs/evidencias/auditoria-forense-n8/2026-09-15_1532/`.
+
+## 2026-09-15 — M11: certificado seguro de proveedor
+
+El workflow operativo M11 ahora emite un certificado limitado a motor, versión,
+proveedor clasificado, sufijo de host, TLS y capacidad de restore lógico. El
+workflow no imprime ni publica usuario, contraseña, host completo ni nombre de
+base; el metadata externo del artefacto también redacciona ese nombre. Esta mejora
+prepara una ejecución real de backup cifrado y restore aislado sobre Desarrollo.
