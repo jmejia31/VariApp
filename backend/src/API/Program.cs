@@ -3,6 +3,7 @@ using System.Threading.RateLimiting;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using InventoryApp.API.Middleware;
+using InventoryApp.API.Observability;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Interfaces.Services;
@@ -32,6 +33,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var mysqlServerVersion = Version.Parse(builder.Configuration["Database:ServerVersion"] ?? "8.4.3");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
 builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<ObservabilityOptions>(builder.Configuration.GetSection("Observability"));
+builder.Services.AddSingleton<RequestObservability>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUsuarioScopeService, UsuarioScopeService>();
 builder.Services.AddScoped<IMensajeOutboxRepository, MensajeOutboxRepository>();
@@ -198,6 +201,7 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = F
 forwardedHeadersOptions.KnownNetworks.Clear(); forwardedHeadersOptions.KnownProxies.Clear(); app.UseForwardedHeaders(forwardedHeadersOptions);
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<RequestObservabilityMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) => { context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff"); context.Response.Headers.TryAdd("X-Frame-Options", "DENY"); context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer"); context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()"); await next(); });
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"); if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
