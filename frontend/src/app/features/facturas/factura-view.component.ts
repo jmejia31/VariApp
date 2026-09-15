@@ -21,6 +21,7 @@ import {
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
+import { FacturaFiscalEmisionComponent } from './factura-fiscal-emision.component';
 
 const FORMATO_STORAGE_KEY = 'variapp_factura_formato_pdf';
 const FORMATOS_FALLBACK: FacturaFormatoPdf[] = [
@@ -43,7 +44,8 @@ interface DimensionesPdf {
   standalone: true,
   imports: [
     CommonModule, FormsModule, RouterLink, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule,
+    FacturaFiscalEmisionComponent
   ],
   templateUrl: './factura-view.component.html',
   styleUrl: './factura-view.component.scss'
