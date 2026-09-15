@@ -6,7 +6,7 @@ Estado de esta ejecución: **FLUJO SMTP FUNCIONAL; EVIDENCIA DE CAPTURAS LOCALES
 
 - Repositorio: `jmejia31/VariApp`
 - Rama autorizada: `Desarrollo`
-- SHA inicial de esta ejecución: `de624845ed758556f6cb1804d21c479a3faf432b`
+- SHA inicial de esta ejecución: `de624845ed758556f6cb1804d21c479a3faf432b`\n- SHA final del changeset funcional/evidencia: `8bc3dffa` (commit publicado en `origin/Desarrollo`)
 - Servicio Render: `variapp-api-desarrollo` (`srv-d9jblq7avr4c73c74jng`)
 - Frontend: `https://variapp-desarrollo.vercel.app`
 - Entorno: Desarrollo/UAT
@@ -40,4 +40,5 @@ El contador de correos enviados es **1**. La prueba autorizada fue un diagnósti
 ## Rama y evidencia
 
 La autoridad `docs/VAEP_AUTHORITY.md` exige trabajar en `Desarrollo` y no crear ramas nuevas; por eso esta evidencia se guarda en la rama autorizada aunque la misión solicitara una rama de evidencia separada.
+
 

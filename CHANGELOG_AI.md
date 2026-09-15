@@ -1157,3 +1157,7 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en VariApp, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
 
 No se tocaron Producción, `main`, secretos ni WhatsApp. Las capturas tomadas por CUA quedaron observadas inline; como CUA no expone una ruta local para sus bytes, no se fabricaron PNG para completar los nombres restantes. La matriz y los archivos aportados están en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`.
+
+## 2026-09-15 — Metadata de recepción SMTP
+
+Se completó la matriz de evidencia con la captura de recepción aportada por el propietario y la verificación visual del PDF A4 descargado. El README identifica el changeset funcional `8bc3dffa`; no se añadieron capturas sintéticas.
