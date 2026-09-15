@@ -12,11 +12,21 @@ public class FacturaService : IFacturaService
 {
     private readonly IFacturaRepository _repository;
     private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
+    private readonly IMovimientoFinancieroRepository? _movimientoFinancieroRepository;
 
     public FacturaService(IFacturaRepository repository, IEmpresaConfiguracionService empresaConfiguracionService)
+        : this(repository, empresaConfiguracionService, null)
+    {
+    }
+
+    public FacturaService(
+        IFacturaRepository repository,
+        IEmpresaConfiguracionService empresaConfiguracionService,
+        IMovimientoFinancieroRepository? movimientoFinancieroRepository)
     {
         _repository = repository;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _movimientoFinancieroRepository = movimientoFinancieroRepository;
     }
 
     public async Task<FacturaDto?> GetByIdAsync(int id)
@@ -95,6 +105,7 @@ public class FacturaService : IFacturaService
         });
 
         RecalcularPago(factura);
+        await SincronizarMovimientoVentaAsync(factura);
         _repository.Update(factura);
         await _repository.SaveChangesAsync();
         return await ToDtoAsync(factura);
@@ -126,6 +137,7 @@ public class FacturaService : IFacturaService
         pago.FechaActualizacion = DateTime.UtcNow;
 
         RecalcularPago(factura);
+        await SincronizarMovimientoVentaAsync(factura);
         _repository.Update(factura);
         await _repository.SaveChangesAsync();
         return await ToDtoAsync(factura);
@@ -235,6 +247,24 @@ public class FacturaService : IFacturaService
                 : factura.SaldoPendiente <= 0
                     ? EstadoPago.Pagado
                     : EstadoPago.Parcial;
+    }
+
+    private async Task SincronizarMovimientoVentaAsync(Factura factura)
+    {
+        if (_movimientoFinancieroRepository is null || factura.VentaId <= 0)
+            return;
+
+        var movimiento = await _movimientoFinancieroRepository.GetByVentaIdAsync(factura.VentaId);
+        if (movimiento is null
+            || !movimiento.EsAutomatico
+            || movimiento.Tipo != TipoMovimientoFinanciero.Ingreso
+            || movimiento.Categoria != CategoriaMovimientoFinanciero.Venta)
+            return;
+
+        movimiento.Estado = factura.Estado == EstadoFactura.Pagada
+            ? EstadoMovimientoFinanciero.Pagado
+            : EstadoMovimientoFinanciero.Pendiente;
+        _movimientoFinancieroRepository.Update(movimiento);
     }
 
     private static bool TransicionPermitida(EstadoFactura actual, EstadoFactura siguiente) =>

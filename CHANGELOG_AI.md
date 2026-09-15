@@ -4,6 +4,16 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — N8.1.G — validación técnica de los seis grupos restantes
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se validaron Compras, Ventas/Facturación, Tesorería/Finanzas, BI/Reportes y Multiempresa/RBAC con UAT autenticado, contratos dirigidos y regresión completa. La evidencia consolidada está en `vaep/evidence/reviews/N8.1.G_CODEX_TECHNICAL_UAT_REMAINING_6_20260915T074247Z.json`; la preparación de sign-off está en `vaep/evidence/reviews/N8.1.G_READY_FOR_FINAL_HUMAN_SIGNOFF_20260915T074247Z.json`.
+
+Se corrigió el defecto causal `N8.1.G-FIN-001`: al registrar o anular un pago de factura, `FacturaService` ahora sincroniza el estado del movimiento financiero automático de la Venta y cuenta con regresión dirigida. No se modificaron `main`, Producción, secretos, dominios ni PR #2.
+
+Validación real: build backend 0 advertencias/0 errores; 2269 pruebas backend no-Integration superadas; filtros dirigidos 294/82/131 superados; lint y build productivo frontend superados. Integrations queda `BLOCKED_EXTERNAL` sólo por falta de sandbox/proveedores externos; no se inventaron credenciales. Falta la aceptación humana autorizada para los seis grupos restantes, por lo que N8.1.G no se marca `LISTO_REAL`.
+
 ## 2026-09-11 — ERP-N6.2.H — recuperación documental y REVIEW_FIRST
 
 **Responsable:** CHATGPT_VAEP como first detector/correction owner.

@@ -242,6 +242,56 @@ public class FacturaServicePagosTests
         Assert.Equal(8, factura.Pagos.Single().AnuladoPorUsuarioId);
     }
 
+    [Fact]
+    public async Task PagoCompletoYSuAnulacion_SincronizanMovimientoAutomaticoDeVenta()
+    {
+        var factura = CrearFactura(300m);
+        var movimiento = new MovimientoFinanciero
+        {
+            Id = 91,
+            VentaId = factura.VentaId,
+            Tipo = TipoMovimientoFinanciero.Ingreso,
+            Categoria = CategoriaMovimientoFinanciero.Venta,
+            Monto = factura.Total,
+            EsAutomatico = true,
+            Estado = EstadoMovimientoFinanciero.Pendiente
+        };
+
+        var repository = new Mock<IFacturaRepository>();
+        repository.Setup(x => x.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetMetodoPagoPorCodigoONombreAsync("Efectivo"))
+            .ReturnsAsync(CrearMetodoPago(1, "EFECTIVO", "Efectivo"));
+
+        var movimientoRepository = new Mock<IMovimientoFinancieroRepository>();
+        movimientoRepository.Setup(x => x.GetByVentaIdAsync(factura.VentaId)).ReturnsAsync(movimiento);
+
+        var empresa = new Mock<IEmpresaConfiguracionService>();
+        empresa.Setup(x => x.GetActivaAsync()).ReturnsAsync(new EmpresaConfiguracionDto());
+        var service = new FacturaService(repository.Object, empresa.Object, movimientoRepository.Object);
+
+        await service.RegistrarPagoAsync(
+            factura.Id,
+            new RegistrarFacturaPagoDto { Monto = factura.Total, MetodoPago = "Efectivo" },
+            7,
+            "tester");
+
+        Assert.Equal(EstadoMovimientoFinanciero.Pagado, movimiento.Estado);
+        movimientoRepository.Verify(x => x.Update(movimiento), Times.Once);
+
+        var pago = factura.Pagos.Single();
+        pago.Id = 92;
+        await service.AnularPagoAsync(
+            factura.Id,
+            pago.Id,
+            new AnularFacturaPagoDto { Motivo = "Prueba UAT" },
+            7,
+            "tester");
+
+        Assert.Equal(EstadoMovimientoFinanciero.Pendiente, movimiento.Estado);
+        movimientoRepository.Verify(x => x.Update(movimiento), Times.Exactly(2));
+    }
+
     private static Factura CrearFactura(decimal total) => new()
     {
         Id = 15,
