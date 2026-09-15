@@ -151,7 +151,7 @@
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
           <td mat-cell *matCellDef="let v" class="actions">
             <button mat-icon-button type="button" title="Galería de la variante" [attr.aria-label]="'Administrar imágenes de ' + (v.etiqueta || v.sku)" (click)="gestionarImagenes(v)"><mat-icon>photo_library</mat-icon></button>
-            <button mat-icon-button type="button" title="Ajustar stock" [disabled]="ajustandoId() !== null" (click)="ajustarStock(v)"><mat-icon>inventory</mat-icon></button>
+            <button mat-icon-button type="button" title="Configurar existencia física" [attr.aria-label]="'Configurar existencia física de ' + (v.etiqueta || v.sku)" [routerLink]="['/inventario/existencias/nueva']" [queryParams]="{ productoId: productoId, productoVarianteId: v.id }"><mat-icon>inventory</mat-icon></button>
             <button mat-icon-button type="button" title="Editar metadatos" [disabled]="v.esTecnica" (click)="editar(v)"><mat-icon>edit</mat-icon></button>
             <button mat-icon-button type="button" [title]="v.activo ? 'Desactivar' : 'Activar'" [disabled]="v.esTecnica" (click)="cambiarEstado(v)"><mat-icon>{{ v.activo ? 'toggle_on' : 'toggle_off' }}</mat-icon></button>
             <button mat-icon-button type="button" title="Eliminar" [disabled]="v.esTecnica || v.cantidad !== 0" (click)="eliminar(v)"><mat-icon>delete</mat-icon></button>
