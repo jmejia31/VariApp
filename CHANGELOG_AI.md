@@ -1161,3 +1161,7 @@ No se tocaron Producción, `main`, secretos ni WhatsApp. Las capturas tomadas po
 ## 2026-09-15 — Metadata de recepción SMTP
 
 Se completó la matriz de evidencia con la captura de recepción aportada por el propietario y la verificación visual del PDF A4 descargado. El README identifica el changeset funcional `8bc3dffa`; no se añadieron capturas sintéticas.
+
+## 2026-09-15 — Limpieza de evidencia
+
+Se eliminó el salto final innecesario del README; `git diff --check` queda limpio.

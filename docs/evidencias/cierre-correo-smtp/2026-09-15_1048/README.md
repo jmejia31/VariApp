@@ -41,4 +41,3 @@ El contador de correos enviados es **1**. La prueba autorizada fue un diagnósti
 
 La autoridad `docs/VAEP_AUTHORITY.md` exige trabajar en `Desarrollo` y no crear ramas nuevas; por eso esta evidencia se guarda en la rama autorizada aunque la misión solicitara una rama de evidencia separada.
 
-
