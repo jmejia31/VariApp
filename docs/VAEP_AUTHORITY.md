@@ -68,6 +68,9 @@ POST_INTERVENTION_REVALIDATE_EXISTING_LISTO=TRUE
 POST_INTERVENTION_REVALIDATION_BASIS=N8.15,N8.16,N8.17,N8.18
 POST_INTERVENTION_REOPEN_ON_GAP=TRUE
 POST_INTERVENTION_HISTORICAL_STATUS_PRESERVED=TRUE
+POST_INTERVENTION_REVALIDATION_ADMISSION=JIT_REOPEN_ONE_AT_A_TIME
+POST_INTERVENTION_REVALIDATION_STATE=PENDIENTE
+POST_INTERVENTION_BULK_REOPEN_PROHIBITED=TRUE
 END_AUTOMATION_POLICY
 ```
 
@@ -197,8 +200,10 @@ Reglas durante `OWNER_INTERVENTION_GATE_ACTIVE=TRUE`:
 7. Mientras la intervención esté abierta, las diez canónicas trabajan exclusivamente la cadena `N8.15.A -> ... -> N8.24.H`; ningún `LISTO` histórico posterior autoriza bypass.
 8. Al cerrar `N8.24.H` con evidencia material, se realiza readback global y se reanuda el plan histórico desde la fila 721 (`N8.3.B`), salvo evidencia causal posterior que exija un sucesor más temprano. La reentrada NO confía automáticamente en estados `LISTO` históricos.
 9. Desde la fila 721 en adelante, toda tarea histórica —incluidas las que ya muestran `LISTO`— debe revalidarse contra la arquitectura, catálogo/matrices, contratos, RBAC, backend authority, seguridad, datos, pruebas y criterios resultantes de `N8.15–N8.18`. El estado histórico se preserva como historia, pero no equivale por sí solo a certificación vigente.
-10. Si una tarea histórica sigue cumpliendo completamente, registrar `REVALIDATED_CURRENT_STANDARD` con evidencia causal sin rehacer trabajo inútil. Si existe gap material, reabrirla y resolverlo antes de promover. Si existe bloqueo externo real, preservarlo sólo en su scope y continuar únicamente trabajo independiente permitido por dependencias; nunca falsear `PASS`.
-11. La auditoría forense `N8.19` conserva su scope especial desde `N8.6.G` en adelante y sirve además como control de cierres rápidos, N/A, timestamps y receipts; no reemplaza la revalidación post-matriz de la fila 721+.
-12. `GATE-N8` debe incluir la intervención y la revalidación vigente de sus prerequisitos como condición formal de cierre.
+10. Para compatibilidad con `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY`, la revalidación se hace `JIT_REOPEN_ONE_AT_A_TIME`: al llegar causalmente a una fila histórica que figure `LISTO`, el controller preserva su status/evidencia histórica en receipt/observaciones, cambia únicamente esa tarea a `PENDIENTE` con marcador `REVALIDATION_REQUIRED__CURRENT_STANDARD`, hace readback y recién entonces adquiere lease y la revalida. Está prohibido reabrir masivamente la cola.
+11. Si la tarea revalidada sigue cumpliendo completamente, vuelve a `LISTO` con `REVALIDATED_CURRENT_STANDARD` y evidencia causal sin rehacer trabajo inútil. Si existe gap material, se corrige bajo `FIRST_DETECTOR_OWNS_RECOVERY`, se ejecutan pruebas/gates aplicables y sólo entonces vuelve a `LISTO`. Si existe bloqueo externo real, se preserva sólo en su scope y se continúa únicamente trabajo independiente permitido por dependencias; nunca se falsea `PASS`.
+12. Las filas posteriores no se abren hasta que la fila revalidada actual cierre; así se conservan dependencias y se evita doble writer, bypass o cascadas artificiales de bloqueos.
+13. La auditoría forense `N8.19` conserva su scope especial desde `N8.6.G` en adelante y sirve además como control de cierres rápidos, N/A, timestamps y receipts; no reemplaza la revalidación post-matriz de la fila 721+.
+14. `GATE-N8` debe incluir la intervención y la revalidación vigente de sus prerequisitos como condición formal de cierre.
 
 Especificación ejecutable del paréntesis: `docs/matrices-evaluacion/00_GOBERNANZA/ESPECIFICACION_EJECUCION_N8_15_N8_24.md`.
