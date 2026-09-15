@@ -111,23 +111,34 @@ test.describe('VariStoreHn Fase 5 — carrito global y persistente', () => {
     await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 0 unidades' })).toBeVisible();
   });
 
-  test('home usa una sola ruta de carrito, no abre drawer paralelo ni ejecuta cierre de compra', async ({ page }) => {
+  test('home usa una sola ruta de carrito, conserva el store global y no ejecuta cierre de compra', async ({ page }) => {
     await prepararEmpresa(page);
     await page.goto('/varistorehn');
     await limpiarCarritos(page);
     await page.reload();
-    await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
 
+    await expect(page.getByRole('heading', { name: /Todo lo que buscas/i })).toBeVisible();
     await expect(page.locator('dialog.cart-dialog')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Pedir por WhatsApp' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Continuar con tarjeta' })).toHaveCount(0);
+    await expect(page.locator('article.product-card')).toHaveCount(0);
+
+    const homeHeader = page.locator('app-varistorehn-header');
+    await expect(homeHeader.getByRole('button', { name: 'Abrir carrito' })).toBeVisible();
+    await expect(homeHeader.locator('.cart-copy small')).toHaveText('Ver carrito');
+    await homeHeader.getByRole('link', { name: 'Productos', exact: true }).click();
+    await expect(page).toHaveURL(/\/varistorehn\/productos$/);
+    await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
 
     const tarjeta = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
     await tarjeta.getByRole('button', { name: 'Agregar Laptop Pro 14' }).click();
+    const catalogHeader = page.locator('app-varistorehn-header');
+    await expect(catalogHeader.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
+    await catalogHeader.getByRole('link', { name: 'Inicio', exact: true }).click();
+
     await expect(page).toHaveURL(/\/varistorehn$/);
     await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
-
-    await page.getByRole('button', { name: 'Ver carrito', exact: true }).click();
+    await page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' }).click();
     await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
     await expect(page.locator('.cart-item').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
 

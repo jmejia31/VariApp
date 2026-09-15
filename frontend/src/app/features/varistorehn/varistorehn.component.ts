@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,8 +9,12 @@ import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnService } from './varistorehn.service';
 import { ModoCarrito, VARISTOREHN_CONFIG } from './varistorehn.config';
 import {
-  CategoriaTienda, EstadoConsultaPublica, ModeloTienda, OrdenCatalogo, ProductoCatalogoPublico, ProductoTienda,
-  crearCatalogoEjemplo, filtrarProductos, mapearProducto, telefonoWhatsapp
+  CategoriaTienda,
+  EstadoConsultaPublica,
+  ModeloTienda,
+  ProductoTienda,
+  crearCatalogoEjemplo,
+  telefonoWhatsapp
 } from './varistorehn.catalog';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
@@ -18,7 +22,8 @@ import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
 @Component({
-  selector: 'app-varistorehn', standalone: true,
+  selector: 'app-varistorehn',
+  standalone: true,
   imports: [CommonModule, VaristorehnHeaderComponent, IconoTiendaComponent, IlustracionTiendaComponent],
   templateUrl: './varistorehn.component.html',
   styleUrls: ['./varistorehn.component.scss', './varistorehn.responsive.scss'],
@@ -27,9 +32,9 @@ import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.
 export class VaristorehnComponent implements OnInit {
   private readonly servicio = inject(VaristorehnService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly document = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carritoStore = inject(VaristorehnCarritoService);
@@ -41,9 +46,11 @@ export class VaristorehnComponent implements OnInit {
   readonly permiteTarjeta = computed(() => this.modoCarrito() !== 'whatsapp');
   readonly telefono = computed(() => telefonoWhatsapp(this.identidad.config().whatsApp));
   readonly tarjetaConfigurada = Boolean(this.config.endpointCheckoutTarjeta && this.config.origenesCheckoutPermitidos.length);
-  readonly productos = signal<ProductoTienda[]>([]);
-  readonly cargando = signal(true);
-  readonly errorCatalogo = signal('');
+
+  readonly busqueda = signal('');
+  readonly aviso = signal('');
+  readonly imagenesFallidas = signal<Set<string>>(new Set());
+
   readonly categoriasTienda = signal<CategoriaTienda[]>([]);
   readonly cargandoCategorias = signal(true);
   readonly errorCategorias = signal('');
@@ -52,141 +59,194 @@ export class VaristorehnComponent implements OnInit {
     if (this.errorCategorias()) return 'error';
     return this.categoriasTienda().length ? 'success' : 'empty';
   });
-  readonly aviso = signal('');
-  readonly totalUnidades = computed(() => this.carritoStore.totalUnidades());
-  readonly totalCarrito = computed(() => this.carritoStore.subtotal());
-  readonly imagenesFallidas = signal<Set<string>>(new Set());
-  readonly busqueda = signal('');
-  readonly categoriaActiva = signal('');
-  readonly soloDisponibles = signal(false);
-  readonly precioMaximo = signal<number | null>(null);
-  readonly orden = signal<OrdenCatalogo>('destacados');
-  readonly pagina = signal(1);
-  readonly tamanoPagina = 12;
-  readonly filtrosAbiertos = signal(false);
+  readonly categoriasPortada = computed(() => this.categoriasTienda().slice(0, 6));
   readonly categoriasNavegacion = computed(() => this.categoriasTienda().map(categoria => categoria.nombre));
-  readonly destacados = computed(() => this.productos().filter(p => p.disponible).slice(0, 3));
-  readonly resultados = computed(() => filtrarProductos(this.productos(), {
-    busqueda: this.busqueda(), categoria: this.categoriaActiva(), soloDisponibles: this.soloDisponibles(),
-    precioMaximo: this.precioMaximo(), orden: this.orden()
-  }));
-  readonly totalPaginas = computed(() => Math.max(1, Math.ceil(this.resultados().length / this.tamanoPagina)));
-  readonly productosVisibles = computed(() => this.resultados().slice((this.pagina() - 1) * this.tamanoPagina, this.pagina() * this.tamanoPagina));
-  readonly hayFiltros = computed(() => Boolean(this.busqueda() || this.categoriaActiva() || this.soloDisponibles() || this.precioMaximo() !== null));
-  readonly enlaceCategorias = VARISTOREHN_PATHS.categorias;
-  private cargaActual?: Subscription;
+
+  readonly destacados = signal<ProductoTienda[]>([]);
+  readonly cargandoDestacados = signal(true);
+  readonly errorDestacados = signal('');
+  readonly estadoDestacados = computed<EstadoConsultaPublica>(() => {
+    if (this.cargandoDestacados()) return 'loading';
+    if (this.errorDestacados()) return 'error';
+    return this.destacados().length ? 'success' : 'empty';
+  });
+  readonly destacadoPrincipal = computed(() => this.destacados()[0] || null);
+
+  readonly totalUnidades = computed<number | null>(() =>
+    this.carritoStore.listo() ? this.carritoStore.totalUnidades() : null
+  );
+  readonly totalCarrito = computed<number | null>(() =>
+    this.carritoStore.listo() ? this.carritoStore.subtotal() : null
+  );
+
+  readonly enlaces = {
+    productos: VARISTOREHN_PATHS.productos,
+    categorias: VARISTOREHN_PATHS.categorias,
+    carrito: VARISTOREHN_PATHS.carrito,
+    contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
+  } as const;
+
   private cargaCategoriasActual?: Subscription;
-  private busquedaInicialAplicada = false;
-  private categoriaInicialAplicada = false;
-  private readonly busquedaInicial = (this.route.snapshot.queryParamMap.get('q') || '').trim().slice(0, 180);
-  private readonly categoriaSlugInicial = (this.route.snapshot.queryParamMap.get('categoria') || '').trim().slice(0, 180);
 
   ngOnInit(): void {
-    if (this.route.snapshot.queryParamMap.get('carrito') === '1') {
+    const query = this.route.snapshot.queryParamMap;
+    if (query.get('carrito') === '1') {
       void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito, { replaceUrl: true });
       return;
     }
 
-    this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      this.cargarCatalogo();
-      this.cargarCategorias();
-    });
-  }
+    const busquedaLegada = (query.get('q') || '').trim().slice(0, 180);
+    const categoriaLegada = (query.get('categoria') || '').trim().slice(0, 180);
+    if (busquedaLegada || categoriaLegada) {
+      void this.router.navigate([VARISTOREHN_PATHS.productos], {
+        queryParams: {
+          ...(busquedaLegada ? { q: busquedaLegada } : {}),
+          ...(categoriaLegada ? { categoria: categoriaLegada } : {})
+        },
+        replaceUrl: true
+      });
+      return;
+    }
 
-  cargarCatalogo(): void {
-    this.cargaActual?.unsubscribe();
-    this.cargando.set(true); this.errorCatalogo.set(''); this.aviso.set('');
-    this.productos.set([]); this.carritoStore.reiniciarContexto();
-    const fuente: Observable<ProductoCatalogoPublico[] | null> = this.utilizarDatosBaseDatos() ? this.servicio.obtenerCatalogo() : of(null);
-    this.cargaActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: datos => {
-        const productos = datos === null ? crearCatalogoEjemplo() : datos.map(mapearProducto);
-        this.productos.set(productos);
-        const resultado = this.carritoStore.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
-        if (resultado.ajustado) this.aviso.set(this.carritoStore.aviso());
-        this.cargando.set(false);
-        this.aplicarBusquedaInicial();
-      },
-      error: () => {
-        this.errorCatalogo.set('No pudimos cargar el catálogo. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
-        this.cargando.set(false);
-      }
+    this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.cargarCategorias();
+      this.cargarDestacados();
     });
   }
 
   cargarCategorias(): void {
     this.cargaCategoriasActual?.unsubscribe();
-    this.cargandoCategorias.set(true); this.errorCategorias.set(''); this.categoriasTienda.set([]);
+    this.cargandoCategorias.set(true);
+    this.errorCategorias.set('');
+    this.categoriasTienda.set([]);
+
     const fuente: Observable<CategoriaTienda[]> = this.utilizarDatosBaseDatos()
       ? this.servicio.obtenerCategorias().pipe(map(categorias => categorias.map(mapearCategoriaTienda)))
       : of(crearCategoriasTiendaEjemplo());
+
     this.cargaCategoriasActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: categorias => { this.categoriasTienda.set(categorias); this.cargandoCategorias.set(false); this.aplicarCategoriaInicial(categorias); },
-      error: () => { this.errorCategorias.set('No pudimos cargar las categorías. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.'); this.cargandoCategorias.set(false); }
+      next: categorias => {
+        this.categoriasTienda.set(categorias);
+        this.cargandoCategorias.set(false);
+      },
+      error: () => {
+        this.errorCategorias.set('No pudimos cargar las categorías. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
+        this.cargandoCategorias.set(false);
+      }
     });
+  }
+
+  cargarDestacados(): void {
+    this.cargandoDestacados.set(true);
+    this.errorDestacados.set('');
+    this.destacados.set([]);
+
+    // El backend público reserva `esDestacado`, pero hoy no existe una fuente administrativa persistida
+    // que pueda marcar productos reales. Fase 7 no inventa destacados ni descarga el catálogo completo
+    // para escoger productos arbitrarios. El modo demo sí ilustra la sección explícitamente.
+    if (this.utilizarDatosBaseDatos()) {
+      this.cargandoDestacados.set(false);
+      return;
+    }
+
+    this.destacados.set(
+      crearCatalogoEjemplo()
+        .filter(producto => producto.activo && producto.destacado && Boolean(producto.slug))
+        .slice(0, 4)
+    );
+    this.cargandoDestacados.set(false);
   }
 
   cambiarFuente(baseDatos: boolean): void {
     if (!this.controlesVistaPrevia || baseDatos === this.utilizarDatosBaseDatos()) return;
-    this.utilizarDatosBaseDatos.set(baseDatos); this.carritoStore.reiniciarContexto(); this.limpiarFiltros(); this.cargarCatalogo(); this.cargarCategorias();
+    this.utilizarDatosBaseDatos.set(baseDatos);
+    this.busqueda.set('');
+    this.aviso.set('');
+    this.cargarCategorias();
+    this.cargarDestacados();
   }
+
   cambiarModo(modo: string): void {
     if (!this.controlesVistaPrevia || !['whatsapp', 'tarjeta', 'ambos'].includes(modo)) return;
     this.modoCarrito.set(modo as ModoCarrito);
   }
-  buscar(texto: string): void { this.busqueda.set(texto); this.pagina.set(1); }
-  seleccionarCategoria(nombre: string, desplazar = false): void { this.categoriaActiva.set(nombre); this.pagina.set(1); if (desplazar) this.irCatalogo(); }
-  cambiarDisponibilidad(valor: boolean): void { this.soloDisponibles.set(valor); this.pagina.set(1); }
-  cambiarPrecio(valor: string): void {
-    const numero = Number(valor); this.precioMaximo.set(valor.trim() && Number.isFinite(numero) && numero >= 0 ? numero : null); this.pagina.set(1);
+
+  actualizarBusqueda(texto: string): void {
+    this.busqueda.set(texto.slice(0, 180));
   }
-  cambiarOrden(valor: string): void {
-    if (['destacados', 'precio-asc', 'precio-desc', 'nombre'].includes(valor)) this.orden.set(valor as OrdenCatalogo); this.pagina.set(1);
+
+  buscarCatalogo(): void {
+    const texto = this.busqueda().trim();
+    void this.router.navigate([VARISTOREHN_PATHS.productos], {
+      queryParams: texto ? { q: texto } : undefined
+    });
   }
-  limpiarFiltros(): void { this.busqueda.set(''); this.categoriaActiva.set(''); this.soloDisponibles.set(false); this.precioMaximo.set(null); this.orden.set('destacados'); this.pagina.set(1); }
-  cambiarPagina(cambio: number): void { this.pagina.set(Math.max(1, Math.min(this.totalPaginas(), this.pagina() + cambio))); this.irCatalogo(); }
-  irCatalogo(evento?: Event): void { evento?.preventDefault(); this.document.getElementById('catalogo')?.scrollIntoView({ block: 'start' }); }
+
+  seleccionarCategoria(nombre: string): void {
+    const categoria = this.categoriasTienda().find(item => item.nombre === nombre);
+    if (!categoria) {
+      this.aviso.set('La categoría seleccionada ya no está disponible.');
+      return;
+    }
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug));
+  }
+
+  abrirCategoria(categoria: CategoriaTienda): void {
+    if (!categoria.slug) return;
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug));
+  }
+
+  abrirDetalle(producto: ProductoTienda): void {
+    if (!producto.slug) {
+      this.aviso.set('Este producto todavía no tiene una URL pública disponible.');
+      return;
+    }
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug));
+  }
+
+  abrirProductos(): void {
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.productos);
+  }
+
+  abrirCarrito(): void {
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito);
+  }
 
   textoCantidadCategoria(categoria: CategoriaTienda): string {
     const cantidad = categoria.cantidadProductos;
-    if (cantidad === null) return 'Cantidad no disponible';
+    if (cantidad === null) return 'Explorar categoría';
     return `${cantidad} ${cantidad === 1 ? 'producto' : 'productos'}`;
   }
-  cantidadCategoriaFiltro(categoria: CategoriaTienda): string { return categoria.cantidadProductos === null ? '—' : String(categoria.cantidadProductos); }
+
   modeloSeleccionado(producto: ProductoTienda): ModeloTienda {
-    return producto.modelos.filter(m => m.disponible).sort((a, b) => a.precio - b.precio)[0] || producto.modelos[0];
+    return producto.modelos.find(modelo => modelo.disponible) || producto.modelos[0];
   }
-  fotos(producto: ProductoTienda): string[] { return this.modeloSeleccionado(producto).imagenes; }
-  imagenValida(url?: string): boolean { return Boolean(url && !this.imagenesFallidas().has(url)); }
-  errorImagen(url: string): void { this.imagenesFallidas.update(actual => new Set([...actual, url])); }
-  abrirDetalle(producto: ProductoTienda): void {
-    if (!producto.slug) { this.aviso.set('Este producto todavía no tiene una URL pública disponible.'); return; }
-    this.document.defaultView?.location.assign(VARISTOREHN_PATHS.producto(producto.slug));
+
+  fotos(producto: ProductoTienda): string[] {
+    return this.modeloSeleccionado(producto)?.imagenes || producto.imagenes;
   }
-  abrirCarrito(): void { void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito); }
-  disponibleParaAgregar(producto: ProductoTienda): boolean {
-    const modelo = this.modeloSeleccionado(producto);
-    return !this.cargando() && this.carritoStore.disponibleParaAgregar(producto, modelo);
+
+  imagenValida(url?: string): boolean {
+    return Boolean(url && !this.imagenesFallidas().has(url));
   }
-  agregar(producto: ProductoTienda): void {
-    const modelo = this.modeloSeleccionado(producto);
-    if (!this.disponibleParaAgregar(producto)) return;
-    const agregadas = this.carritoStore.agregar(producto, modelo, 1);
-    if (agregadas) this.aviso.set(`${producto.nombre} se agregó al carrito.`);
+
+  errorImagen(url: string): void {
+    if (!url) return;
+    this.imagenesFallidas.update(actual => new Set([...actual, url]));
   }
 
   moneda(valor: number): string {
-    try { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: this.identidad.config().moneda || 'HNL' }).format(valor); }
-    catch { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor); }
+    try {
+      return new Intl.NumberFormat('es-HN', {
+        style: 'currency',
+        currency: this.identidad.config().moneda || 'HNL'
+      }).format(valor);
+    } catch {
+      return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor);
+    }
   }
-  enlaceWhatsapp(): string { return this.telefono() ? `https://wa.me/${this.telefono()}` : ''; }
 
-  private aplicarBusquedaInicial(): void {
-    if (this.busquedaInicialAplicada) return; this.busquedaInicialAplicada = true; if (this.busquedaInicial) this.buscar(this.busquedaInicial);
-  }
-  private aplicarCategoriaInicial(categorias: CategoriaTienda[]): void {
-    if (this.categoriaInicialAplicada) return; this.categoriaInicialAplicada = true; if (!this.categoriaSlugInicial) return;
-    const categoria = categorias.find(item => item.slug === this.categoriaSlugInicial);
-    if (categoria) this.seleccionarCategoria(categoria.nombre); else this.aviso.set('La categoría solicitada ya no está disponible.');
+  enlaceWhatsapp(): string {
+    return this.telefono() ? `https://wa.me/${this.telefono()}` : '';
   }
 }

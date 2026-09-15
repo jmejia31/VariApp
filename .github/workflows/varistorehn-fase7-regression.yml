@@ -1,0 +1,158 @@
+name: VariStoreHn Fase 7 - home comercial
+
+on:
+  push:
+    branches:
+      - Desarrollo
+      - chatgpt/varistorehn-fase7-home-comercial
+    paths:
+      - 'frontend/src/app/features/varistorehn/**'
+      - 'frontend/src/app/app.routes.ts'
+      - 'frontend/e2e/varistorehn-fase1.spec.ts'
+      - 'frontend/e2e/varistorehn-fase2.spec.ts'
+      - 'frontend/e2e/varistorehn-fase3.spec.ts'
+      - 'frontend/e2e/varistorehn-fase4.spec.ts'
+      - 'frontend/e2e/varistorehn-fase5.spec.ts'
+      - 'frontend/e2e/varistorehn-fase6.spec.ts'
+      - 'frontend/e2e/varistorehn-fase7.spec.ts'
+      - 'frontend/scripts/validate-varistorehn-fase1.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase2.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase3.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase4.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase5.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase6.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase7.mjs'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - '.github/workflows/varistorehn-fase7-regression.yml'
+  pull_request:
+    branches:
+      - Desarrollo
+    paths:
+      - 'frontend/src/app/features/varistorehn/**'
+      - 'frontend/src/app/app.routes.ts'
+      - 'frontend/e2e/varistorehn-fase1.spec.ts'
+      - 'frontend/e2e/varistorehn-fase2.spec.ts'
+      - 'frontend/e2e/varistorehn-fase3.spec.ts'
+      - 'frontend/e2e/varistorehn-fase4.spec.ts'
+      - 'frontend/e2e/varistorehn-fase5.spec.ts'
+      - 'frontend/e2e/varistorehn-fase6.spec.ts'
+      - 'frontend/e2e/varistorehn-fase7.spec.ts'
+      - 'frontend/scripts/validate-varistorehn-fase1.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase2.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase3.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase4.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase5.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase6.mjs'
+      - 'frontend/scripts/validate-varistorehn-fase7.mjs'
+      - 'frontend/package.json'
+      - 'frontend/package-lock.json'
+      - '.github/workflows/varistorehn-fase7-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: varistorehn-fase7-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Fase 7 - regresion publica acumulada
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint TypeScript y guardas Fases 1-7
+        run: npm run lint
+
+      - name: Build de produccion
+        run: npm run build:prod
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm start -- --host 127.0.0.1 --port 4200 > varistorehn-fase7-regression.log 2>&1 &
+
+      - name: Esperar Angular
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4200/varistorehn > /dev/null; then
+              echo 'Angular listo para la regresion publica de Fase 7.'
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'Angular no respondio dentro del tiempo esperado.' >&2
+          cat varistorehn-fase7-regression.log >&2 || true
+          exit 1
+
+      - name: Regresion Fase 1
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase1
+
+      - name: Regresion Fase 2
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase2
+
+      - name: Regresion Fase 3
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase3
+
+      - name: Regresion Fase 4
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase4
+
+      - name: Regresion Fase 5
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase5
+
+      - name: Regresion Fase 6
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase6
+
+      - name: Playwright Fase 7
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npm run test:e2e:varistorehn-fase7
+
+      - name: Publicar evidencia frontend
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: varistorehn-fase7-frontend
+          path: |
+            frontend/varistorehn-fase7-regression.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: warn
+          retention-days: 7

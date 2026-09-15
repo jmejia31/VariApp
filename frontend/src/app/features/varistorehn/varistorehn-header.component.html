@@ -16,7 +16,7 @@
 
 <header class="store-header">
   <div class="container header-main">
-    <a class="brand" [href]="enlaces.inicio" [attr.aria-label]="identidad.nombreSistema() + ', inicio'">
+    <a class="brand" [routerLink]="enlaces.inicio" [attr.aria-label]="identidad.nombreSistema() + ', inicio'">
       @if (mostrarLogo()) {
         <img [src]="identidad.logoUrl()" alt="" width="46" height="46" (error)="reportarErrorLogo(identidad.logoUrl())">
       } @else {
@@ -71,9 +71,9 @@
   </div>
 
   <nav class="container store-nav" aria-label="Navegación de tienda">
-    <a [href]="enlaces.inicio">Inicio</a>
-    <a [href]="enlaces.productos">Productos</a>
-    <a [href]="enlaces.categorias">Categorías</a>
+    <a [routerLink]="enlaces.inicio">Inicio</a>
+    <a [routerLink]="enlaces.productos">Productos</a>
+    <a [routerLink]="enlaces.categorias">Categorías</a>
     <span class="nav-divider" aria-hidden="true"></span>
     <button type="button" class="nav-all" [attr.aria-pressed]="!categoriaActiva" (click)="seleccionarCategoria('')"><app-store-icon nombre="rejilla" /> Todas</button>
     @for (categoria of categorias.slice(0, 5); track categoria) {
@@ -101,9 +101,9 @@
     </header>
 
     <nav aria-label="Navegación móvil">
-      <a #primerEnlaceMovil [href]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
-      <a [href]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
-      <a [href]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
+      <a #primerEnlaceMovil [routerLink]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
+      <a [routerLink]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
+      <a [routerLink]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
       <a [href]="enlaces.contacto" (click)="cerrarMenuMovil(false)">Contacto</a>
     </nav>
 
