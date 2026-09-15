@@ -582,3 +582,17 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.10.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.10.H. NEXT_PARENT_PREARMED=GATE-N7. No se promueve GATE-N7 antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N8.2 — Compatibilidad de dispositivos — ROLLUP DOCUMENTAL 2026-09-15
+
+Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N8.2.D cerró `LISTO_REAL` antes del frontend/UX.
+- [x] N8.2.E resolvió same-run el P1 `MISSING_N8_2_EXPLICIT_DEVICE_PROFILE_COVERAGE` con perfiles explícitos escritorio 1440x900, laptop 1366x768, tablet 820x1180, Android 412x915 e iPhone 390x844.
+- [x] Gate causal `N8.2 - Compatibilidad de dispositivos` run `34941980085`, job `104292533908`, sobre `1f7008f464f195aab3020a5d0102a85428c8919a`: lint, build y Playwright dirigido PASS.
+- [x] N8.2.E `LISTO_REAL`: `vaep/evidence/receipts/N8.2.E_LISTO_REAL_20260915T073218Z_SUP48.json`.
+- [x] N8.2.F `LISTO_REAL`: `vaep/evidence/receipts/N8.2.F_LISTO_REAL_20260915T073344Z_SUP48.json`; sin delta runtime de RBAC/auditoría/seguridad.
+- [x] N8.2.G `LISTO_REAL`: `vaep/evidence/receipts/N8.2.G_LISTO_REAL_20260915T073447Z_SUP48.json`; P0=0/P1=0/P2=0.
+- [x] Paquete canónico H materializado en `docs/CERTIFICACION_N8_2_DISPOSITIVOS.md` y reconciliación history-preserving de TASKS/CHANGELOG ejecutada.
+
+N8.2.H sólo pasa a `LISTO_REAL` mediante su receipt final después de REVIEW_FIRST documental; este rollup no sustituye el receipt ni el control-plane fresco.

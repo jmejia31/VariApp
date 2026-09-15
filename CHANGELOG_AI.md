@@ -1096,3 +1096,13 @@ Admission transition is guarded; no production, merge or secret changes.
 **Seguridad y operación:** la emisión fiscal permanece autenticada, permission-gated, tenant-aware, idempotente y fail-closed ante configuración/proveedor inválido. La auditoría evita claves de idempotencia, hash de snapshot, payloads del proveedor, referencias externas y excepciones crudas. No se introdujo webhook fiscal ni se certifica una superficie inexistente.
 
 **Control:** esta publicación resuelve los rollups documentales mediante append byte-exacto. No declara por sí sola `N7.10.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover `GATE-N7`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+
+## 2026-09-15 — ERP-N8.2 Compatibilidad de dispositivos — reconciliación documental H
+
+**Responsable:** Tarea Supervisión :48 bajo `docs/VAEP_AUTHORITY.md`.
+
+Se cerró la cobertura causal de N8.2 para escritorio, laptop, tablet, Android e iPhone. El P1 inicial por falta de perfiles explícitos se resolvió same-run con `frontend/e2e/n82-device-compatibility.spec.ts` y el gate dedicado `.github/workflows/n8-2-device-compatibility.yml`. El workflow `N8.2 - Compatibilidad de dispositivos` run `34941980085`, job `104292533908`, terminó `success` sobre `1f7008f464f195aab3020a5d0102a85428c8919a`; lint, build de producción y Playwright dirigido quedaron PASS.
+
+N8.2.E, N8.2.F y N8.2.G quedaron `LISTO_REAL` mediante receipts VAEP con REVIEW_FIRST P0=0/P1=0/P2=0. No hubo delta de runtime backend, persistencia, migraciones, RBAC, límites tenant, deploy, Producción, secretos ni PR #2. La certificación canónica se materializó en `docs/CERTIFICACION_N8_2_DISPOSITIVOS.md`.
+
+Este registro es histórico y no falsea H: N8.2.H sólo es `LISTO_REAL` cuando exista su receipt final tras REVIEW_FIRST documental y readback/reconciliación de control-plane.
