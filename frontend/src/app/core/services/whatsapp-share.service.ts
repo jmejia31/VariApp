@@ -7,6 +7,12 @@ export type WhatsAppHandoffStatus =
   | typeof WHATSAPP_HANDOFF_GENERATED
   | typeof WHATSAPP_CLIENT_OPEN_REQUESTED;
 
+export interface WhatsAppAuditPayload {
+  canal: 'WhatsApp';
+  destinatario: string;
+  resultado: WhatsAppHandoffStatus;
+}
+
 const DEFAULT_COUNTRY_PREFIX = '504';
 const INVALID_PHONE = /^[0]+$/;
 
@@ -38,6 +44,11 @@ export function construirEnlaceWhatsApp(numero: string, mensaje: string): string
   const texto = mensaje.trim();
   if (!normalizado || !texto || texto.length > 6000) return '';
   return `https://wa.me/${normalizado}?text=${encodeURIComponent(texto)}`;
+}
+
+/** Contract sent to the authenticated API; masking is deliberately backend-owned. */
+export function crearPayloadAuditoriaWhatsApp(numero: string, resultado: WhatsAppHandoffStatus = WHATSAPP_CLIENT_OPEN_REQUESTED): WhatsAppAuditPayload {
+  return { canal: 'WhatsApp', destinatario: normalizarTelefonoWhatsApp(numero), resultado };
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -48,6 +49,51 @@ public class FacturaCompartirServiceTests
             _currentUser.Object,
             _configuration,
             new HttpContextAccessor());
+    }
+
+    [Fact]
+    public async Task RegistrarIntentoAsync_WhatsApp_Enmascara_El_Numero_Normalizado_En_Persistencia()
+    {
+        var factura = CrearFactura();
+        HistorialEnvioFactura? guardado = null;
+        _facturaService.Setup(s => s.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+        _repository.Setup(r => r.AddHistorialAsync(It.IsAny<HistorialEnvioFactura>()))
+            .Callback<HistorialEnvioFactura>(h => guardado = h)
+            .Returns(Task.CompletedTask);
+
+        await _service.RegistrarIntentoAsync(factura.Id, new RegistrarEnvioDto
+        {
+            Canal = "WhatsApp",
+            Destinatario = "50499999999",
+            Resultado = WhatsAppSharePolicy.ClientOpenRequested
+        });
+
+        Assert.NotNull(guardado);
+        Assert.Equal("*******9999", guardado!.Destinatario);
+        Assert.DoesNotContain("50499999999", guardado.Destinatario, StringComparison.Ordinal);
+        Assert.Equal(WhatsAppSharePolicy.ClientOpenRequested, guardado.Resultado);
+        Assert.DoesNotContain("SENT", guardado.Resultado, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("DELIVERED", guardado.Resultado, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("READ", guardado.Resultado, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task RegistrarIntentoAsync_WhatsApp_Rechaza_Numero_PreEnmascarado()
+    {
+        var factura = CrearFactura();
+        _facturaService.Setup(s => s.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarIntentoAsync(
+            factura.Id,
+            new RegistrarEnvioDto
+            {
+                Canal = "WhatsApp",
+                Destinatario = "*******9999",
+                Resultado = WhatsAppSharePolicy.ClientOpenRequested
+            }));
+
+        Assert.Contains("teléfono", error.Message, StringComparison.OrdinalIgnoreCase);
+        _repository.Verify(r => r.AddHistorialAsync(It.IsAny<HistorialEnvioFactura>()), Times.Never);
     }
 
     [Fact]

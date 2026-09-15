@@ -19,6 +19,10 @@ Se registró el receipt de cierre de los bloqueos externos sustituidos por evide
 
 El flujo de factura conserva el enlace `wa.me` seguro y lo muestra como fallback cuando el navegador bloquea la apertura automática.
 
+## 2026-09-15 — WhatsApp — erratum de contrato de auditoría
+
+Se corrigió el doble enmascarado: factura envía el teléfono normalizado de forma transitoria y el backend aplica la máscara una sola vez antes de persistir. Se añadió manejo visible de error de auditoría y cobertura frontend/backend del contrato. No se enviaron mensajes reales ni se tocaron `N8.7.A` o las automatizaciones.
+
 ## 2026-09-15 — WhatsApp — handoff canónico sin API de proveedor
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

@@ -12,7 +12,7 @@ El enlace `wa.me` no adjunta binarios. El mensaje puede incluir el enlace públi
 
 ## Teléfonos y estados
 
-El fallback documentado para Honduras acepta `+504 9999-9999`, `50499999999`, `9999-9999`, `99999999` y `(504) 9999 9999`, y produce `50499999999`. La política está encapsulada y permite otro prefijo por tenant en el futuro. Teléfonos ausentes, inválidos o con prefijo duplicado no abren WhatsApp.
+El fallback documentado para Honduras acepta formatos locales e internacionales (por ejemplo, `+504 XXXX-XXXX`) y produce el número E.164 sin signos. La política está encapsulada y permite otro prefijo por tenant en el futuro. Teléfonos ausentes, inválidos o con prefijo duplicado no abren WhatsApp.
 
 La auditoría usa destinatario enmascarado y uno de estos estados:
 

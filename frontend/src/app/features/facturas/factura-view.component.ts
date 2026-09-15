@@ -20,7 +20,7 @@ import {
   ResultadoDiagnosticoSmtp
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
-import { enmascararTelefonoWhatsApp, normalizarTelefonoWhatsApp, WhatsAppShareService, WHATSAPP_CLIENT_OPEN_REQUESTED } from '../../core/services/whatsapp-share.service';
+import { crearPayloadAuditoriaWhatsApp, normalizarTelefonoWhatsApp, WhatsAppShareService, WHATSAPP_CLIENT_OPEN_REQUESTED } from '../../core/services/whatsapp-share.service';
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
 import { FacturaFiscalEmisionComponent } from './factura-fiscal-emision.component';
 
@@ -286,9 +286,12 @@ export class FacturaViewComponent implements OnInit {
       return;
     }
 
+    const auditoria = crearPayloadAuditoriaWhatsApp(numero, WHATSAPP_CLIENT_OPEN_REQUESTED);
     this.facturaService
-      .registrarIntentoEnvio(factura.id, 'WhatsApp', enmascararTelefonoWhatsApp(numero), WHATSAPP_CLIENT_OPEN_REQUESTED)
-      .subscribe();
+      .registrarIntentoEnvio(factura.id, auditoria.canal, auditoria.destinatario, auditoria.resultado)
+      .subscribe({
+        error: () => this.snackBar.open('WhatsApp se abrió, pero no fue posible registrar la auditoría del handoff.', 'Cerrar', { duration: 5000 })
+      });
 
     if (!this.whatsappShare.abrir(numero, this.mensajeEditable)) {
       this.enlaceWhatsAppFallback.set(url);

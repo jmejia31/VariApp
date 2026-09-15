@@ -1,5 +1,6 @@
 import {
   construirEnlaceWhatsApp,
+  crearPayloadAuditoriaWhatsApp,
   enmascararTelefonoWhatsApp,
   normalizarTelefonoWhatsApp
 } from './whatsapp-share.service';
@@ -30,5 +31,13 @@ describe('WhatsAppShareService policy', () => {
 
   it('enmascara el destinatario para auditoría', () => {
     expect(enmascararTelefonoWhatsApp('99999999')).toBe('*******9999');
+  });
+
+  it('envía al API el número normalizado y deja el enmascarado al backend', () => {
+    const payload = crearPayloadAuditoriaWhatsApp('+504 9999-9999');
+    expect(payload).toEqual({
+      canal: 'WhatsApp', destinatario: '50499999999', resultado: 'WHATSAPP_CLIENT_OPEN_REQUESTED'
+    });
+    expect(payload.destinatario).not.toContain('*');
   });
 });
