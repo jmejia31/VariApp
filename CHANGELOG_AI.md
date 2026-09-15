@@ -1270,3 +1270,13 @@ Se certificó la cadena N8.4.A-F con sus receipts canónicos y se reconcilió N8
 El historial previo de bloqueo físico permanece intacto. El contrato canónico se conserva en `docs/N8_4_POS_PHYSICAL_CAPABILITY_CONTRACT.md` y la certificación final de alcance se materializó en `docs/CERTIFICACION_N8_4_POS_FISICO.md`. N8.4.H no introduce delta de runtime, esquema, datos, secretos, Producción ni deploy.
 
 Este registro es histórico y no falsea H: N8.4.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
+
+## 2026-09-15 — Auditoría forense N8.6–N8.8
+
+Se contrastaron receipts con commits, diffs, revisiones, el control plane y runtime
+de Desarrollo. N8.6.G/H quedan confirmados por el contrato funcional de WhatsApp y
+la prueba dirigida actual (4/4). La corrección append-only de N8.7.E actualizó sólo
+`COLA!N676:O676` a los instantes canónicos demostrados por Git. N8.7.G conserva un
+blocker auténtico de workload autenticado no productivo; N8.8.G se reabre para
+certificar el proveedor y un backup/restore fresco mediante la ruta M11 existente.
+La evidencia completa está en `docs/evidencias/auditoria-forense-n8/2026-09-15_1532/`.
