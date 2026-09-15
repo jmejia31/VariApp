@@ -1143,3 +1143,6 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 
 - N8.1.G delegated browser UAT captured on Desarrollo at 2026-09-15T15:10:49.1317092Z (exact head 0e1854c42941e3eaf74af88628f99f197ddfbf89): real CUA observations cover purchasing, sales/invoicing, payments, BI, RBAC, inventory and native-dialog modal behavior. Finance has a pre-existing sale-movement reconciliation mismatch (Pendiente vs invoice Pagada); WhatsApp/email provider scope is unconfigured. No synthetic PNG/JPG or human PASS was created; literal N8.1 human acceptance and external Sheet readback remain required. Evidence: vaep\evidence\browser\N8.1.G\N8.1.G_DELEGATED_BROWSER_UAT_CAPTURED_20260915T151049Z.json.
 
+
+- Evidence JSON normalization follow-up for the authenticated delegated UAT capture (same browser observations; syntax corrected before consumption).
+
