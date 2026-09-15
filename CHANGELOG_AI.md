@@ -1210,3 +1210,9 @@ corregido queda en `N_A` porque Vercel reportó `Deployment rate limited — ret
 para el commit `8a0552e3`; la URL remota continúa sirviendo el bundle anterior. No se
 fabricaron capturas ni resultados PASS para esa corrida.
 
+La verificación remota posterior al despliegue encontró que una fila de venta muy angosta
+podía colapsar la columna de cantidad al combinar un área de producto de dos columnas.
+La plantilla móvil ahora reserva una columna táctil estable para cantidad y deja el precio
+en la columna flexible; el ajuste es transversal al componente reutilizado y no cambia
+ningún flujo transaccional.
+
