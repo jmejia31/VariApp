@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { CentroCosto, TipoCentroCosto } from '../../core/models/centro-costo.model';
 import { CentroCostoService } from '../../services/centro-costo.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-centros-costo',
@@ -65,6 +66,7 @@ export class CentrosCostoComponent implements OnInit {
   private readonly service = inject(CentroCostoService);
   private readonly snack = inject(MatSnackBar);
   private readonly permisosRuntime = inject(PermisosRuntimeService);
+  private readonly alerts = inject(AppAlertService);
   readonly items = signal<CentroCosto[]>([]); readonly loading = signal(true); readonly saving = signal(false); readonly termino = signal(''); readonly mostrandoFormulario = signal(false); readonly editandoId = signal<number | null>(null); readonly errorCarga = signal(''); readonly errorFormulario = signal('');
   readonly puedeCrear = signal(false); readonly puedeEditar = signal(false); readonly puedeActivar = signal(false); readonly puedeDesactivar = signal(false); readonly puedeEliminar = signal(false);
   readonly tipos = [{ value: TipoCentroCosto.Sucursal, label: 'Sucursal' }, { value: TipoCentroCosto.Departamento, label: 'Departamento' }, { value: TipoCentroCosto.Proyecto, label: 'Proyecto' }, { value: TipoCentroCosto.UnidadNegocio, label: 'Unidad de negocio' }];
@@ -78,6 +80,18 @@ export class CentrosCostoComponent implements OnInit {
   guardar(): void { const permitido = this.editandoId() ? this.puedeEditar() : this.puedeCrear(); if (!permitido) return; if (this.form.invalid || this.saving()) { this.form.markAllAsTouched(); return; } const raw = this.form.getRawValue(); const sucursalId = raw.sucursalId ? Number(raw.sucursalId) : null; if (raw.tipo === TipoCentroCosto.Sucursal && !sucursalId) { this.errorFormulario.set('Sucursal ID es obligatoria para centros de tipo Sucursal.'); return; } if (raw.tipo !== TipoCentroCosto.Sucursal && sucursalId) { this.errorFormulario.set('Sucursal ID debe quedar vacía para tipos distintos de Sucursal.'); return; } const base = { codigo: raw.codigo!.trim(), nombre: raw.nombre!.trim(), descripcion: raw.descripcion?.trim() || null, tipo: raw.tipo!, sucursalId }; this.saving.set(true); const request = this.editandoId() ? this.service.update(this.editandoId()!, { ...base, activo: Boolean(raw.activo) }) : this.service.create(base); request.subscribe({ next: () => { this.saving.set(false); this.cancelar(); this.snack.open('Centro de costo guardado.', 'Cerrar', { duration: 3000 }); this.cargar(); }, error: () => { this.saving.set(false); this.errorFormulario.set('No se pudo guardar el centro de costo.'); } }); }
   puedeCambiarEstado(item: CentroCosto): boolean { return item.activo ? this.puedeDesactivar() : this.puedeActivar(); }
   cambiarEstado(item: CentroCosto): void { if (!this.puedeCambiarEstado(item)) return; this.service.cambiarEstado(item.id, !item.activo).subscribe({ next: () => this.cargar(), error: () => this.snack.open('No se pudo cambiar el estado.', 'Cerrar', { duration: 3000 }) }); }
-  eliminar(item: CentroCosto): void { if (!this.puedeEliminar()) return; if (!confirm(`¿Eliminar el centro de costo ${item.codigo}?`)) return; this.service.delete(item.id).subscribe({ next: () => this.cargar(), error: () => this.snack.open('No se pudo eliminar el centro de costo.', 'Cerrar', { duration: 3000 }) }); }
+  async eliminar(item: CentroCosto): Promise<void> {
+    if (!this.puedeEliminar()) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar centro de costo',
+      mensaje: `Se eliminará lógicamente el centro ${item.codigo}.`,
+      detalle: 'El historial relacionado se conservará.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar',
+      cancelarTexto: 'Cancelar'
+    });
+    if (!confirmado) return;
+    this.service.delete(item.id).subscribe({ next: () => this.cargar(), error: () => this.snack.open('No se pudo eliminar el centro de costo.', 'Cerrar', { duration: 3000 }) });
+  }
   tipoNombre(tipo: TipoCentroCosto): string { return this.tipos.find(x => x.value === tipo)?.label ?? String(tipo); }
 }

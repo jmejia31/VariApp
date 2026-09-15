@@ -10,6 +10,7 @@ import { Producto, ProductoImagen } from '../../core/models/producto.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-producto-detail',
@@ -32,7 +33,8 @@ export class ProductoDetailComponent implements OnInit {
     private productoService: ProductoService,
     private route: ActivatedRoute,
     private permisosRuntime: PermisosRuntimeService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -58,14 +60,17 @@ export class ProductoDetailComponent implements OnInit {
     });
   }
 
-  ajustarStockProducto(): void {
+  async ajustarStockProducto(): Promise<void> {
     const producto = this.producto();
     if (!producto || producto.usaVariantes || this.ajustandoStock()) return;
 
-    const cantidadTexto = window.prompt(
-      `Stock actual: ${producto.cantidad}. Ingresa la nueva cantidad:`,
-      String(producto.cantidad)
-    );
+    const cantidadTexto = await this.alerts.solicitarTexto({
+      titulo: 'Ajustar inventario',
+      mensaje: `Stock actual: ${producto.cantidad}. Ingresa la nueva cantidad para este producto.`,
+      tipo: 'advertencia',
+      confirmarTexto: 'Continuar',
+      entrada: { etiqueta: 'Nueva cantidad', valor: String(producto.cantidad), requerida: true }
+    });
     if (cantidadTexto === null) return;
 
     const cantidadNueva = Number(cantidadTexto.trim());
@@ -74,7 +79,13 @@ export class ProductoDetailComponent implements OnInit {
       return;
     }
 
-    const motivo = window.prompt('Motivo obligatorio del ajuste:')?.trim();
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Motivo del ajuste',
+      mensaje: 'Registra un motivo para mantener la trazabilidad del cambio de inventario.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Aplicar ajuste',
+      entrada: { etiqueta: 'Motivo obligatorio', requerida: true }
+    });
     if (!motivo) {
       this.snackBar.open('El motivo del ajuste es obligatorio.', 'Cerrar', { duration: 5000 });
       return;

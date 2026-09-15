@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { CostoEnvioService } from '../../services/costo-envio.service';
 import { CostoEnvio, GuardarCostoEnvio } from '../../core/models/costo-envio.model';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-costos-envio',
@@ -45,7 +46,10 @@ export class CostosEnvioComponent implements OnInit {
     activo: [true]
   });
 
-  constructor(private readonly service: CostoEnvioService) {}
+  constructor(
+    private readonly service: CostoEnvioService,
+    private readonly alerts: AppAlertService
+  ) {}
 
   ngOnInit(): void {
     this.cargar();
@@ -132,8 +136,16 @@ export class CostosEnvioComponent implements OnInit {
     });
   }
 
-  eliminar(item: CostoEnvio): void {
-    if (!window.confirm(`¿Eliminar lógicamente el costo de envío “${item.nombre}”?`)) return;
+  async eliminar(item: CostoEnvio): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar costo de envío',
+      mensaje: `Se eliminará lógicamente “${item.nombre}”.`,
+      detalle: 'El historial de envíos se conservará.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar',
+      cancelarTexto: 'Cancelar'
+    });
+    if (!confirmado) return;
     this.service.delete(item.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.error.set(err.error?.message ?? 'No se pudo eliminar el costo de envío.')

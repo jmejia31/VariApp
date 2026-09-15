@@ -21,6 +21,7 @@ import {
   TipoCargaMasiva
 } from '../../core/models/carga-masiva.model';
 import { CargaMasivaService } from '../../services/carga-masiva.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { FeedbackStateComponent } from '../../shared/feedback-state/feedback-state.component';
 
 @Component({
@@ -62,7 +63,10 @@ export class CargasMasivasComponent implements OnInit {
   busqueda = '';
   readonly columnasHistorial = ['archivo', 'tipo', 'estado', 'filas', 'resultado', 'fecha', 'acciones'];
 
-  constructor(private readonly service: CargaMasivaService) {}
+  constructor(
+    private readonly service: CargaMasivaService,
+    private readonly alerts: AppAlertService
+  ) {}
 
   ngOnInit(): void {
     this.service.getConfiguracion().subscribe({
@@ -141,10 +145,18 @@ export class CargasMasivasComponent implements OnInit {
     });
   }
 
-  confirmar(): void {
+  async confirmar(): Promise<void> {
     const carga = this.detalle();
     if (!carga?.puedeConfirmarse || this.confirmando()) return;
-    if (!window.confirm(`¿Confirmar ${carga.filasValidas} filas válidas? La operación conservará atomicidad transaccional.`)) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Confirmar carga masiva',
+      mensaje: `Se confirmarán ${carga.filasValidas} filas válidas.`,
+      detalle: 'La operación conservará atomicidad transaccional y no aplicará cambios parciales.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Confirmar carga',
+      cancelarTexto: 'Cancelar'
+    });
+    if (!confirmado) return;
 
     this.confirmando.set(true);
     this.error.set(null);

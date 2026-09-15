@@ -4,6 +4,14 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — UX — eliminación de diálogos nativos en flujos empresariales
+
+**Responsable:** ChatGPT/VAEP, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se reemplazaron todos los `window.confirm`, `confirm`, `window.prompt` y `prompt` de `frontend/src/app` por el `AppAlertService` compartido. Las acciones de compras, ventas, facturación, pagos, inventario, productos, solicitudes, órdenes, preparaciones, cargas masivas y administración usan ahora modales propios con texto semántico, motivos obligatorios cuando aplican, cancelación accesible y estado de confirmación sin ventanas nativas del navegador.
+
+Validación real: barrido `rg` sin diálogos nativos de producción; `npm run lint` y `npm run build:prod` superados. El build backend Release superó 0 advertencias/0 errores; la ejecución local de pruebas .NET quedó impedida por la directiva de Control de aplicaciones del host al cargar `InventoryApp.Tests.dll`, sin resultado PASS inventado.
+
 ## 2026-09-15 — N8.1.G — validación técnica de los seis grupos restantes
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

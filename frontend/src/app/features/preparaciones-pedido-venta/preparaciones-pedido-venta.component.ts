@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { EstadoPreparacionPedidoVenta, PreparacionPedidoVenta } from './preparacion-pedido-venta.model';
 import { PreparacionPedidoVentaService } from './preparacion-pedido-venta.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-preparaciones-pedido-venta',
@@ -134,6 +135,7 @@ export class PreparacionesPedidoVentaComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly snack = inject(MatSnackBar);
+  private readonly alerts = inject(AppAlertService);
 
   readonly preparacion = signal<PreparacionPedidoVenta | null>(null);
   readonly pedidoBuscado = signal<number | null>(null);
@@ -199,9 +201,16 @@ export class PreparacionesPedidoVentaComponent implements OnInit {
     });
   }
 
-  cancelar(): void {
+  async cancelar(): Promise<void> {
     const p = this.preparacion(); if (!p || this.saving()) return;
-    const motivo = window.prompt('Motivo de cancelación de la preparación:')?.trim();
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Cancelar preparación',
+      mensaje: 'La preparación se marcará como cancelada y dejará de avanzar en el despacho.',
+      detalle: 'Indica un motivo trazable para la auditoría.',
+      tipo: 'peligro',
+      entrada: { etiqueta: 'Motivo de cancelación', requerida: true },
+      confirmarTexto: 'Cancelar preparación'
+    });
     if (!motivo) return;
     this.saving.set(true);
     this.svc.cancelar(p.id, motivo).subscribe({

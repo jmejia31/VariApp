@@ -18,6 +18,7 @@ import { Proveedor } from '../../core/models/proveedor.model';
 import { ProductoService } from '../../services/producto.service';
 import { SolicitudCompraService } from '../../services/solicitud-compra.service';
 import { ProveedorService } from '../../services/proveedor.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 interface LineaEditorSolicitudCompra {
   productoId: number | null;
@@ -90,7 +91,8 @@ export class SolicitudesCompraShellComponent implements OnInit, OnDestroy {
     private productoService: ProductoService,
     private permisosRuntime: PermisosRuntimeService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -275,15 +277,28 @@ export class SolicitudesCompraShellComponent implements OnInit, OnDestroy {
     this.ejecutarAccion(() => this.solicitudService.enviar(solicitud.id), 'No fue posible enviar la solicitud.');
   }
 
-  aprobar(solicitud: SolicitudCompra): void {
+  async aprobar(solicitud: SolicitudCompra): Promise<void> {
     if (solicitud.estado !== 'Solicitada' || !this.puede('Aprobar')) return;
-    if (!window.confirm(`¿Aprobar la solicitud ${solicitud.numeroSolicitud}?`)) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Aprobar solicitud de compra',
+      mensaje: `¿Aprobar la solicitud ${solicitud.numeroSolicitud}?`,
+      detalle: 'La solicitud podrá continuar al flujo de orden de compra con sus líneas y costos trazables.',
+      confirmarTexto: 'Aprobar solicitud'
+    });
+    if (!confirmado) return;
     this.ejecutarAccion(() => this.solicitudService.aprobar(solicitud.id), 'No fue posible aprobar la solicitud.');
   }
 
-  rechazar(solicitud: SolicitudCompra): void {
+  async rechazar(solicitud: SolicitudCompra): Promise<void> {
     if (solicitud.estado !== 'Solicitada' || !this.puede('Rechazar')) return;
-    const motivo = window.prompt(`Motivo de rechazo para ${solicitud.numeroSolicitud}:`)?.trim() ?? '';
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Rechazar solicitud de compra',
+      mensaje: `La solicitud ${solicitud.numeroSolicitud} se marcará como rechazada.`,
+      detalle: 'Indica el motivo para conservar la trazabilidad de la decisión.',
+      tipo: 'peligro',
+      entrada: { etiqueta: 'Motivo de rechazo', requerida: true },
+      confirmarTexto: 'Rechazar solicitud'
+    });
     if (!motivo) {
       this.detalleError.set('El motivo de rechazo es obligatorio.');
       return;

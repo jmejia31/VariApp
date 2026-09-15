@@ -11,6 +11,7 @@ import { finalize } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { CapturarConteoInventarioLinea, ConteoInventario, ConteoInventarioDetalle, EstadoConteoInventario } from '../../core/models/conteo-inventario.model';
 import { ConteoInventarioService } from '../../services/conteo-inventario.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-conteo-inventario-detail',
@@ -70,7 +71,13 @@ export class ConteoInventarioDetailComponent implements OnInit {
   private id = 0;
   private capturasOriginales: Record<number, number | null> = {};
 
-  constructor(private readonly service: ConteoInventarioService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly permisos: PermisosRuntimeService) {}
+  constructor(
+    private readonly service: ConteoInventarioService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly permisos: PermisosRuntimeService,
+    private readonly alerts: AppAlertService
+  ) {}
   ngOnInit(): void { this.id = Number(this.route.snapshot.paramMap.get('id')); this.cargar(); }
   get puedeEditar(): boolean { return this.permisos.puede('MovimientosInventario', 'Editar'); }
   get puedeCrear(): boolean { return this.permisos.puede('MovimientosInventario', 'Crear'); }
@@ -116,11 +123,68 @@ export class ConteoInventarioDetailComponent implements OnInit {
     if (!lineas.length) { this.error = 'No hay cambios de captura pendientes.'; return; }
     this.ejecutar(this.service.capturarLote(this.id, lineas));
   }
-  iniciar(): void { if (confirm('¿Iniciar el conteo? El alcance quedará bloqueado para captura.')) this.ejecutar(this.service.iniciar(this.id)); }
-  cerrar(): void { if (confirm('¿Cerrar el conteo? Verifica que todas las líneas estén capturadas.')) this.ejecutar(this.service.cerrar(this.id)); }
-  aprobar(): void { if (confirm('¿Aprobar las diferencias de este conteo?')) this.ejecutar(this.service.aprobar(this.id)); }
-  generarAjuste(): void { if (!confirm('¿Generar un ajuste borrador con las diferencias? El ajuste requerirá confirmación formal posterior.')) return; this.accionando = true; this.error = ''; this.service.generarAjuste(this.id).pipe(finalize(() => this.accionando = false)).subscribe({ next: response => { if (!response.success) { this.error = response.message || 'No se pudo generar el ajuste.'; return; } void this.router.navigate(['/inventario/ajustes', response.data.id]); }, error: err => this.error = err?.error?.message || 'No se pudo generar el ajuste.' }); }
-  cancelar(): void { const motivo = prompt('Motivo de cancelación:')?.trim(); if (!motivo) return; this.ejecutar(this.service.cancelar(this.id, motivo)); }
+  async iniciar(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Iniciar conteo físico',
+      mensaje: '¿Iniciar el conteo? El alcance quedará bloqueado para captura.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Iniciar'
+    });
+    if (confirmado) this.ejecutar(this.service.iniciar(this.id));
+  }
+
+  async cerrar(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Cerrar conteo físico',
+      mensaje: '¿Cerrar el conteo? Verifica que todas las líneas estén capturadas.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Cerrar conteo'
+    });
+    if (confirmado) this.ejecutar(this.service.cerrar(this.id));
+  }
+
+  async aprobar(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Aprobar diferencias',
+      mensaje: '¿Aprobar las diferencias de este conteo?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Aprobar'
+    });
+    if (confirmado) this.ejecutar(this.service.aprobar(this.id));
+  }
+
+  async generarAjuste(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Generar ajuste de inventario',
+      mensaje: '¿Generar un ajuste borrador con las diferencias? El ajuste requerirá confirmación formal posterior.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Generar ajuste'
+    });
+    if (!confirmado) return;
+    this.accionando = true;
+    this.error = '';
+    this.service.generarAjuste(this.id).pipe(finalize(() => this.accionando = false)).subscribe({
+      next: response => {
+        if (!response.success) {
+          this.error = response.message || 'No se pudo generar el ajuste.';
+          return;
+        }
+        void this.router.navigate(['/inventario/ajustes', response.data.id]);
+      },
+      error: err => this.error = err?.error?.message || 'No se pudo generar el ajuste.'
+    });
+  }
+
+  async cancelar(): Promise<void> {
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Cancelar conteo físico',
+      mensaje: 'Indica el motivo de cancelación. Esta acción no se puede deshacer.',
+      tipo: 'peligro',
+      confirmarTexto: 'Cancelar conteo',
+      entrada: { etiqueta: 'Motivo de cancelación', requerida: true }
+    });
+    if (motivo) this.ejecutar(this.service.cancelar(this.id, motivo));
+  }
   editar(): void { void this.router.navigate(['/inventario/conteos', this.id, 'editar']); }
   volver(): void { void this.router.navigate(['/inventario/conteos']); }
   verAjuste(id: number): void { void this.router.navigate(['/inventario/ajustes', id]); }

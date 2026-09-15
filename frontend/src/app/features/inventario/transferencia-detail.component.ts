@@ -9,6 +9,7 @@ import { finalize } from 'rxjs';
 import { TransferenciaInventario } from '../../core/models/transferencia-inventario.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { TransferenciaInventarioService } from '../../services/transferencia-inventario.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 type RecepcionLinea = {
   recibida: number;
@@ -141,7 +142,8 @@ export class TransferenciaDetailComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly service: TransferenciaInventarioService,
-    private readonly permisos: PermisosRuntimeService
+    private readonly permisos: PermisosRuntimeService,
+    private readonly alerts: AppAlertService
   ) {
     this.id = Number(this.route.snapshot.paramMap.get('id')) || 0;
   }
@@ -179,30 +181,57 @@ export class TransferenciaDetailComponent implements OnInit {
     return linea.recibida + linea.faltante + linea.danada === despachada;
   }
 
-  solicitar(): void {
-    if (!window.confirm('¿Solicitar esta transferencia? Después de solicitarla ya no podrá editarse como borrador.')) return;
+  async solicitar(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Solicitar transferencia',
+      mensaje: '¿Solicitar esta transferencia? Después de solicitarla ya no podrá editarse como borrador.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Solicitar'
+    });
+    if (!confirmado) return;
     this.runAction(() => this.service.solicitar(this.id));
   }
 
-  aprobar(): void {
+  async aprobar(): Promise<void> {
     const transferencia = this.item;
-    if (!transferencia || !window.confirm('¿Aprobar las cantidades solicitadas de esta transferencia?')) return;
+    if (!transferencia) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Aprobar transferencia',
+      mensaje: '¿Aprobar las cantidades solicitadas de esta transferencia?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Aprobar'
+    });
+    if (!confirmado) return;
     this.runAction(() => this.service.aprobar(this.id, {
       detalles: transferencia.detalles.map(d => ({ detalleId: d.id, cantidadAprobada: d.cantidadSolicitada }))
     }));
   }
 
-  despachar(): void {
+  async despachar(): Promise<void> {
     const transferencia = this.item;
-    if (!transferencia || !window.confirm('¿Despachar las cantidades aprobadas? Esta acción afecta stock físico.')) return;
+    if (!transferencia) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Despachar transferencia',
+      mensaje: '¿Despachar las cantidades aprobadas? Esta acción afecta stock físico.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Despachar'
+    });
+    if (!confirmado) return;
     this.runAction(() => this.service.despachar(this.id, {
       detalles: transferencia.detalles.map(d => ({ detalleId: d.id, cantidadDespachada: d.cantidadAprobada }))
     }));
   }
 
-  recibir(): void {
+  async recibir(): Promise<void> {
     const transferencia = this.item;
-    if (!transferencia || !this.recepcionValida || !window.confirm('¿Registrar la recepción y sus discrepancias?')) return;
+    if (!transferencia || !this.recepcionValida) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Registrar recepción',
+      mensaje: '¿Registrar la recepción y sus discrepancias?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Registrar recepción'
+    });
+    if (!confirmado) return;
     this.runAction(() => this.service.recibir(this.id, {
       detalles: transferencia.detalles.map(d => {
         const linea = this.recepcion[d.id];
@@ -217,8 +246,14 @@ export class TransferenciaDetailComponent implements OnInit {
     }));
   }
 
-  cancelar(): void {
-    const motivo = window.prompt('Motivo obligatorio de cancelación:')?.trim();
+  async cancelar(): Promise<void> {
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Cancelar transferencia',
+      mensaje: 'Indica el motivo obligatorio de cancelación. Esta acción no se puede deshacer.',
+      tipo: 'peligro',
+      confirmarTexto: 'Cancelar transferencia',
+      entrada: { etiqueta: 'Motivo de cancelación', requerida: true }
+    });
     if (!motivo) return;
     this.runAction(() => this.service.cancelar(this.id, { motivo }));
   }

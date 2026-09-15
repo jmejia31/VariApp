@@ -16,6 +16,7 @@ import { Factura, FacturaPago, RegistrarFacturaPago } from '../../core/models/fa
 import { BancoLookup, MetodoPago } from '../../core/models/metodo-pago.model';
 import { FacturaService } from '../../services/factura.service';
 import { MetodoPagoService } from '../../services/metodo-pago.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import {
   EstadoPagoOnline,
   PagoOnline,
@@ -71,7 +72,8 @@ export class FacturaPagosComponent implements OnInit {
     private readonly metodoPagoService: MetodoPagoService,
     private readonly pagoOnlineService: PagoOnlineService,
     private readonly tenantContext: TenantContextService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -167,11 +169,18 @@ export class FacturaPagosComponent implements OnInit {
     });
   }
 
-  anularPago(pago: FacturaPago): void {
+  async anularPago(pago: FacturaPago): Promise<void> {
     const factura = this.factura();
     if (!factura || pago.anulado || this.anulandoId() !== null) return;
 
-    const motivo = window.prompt('Indique el motivo de anulación del pago:')?.trim();
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Anular pago',
+      mensaje: `El pago aplicado a ${factura.numeroFactura || `FAC-${factura.id}`} se revertirá.`,
+      detalle: 'El saldo de la factura y el movimiento financiero se recalcularán; indica el motivo para la auditoría.',
+      tipo: 'peligro',
+      entrada: { etiqueta: 'Motivo de anulación', requerida: true },
+      confirmarTexto: 'Anular pago'
+    });
     if (!motivo) return;
 
     this.anulandoId.set(pago.id);

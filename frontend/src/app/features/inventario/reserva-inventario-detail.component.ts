@@ -8,6 +8,7 @@ import { finalize } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { ReservaInventario } from '../../core/models/reserva-inventario.model';
 import { ReservaInventarioService } from '../../services/reserva-inventario.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-reserva-inventario-detail',
@@ -50,7 +51,13 @@ export class ReservaInventarioDetailComponent implements OnInit {
   mensaje = '';
   private id = 0;
 
-  constructor(private readonly route: ActivatedRoute, private readonly router: Router, private readonly service: ReservaInventarioService, private readonly permisos: PermisosRuntimeService) {}
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly service: ReservaInventarioService,
+    private readonly permisos: PermisosRuntimeService,
+    private readonly alerts: AppAlertService
+  ) {}
   ngOnInit(): void { this.id = Number(this.route.snapshot.paramMap.get('id')); if (!Number.isInteger(this.id) || this.id <= 0) { this.error = 'Identificador de reserva inválido.'; return; } this.cargar(); }
   get puedeEditar(): boolean { return this.permisos.puede('MovimientosInventario', 'Editar'); }
   get puedeConfirmar(): boolean { return this.permisos.puede('MovimientosInventario', 'Confirmar'); }
@@ -63,11 +70,61 @@ export class ReservaInventarioDetailComponent implements OnInit {
   }
 
   cargar(): void { this.loading = true; this.error = ''; this.service.getById(this.id).pipe(finalize(() => this.loading = false)).subscribe({ next: r => { if (!r.success) { this.error = r.message || 'No se pudo cargar la reserva.'; return; } this.reserva = r.data; }, error: () => this.error = 'No se pudo cargar la reserva.' }); }
-  activar(): void { if (!confirm('¿Activar esta reserva y bloquear stock disponible?')) return; this.ejecutar(() => this.service.activar(this.id), 'Reserva activada.'); }
-  consumir(): void { if (!confirm('¿Consumir definitivamente esta reserva?')) return; this.ejecutar(() => this.service.consumir(this.id), 'Reserva consumida.'); }
-  expirar(): void { if (!this.reservaPuedeExpirar) { this.error = 'La reserva todavía no alcanzó su fecha de expiración.'; return; } if (!confirm('¿Marcar esta reserva como expirada y liberar el stock?')) return; this.ejecutar(() => this.service.expirar(this.id), 'Reserva expirada.'); }
-  liberar(): void { const motivo = prompt('Motivo de liberación:')?.trim(); if (!motivo) return; this.ejecutar(() => this.service.liberar(this.id, motivo), 'Reserva liberada.'); }
-  cancelar(): void { const motivo = prompt('Motivo de cancelación:')?.trim(); if (!motivo) return; this.ejecutar(() => this.service.cancelar(this.id, motivo), 'Reserva cancelada.'); }
+  async activar(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Activar reserva',
+      mensaje: '¿Activar esta reserva y bloquear stock disponible?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Activar'
+    });
+    if (confirmado) this.ejecutar(() => this.service.activar(this.id), 'Reserva activada.');
+  }
+
+  async consumir(): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Consumir reserva',
+      mensaje: '¿Consumir definitivamente esta reserva?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Consumir'
+    });
+    if (confirmado) this.ejecutar(() => this.service.consumir(this.id), 'Reserva consumida.');
+  }
+
+  async expirar(): Promise<void> {
+    if (!this.reservaPuedeExpirar) {
+      this.error = 'La reserva todavía no alcanzó su fecha de expiración.';
+      return;
+    }
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Expirar reserva',
+      mensaje: '¿Marcar esta reserva como expirada y liberar el stock?',
+      tipo: 'advertencia',
+      confirmarTexto: 'Expirar'
+    });
+    if (confirmado) this.ejecutar(() => this.service.expirar(this.id), 'Reserva expirada.');
+  }
+
+  async liberar(): Promise<void> {
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Liberar reserva',
+      mensaje: 'Indica el motivo para liberar la reserva y devolver el stock disponible.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Liberar',
+      entrada: { etiqueta: 'Motivo de liberación', requerida: true }
+    });
+    if (motivo) this.ejecutar(() => this.service.liberar(this.id, motivo), 'Reserva liberada.');
+  }
+
+  async cancelar(): Promise<void> {
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Cancelar reserva',
+      mensaje: 'Indica el motivo de cancelación. Esta acción no se puede deshacer.',
+      tipo: 'peligro',
+      confirmarTexto: 'Cancelar reserva',
+      entrada: { etiqueta: 'Motivo de cancelación', requerida: true }
+    });
+    if (motivo) this.ejecutar(() => this.service.cancelar(this.id, motivo), 'Reserva cancelada.');
+  }
   editar(): void { void this.router.navigate(['/inventario/reservas', this.id, 'editar']); }
   volver(): void { void this.router.navigate(['/inventario/reservas']); }
   descripcionProducto(d: ReservaInventario['detalles'][number]): string { return [d.productoMarca, d.productoModelo, d.productoColor, d.productoTalla].filter(Boolean).join(' · '); }

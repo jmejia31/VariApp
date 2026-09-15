@@ -15,6 +15,7 @@ import { EstadoOrdenCompra, EstadoOrdenCompraNombre, OrdenCompra } from '../../c
 import { Proveedor } from '../../core/models/proveedor.model';
 import { OrdenCompraService } from '../../services/orden-compra.service';
 import { ProveedorService } from '../../services/proveedor.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-ordenes-compra-shell',
@@ -272,7 +273,8 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
     private readonly ordenService: OrdenCompraService,
     private readonly proveedorService: ProveedorService,
     private readonly router: Router,
-    public readonly permisosRuntime: PermisosRuntimeService
+    public readonly permisosRuntime: PermisosRuntimeService,
+    private readonly alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -394,33 +396,52 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
     });
   }
 
-  enviarAprobacion(orden: OrdenCompra): void {
+  async enviarAprobacion(orden: OrdenCompra): Promise<void> {
     if (!this.esBorrador(orden) || !this.permisosRuntime.puede('Compras', 'Confirmar') || this.accionLoading()) return;
-    if (!globalThis.confirm('¿Enviar esta orden a aprobación? Después ya no podrá editarse como borrador.')) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Enviar orden a aprobación',
+      mensaje: `La orden ${orden.numeroOrden} dejará de ser editable como borrador.`,
+      detalle: 'La operación conserva sus líneas y totales, pero inicia el flujo de aprobación.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Enviar a aprobación'
+    });
+    if (!confirmado) return;
     this.ejecutarAccion(
       () => this.ordenService.enviarAprobacion(orden.id),
       'Orden enviada a aprobación correctamente.'
     );
   }
 
-  aprobar(orden: OrdenCompra): void {
+  async aprobar(orden: OrdenCompra): Promise<void> {
     if (!this.esPendienteAprobacion(orden) || !this.permisosRuntime.puede('Compras', 'Aprobar') || this.accionLoading()) return;
-    if (!globalThis.confirm('¿Aprobar esta orden de compra? La aprobación no recibe mercancía ni modifica inventario.')) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Aprobar orden de compra',
+      mensaje: `¿Aprobar la orden ${orden.numeroOrden}?`,
+      detalle: 'La aprobación no recibe mercancía ni modifica inventario; el impacto ocurre en la recepción autorizada.',
+      confirmarTexto: 'Aprobar orden'
+    });
+    if (!confirmado) return;
     this.ejecutarAccion(
       () => this.ordenService.aprobar(orden.id),
       'Orden de compra aprobada correctamente.'
     );
   }
 
-  cancelar(orden: OrdenCompra): void {
+  async cancelar(orden: OrdenCompra): Promise<void> {
     if (!this.esCancelable(orden) || !this.permisosRuntime.puede('Compras', 'Anular') || this.accionLoading()) return;
-    const motivo = globalThis.prompt('Motivo de cancelación de la orden:')?.trim() ?? '';
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Cancelar orden de compra',
+      mensaje: `La orden ${orden.numeroOrden} se marcará como cancelada y no podrá continuar su ciclo.`,
+      detalle: 'Indica un motivo trazable para la auditoría.',
+      tipo: 'peligro',
+      entrada: { etiqueta: 'Motivo de cancelación', requerida: true },
+      confirmarTexto: 'Cancelar orden'
+    });
     if (!motivo) {
       this.accionMensaje.set(null);
       this.accionError.set('La cancelación exige un motivo.');
       return;
     }
-    if (!globalThis.confirm('¿Confirmas la cancelación de esta orden de compra?')) return;
     this.ejecutarAccion(
       () => this.ordenService.cancelar(orden.id, motivo),
       'Orden de compra cancelada correctamente.'

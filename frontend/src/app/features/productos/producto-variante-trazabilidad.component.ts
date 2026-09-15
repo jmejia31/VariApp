@@ -14,6 +14,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ProductoVariante } from '../../core/models/producto.model';
 import { LoteInventario, SerieInventario } from '../../core/models/trazabilidad-inventario.model';
 import { TrazabilidadInventarioService } from '../../services/trazabilidad-inventario.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-producto-variante-trazabilidad',
@@ -29,6 +30,7 @@ export class ProductoVarianteTrazabilidadComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(TrazabilidadInventarioService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly alerts = inject(AppAlertService);
 
   @Input({ required: true }) variantes: ProductoVariante[] = [];
 
@@ -148,8 +150,15 @@ export class ProductoVarianteTrazabilidadComponent {
     });
   }
 
-  desactivarLote(lote: LoteInventario): void {
-    if (!lote.activo || !window.confirm(`¿Desactivar el lote ${lote.codigo}?`)) return;
+  async desactivarLote(lote: LoteInventario): Promise<void> {
+    if (!lote.activo) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Desactivar lote',
+      mensaje: `¿Desactivar el lote ${lote.codigo}?`,
+      tipo: 'peligro',
+      confirmarTexto: 'Desactivar lote'
+    });
+    if (!confirmado) return;
     this.service.desactivarLote(lote.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.error.set(err.error?.message ?? 'No se pudo desactivar el lote.')
@@ -179,8 +188,14 @@ export class ProductoVarianteTrazabilidadComponent {
     });
   }
 
-  darDeBajaSerie(serie: SerieInventario): void {
-    if (!window.confirm(`¿Dar de baja la serie ${serie.numeroSerie}?`)) return;
+  async darDeBajaSerie(serie: SerieInventario): Promise<void> {
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Dar de baja serie',
+      mensaje: `¿Dar de baja la serie ${serie.numeroSerie}?`,
+      tipo: 'peligro',
+      confirmarTexto: 'Dar de baja'
+    });
+    if (!confirmado) return;
     this.service.darDeBajaSerie(serie.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.error.set(err.error?.message ?? 'No se pudo dar de baja la serie.')

@@ -15,6 +15,7 @@ import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
 import { Producto, ProductoImagen, ProductoVariante, ProductoVarianteFormValue } from '../../core/models/producto.model';
 import { CatalogoProductoService } from '../../services/catalogo-producto.service';
 import { ProductoService } from '../../services/producto.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 const MAX_IMAGENES_VARIANTE = 5;
@@ -36,6 +37,7 @@ export class ProductoVariantesComponent implements OnInit {
   private readonly catalogoService = inject(CatalogoProductoService);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly alerts = inject(AppAlertService);
 
   readonly producto = signal<Producto | null>(null);
   readonly variantes = signal<ProductoVariante[]>([]);
@@ -162,13 +164,16 @@ export class ProductoVariantesComponent implements OnInit {
     });
   }
 
-  ajustarStock(variante: ProductoVariante): void {
+  async ajustarStock(variante: ProductoVariante): Promise<void> {
     if (this.ajustandoId() !== null) return;
 
-    const cantidadTexto = window.prompt(
-      `Stock actual de ${variante.etiqueta || variante.sku}: ${variante.cantidad}. Ingresa la nueva cantidad:`,
-      String(variante.cantidad)
-    );
+    const cantidadTexto = await this.alerts.solicitarTexto({
+      titulo: 'Ajustar inventario de variante',
+      mensaje: `Stock actual de ${variante.etiqueta || variante.sku}: ${variante.cantidad}. Ingresa la nueva cantidad.`,
+      tipo: 'advertencia',
+      confirmarTexto: 'Continuar',
+      entrada: { etiqueta: 'Nueva cantidad', valor: String(variante.cantidad), requerida: true }
+    });
     if (cantidadTexto === null) return;
 
     const cantidadNueva = Number(cantidadTexto.trim());
@@ -177,7 +182,13 @@ export class ProductoVariantesComponent implements OnInit {
       return;
     }
 
-    const motivo = window.prompt('Motivo obligatorio del ajuste:')?.trim();
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Motivo del ajuste',
+      mensaje: 'Registra un motivo para mantener la trazabilidad del cambio de inventario.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Aplicar ajuste',
+      entrada: { etiqueta: 'Motivo obligatorio', requerida: true }
+    });
     if (!motivo) {
       this.errorMessage.set('El motivo del ajuste es obligatorio.');
       return;
@@ -273,9 +284,15 @@ export class ProductoVariantesComponent implements OnInit {
     });
   }
 
-  eliminar(variante: ProductoVariante): void {
+  async eliminar(variante: ProductoVariante): Promise<void> {
     if (variante.esTecnica) return;
-    if (!window.confirm(`¿Eliminar lógicamente la variante ${variante.etiqueta || variante.sku}? Solo es posible con stock cero.`)) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar variante',
+      mensaje: `¿Eliminar lógicamente la variante ${variante.etiqueta || variante.sku}? Solo es posible con stock cero.`,
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar variante'
+    });
+    if (!confirmado) return;
     this.productoService.eliminarVariante(this.productoId, variante.id).subscribe({
       next: () => {
         if (this.imagenVariante()?.id === variante.id) this.cerrarImagenesVariante();
@@ -371,10 +388,16 @@ export class ProductoVariantesComponent implements OnInit {
     });
   }
 
-  eliminarImagenVariante(imagen: ProductoImagen): void {
+  async eliminarImagenVariante(imagen: ProductoImagen): Promise<void> {
     const variante = this.imagenVariante();
     if (!variante || imagen.productoVarianteId == null) return;
-    if (!window.confirm('¿Eliminar esta imagen de la variante? La imagen general del producto seguirá disponible como respaldo.')) return;
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar imagen de variante',
+      mensaje: '¿Eliminar esta imagen de la variante? La imagen general del producto seguirá disponible como respaldo.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar imagen'
+    });
+    if (!confirmado) return;
     this.productoService.eliminarImagenVariante(this.productoId, variante.id, imagen.id).subscribe({
       next: () => {
         this.snackBar.open('Imagen de variante eliminada.', 'Cerrar', { duration: 2500 });
