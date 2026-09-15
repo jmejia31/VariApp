@@ -1149,3 +1149,11 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 
 - Sheet reconciliation remains pending at exact evidence head 1700accb50edf550123b1e2e794b1dc8fb664ea4 (2026-09-15T15:12:40.8585093Z); no connector or external readback was available, and the Finance/payment mismatch plus unconfigured providers are recorded without synthetic state changes. Evidence: vaep/evidence/reconciliations/N8.1_G_H_SHEET_RECONCILIATION_PENDING_20260915T151240Z.json.
 
+
+## 2026-09-15 — Cierre visual SMTP DEV/UAT
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en VariApp, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
+
+No se tocaron Producción, `main`, secretos ni WhatsApp. Las capturas tomadas por CUA quedaron observadas inline; como CUA no expone una ruta local para sus bytes, no se fabricaron PNG para completar los nombres restantes. La matriz y los archivos aportados están en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`.
