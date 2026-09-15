@@ -1,0 +1,77 @@
+name: N8.4.H - Reconciliar historial documental
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/n8-4-h-doc-sync.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: n8-4-h-doc-sync-Desarrollo
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: Append history-preserving N8.4 documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Fast-forward and append canonical history
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin Desarrollo
+
+          if ! grep -Fq 'ERP-N8.4 — POS físico — ROLLUP DOCUMENTAL 2026-09-15' TASKS.md; then
+            cat >> TASKS.md <<'EOF'
+
+          ## ERP-N8.4 — POS físico — ROLLUP DOCUMENTAL 2026-09-15
+
+          Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+          - [x] N8.4.A-F cerraron `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+          - [x] N8.4.G cerró `LISTO_REAL` mediante `vaep/evidence/receipts/OWNER_RECONCILIATION_N8.1.G_N8.1.H_N8.4.G_20260915T193239Z.json` después de aceptación explícita del propietario para el checkpoint físico de POS.
+          - [x] La evidencia histórica de bloqueo físico se conserva; no se falsificó ni sustituyó por evidencia sintética de impresora.
+          - [x] `docs/N8_4_POS_PHYSICAL_CAPABILITY_CONTRACT.md` mantiene el contrato de capacidades físicas y fail-closed cuando el hardware no está disponible.
+          - [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_4_POS_FISICO.md`.
+
+          N8.4.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.
+          EOF
+          fi
+
+          if ! grep -Fq 'ERP-N8.4 POS físico — reconciliación documental H' CHANGELOG_AI.md; then
+            cat >> CHANGELOG_AI.md <<'EOF'
+
+          ## 2026-09-15 — ERP-N8.4 POS físico — reconciliación documental H
+
+          **Responsable:** Tarea Supervisión :24 bajo `docs/VAEP_AUTHORITY.md`.
+
+          Se certificó la cadena N8.4.A-F con sus receipts canónicos y se reconcilió N8.4.G mediante la aceptación explícita del propietario registrada en `vaep/evidence/receipts/OWNER_RECONCILIATION_N8.1.G_N8.1.H_N8.4.G_20260915T193239Z.json`. La aceptación confirma que la validación de impresora fue revisada/corroborada y aprobada, con P0=0/P1=0 y sin generar evidencia sintética ni afirmar observación física adicional por el controller.
+
+          El historial previo de bloqueo físico permanece intacto. El contrato canónico se conserva en `docs/N8_4_POS_PHYSICAL_CAPABILITY_CONTRACT.md` y la certificación final de alcance se materializó en `docs/CERTIFICACION_N8_4_POS_FISICO.md`. N8.4.H no introduce delta de runtime, esquema, datos, secretos, Producción ni deploy.
+
+          Este registro es histórico y no falsea H: N8.4.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
+          EOF
+          fi
+
+          if git diff --quiet -- TASKS.md CHANGELOG_AI.md; then
+            echo 'No documentary delta required.'
+            exit 0
+          fi
+
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add TASKS.md CHANGELOG_AI.md
+          git commit -m 'docs(n8.4.h): reconcile TASKS and CHANGELOG history'
+          git push origin HEAD:Desarrollo
