@@ -20,7 +20,7 @@ import {
   ResultadoDiagnosticoSmtp
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
-import { crearPayloadAuditoriaWhatsApp, normalizarTelefonoWhatsApp, WhatsAppShareService, WHATSAPP_CLIENT_OPEN_REQUESTED } from '../../core/services/whatsapp-share.service';
+import { ejecutarFacturaWhatsAppHandoff, normalizarTelefonoWhatsApp, WhatsAppShareService, WHATSAPP_AUDIT_FAILURE_MESSAGE } from '../../core/services/whatsapp-share.service';
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
 import { FacturaFiscalEmisionComponent } from './factura-fiscal-emision.component';
 
@@ -280,21 +280,23 @@ export class FacturaViewComponent implements OnInit {
     if (!factura || !this.telefonoValido() || !this.mensajeEditable.trim()) return;
 
     const numero = normalizarTelefonoWhatsApp(this.telefonoEditable);
-    const url = this.whatsappShare.construirEnlace(numero, this.mensajeEditable);
-    if (!url) {
+    const resultado = ejecutarFacturaWhatsAppHandoff({
+      numero,
+      mensaje: this.mensajeEditable,
+      construirEnlace: (telefono, mensaje) => this.whatsappShare.construirEnlace(telefono, mensaje),
+      abrir: (telefono, mensaje) => this.whatsappShare.abrir(telefono, mensaje),
+      registrarAuditoria: (payload) => this.facturaService.registrarIntentoEnvio(
+        factura.id, payload.canal, payload.destinatario, payload.resultado
+      ),
+      onAuditError: () => this.snackBar.open(WHATSAPP_AUDIT_FAILURE_MESSAGE, 'Cerrar', { duration: 5000 })
+    });
+    if (!resultado) {
       this.snackBar.open('Ingresa un teléfono válido y un mensaje permitido.', 'Cerrar', { duration: 4500 });
       return;
     }
-
-    const auditoria = crearPayloadAuditoriaWhatsApp(numero, WHATSAPP_CLIENT_OPEN_REQUESTED);
-    this.facturaService
-      .registrarIntentoEnvio(factura.id, auditoria.canal, auditoria.destinatario, auditoria.resultado)
-      .subscribe({
-        error: () => this.snackBar.open('WhatsApp se abrió, pero no fue posible registrar la auditoría del handoff.', 'Cerrar', { duration: 5000 })
-      });
-
-    if (!this.whatsappShare.abrir(numero, this.mensajeEditable)) {
-      this.enlaceWhatsAppFallback.set(url);
+    const aperturaAceptada = resultado.aperturaAceptada;
+    if (!aperturaAceptada) {
+      this.enlaceWhatsAppFallback.set(resultado.url);
       this.snackBar.open('No se pudo abrir WhatsApp automáticamente. Usa el enlace generado desde el navegador.', 'Cerrar', { duration: 5000 });
       return;
     }

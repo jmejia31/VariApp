@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 /** Estados que describen el handoff iniciado por el usuario; nunca delivery/read. */
 export const WHATSAPP_HANDOFF_GENERATED = 'WHATSAPP_HANDOFF_GENERATED' as const;
 export const WHATSAPP_CLIENT_OPEN_REQUESTED = 'WHATSAPP_CLIENT_OPEN_REQUESTED' as const;
+export const WHATSAPP_AUDIT_FAILURE_MESSAGE = 'No fue posible registrar la auditoría del intento de apertura de WhatsApp.';
 export type WhatsAppHandoffStatus =
   | typeof WHATSAPP_HANDOFF_GENERATED
   | typeof WHATSAPP_CLIENT_OPEN_REQUESTED;
@@ -11,6 +12,25 @@ export interface WhatsAppAuditPayload {
   canal: 'WhatsApp';
   destinatario: string;
   resultado: WhatsAppHandoffStatus;
+}
+
+interface WhatsAppAuditObservable {
+  subscribe(handlers: { error: () => void }): unknown;
+}
+
+export interface FacturaWhatsAppHandoffDependencies {
+  numero: string;
+  mensaje: string;
+  construirEnlace: (numero: string, mensaje: string) => string;
+  abrir: (numero: string, mensaje: string) => boolean;
+  registrarAuditoria: (payload: WhatsAppAuditPayload) => WhatsAppAuditObservable;
+  onAuditError: () => void;
+}
+
+export interface FacturaWhatsAppHandoffResult {
+  url: string;
+  aperturaAceptada: boolean;
+  payload: WhatsAppAuditPayload;
 }
 
 const DEFAULT_COUNTRY_PREFIX = '504';
@@ -49,6 +69,17 @@ export function construirEnlaceWhatsApp(numero: string, mensaje: string): string
 /** Contract sent to the authenticated API; masking is deliberately backend-owned. */
 export function crearPayloadAuditoriaWhatsApp(numero: string, resultado: WhatsAppHandoffStatus = WHATSAPP_CLIENT_OPEN_REQUESTED): WhatsAppAuditPayload {
   return { canal: 'WhatsApp', destinatario: normalizarTelefonoWhatsApp(numero), resultado };
+}
+
+/** Orchestrates the real invoice contract without coupling UI fallback to audit HTTP. */
+export function ejecutarFacturaWhatsAppHandoff(deps: FacturaWhatsAppHandoffDependencies): FacturaWhatsAppHandoffResult | null {
+  const payload = crearPayloadAuditoriaWhatsApp(deps.numero);
+  const url = deps.construirEnlace(deps.numero, deps.mensaje);
+  if (!payload.destinatario || !url) return null;
+
+  const aperturaAceptada = deps.abrir(deps.numero, deps.mensaje);
+  deps.registrarAuditoria(payload).subscribe({ error: deps.onAuditError });
+  return { url, aperturaAceptada, payload };
 }
 
 @Injectable({ providedIn: 'root' })

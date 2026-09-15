@@ -25,6 +25,10 @@ Se corrigió el doble enmascarado: factura envía el teléfono normalizado de fo
 
 El receipt correctivo quedó fijado al HEAD funcional exacto de la corrección.
 
+## 2026-09-15 — WhatsApp — UX veraz del popup y auditoría desacoplada
+
+Se aisló el booleano real de `window.open`: el fallback depende solo de la apertura aceptada y el error de auditoría usa wording neutral. Se añadió el contrato ejecutable Factura→Service con casos popup aceptado, bloqueado y auditoría fallida.
+
 ## 2026-09-15 — WhatsApp — handoff canónico sin API de proveedor
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
