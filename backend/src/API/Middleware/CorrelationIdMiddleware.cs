@@ -1,9 +1,12 @@
+using System.Diagnostics;
+
 namespace InventoryApp.API.Middleware;
 
 public sealed class CorrelationIdMiddleware
 {
     public const string HeaderName = "X-Correlation-ID";
     public const string ItemKey = "CorrelationId";
+    public const string TraceIdItemKey = "TraceId";
 
     private const int MaxCorrelationIdLength = 64;
     private readonly RequestDelegate _next;
@@ -20,14 +23,19 @@ public sealed class CorrelationIdMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = ResolverCorrelationId(context.Request.Headers[HeaderName].FirstOrDefault());
+        var traceId = Activity.Current?.TraceId.ToString();
+        if (string.IsNullOrWhiteSpace(traceId))
+            traceId = correlationId;
 
         context.Items[ItemKey] = correlationId;
+        context.Items[TraceIdItemKey] = traceId;
         context.TraceIdentifier = correlationId;
         context.Response.Headers[HeaderName] = correlationId;
 
         using (_logger.BeginScope(new Dictionary<string, object>
         {
-            [ItemKey] = correlationId
+            [ItemKey] = correlationId,
+            [TraceIdItemKey] = traceId
         }))
         {
             await _next(context);
