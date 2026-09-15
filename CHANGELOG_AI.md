@@ -9,6 +9,12 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — Responsive — paneles globales de select y autocomplete
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Los paneles de Angular Material para selects y autocompletado ahora tienen un ancho mínimo legible y un máximo ligado al viewport, con opciones de altura flexible y texto envolvente. El gate responsive abre un select real por ruta cuando existe y falla si el panel u opciones quedan fuera, estrechos o recortados.
+
 ## 2026-09-15 — Responsive — corrección de campos de detalle en Nueva venta
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

@@ -208,6 +208,29 @@ async function assertNavigationMode(page: Page, mobile: boolean): Promise<void> 
   }
 }
 
+async function auditFirstSelectOverlay(page: Page, route: string): Promise<void> {
+  const select = page.locator('main mat-select').first();
+  if (await select.count() === 0 || !(await select.isVisible())) return;
+  await select.click();
+  const panel = page.locator('.mat-mdc-select-panel').first();
+  await expect(panel, `El select no abrió panel en ${route}`).toBeVisible();
+  const geometry = await panel.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth;
+    const clippedOptions = Array.from(element.querySelectorAll<HTMLElement>('.mat-mdc-option')).filter((option) => {
+      const optionRect = option.getBoundingClientRect();
+      return optionRect.right > viewportWidth + 2 || optionRect.left < -2 || option.scrollWidth > option.clientWidth + 2;
+    }).length;
+    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth, clippedOptions };
+  });
+  expect(geometry.left, `Panel select fuera por la izquierda en ${route}`).toBeGreaterThanOrEqual(-2);
+  expect(geometry.right, `Panel select fuera por la derecha en ${route}`).toBeLessThanOrEqual(geometry.viewportWidth + 2);
+  expect(geometry.width, `Panel select ilegible en ${route}`).toBeGreaterThanOrEqual(Math.min(320, geometry.viewportWidth - 24));
+  expect(geometry.clippedOptions, `Opciones de select recortadas en ${route}`).toBe(0);
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
+}
+
 async function certifyRoute(page: Page, route: string, mobile: boolean, errors: string[]): Promise<void> {
   errors.length = 0;
   await page.goto(route, { waitUntil: 'domcontentloaded' });
@@ -219,7 +242,10 @@ async function certifyRoute(page: Page, route: string, mobile: boolean, errors: 
     await expect(page.locator('#main-content h1').first()).toBeVisible({ timeout: 15_000 });
   }
   await expect.poll(() => bodyOverflow(page), { timeout: 5_000 }).toBeLessThanOrEqual(2);
-  if (route !== '/' && !route.startsWith('/varistorehn') && route !== '/login') await auditGeometry(page, route, mobile);
+  if (route !== '/' && !route.startsWith('/varistorehn') && route !== '/login') {
+    await auditGeometry(page, route, mobile);
+    await auditFirstSelectOverlay(page, route);
+  }
   expect(errors, `Errores de consola en ${route}: ${errors.join(' | ')}`).toEqual([]);
 }
 
