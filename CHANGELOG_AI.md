@@ -1,3 +1,8 @@
+## 2026-09-15 — Cierre visual SMTP — materialización de capturas
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se materializaron como PNG las pantallas reales de Render (servicio Live, Environment con secretos ocultos, arranque y logs del envío) y VariApp (facturación, FAC-000003, historial y evidencia persistente posterior al único envío). Se incorporaron la captura de recepción, el PDF A4 y la captura final del inventario de la carpeta en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`. No hubo cambios de código, nuevas ventas, nuevos correos, cambios de variables, Producción ni WhatsApp. La única reapertura diagnóstica permitida mostró un fallo transitorio y quedó descrita sin fabricar un PASS.
 # CHANGELOG_AI — VariApp
 
 Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Chat B (ChatGPT Business) y futuros agentes autorizados.
@@ -1173,3 +1178,4 @@ Se reescribió el README de cierre con saltos de línea limpios y se verificó q
 ## 2026-09-15 — Transparencia de materialización
 
 El README diferencia capturas observadas inline de archivos realmente almacenados; se mantienen PASS funcionales sin afirmar que existan PNG locales inexistentes.
+
