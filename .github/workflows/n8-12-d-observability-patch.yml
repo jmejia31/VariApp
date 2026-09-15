@@ -89,4 +89,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add backend/src/API/Program.cs backend/src/API/appsettings.json
           git commit -m 'feat(n8.12.d): wire request observability'
+          git pull --rebase origin Desarrollo
           git push origin HEAD:Desarrollo
