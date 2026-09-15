@@ -12,6 +12,12 @@ Se reemplazaron todos los `window.confirm`, `confirm`, `window.prompt` y `prompt
 
 Validación real: barrido `rg` sin diálogos nativos de producción; `npm run lint` y `npm run build:prod` superados. El build backend Release superó 0 advertencias/0 errores; la ejecución local de pruebas .NET quedó impedida por la directiva de Control de aplicaciones del host al cargar `InventoryApp.Tests.dll`, sin resultado PASS inventado.
 
+## 2026-09-15 — N8.1.G — evidencia de UAT delegado y reconciliación pendiente
+
+**Responsable:** ChatGPT/VAEP, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se registró el intento de UAT delegado sobre `c3e2b5fc34d2f51738a33a04d092104ecf2bf1c7`: la sesión CUA disponible quedó en `/login` después del redeploy y no se fabricaron capturas, DOM ni aceptación humana. La evidencia conserva el PASS existente de Inventario, los PASS técnicos previos de los otros grupos, el alcance interno provider-neutral/fail-closed de Integrations y el barrido de diálogos nativos en cero. La reconciliación del Sheet queda explícitamente pendiente por falta de acceso conectado.
+
 ## 2026-09-15 — N8.1.G — validación técnica de los seis grupos restantes
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
