@@ -84,6 +84,14 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
         </div>
       </form>
 
+      <div class="feedback success" *ngIf="success()" role="status" aria-live="polite">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ success() }}</span>
+        <button mat-icon-button type="button" aria-label="Cerrar mensaje" (click)="success.set('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
       <div class="feedback error" *ngIf="error()" role="alert">
         <mat-icon>error_outline</mat-icon>
         <span>{{ error() }}</span>
@@ -177,6 +185,98 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
         </div>
       </ng-container>
     </section>
+
+    <div class="modal-backdrop" *ngIf="dialogAjuste() as ajusteDialog" (click)="cerrarModal()">
+      <section
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="inventory-action-dialog-title"
+        (click)="$event.stopPropagation()">
+        <button
+          class="modal-close"
+          mat-icon-button
+          type="button"
+          aria-label="Cerrar"
+          [disabled]="processingId() !== null"
+          (click)="cerrarModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+
+        <div class="modal-icon" [class.danger]="dialogAction() === 'anular'">
+          <mat-icon>{{ dialogAction() === 'confirmar' ? 'inventory' : 'undo' }}</mat-icon>
+        </div>
+
+        <p class="modal-eyebrow">Inventario empresarial</p>
+        <h2 id="inventory-action-dialog-title">
+          {{ dialogAction() === 'confirmar' ? 'Confirmar ajuste de inventario' : 'Anular ajuste de inventario' }}
+        </h2>
+        <p class="modal-description" *ngIf="dialogAction() === 'confirmar'">
+          Revisa la información antes de continuar. Esta acción aplicará físicamente el inventario y dejará trazabilidad del movimiento.
+        </p>
+        <p class="modal-description" *ngIf="dialogAction() === 'anular'">
+          La anulación revertirá el ajuste confirmado y quedará registrada en la trazabilidad. Debes indicar el motivo.
+        </p>
+
+        <div class="modal-summary">
+          <div><span>Ajuste</span><strong>{{ ajusteDialog.numeroAjuste }}</strong></div>
+          <div><span>Motivo</span><strong>{{ ajusteDialog.motivo }}</strong></div>
+          <div><span>Detalles</span><strong>{{ ajusteDialog.detalles.length }}</strong></div>
+          <div><span>Estado actual</span><strong>{{ ajusteDialog.estado }}</strong></div>
+        </div>
+
+        <div class="modal-notice" *ngIf="dialogAction() === 'confirmar'">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Acción con efecto real</strong>
+            <span>El sistema actualizará las existencias físicas y generará la trazabilidad/Kardex correspondiente.</span>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="modal-field" *ngIf="dialogAction() === 'anular'">
+          <mat-label>Motivo de anulación</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            maxlength="500"
+            name="motivoAnulacionModal"
+            [(ngModel)]="motivoAnulacion"
+            placeholder="Describe claramente por qué se anula este ajuste"></textarea>
+          <mat-hint align="end">{{ motivoAnulacion.length }}/500</mat-hint>
+        </mat-form-field>
+
+        <div class="modal-error" *ngIf="modalError()" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ modalError() }}</span>
+        </div>
+
+        <div class="modal-actions">
+          <button mat-button type="button" [disabled]="processingId() !== null" (click)="cerrarModal()">Cancelar</button>
+          <button
+            *ngIf="dialogAction() === 'confirmar'"
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="processingId() !== null"
+            (click)="ejecutarAccionModal()">
+            <mat-spinner *ngIf="processingId() !== null" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="processingId() === null">check_circle</mat-icon>
+            {{ processingId() !== null ? 'Confirmando…' : 'Confirmar ajuste' }}
+          </button>
+          <button
+            *ngIf="dialogAction() === 'anular'"
+            mat-flat-button
+            color="warn"
+            type="button"
+            [disabled]="processingId() !== null || !motivoAnulacion.trim()"
+            (click)="ejecutarAccionModal()">
+            <mat-spinner *ngIf="processingId() !== null" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="processingId() === null">undo</mat-icon>
+            {{ processingId() !== null ? 'Anulando…' : 'Anular ajuste' }}
+          </button>
+        </div>
+      </section>
+    </div>
   `,
   styles: [`
     :host { display: block; }
@@ -190,6 +290,8 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .filter-actions { display: flex; gap: 8px; min-height: 56px; align-items: center; }
     .feedback, .loading, .empty { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 28px; border-radius: 12px; }
     .feedback.error { justify-content: flex-start; border: 1px solid rgba(244,67,54,.32); background: rgba(244,67,54,.06); }
+    .feedback.success { justify-content: flex-start; margin-bottom: 16px; border: 1px solid rgba(46,125,50,.28); background: rgba(46,125,50,.07); }
+    .feedback.success span { flex: 1; }
     .empty { min-height: 220px; flex-direction: column; text-align: center; border: 1px dashed rgba(127,127,127,.35); }
     .empty h2, .empty p { margin: 0; }
     .empty mat-icon { width: 42px; height: 42px; font-size: 42px; opacity: .5; }
@@ -205,8 +307,72 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .actions-column { width: 310px; }
     .row-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .muted { opacity: .55; font-size: 13px; }
-    @media (max-width: 1050px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-actions { grid-column: span 2; } }
-    @media (max-width: 640px) { .ajustes-page { padding: 16px; } .page-header { flex-direction: column; } .page-actions { width: 100%; justify-content: flex-start; } .filters { grid-template-columns: 1fr; } .filter-actions { grid-column: auto; } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1400;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(15,23,42,.58);
+      backdrop-filter: blur(5px);
+    }
+    .modal-card {
+      position: relative;
+      width: min(620px, 100%);
+      max-height: min(760px, calc(100vh - 48px));
+      overflow: auto;
+      box-sizing: border-box;
+      border: 1px solid rgba(127,127,127,.22);
+      border-radius: 20px;
+      padding: 28px;
+      background: var(--surface-card, #fff);
+      box-shadow: 0 28px 80px rgba(15,23,42,.34);
+    }
+    .modal-close { position: absolute; top: 14px; right: 14px; }
+    .modal-icon {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      background: rgba(25,118,210,.12);
+    }
+    .modal-icon.danger { background: rgba(198,40,40,.1); }
+    .modal-icon mat-icon { width: 30px; height: 30px; font-size: 30px; }
+    .modal-eyebrow { margin: 0 0 5px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .62; }
+    .modal-card h2 { margin: 0; padding-right: 42px; font-size: clamp(22px, 3vw, 28px); }
+    .modal-description { margin: 10px 0 20px; line-height: 1.55; opacity: .76; }
+    .modal-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .modal-summary div { min-width: 0; padding: 13px 14px; border: 1px solid rgba(127,127,127,.2); border-radius: 12px; background: rgba(127,127,127,.035); }
+    .modal-summary span { display: block; margin-bottom: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; opacity: .6; }
+    .modal-summary strong { display: block; overflow: hidden; text-overflow: ellipsis; }
+    .modal-notice { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px; padding: 14px; border-radius: 12px; background: rgba(25,118,210,.07); }
+    .modal-notice div { display: grid; gap: 3px; }
+    .modal-notice span { line-height: 1.45; opacity: .76; }
+    .modal-field { width: 100%; }
+    .modal-error { display: flex; align-items: flex-start; gap: 9px; margin-top: 2px; padding: 12px 14px; border: 1px solid rgba(244,67,54,.28); border-radius: 12px; background: rgba(244,67,54,.06); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    .modal-actions mat-spinner { display: inline-block; margin-right: 7px; }
+
+    @media (max-width: 1050px) {
+      .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .filter-actions { grid-column: span 2; }
+    }
+    @media (max-width: 640px) {
+      .ajustes-page { padding: 16px; }
+      .page-header { flex-direction: column; }
+      .page-actions { width: 100%; justify-content: flex-start; }
+      .filters { grid-template-columns: 1fr; }
+      .filter-actions { grid-column: auto; }
+      .modal-backdrop { padding: 12px; }
+      .modal-card { padding: 22px 18px 18px; border-radius: 16px; }
+      .modal-summary { grid-template-columns: 1fr; }
+      .modal-actions { flex-direction: column-reverse; }
+      .modal-actions button { width: 100%; }
+    }
   `]
 })
 export class AjustesListComponent implements OnInit {
@@ -214,11 +380,15 @@ export class AjustesListComponent implements OnInit {
   readonly totalCount = signal(0);
   readonly loading = signal(false);
   readonly error = signal('');
+  readonly success = signal('');
+  readonly modalError = signal('');
   readonly processingId = signal<number | null>(null);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
   readonly puedeConfirmar = signal(false);
   readonly puedeAnular = signal(false);
+  readonly dialogAction = signal<'confirmar' | 'anular' | null>(null);
+  readonly dialogAjuste = signal<AjusteInventario | null>(null);
 
   search = '';
   estado: '' | EstadoAjusteInventario = '';
@@ -226,6 +396,7 @@ export class AjustesListComponent implements OnInit {
   hasta = '';
   page = 1;
   pageSize = 10;
+  motivoAnulacion = '';
 
   constructor(
     private readonly ajusteService: AjusteInventarioService,
@@ -317,51 +488,91 @@ export class AjustesListComponent implements OnInit {
 
   confirmar(ajuste: AjusteInventario): void {
     if (!this.puedeConfirmar() || ajuste.estado !== 'Borrador' || this.processingId() !== null) return;
-    if (!window.confirm(`¿Confirmar el ajuste ${ajuste.numeroAjuste}? Esta operación aplicará el inventario.`)) return;
+    this.abrirModal('confirmar', ajuste);
+  }
 
+  anular(ajuste: AjusteInventario): void {
+    if (!this.puedeAnular() || ajuste.estado !== 'Confirmado' || this.processingId() !== null) return;
+    this.abrirModal('anular', ajuste);
+  }
+
+  cerrarModal(): void {
+    if (this.processingId() !== null) return;
+    this.resetModal();
+  }
+
+  ejecutarAccionModal(): void {
+    const accion = this.dialogAction();
+    const ajuste = this.dialogAjuste();
+    if (!accion || !ajuste || this.processingId() !== null) return;
+
+    this.modalError.set('');
+    if (accion === 'confirmar') {
+      this.ejecutarConfirmacion(ajuste);
+      return;
+    }
+
+    const motivo = this.motivoAnulacion.trim();
+    if (!motivo) {
+      this.modalError.set('Indica un motivo claro antes de anular el ajuste.');
+      return;
+    }
+    this.ejecutarAnulacion(ajuste, motivo);
+  }
+
+  trackById(_: number, ajuste: AjusteInventario): number {
+    return ajuste.id;
+  }
+
+  private abrirModal(accion: 'confirmar' | 'anular', ajuste: AjusteInventario): void {
+    this.success.set('');
+    this.modalError.set('');
+    this.motivoAnulacion = '';
+    this.dialogAction.set(accion);
+    this.dialogAjuste.set(ajuste);
+  }
+
+  private ejecutarConfirmacion(ajuste: AjusteInventario): void {
     this.processingId.set(ajuste.id);
-    this.error.set('');
     this.ajusteService.confirmar(ajuste.id)
       .pipe(finalize(() => this.processingId.set(null)))
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error.set(this.extraerRespuestaFallida(response, 'No fue posible confirmar el ajuste.'));
+            this.modalError.set(this.extraerRespuestaFallida(response, 'No fue posible confirmar el ajuste.'));
             return;
           }
+          this.resetModal();
+          this.success.set(`El ajuste ${ajuste.numeroAjuste} fue confirmado correctamente y el inventario quedó actualizado.`);
           this.cargar();
         },
-        error: (err) => this.error.set(this.extraerError(err, 'No fue posible confirmar el ajuste.'))
+        error: (err) => this.modalError.set(this.extraerError(err, 'No fue posible confirmar el ajuste.'))
       });
   }
 
-  anular(ajuste: AjusteInventario): void {
-    if (!this.puedeAnular() || ajuste.estado !== 'Confirmado' || this.processingId() !== null) return;
-
-    const motivo = window.prompt(`Motivo obligatorio para anular ${ajuste.numeroAjuste}:`, '')?.trim() ?? '';
-    if (!motivo) {
-      this.error.set('Debes indicar un motivo para anular un ajuste confirmado.');
-      return;
-    }
-
+  private ejecutarAnulacion(ajuste: AjusteInventario, motivo: string): void {
     this.processingId.set(ajuste.id);
-    this.error.set('');
     this.ajusteService.anular(ajuste.id, motivo)
       .pipe(finalize(() => this.processingId.set(null)))
       .subscribe({
         next: (response) => {
           if (!response.success) {
-            this.error.set(this.extraerRespuestaFallida(response, 'No fue posible anular el ajuste.'));
+            this.modalError.set(this.extraerRespuestaFallida(response, 'No fue posible anular el ajuste.'));
             return;
           }
+          this.resetModal();
+          this.success.set(`El ajuste ${ajuste.numeroAjuste} fue anulado correctamente y la reversión quedó registrada.`);
           this.cargar();
         },
-        error: (err) => this.error.set(this.extraerError(err, 'No fue posible anular el ajuste.'))
+        error: (err) => this.modalError.set(this.extraerError(err, 'No fue posible anular el ajuste.'))
       });
   }
 
-  trackById(_: number, ajuste: AjusteInventario): number {
-    return ajuste.id;
+  private resetModal(): void {
+    this.dialogAction.set(null);
+    this.dialogAjuste.set(null);
+    this.modalError.set('');
+    this.motivoAnulacion = '';
   }
 
   private extraerRespuestaFallida(response: { message?: string; errors?: string[] }, fallback: string): string {
