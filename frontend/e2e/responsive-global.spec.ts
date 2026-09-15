@@ -134,6 +134,7 @@ async function auditGeometry(page: Page, route: string, mobile: boolean): Promis
     };
     const outside: Array<Record<string, unknown>> = [];
     const clipped: Array<Record<string, unknown>> = [];
+    const overlaps: Array<Record<string, unknown>> = [];
     const interactive = Array.from(document.querySelectorAll<HTMLElement>(
       'main a, main button, main input, main select, main textarea, main [role="button"], main h1, main h2, .topbar'
     )).filter(visible);
@@ -159,12 +160,29 @@ async function auditGeometry(page: Page, route: string, mobile: boolean): Promis
       const rect = element.getBoundingClientRect();
       return rect.width < 36 || rect.height < 36 ? [{ tag: element.tagName, text: (element.textContent ?? '').trim().slice(0, 60), width: rect.width, height: rect.height }] : [];
     }) : [];
+    const detailFields = Array.from(document.querySelectorAll<HTMLElement>('.detalle-row .mat-mdc-form-field')).filter(visible);
+    if (isMobile) {
+      for (const field of detailFields) {
+        const rect = field.getBoundingClientRect();
+        if (rect.width < 120) overlaps.push({ kind: 'detail-field-too-narrow', label: field.querySelector('mat-label')?.textContent?.trim(), width: rect.width });
+      }
+    }
+    for (let index = 0; index < detailFields.length; index += 1) {
+      const first = detailFields[index].getBoundingClientRect();
+      for (let next = index + 1; next < detailFields.length; next += 1) {
+        const second = detailFields[next].getBoundingClientRect();
+        const width = Math.min(first.right, second.right) - Math.max(first.left, second.left);
+        const height = Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top);
+        if (width > 4 && height > 4) overlaps.push({ kind: 'detail-field-overlap', first: index, second: next, width, height });
+      }
+    }
     const hiddenInteractive = Array.from(document.querySelectorAll<HTMLElement>('main button, main a, main input, main select, main textarea')).filter((element) => element.getAttribute('aria-hidden') === 'true' && visible(element)).map((element) => element.outerHTML.slice(0, 160));
-    return { currentRoute, outside, clipped, tables, badTargets, hiddenInteractive };
+    return { currentRoute, outside, clipped, overlaps, tables, badTargets, hiddenInteractive };
   }, { route, mobile });
 
   expect(result.outside, `Controles/encabezados fuera del viewport en ${route}: ${JSON.stringify(result.outside)}`).toEqual([]);
   expect(result.clipped, `Contenido crítico recortado en ${route}: ${JSON.stringify(result.clipped)}`).toEqual([]);
+  expect(result.overlaps, `Campos estrechos o montados en ${route}: ${JSON.stringify(result.overlaps)}`).toEqual([]);
   expect(result.tables, `Tabla sin shell horizontal en ${route}: ${JSON.stringify(result.tables)}`).toEqual([]);
   expect(result.badTargets, `Acciones táctiles pequeñas en ${route}: ${JSON.stringify(result.badTargets)}`).toEqual([]);
   expect(result.hiddenInteractive, `Controles interactivos ocultos semánticamente en ${route}`).toEqual([]);

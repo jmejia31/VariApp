@@ -9,6 +9,14 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — Responsive — corrección de campos de detalle en Nueva venta
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+La fila de detalle móvil de `Ventas/Nueva venta` tenía una columna automática que comprimía `Cantidad` y dejaba el outline del campo junto a `Precio unitario`. La grilla ahora usa dos columnas fluidas reales para ambos controles, manteniendo producto/variante/acción y evitando colisiones. El gate global añade detección de campos de detalle demasiado estrechos y solapamientos entre outlines.
+
+Validación: build productivo y lint del frontend superados antes del cambio; la verificación remota se repetirá sobre la ruta desplegada sin crear una venta ni enviar correo.
+
 ## 2026-09-15 — Responsive global — foundation y gate automático
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

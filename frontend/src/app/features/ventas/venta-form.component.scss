@@ -31,7 +31,10 @@
 }
 @media (max-width: 640px) {
   .fields-grid { grid-template-columns: 1fr; } .fields-grid .full-width { grid-column: auto; }
-  .detalle-row { grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-areas: "imagen producto eliminar" "imagen variante variante" ". cantidad costo"; }
+  /* Mantén cantidad y precio como dos columnas reales. La columna `auto`
+     permitía que el precio tomara todo el ancho y comprimía cantidad hasta
+     solapar su outline/label con el siguiente control. */
+  .detalle-row { grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "imagen producto eliminar" "imagen variante variante" ". cantidad costo"; }
   .header-row { align-items: flex-start; } .form { padding: 14px; } .totales { max-width: none; } .hint { text-align: left; }
   .form-actions { flex-direction: column-reverse; align-items: stretch; button, a { width: 100%; } }
 }
