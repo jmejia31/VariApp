@@ -47,22 +47,20 @@ public sealed class RequestObservabilityMiddleware
             activity?.SetTag("http.response.status_code", statusCode);
             activity?.SetTag("app.request.slow", isSlow);
 
-            if (!_options.EnableAlertLogs)
+            if (_options.EnableAlertLogs)
             {
-                return;
-            }
-
-            if (statusCode >= errorAlertStatusCode)
-            {
-                _logger.LogError(
-                    "ObservabilityAlert RequestError Method={Method} Endpoint={Endpoint} StatusCode={StatusCode} DurationMs={DurationMs:F1}",
-                    RequestObservability.NormalizeMethod(context.Request.Method), endpoint, statusCode, stopwatch.Elapsed.TotalMilliseconds);
-            }
-            else if (isSlow)
-            {
-                _logger.LogWarning(
-                    "ObservabilityAlert SlowRequest Method={Method} Endpoint={Endpoint} StatusCode={StatusCode} DurationMs={DurationMs:F1} ThresholdMs={ThresholdMs}",
-                    RequestObservability.NormalizeMethod(context.Request.Method), endpoint, statusCode, stopwatch.Elapsed.TotalMilliseconds, thresholdMs);
+                if (statusCode >= errorAlertStatusCode)
+                {
+                    _logger.LogError(
+                        "ObservabilityAlert RequestError Method={Method} Endpoint={Endpoint} StatusCode={StatusCode} DurationMs={DurationMs:F1}",
+                        RequestObservability.NormalizeMethod(context.Request.Method), endpoint, statusCode, stopwatch.Elapsed.TotalMilliseconds);
+                }
+                else if (isSlow)
+                {
+                    _logger.LogWarning(
+                        "ObservabilityAlert SlowRequest Method={Method} Endpoint={Endpoint} StatusCode={StatusCode} DurationMs={DurationMs:F1} ThresholdMs={ThresholdMs}",
+                        RequestObservability.NormalizeMethod(context.Request.Method), endpoint, statusCode, stopwatch.Elapsed.TotalMilliseconds, thresholdMs);
+                }
             }
         }
     }
