@@ -19,15 +19,18 @@ public sealed class FacturacionFiscalController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IUsuarioScopeService _usuarioScope;
+    private readonly IAuditoriaService _auditoria;
     private readonly DocumentoFiscalEmisionService _service;
 
     public FacturacionFiscalController(
         AppDbContext db,
         IUsuarioScopeService usuarioScope,
-        IEnumerable<IProveedorDocumentoFiscal> proveedores)
+        IEnumerable<IProveedorDocumentoFiscal> proveedores,
+        IAuditoriaService auditoria)
     {
         _db = db;
         _usuarioScope = usuarioScope;
+        _auditoria = auditoria;
         _service = new DocumentoFiscalEmisionService(db, proveedores);
     }
 
@@ -129,6 +132,14 @@ public sealed class FacturacionFiscalController : ControllerBase
         try
         {
             var resultado = await _service.EmitirAsync(solicitud, cancellationToken);
+            await RegistrarAuditoriaAsync(
+                request,
+                resultado.RegistroId,
+                resultado.Estado.ToString(),
+                resultado.Idempotente,
+                resultado.ReintentoAceptado,
+                resultado: "Exito");
+
             var body = new DocumentoFiscalEmisionResponse(
                 resultado.RegistroId,
                 resultado.Estado.ToString(),
@@ -146,23 +157,74 @@ public sealed class FacturacionFiscalController : ControllerBase
                 _ => Accepted(body)
             };
         }
-        catch (DocumentoFiscalIdempotenciaException ex)
+        catch (DocumentoFiscalIdempotenciaException)
         {
+            await RegistrarAuditoriaAsync(
+                request,
+                referenciaId: null,
+                estadoFiscal: "RECHAZADO_IDEMPOTENCIA",
+                idempotente: true,
+                reintentoAceptado: false,
+                resultado: "Rechazado",
+                error: "IDEMPOTENCY_KEY_REUTILIZADA");
+
             return Conflict(new
             {
                 error = "IDEMPOTENCY_KEY_REUTILIZADA",
-                mensaje = ex.Message
+                mensaje = "La clave de idempotencia ya existe para una operación fiscal distinta."
             });
         }
         catch (DocumentoFiscalProveedorNoDisponibleException ex)
         {
+            await RegistrarAuditoriaAsync(
+                request,
+                ex.RegistroId,
+                estadoFiscal: "PENDIENTE_PROVEEDOR",
+                idempotente: false,
+                reintentoAceptado: ex.RegistroId.HasValue,
+                resultado: "Error",
+                error: "PROVEEDOR_FISCAL_NO_DISPONIBLE");
+
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new
             {
                 error = "PROVEEDOR_FISCAL_NO_DISPONIBLE",
-                mensaje = ex.Message,
+                mensaje = "El proveedor fiscal no pudo completar la emisión. La operación puede reintentarse de forma segura con la misma clave de idempotencia.",
                 registroId = ex.RegistroId
             });
         }
+    }
+
+    private Task RegistrarAuditoriaAsync(
+        EmitirDocumentoFiscalRequest request,
+        int? referenciaId,
+        string estadoFiscal,
+        bool idempotente,
+        bool reintentoAceptado,
+        string resultado,
+        string? error = null)
+    {
+        // No registrar ClaveIdempotencia, HashSnapshot, payload del proveedor,
+        // referencias externas ni mensajes crudos: son material sensible o correlable.
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Crear,
+            "Emisión fiscal procesada mediante frontera tenant-aware.",
+            referenciaId,
+            "DocumentoFiscalEmision",
+            valoresNuevos: new
+            {
+                request.EmpresaId,
+                request.SucursalId,
+                request.FacturaId,
+                request.Jurisdiccion,
+                request.Proveedor,
+                request.TipoDocumento,
+                Estado = estadoFiscal,
+                Idempotente = idempotente,
+                ReintentoAceptado = reintentoAceptado
+            },
+            resultado: resultado,
+            error: error);
     }
 
     private static string NormalizarIdentidadFiscal(string value) =>
