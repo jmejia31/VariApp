@@ -1169,3 +1169,7 @@ Se eliminó el salto final innecesario del README; `git diff --check` queda limp
 ## 2026-09-15 — Corrección final del README de evidencia
 
 Se reescribió el README de cierre con saltos de línea limpios y se verificó que la matriz mantenga resultados y limitaciones sin capturas sintéticas.
+
+## 2026-09-15 — Transparencia de materialización
+
+El README diferencia capturas observadas inline de archivos realmente almacenados; se mantienen PASS funcionales sin afirmar que existan PNG locales inexistentes.
