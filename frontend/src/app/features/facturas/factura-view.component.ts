@@ -72,6 +72,7 @@ export class FacturaViewComponent implements OnInit {
   readonly mostrarPanelWhatsApp = signal(false);
   readonly preparandoWhatsApp = signal(false);
   readonly enlaceCompartir = signal<EnlaceCompartir | null>(null);
+  readonly enlaceWhatsAppFallback = signal('');
   telefonoEditable = '';
   mensajeEditable = '';
 
@@ -211,6 +212,7 @@ export class FacturaViewComponent implements OnInit {
 
     if (this.mostrarPanelWhatsApp()) {
       this.mostrarPanelWhatsApp.set(false);
+      this.enlaceWhatsAppFallback.set('');
       return;
     }
 
@@ -230,6 +232,7 @@ export class FacturaViewComponent implements OnInit {
         this.enlaceCompartir.set(res.data);
         this.telefonoEditable = res.data.telefonoSugerido;
         this.mensajeEditable = res.data.mensajeWhatsApp;
+        this.enlaceWhatsAppFallback.set('');
         this.mostrarPanelWhatsApp.set(true);
         this.snackBar.open('Enlace temporal A4 creado. Los enlaces anteriores fueron revocados.', 'Cerrar', { duration: 4500 });
       },
@@ -288,9 +291,11 @@ export class FacturaViewComponent implements OnInit {
       .subscribe();
 
     if (!this.whatsappShare.abrir(numero, this.mensajeEditable)) {
+      this.enlaceWhatsAppFallback.set(url);
       this.snackBar.open('No se pudo abrir WhatsApp automáticamente. Usa el enlace generado desde el navegador.', 'Cerrar', { duration: 5000 });
       return;
     }
+    this.enlaceWhatsAppFallback.set('');
     this.mostrarPanelWhatsApp.set(false);
   }
 

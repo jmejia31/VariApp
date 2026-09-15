@@ -15,6 +15,10 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 Se registró el receipt de cierre de los bloqueos externos sustituidos por evidencia SMTP existente y el modo WhatsApp `USER_INITIATED_HANDOFF`. La validación visual CUA queda pendiente por ausencia de sesión; no se fabricó evidencia. No se modificó `N8.7.A`, su lease ni las automatizaciones.
 
+## 2026-09-15 — WhatsApp — fallback visible ante popup bloqueado
+
+El flujo de factura conserva el enlace `wa.me` seguro y lo muestra como fallback cuando el navegador bloquea la apertura automática.
+
 ## 2026-09-15 — WhatsApp — handoff canónico sin API de proveedor
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

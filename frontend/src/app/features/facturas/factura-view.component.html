@@ -223,6 +223,9 @@
       WhatsApp prepara el mensaje y el enlace seguro al PDF oficial A4; el usuario debe pulsar Enviar en WhatsApp.
       El enlace vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}. Generar otro enlace revoca automáticamente el anterior.
     </p>
+    @if (enlaceWhatsAppFallback()) {
+      <p class="hint hint-warning" role="status">El navegador bloqueó la apertura automática. <a [href]="enlaceWhatsAppFallback()" target="_blank" rel="noopener noreferrer">Abrir el enlace seguro de WhatsApp</a>.</p>
+    }
     <div class="panel-actions">
       <button mat-flat-button color="primary" [disabled]="!telefonoValido() || !mensajeEditable.trim()" (click)="abrirWhatsApp()">
         <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
