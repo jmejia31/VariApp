@@ -29,8 +29,10 @@ public class CreateProductoDto
 
     // Compatibilidad de entrada para clientes anteriores. Estos campos NO son fuente de verdad:
     // el controlador los traduce a ProductoVariante y Producto no los usa operativamente.
-    public string Marca { get; set; } = string.Empty;
-    public string Modelo { get; set; } = string.Empty;
+    // Deben permanecer opcionales: una variante comercial solo exige al menos una dimension
+    // entre Marca/Modelo/Color/Talla, y Modelo no es obligatorio cuando ya existe otra dimension.
+    public string? Marca { get; set; }
+    public string? Modelo { get; set; }
 
     public string? Descripcion { get; set; }
     public TipoInventario TipoInventario { get; set; } = TipoInventario.MercaderiaVenta;
