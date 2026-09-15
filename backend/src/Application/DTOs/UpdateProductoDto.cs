@@ -6,8 +6,13 @@ namespace InventoryApp.Application.DTOs;
 public class UpdateProductoDto
 {
     public string Nombre { get; set; } = string.Empty;
-    public string Marca { get; set; } = string.Empty;
-    public string Modelo { get; set; } = string.Empty;
+
+    // Campos heredados de compatibilidad. No son obligatorios en el modelo por variantes.
+    // Mantenerlos nullable evita que ApiController los convierta en validaciones Required
+    // cuando el usuario no selecciona Marca o Modelo en una variante valida.
+    public string? Marca { get; set; }
+    public string? Modelo { get; set; }
+
     public string? Descripcion { get; set; }
     // Nullable para que clientes antiguos que no envían el campo conserven
     // la clasificación actual del producto.
