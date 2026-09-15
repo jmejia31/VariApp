@@ -52,6 +52,14 @@ NO_REJECT_QUEUE=TRUE
 RECOVERY_MUST_RESOLVE_SAME_RUN=TRUE
 RECOVERY_UNBLOCK_DEPENDENTS_SAME_RUN=TRUE
 PARENT_CLOSE_FIRST=TRUE
+OWNER_INTERVENTION_GATE_ACTIVE=TRUE
+OWNER_INTERVENTION_AUTOMATIONS_PAUSED=TRUE
+OWNER_PAUSE_OVERRIDES_CANONICAL_LIVENESS=TRUE
+OWNER_INTERVENTION_ENTRY_AFTER=N8.6.F
+OWNER_INTERVENTION_ALLOWED_PARENTS=N8.15,N8.16,N8.17,N8.18,N8.19,N8.20,N8.21,N8.22,N8.23,N8.24
+OWNER_INTERVENTION_EXIT=N8.24.H
+OWNER_INTERVENTION_RESUME_FROM=N8.6.G
+OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE
 END_AUTOMATION_POLICY
 ```
 
@@ -165,3 +173,20 @@ Regla: `DEFECT_RECOVERY_FIRST + FIRST_DETECTOR_OWNS_RECOVERY + NO_REJECT_QUEUE`.
 La antigua infraestructura J1–J6/Jules está retirada del runtime de VariApp. Sus commits, receipts, Issues y demás evidencia histórica permanecen únicamente como historial inmutable. Ningún artefacto histórico puede reactivar workers externos, crear manifests, asignar lanes, consumir credenciales o convertirse en requisito de progreso, cierre o certificación.
 
 El runtime vigente y completo es exclusivamente las diez automatizaciones canónicas definidas por este MAESTRO.
+
+## 9. Intervención prioritaria del propietario N8.15–N8.24
+
+Existe un gate deliberado temporal ordenado por el propietario para resolver arquitectura, matrices y preparación pre-go-live antes de reanudar el flujo histórico desde `N8.6.G`.
+
+Reglas durante `OWNER_INTERVENTION_GATE_ACTIVE=TRUE`:
+
+1. La frontera de entrada es `N8.6.F`.
+2. Sólo son elegibles materialmente `N8.15` a `N8.24` y sus microtareas dependency-valid.
+3. `UNRELATED_WORKFLOW_BLOCKING_PROHIBITED` no puede usarse para escapar de esta intervención: esto no es un blocker, es un filtro deliberado de admisión.
+4. `OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE` prevalece sobre selección de trabajo independiente fuera del conjunto permitido.
+5. Mientras `OWNER_INTERVENTION_AUTOMATIONS_PAUSED=TRUE`, ninguna automatización canónica debe auto-reactivarse; esta pausa explícita del propietario prevalece sobre cualquier regla de liveness/scheduler recovery.
+6. Reactivación futura requiere instrucción explícita del propietario. Al reactivarse, las diez canónicas conservan títulos/prompts/schedules y trabajan únicamente la cadena de intervención hasta `N8.24.H`.
+7. Al cerrar `N8.24.H` con evidencia material, se debe realizar readback global, poner `OWNER_INTERVENTION_GATE_ACTIVE=FALSE`, `OWNER_INTERVENTION_AUTOMATIONS_PAUSED=FALSE` sólo si el propietario ya autorizó la reanudación, y determinar la reentrada real desde `N8.6.G` según la auditoría forense; no se repite trabajo confirmado ni se protegen cierres inválidos.
+8. `GATE-N8` debe incluir la intervención como prerequisito formal.
+
+Especificación ejecutable del paréntesis: `docs/matrices-evaluacion/00_GOBERNANZA/ESPECIFICACION_EJECUCION_N8_15_N8_24.md`.
