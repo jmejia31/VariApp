@@ -53,7 +53,7 @@ RECOVERY_MUST_RESOLVE_SAME_RUN=TRUE
 RECOVERY_UNBLOCK_DEPENDENTS_SAME_RUN=TRUE
 PARENT_CLOSE_FIRST=TRUE
 OWNER_INTERVENTION_GATE_ACTIVE=TRUE
-OWNER_INTERVENTION_AUTOMATIONS_PAUSED=TRUE
+OWNER_INTERVENTION_AUTOMATIONS_PAUSED=FALSE
 OWNER_PAUSE_OVERRIDES_CANONICAL_LIVENESS=TRUE
 OWNER_INTERVENTION_QUEUE_ANCHOR_ROW=640
 OWNER_INTERVENTION_FIRST_ROW=641
@@ -62,6 +62,12 @@ OWNER_INTERVENTION_ALLOWED_PARENTS=N8.15,N8.16,N8.17,N8.18,N8.19,N8.20,N8.21,N8.
 OWNER_INTERVENTION_EXIT=N8.24.H
 OWNER_INTERVENTION_RESUME_FROM=N8.3.B
 OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE
+POST_INTERVENTION_REVALIDATION_REQUIRED=TRUE
+POST_INTERVENTION_REVALIDATION_START_ROW=721
+POST_INTERVENTION_REVALIDATE_EXISTING_LISTO=TRUE
+POST_INTERVENTION_REVALIDATION_BASIS=N8.15,N8.16,N8.17,N8.18
+POST_INTERVENTION_REOPEN_ON_GAP=TRUE
+POST_INTERVENTION_HISTORICAL_STATUS_PRESERVED=TRUE
 END_AUTOMATION_POLICY
 ```
 
@@ -187,10 +193,12 @@ Reglas durante `OWNER_INTERVENTION_GATE_ACTIVE=TRUE`:
 3. Sólo son elegibles materialmente `N8.15` a `N8.24` y sus microtareas dependency-valid.
 4. `UNRELATED_WORKFLOW_BLOCKING_PROHIBITED` no puede usarse para escapar de esta intervención: esto no es un blocker, es un filtro deliberado de admisión.
 5. `OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE` prevalece sobre selección de trabajo independiente fuera del conjunto permitido.
-6. Mientras `OWNER_INTERVENTION_AUTOMATIONS_PAUSED=TRUE`, ninguna automatización canónica debe auto-reactivarse; esta pausa explícita del propietario prevalece sobre cualquier regla de liveness/scheduler recovery.
-7. Reactivación futura requiere instrucción explícita del propietario. Al reactivarse, las diez canónicas conservan títulos/prompts/schedules y trabajan únicamente la cadena de intervención hasta `N8.24.H`.
-8. Al cerrar `N8.24.H` con evidencia material, se realiza readback global y se reanuda el plan histórico exactamente desde `N8.3.B`, salvo que una auditoría causal demuestre un sucesor distinto. No se repite trabajo confirmado ni se protegen cierres inválidos.
-9. La auditoría forense `N8.19` conserva su scope especial desde `N8.6.G` en adelante; ese scope forense no cambia el ancla física ni el orden de reentrada del plan.
-10. `GATE-N8` debe incluir la intervención como prerequisito formal.
+6. La pausa temporal fue levantada explícitamente por el propietario. Las diez automatizaciones canónicas quedan autorizadas a reanudarse conservando exactamente títulos, prompts, horarios, timezone y política de notificaciones.
+7. Mientras la intervención esté abierta, las diez canónicas trabajan exclusivamente la cadena `N8.15.A -> ... -> N8.24.H`; ningún `LISTO` histórico posterior autoriza bypass.
+8. Al cerrar `N8.24.H` con evidencia material, se realiza readback global y se reanuda el plan histórico desde la fila 721 (`N8.3.B`), salvo evidencia causal posterior que exija un sucesor más temprano. La reentrada NO confía automáticamente en estados `LISTO` históricos.
+9. Desde la fila 721 en adelante, toda tarea histórica —incluidas las que ya muestran `LISTO`— debe revalidarse contra la arquitectura, catálogo/matrices, contratos, RBAC, backend authority, seguridad, datos, pruebas y criterios resultantes de `N8.15–N8.18`. El estado histórico se preserva como historia, pero no equivale por sí solo a certificación vigente.
+10. Si una tarea histórica sigue cumpliendo completamente, registrar `REVALIDATED_CURRENT_STANDARD` con evidencia causal sin rehacer trabajo inútil. Si existe gap material, reabrirla y resolverlo antes de promover. Si existe bloqueo externo real, preservarlo sólo en su scope y continuar únicamente trabajo independiente permitido por dependencias; nunca falsear `PASS`.
+11. La auditoría forense `N8.19` conserva su scope especial desde `N8.6.G` en adelante y sirve además como control de cierres rápidos, N/A, timestamps y receipts; no reemplaza la revalidación post-matriz de la fila 721+.
+12. `GATE-N8` debe incluir la intervención y la revalidación vigente de sus prerequisitos como condición formal de cierre.
 
 Especificación ejecutable del paréntesis: `docs/matrices-evaluacion/00_GOBERNANZA/ESPECIFICACION_EJECUCION_N8_15_N8_24.md`.
