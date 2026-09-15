@@ -62,4 +62,20 @@ public class RequestObservabilityTests
         Assert.Equal(1, snapshot.ErrorCount);
         Assert.Equal(0, snapshot.SlowRequestCount);
     }
+
+    [Fact]
+    public async Task CorrelationMiddleware_ProvidesBoundedCorrelationAndTraceContext()
+    {
+        var middleware = new CorrelationIdMiddleware(
+            _ => Task.CompletedTask,
+            NullLogger<CorrelationIdMiddleware>.Instance);
+        var context = new DefaultHttpContext();
+        context.Request.Headers[CorrelationIdMiddleware.HeaderName] = "trace-safe-123";
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal("trace-safe-123", context.Items[CorrelationIdMiddleware.ItemKey]);
+        Assert.Equal("trace-safe-123", context.Items[CorrelationIdMiddleware.TraceIdItemKey]);
+        Assert.Equal("trace-safe-123", context.Response.Headers[CorrelationIdMiddleware.HeaderName].ToString());
+    }
 }
