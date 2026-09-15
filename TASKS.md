@@ -596,3 +596,16 @@ Este bloque es aditivo e histórico. El estado operativo vigente se determina ú
 - [x] Paquete canónico H materializado en `docs/CERTIFICACION_N8_2_DISPOSITIVOS.md` y reconciliación history-preserving de TASKS/CHANGELOG ejecutada.
 
 N8.2.H sólo pasa a `LISTO_REAL` mediante su receipt final después de REVIEW_FIRST documental; este rollup no sustituye el receipt ni el control-plane fresco.
+
+## ERP-N8.3 — Compatibilidad de navegadores — ROLLUP DOCUMENTAL 2026-09-15
+
+Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N8.3.A-G cerraron `LISTO_REAL` con receipts/evidencia VAEP y P0/P1/P2 atribuibles conocidos=0.
+- [x] Functional candidate `b833e44a976f92a426fff7f969a3f3f757234f20` incorpora el gate causal de compatibilidad en Chromium, Firefox y WebKit.
+- [x] Workflow `N8.3 - Compatibilidad de navegadores`, run `34943377733`, job `104296994230`, terminó `success`; npm ci, lint, build producción, instalación de navegadores, arranque Angular, regresión cross-browser y publicación de evidencia quedaron PASS.
+- [x] N8.3.F certificó seguridad/observabilidad sin delta de runtime de auth/RBAC/auditoría, sin secretos y con permisos `contents: read`.
+- [x] N8.3.G certificó QA/regresión/CI con equivalencia funcional demostrada y sin P0/P1/P2 abiertos.
+- [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
+
+N8.3.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.

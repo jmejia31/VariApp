@@ -1116,3 +1116,13 @@ Se cerró la cobertura causal de N8.2 para escritorio, laptop, tablet, Android e
 N8.2.E, N8.2.F y N8.2.G quedaron `LISTO_REAL` mediante receipts VAEP con REVIEW_FIRST P0=0/P1=0/P2=0. No hubo delta de runtime backend, persistencia, migraciones, RBAC, límites tenant, deploy, Producción, secretos ni PR #2. La certificación canónica se materializó en `docs/CERTIFICACION_N8_2_DISPOSITIVOS.md`.
 
 Este registro es histórico y no falsea H: N8.2.H sólo es `LISTO_REAL` cuando exista su receipt final tras REVIEW_FIRST documental y readback/reconciliación de control-plane.
+
+## 2026-09-15 — ERP-N8.3 Compatibilidad de navegadores — reconciliación documental H
+
+**Responsable:** Tarea Supervisión :48 bajo `docs/VAEP_AUTHORITY.md`.
+
+Se cerró la cobertura causal de compatibilidad del storefront en Chromium, Firefox y WebKit sobre el functional candidate `b833e44a976f92a426fff7f969a3f3f757234f20`. El workflow `N8.3 - Compatibilidad de navegadores`, run `34943377733`, job `104296994230`, terminó `success`; lint, build de producción y Playwright dirigido quedaron PASS en los tres motores.
+
+N8.3.F y N8.3.G quedaron `LISTO_REAL` con REVIEW_FIRST P0=0/P1=0/P2=0. El workflow usa permisos `contents: read`, no consume secretos y sirve Angular únicamente en `127.0.0.1`. N8.3 no introduce delta backend, persistencia, migraciones, autenticación, RBAC, Producción ni deploy. La certificación canónica se materializó en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
+
+Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
