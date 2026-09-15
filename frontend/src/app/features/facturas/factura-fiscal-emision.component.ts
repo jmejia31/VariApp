@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -40,7 +40,7 @@ type AmbitoSucursal = 'empresa' | 'sucursal';
     MatSelectModule
   ],
   template: `
-    @if (puedeEmitir) {
+    @if (puedeEmitir()) {
       <section class="fiscal-card no-print" aria-labelledby="fiscal-title">
         <div class="fiscal-heading">
           <div>
@@ -221,7 +221,7 @@ export class FacturaFiscalEmisionComponent {
   readonly emitiendo = signal(false);
   readonly resultado = signal<DocumentoFiscalEmisionResponse | null>(null);
   readonly error = signal('');
-  readonly puedeEmitir = this.permisosRuntime.puede('Facturacion', 'Crear');
+  readonly puedeEmitir = computed(() => this.permisosRuntime.puede('Facturacion', 'Crear'));
   readonly empresaIdVerificada = this.tenantContext.empresaIdVerificada;
 
   jurisdiccion = '';
@@ -232,7 +232,7 @@ export class FacturaFiscalEmisionComponent {
   private claveIdempotencia = '';
 
   abrirFormulario(): void {
-    if (!this.puedeEmitir || this.factura.estado === 'Anulada') return;
+    if (!this.puedeEmitir() || this.factura.estado === 'Anulada') return;
     this.mostrarFormulario.set(true);
     this.error.set('');
   }
@@ -257,7 +257,7 @@ export class FacturaFiscalEmisionComponent {
     const sucursalValida = this.ambitoSucursal === 'empresa' ||
       (Number.isInteger(Number(this.sucursalId)) && Number(this.sucursalId) > 0);
 
-    return !!empresaId && empresaId > 0 && codigosValidos && sucursalValida && !this.emitiendo();
+    return this.puedeEmitir() && !!empresaId && empresaId > 0 && codigosValidos && sucursalValida && !this.emitiendo();
   }
 
   async emitir(): Promise<void> {
