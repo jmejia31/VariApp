@@ -609,3 +609,15 @@ Este bloque es aditivo e histórico. El estado operativo vigente se determina ú
 - [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
 
 N8.3.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.
+
+## ERP-N8.4 — POS físico — ROLLUP DOCUMENTAL 2026-09-15
+
+Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N8.4.A-F cerraron `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N8.4.G cerró `LISTO_REAL` mediante `vaep/evidence/receipts/OWNER_RECONCILIATION_N8.1.G_N8.1.H_N8.4.G_20260915T193239Z.json` después de aceptación explícita del propietario para el checkpoint físico de POS.
+- [x] La evidencia histórica de bloqueo físico se conserva; no se falsificó ni sustituyó por evidencia sintética de impresora.
+- [x] `docs/N8_4_POS_PHYSICAL_CAPABILITY_CONTRACT.md` mantiene el contrato de capacidades físicas y fail-closed cuando el hardware no está disponible.
+- [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_4_POS_FISICO.md`.
+
+N8.4.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.

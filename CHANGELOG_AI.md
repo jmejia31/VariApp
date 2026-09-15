@@ -1230,3 +1230,13 @@ ventas y cotizaciones son de solo lectura y la prueba de aplicación cubre una m
 de L. 1 frente a un catálogo de L. 200. La regla canónica quedó en
 `docs/REGLA_INTEGRIDAD_PRECIOS_VENTAS.md`.
 
+
+## 2026-09-15 — ERP-N8.4 POS físico — reconciliación documental H
+
+**Responsable:** Tarea Supervisión :24 bajo `docs/VAEP_AUTHORITY.md`.
+
+Se certificó la cadena N8.4.A-F con sus receipts canónicos y se reconcilió N8.4.G mediante la aceptación explícita del propietario registrada en `vaep/evidence/receipts/OWNER_RECONCILIATION_N8.1.G_N8.1.H_N8.4.G_20260915T193239Z.json`. La aceptación confirma que la validación de impresora fue revisada/corroborada y aprobada, con P0=0/P1=0 y sin generar evidencia sintética ni afirmar observación física adicional por el controller.
+
+El historial previo de bloqueo físico permanece intacto. El contrato canónico se conserva en `docs/N8_4_POS_PHYSICAL_CAPABILITY_CONTRACT.md` y la certificación final de alcance se materializó en `docs/CERTIFICACION_N8_4_POS_FISICO.md`. N8.4.H no introduce delta de runtime, esquema, datos, secretos, Producción ni deploy.
+
+Este registro es histórico y no falsea H: N8.4.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
