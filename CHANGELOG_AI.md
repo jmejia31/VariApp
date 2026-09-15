@@ -1084,3 +1084,15 @@ Admission transition is guarded; no production, merge or secret changes.
 **Evidencia funcional:** N7.9.A-G=`LISTO_REAL`; functional candidate final `5de96492290218639f18c1648668215339c34a1e`; receipt G `vaep/evidence/receipts/N7.9.G_LISTO_REAL_20260914T230920Z_SUP00.json`; REVIEW_FIRST G P0=0/P1=0/P2=0. El workflow causal `34905794077` terminó con backend Release/pruebas, Docker, frontend producción, higiene y MySQL/migraciones en `SUCCESS`; backend registró 2245 passed, 0 failed, 0 skipped. Los commits posteriores al candidate hasta el receipt G son exclusivamente evidencia y no introducen delta funcional de producto/schema.
 
 **Control:** esta publicación resuelve los P1 documentales mediante append byte-exacto. No declara por sí sola `N7.9.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover `N7.10.A`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+
+## 2026-09-14 — ERP-N7.10 Facturación fiscal/electrónica — reconciliación documental append-only
+
+**Responsable:** VAEP / DOC_CERT N7.10.H.
+
+**Objetivo/alcance:** cerrar documentalmente N7.10 sin reabrir lógica ya certificada ni ampliar alcance. Esta entrada y el rollup de `TASKS.md` preservan byte-for-byte sus históricos previos.
+
+**Evidencia funcional:** N7.10.A-G=`LISTO_REAL`; functional candidate final `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt F `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`; receipt G `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; REVIEW_FIRST F/G P0=0/P1=0/P2=0. El workflow causal `34916355954` terminó con backend Release/pruebas, Docker, frontend producción, higiene y MySQL/migraciones/integración en `SUCCESS`; backend registró 2263 passed, 0 failed, 0 skipped. El gate suplementario `34916355934` terminó `SUCCESS` para restore aislado y seguridad/tenant/secrets. Los commits posteriores al candidate hasta el receipt G son exclusivamente evidencia.
+
+**Seguridad y operación:** la emisión fiscal permanece autenticada, permission-gated, tenant-aware, idempotente y fail-closed ante configuración/proveedor inválido. La auditoría evita claves de idempotencia, hash de snapshot, payloads del proveedor, referencias externas y excepciones crudas. No se introdujo webhook fiscal ni se certifica una superficie inexistente.
+
+**Control:** esta publicación resuelve los rollups documentales mediante append byte-exacto. No declara por sí sola `N7.10.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover `GATE-N7`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.

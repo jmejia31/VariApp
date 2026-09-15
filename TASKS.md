@@ -569,3 +569,16 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [ ] N7.9.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `5de96492290218639f18c1648668215339c34a1e` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.9.H. NEXT_PARENT_PREARMED=N7.10.A. No se promueve N7.10.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+## ERP-N7.10 — Facturación fiscal/electrónica — ROLLUP DOCUMENTAL 2026-09-14
+
+Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N7.10.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+- [x] N7.10.F — seguridad/RBAC/auditoría/observabilidad certificada mediante `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`.
+- [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend, Docker, frontend, higiene y MySQL/migraciones/integración en `SUCCESS`.
+- [x] N7.10.H — certificación canónica `docs/CERTIFICACION_N7_10_FACTURACION_FISCAL_ELECTRONICA.md` preparada para cierre documental.
+- [x] Este rollup reconcilia `TASKS.md` y `CHANGELOG_AI.md` mediante append byte-exacto sin reescribir historia previa.
+- [ ] N7.10.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b` y receipt H persistido/releído.
+
+**CURRENT_PARENT=N7.10.H. NEXT_PARENT_PREARMED=GATE-N7. No se promueve GATE-N7 antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
