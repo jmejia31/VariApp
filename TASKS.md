@@ -621,3 +621,16 @@ Este bloque es aditivo e histórico. El estado operativo vigente se determina ú
 - [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_4_POS_FISICO.md`.
 
 N8.4.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.
+
+## ERP-N8.11 — Seguridad — ROLLUP DOCUMENTAL 2026-09-15
+
+Este bloque es aditivo e histórico. El estado operativo vigente se determina únicamente por CONFIG/COLA y receipts VAEP bajo `docs/VAEP_AUTHORITY.md`.
+
+- [x] N8.11.A-C cerraron `LISTO_REAL`; B (DOMAIN) y C (DB_MIG) quedaron materialmente N/A donde no existía delta causal que justificara inventar dominio o migración.
+- [x] N8.11.D cerró `LISTO_REAL` con contratos de regresión de seguridad del backend para autenticación, límites de uploads, rate limiting de superficie pública y anonimato acotado del webhook.
+- [x] N8.11.E cerró `LISTO_REAL` sin delta UI material requerido por el punto.
+- [x] N8.11.F cerró `LISTO_REAL` con P0=0/P1=0/P2=0 y gates terminales PASS para hardening de configuración, auditoría npm high/critical y auditoría de vulnerabilidades .NET.
+- [x] N8.11.G cerró `LISTO_REAL` con backend non-integration, frontend unit, frontend lint/build y security audit causales en PASS sobre `91a7051bdb75c858af08d0e28368d827c4c0f6b8`.
+- [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_11_SEGURIDAD.md`.
+
+N8.11.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.

@@ -1288,3 +1288,13 @@ proveedor clasificado, sufijo de host, TLS y capacidad de restore lógico. El
 workflow no imprime ni publica usuario, contraseña, host completo ni nombre de
 base; el metadata externo del artefacto también redacciona ese nombre. Esta mejora
 prepara una ejecución real de backup cifrado y restore aislado sobre Desarrollo.
+
+## 2026-09-15 — ERP-N8.11 Seguridad — reconciliación documental H
+
+**Responsable:** Tarea Supervisión :48 bajo `docs/VAEP_AUTHORITY.md`.
+
+Se certificó la cadena N8.11.A-G. El delta material de backend quedó cubierto por contratos de seguridad dirigidos; la auditoría SEC_AUDIT cerró con P0=0/P1=0/P2=0 y gates de hardening, npm high/critical y vulnerabilidades .NET en PASS. TEST_CI confirmó backend, frontend y security gates causales sobre el functional candidate `91a7051bdb75c858af08d0e28368d827c4c0f6b8`.
+
+La certificación final se materializó en `docs/CERTIFICACION_N8_11_SEGURIDAD.md`. N8.11.H es documental y no introduce delta de runtime, esquema, datos, secretos, Producción ni deploy. Fallos/cancelaciones de workflows no causales no se utilizaron para fabricar PASS.
+
+Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
