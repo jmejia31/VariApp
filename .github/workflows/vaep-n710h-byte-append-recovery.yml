@@ -1,0 +1,102 @@
+name: VAEP N7.10.H byte append recovery
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n710h-byte-append-recovery.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n710h-byte-append-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Recover N7.10.H append-only docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Verify exact blobs and append bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object TASKS.md)" = "6c69a3f6d4c64e73ccb3333fdce4930a25bd31b6"
+          test "$(git hash-object CHANGELOG_AI.md)" = "ebb2e8c73b407ffc96fd7013b18f1e19c31ca1e8"
+          cp TASKS.md /tmp/TASKS.before
+          cp CHANGELOG_AI.md /tmp/CHANGELOG.before
+          tasks_last="$(tail -c 1 /tmp/TASKS.before | od -An -t x1 | tr -d ' \n')"
+          changelog_last="$(tail -c 1 /tmp/CHANGELOG.before | od -An -t x1 | tr -d ' \n')"
+
+          cat >> TASKS.md <<'TASKS_EOF'
+
+          ## ERP-N7.10 — Facturación fiscal/electrónica — ROLLUP DOCUMENTAL 2026-09-14
+
+          Este bloque es estrictamente aditivo/history-preserving y supersede únicamente snapshots operativos stale; la autoridad viva continúa en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
+
+          - [x] N7.10.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
+          - [x] N7.10.F — seguridad/RBAC/auditoría/observabilidad certificada mediante `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`.
+          - [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend, Docker, frontend, higiene y MySQL/migraciones/integración en `SUCCESS`.
+          - [x] N7.10.H — certificación canónica `docs/CERTIFICACION_N7_10_FACTURACION_FISCAL_ELECTRONICA.md` preparada para cierre documental.
+          - [x] Este rollup reconcilia `TASKS.md` y `CHANGELOG_AI.md` mediante append byte-exacto sin reescribir historia previa.
+          - [ ] N7.10.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b` y receipt H persistido/releído.
+
+          **CURRENT_PARENT=N7.10.H. NEXT_PARENT_PREARMED=GATE-N7. No se promueve GATE-N7 antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+          TASKS_EOF
+
+          cat >> CHANGELOG_AI.md <<'CHANGELOG_EOF'
+
+          ## 2026-09-14 — ERP-N7.10 Facturación fiscal/electrónica — reconciliación documental append-only
+
+          **Responsable:** VAEP / DOC_CERT N7.10.H.
+
+          **Objetivo/alcance:** cerrar documentalmente N7.10 sin reabrir lógica ya certificada ni ampliar alcance. Esta entrada y el rollup de `TASKS.md` preservan byte-for-byte sus históricos previos.
+
+          **Evidencia funcional:** N7.10.A-G=`LISTO_REAL`; functional candidate final `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt F `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`; receipt G `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; REVIEW_FIRST F/G P0=0/P1=0/P2=0. El workflow causal `34916355954` terminó con backend Release/pruebas, Docker, frontend producción, higiene y MySQL/migraciones/integración en `SUCCESS`; backend registró 2263 passed, 0 failed, 0 skipped. El gate suplementario `34916355934` terminó `SUCCESS` para restore aislado y seguridad/tenant/secrets. Los commits posteriores al candidate hasta el receipt G son exclusivamente evidencia.
+
+          **Seguridad y operación:** la emisión fiscal permanece autenticada, permission-gated, tenant-aware, idempotente y fail-closed ante configuración/proveedor inválido. La auditoría evita claves de idempotencia, hash de snapshot, payloads del proveedor, referencias externas y excepciones crudas. No se introdujo webhook fiscal ni se certifica una superficie inexistente.
+
+          **Control:** esta publicación resuelve los rollups documentales mediante append byte-exacto. No declara por sí sola `N7.10.H=LISTO_REAL`: exige hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional y receipt H persistido/releído antes de promover `GATE-N7`. Sin cambios a `main`, Producción, deploys, secretos ni PR #2.
+          CHANGELOG_EOF
+
+          tasks_before_size="$(wc -c < /tmp/TASKS.before)"
+          changelog_before_size="$(wc -c < /tmp/CHANGELOG.before)"
+          cmp -n "$tasks_before_size" /tmp/TASKS.before TASKS.md
+          cmp -n "$changelog_before_size" /tmp/CHANGELOG.before CHANGELOG_AI.md
+          test "$(wc -c < TASKS.md)" -gt "$tasks_before_size"
+          test "$(wc -c < CHANGELOG_AI.md)" -gt "$changelog_before_size"
+
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md' || test "$changed" = $'TASKS.md\nCHANGELOG_AI.md'
+          for f in TASKS.md CHANGELOG_AI.md; do
+            stats="$(git diff --numstat -- "$f")"
+            adds="$(printf '%s\n' "$stats" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$stats" | awk '{print $2}')"
+            test -n "$adds" && test "$adds" -gt 0
+            if [ "$dels" -ne 0 ]; then
+              if [ "$f" = "TASKS.md" ]; then old_last="$tasks_last"; else old_last="$changelog_last"; fi
+              test "$old_last" != "0a"
+              test "$dels" -le 1
+            fi
+          done
+          git diff --check
+
+      - name: Commit rollups and retire recovery workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "VAEP Recovery"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/vaep-n710h-byte-append-recovery.yml
+          git add TASKS.md CHANGELOG_AI.md
+          git diff --cached --check
+          git commit -m "docs(n7.10.h): append byte-safe closure rollups"
+          git push origin HEAD:Desarrollo
