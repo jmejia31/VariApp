@@ -9,6 +9,14 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — WhatsApp — handoff canónico sin API de proveedor
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se consolidó `WhatsAppShareService` y `WhatsAppSharePolicy` para normalización multi-país con fallback Honduras, enlaces `wa.me` URL-encoded, apertura oficial y destinatarios enmascarados. El historial acepta únicamente estados de handoff y rechaza afirmaciones de entrega/lectura. Facturas, catálogo público y checkout consumen la misma política. No se añadieron APIs pagadas, tokens, secretos, envíos reales ni cambios al scheduler.
+
+Validación: 24 pruebas backend dirigidas, 4 pruebas Vitest de política frontend, `npm run lint`, `npm run build:prod` y `git diff --check` superados.
+
 ## 2026-09-15 — Responsive — paneles globales de select y autocomplete
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.

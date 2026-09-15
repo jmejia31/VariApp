@@ -20,6 +20,7 @@ import {
   ResultadoDiagnosticoSmtp
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { enmascararTelefonoWhatsApp, normalizarTelefonoWhatsApp, WhatsAppShareService, WHATSAPP_CLIENT_OPEN_REQUESTED } from '../../core/services/whatsapp-share.service';
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
 import { FacturaFiscalEmisionComponent } from './factura-fiscal-emision.component';
 
@@ -52,6 +53,7 @@ interface DimensionesPdf {
 })
 export class FacturaViewComponent implements OnInit {
   private readonly permisosRuntime = inject(PermisosRuntimeService);
+  private readonly whatsappShare = inject(WhatsAppShareService);
 
   readonly defaultLogoUrl = 'assets/varistorehn-logo.png';
   readonly factura = signal<Factura | null>(null);
@@ -265,8 +267,7 @@ export class FacturaViewComponent implements OnInit {
   }
 
   telefonoValido(): boolean {
-    const soloDigitos = this.telefonoEditable.replace(/\D/g, '');
-    return soloDigitos.length >= 10 && soloDigitos.length <= 15;
+    return Boolean(normalizarTelefonoWhatsApp(this.telefonoEditable));
   }
 
   abrirWhatsApp(): void {
@@ -275,14 +276,21 @@ export class FacturaViewComponent implements OnInit {
     const factura = this.factura();
     if (!factura || !this.telefonoValido() || !this.mensajeEditable.trim()) return;
 
-    const numero = this.telefonoEditable.replace(/\D/g, '');
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(this.mensajeEditable.trim())}`;
+    const numero = normalizarTelefonoWhatsApp(this.telefonoEditable);
+    const url = this.whatsappShare.construirEnlace(numero, this.mensajeEditable);
+    if (!url) {
+      this.snackBar.open('Ingresa un teléfono válido y un mensaje permitido.', 'Cerrar', { duration: 4500 });
+      return;
+    }
 
     this.facturaService
-      .registrarIntentoEnvio(factura.id, 'WhatsApp', numero, 'Iniciado')
+      .registrarIntentoEnvio(factura.id, 'WhatsApp', enmascararTelefonoWhatsApp(numero), WHATSAPP_CLIENT_OPEN_REQUESTED)
       .subscribe();
 
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (!this.whatsappShare.abrir(numero, this.mensajeEditable)) {
+      this.snackBar.open('No se pudo abrir WhatsApp automáticamente. Usa el enlace generado desde el navegador.', 'Cerrar', { duration: 5000 });
+      return;
+    }
     this.mostrarPanelWhatsApp.set(false);
   }
 

@@ -16,6 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
 import {
   CategoriaTienda,
   ModeloTienda,
@@ -232,8 +233,8 @@ export class VaristorehnProductoComponent implements OnInit {
     const sku = this.skuVisible() ? `\nSKU: ${this.skuVisible()}` : '';
     const mensaje = `Hola ${this.identidad.config().nombreComercial}, deseo consultar este producto:\n\n${producto.nombre}\nModelo: ${modelo.nombre}${sku}\nCantidad: ${unidades}\nPrecio unitario: ${this.moneda(this.precioActual())}\nSubtotal: ${this.moneda(subtotal)}\n\nPor favor confirmar disponibilidad y total final.`;
     if (!this.utilizarDatosBaseDatos()) { this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`); return; }
-    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-    if (url.length > 7500) { this.aviso.set('El mensaje es demasiado largo para abrirse de forma segura en WhatsApp.'); return; }
+    const url = construirEnlaceWhatsApp(telefono, mensaje);
+    if (!url) { this.aviso.set('El mensaje es demasiado largo o el número no es válido para abrir WhatsApp.'); return; }
     this.document.defaultView?.open(url, '_blank', 'noopener,noreferrer');
   }
 

@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
 import { crearCatalogoEjemplo, mapearProducto, telefonoWhatsapp } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { mensajeWhatsappCheckout, normalizarDatosComprador, urlCheckoutPermitida } from './varistorehn-checkout.rules';
@@ -121,7 +122,12 @@ export class VaristorehnCheckoutComponent implements OnInit {
     const mensaje = mensajeWhatsappCheckout(
       this.identidad.nombreSistema(), comprador, validado.validacionId, moneda, validado.lineas, validado.total
     );
-    this.enlaceWhatsapp.set(`https://wa.me/${destino}?text=${encodeURIComponent(mensaje)}`);
+    const enlace = construirEnlaceWhatsApp(destino, mensaje);
+    if (!enlace) {
+      this.error.set('No se pudo generar un enlace seguro para WhatsApp. Verifica el número configurado.');
+      return;
+    }
+    this.enlaceWhatsapp.set(enlace);
     this.aviso.set('Solicitud preparada. Revisa el resumen y abre WhatsApp para continuar.');
   }
 

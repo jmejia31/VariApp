@@ -8,6 +8,7 @@ import type {
   ProductoTienda,
   ReferenciaCarrito
 } from './varistorehn.models';
+import { normalizarTelefonoWhatsApp } from '../../core/services/whatsapp-share.service';
 
 export type {
   CategoriaCatalogoPublico,
@@ -175,14 +176,7 @@ export function totalCarrito(items: ItemCarrito[]): number {
 }
 
 export function telefonoWhatsapp(valor?: string): string {
-  const limpio = (valor || '').trim();
-  // Accept a local Honduran number or an international number; reject prose/URLs.
-  if (!/^[+\d\s().-]+$/.test(limpio)) return '';
-  let numero = limpio.replace(/\D/g, '');
-  if (/^0+$/.test(numero)) return '';
-  if (numero.startsWith('00')) numero = numero.slice(2);
-  if (numero.length === 8) numero = `504${numero}`;
-  return /^[1-9]\d{9,14}$/.test(numero) ? numero : '';
+  return normalizarTelefonoWhatsApp(valor);
 }
 
 /** Illustrative inventory only. Never written to the database or sent to a checkout. */

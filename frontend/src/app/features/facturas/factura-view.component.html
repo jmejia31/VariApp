@@ -220,8 +220,8 @@
       <textarea matInput [(ngModel)]="mensajeEditable" rows="5"></textarea>
     </mat-form-field>
     <p class="hint">
-      El enlace contiene el PDF oficial A4 y vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}.
-      Generar otro enlace revoca automáticamente el anterior.
+      WhatsApp prepara el mensaje y el enlace seguro al PDF oficial A4; el usuario debe pulsar Enviar en WhatsApp.
+      El enlace vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}. Generar otro enlace revoca automáticamente el anterior.
     </p>
     <div class="panel-actions">
       <button mat-flat-button color="primary" [disabled]="!telefonoValido() || !mensajeEditable.trim()" (click)="abrirWhatsApp()">

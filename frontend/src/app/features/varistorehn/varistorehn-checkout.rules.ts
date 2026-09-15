@@ -1,4 +1,5 @@
 import { CheckoutLineaValidada, DatosCompradorCheckout } from './varistorehn.models';
+import { normalizarTelefonoWhatsApp } from '../../core/services/whatsapp-share.service';
 
 export function urlCheckoutPermitida(url: string, origenesPermitidos: readonly string[]): string {
   try {
@@ -15,7 +16,7 @@ export function urlCheckoutPermitida(url: string, origenesPermitidos: readonly s
 export function normalizarDatosComprador(datos: DatosCompradorCheckout): DatosCompradorCheckout {
   return {
     nombre: datos.nombre.trim().replace(/\s+/g, ' ').slice(0, 120),
-    telefono: datos.telefono.replace(/[^0-9+]/g, '').slice(0, 24),
+    telefono: normalizarTelefonoWhatsApp(datos.telefono) || datos.telefono.replace(/[^0-9+]/g, '').slice(0, 24),
     correo: datos.correo?.trim().toLowerCase().slice(0, 160) || undefined,
     notas: datos.notas?.trim().slice(0, 600) || undefined
   };

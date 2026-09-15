@@ -100,7 +100,7 @@ public class FacturaCompartirService : IFacturaCompartirService
             UrlPdfPublica = urlPublica,
             FechaExpiracion = enlace.FechaExpiracion,
             MensajeWhatsApp = mensaje,
-            TelefonoSugerido = NormalizarTelefonoHonduras(factura.ClienteTelefono)
+            TelefonoSugerido = WhatsAppSharePolicy.NormalizePhone(factura.ClienteTelefono)
         };
     }
 
@@ -116,11 +116,17 @@ public class FacturaCompartirService : IFacturaCompartirService
             throw new BusinessRuleException("El canal de envío debe ser WhatsApp o Correo.");
         }
 
-        var destinatario = Truncar(dto.Destinatario?.Trim(), 200);
+        var destinatario = string.Equals(canal, "WhatsApp", StringComparison.OrdinalIgnoreCase)
+            ? WhatsAppSharePolicy.MaskPhone(dto.Destinatario)
+            : Truncar(dto.Destinatario?.Trim(), 200);
         if (string.IsNullOrWhiteSpace(destinatario))
-            throw new BusinessRuleException("El destinatario del envío es obligatorio.");
+            throw new BusinessRuleException(string.Equals(canal, "WhatsApp", StringComparison.OrdinalIgnoreCase)
+                ? "El teléfono de WhatsApp no tiene un formato válido."
+                : "El destinatario del envío es obligatorio.");
 
-        var resultado = string.IsNullOrWhiteSpace(dto.Resultado) ? "Iniciado" : Truncar(dto.Resultado.Trim(), 50)!;
+        var resultado = string.Equals(canal, "WhatsApp", StringComparison.OrdinalIgnoreCase)
+            ? NormalizarResultadoWhatsApp(dto.Resultado)
+            : (string.IsNullOrWhiteSpace(dto.Resultado) ? "Iniciado" : Truncar(dto.Resultado.Trim(), 50)!);
         var error = Truncar(dto.Error?.Trim(), 500);
 
         await _repository.AddHistorialAsync(new HistorialEnvioFactura
@@ -431,17 +437,20 @@ public class FacturaCompartirService : IFacturaCompartirService
                !uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static string NormalizarTelefonoHonduras(string? telefono)
+    private static string NormalizarResultadoWhatsApp(string? resultado)
     {
-        if (string.IsNullOrWhiteSpace(telefono)) return string.Empty;
-
-        var soloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
-        if (soloDigitos.StartsWith("00", StringComparison.Ordinal))
-            soloDigitos = soloDigitos[2..];
-        if (soloDigitos.Length == 8)
-            return "504" + soloDigitos;
-
-        return soloDigitos;
+        if (string.IsNullOrWhiteSpace(resultado) || string.Equals(resultado, "Iniciado", StringComparison.OrdinalIgnoreCase))
+            return WhatsAppSharePolicy.ClientOpenRequested;
+        var valor = Truncar(resultado.Trim(), 50)!;
+        if (valor.Equals("WHATSAPP_SENT", StringComparison.OrdinalIgnoreCase) ||
+            valor.Equals("DELIVERED", StringComparison.OrdinalIgnoreCase) ||
+            valor.Equals("READ", StringComparison.OrdinalIgnoreCase) ||
+            valor.Equals("SUCCESSFULLY_DELIVERED", StringComparison.OrdinalIgnoreCase))
+            throw new BusinessRuleException("WhatsApp manual no permite registrar entrega o lectura; solo estados de handoff.");
+        if (!valor.Equals(WhatsAppSharePolicy.HandoffGenerated, StringComparison.OrdinalIgnoreCase) &&
+            !valor.Equals(WhatsAppSharePolicy.ClientOpenRequested, StringComparison.OrdinalIgnoreCase))
+            throw new BusinessRuleException("El resultado de WhatsApp debe describir la preparación o apertura del cliente.");
+        return valor.ToUpperInvariant();
     }
 
     private static string GenerarTokenSeguro()
