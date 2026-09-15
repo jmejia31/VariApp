@@ -2,8 +2,8 @@ using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Domain.Entities;
 
-/// Módulo real y administrable de impuestos (sección 12). Reemplaza el monto
-/// manual que antes se enviaba directo desde Angular.
+/// Módulo real y administrable de impuestos. La configuración se gestiona
+/// desde la interfaz y el motor conserva un snapshot monetario de cada aplicación.
 public class Impuesto
 {
     public int Id { get; set; }
@@ -12,8 +12,8 @@ public class Impuesto
     public string? Descripcion { get; set; }
 
     public TipoImpuesto Tipo { get; set; }
-    public decimal Tasa { get; set; } // % si Tipo=Porcentaje
-    public decimal? MontoFijo { get; set; } // si Tipo=MontoFijo
+    public decimal Tasa { get; set; }
+    public decimal? MontoFijo { get; set; }
 
     public DateTime? FechaInicio { get; set; }
     public DateTime? FechaFin { get; set; }
@@ -46,8 +46,6 @@ public class Impuesto
 public class ImpuestoProducto { public int Id { get; set; } public int ImpuestoId { get; set; } public int ProductoId { get; set; } }
 public class ImpuestoCategoria { public int Id { get; set; } public int ImpuestoId { get; set; } public int CategoriaId { get; set; } }
 public class ImpuestoOperacion { public int Id { get; set; } public int ImpuestoId { get; set; } public OperacionImpuesto Operacion { get; set; } }
-
-/// Fila presente = ese cliente/proveedor está EXENTO de este impuesto (sección 12: "Exención").
 public class ImpuestoCliente { public int Id { get; set; } public int ImpuestoId { get; set; } public int ClienteId { get; set; } }
 public class ImpuestoProveedor { public int Id { get; set; } public int ImpuestoId { get; set; } public int ProveedorId { get; set; } }
 
@@ -56,10 +54,8 @@ public class HistorialAplicacionImpuesto
     public int Id { get; set; }
     public int ImpuestoId { get; set; }
     public Impuesto? Impuesto { get; set; }
-
-    public string DocumentoTipo { get; set; } = string.Empty; // "Venta" | "Compra"
+    public string DocumentoTipo { get; set; } = string.Empty;
     public int DocumentoId { get; set; }
-
     public decimal BaseImponible { get; set; }
     public decimal TasaAplicada { get; set; }
     public decimal MontoAplicado { get; set; }
@@ -76,6 +72,7 @@ public class VentaImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
+    public bool IncluidoEnPrecioSnapshot { get; set; }
 }
 
 public class CompraImpuesto
@@ -88,4 +85,5 @@ public class CompraImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
+    public bool IncluidoEnPrecioSnapshot { get; set; }
 }

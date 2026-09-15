@@ -23,8 +23,6 @@ export class ProveedorService {
     return this.http.get<ApiResponse<Proveedor>>(`${this.apiUrl}/${id}`);
   }
 
-  /** Autocompletado remoto (sección 17): el backend limita a ~10 resultados,
-   * nunca se cargan todos los proveedores en memoria. */
   buscar(termino: string): Observable<ApiResponse<Proveedor[]>> {
     return this.http.get<ApiResponse<Proveedor[]>>(`${this.apiUrl}/buscar`, { params: { termino } });
   }
@@ -35,6 +33,14 @@ export class ProveedorService {
 
   update(id: number, value: ProveedorFormValue): Observable<ApiResponse<Proveedor>> {
     return this.http.put<ApiResponse<Proveedor>>(`${this.apiUrl}/${id}`, value);
+  }
+
+  activar(id: number): Observable<ApiResponse<Proveedor>> {
+    return this.http.patch<ApiResponse<Proveedor>>(`${this.apiUrl}/${id}/activar`, {});
+  }
+
+  desactivar(id: number): Observable<ApiResponse<Proveedor>> {
+    return this.http.patch<ApiResponse<Proveedor>>(`${this.apiUrl}/${id}/desactivar`, {});
   }
 
   delete(id: number): Observable<ApiResponse<object>> {

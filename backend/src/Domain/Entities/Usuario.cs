@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Domain.Entities;
@@ -8,31 +9,30 @@ public class Usuario
     public string NombreUsuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    /// Enum legado, se conserva por compatibilidad durante la migración a roles dinámicos.
+
+    /// <summary>Fuente de verdad del rol del usuario desde ERP-N0.4.</summary>
+    public int RolId { get; set; }
+    public Rol RolEntidad { get; set; } = null!;
+
+    /// <summary>
+    /// Compatibilidad exclusiva de contratos/fixtures antiguos. No se persiste y
+    /// ningún componente de autorización de ERP-N0.4 consulta este valor.
+    /// </summary>
+    [NotMapped]
     public RolUsuario Rol { get; set; } = RolUsuario.Vendedor;
 
-    /// FK al catálogo dinámico de roles (Domain.Entities.Rol). Nullable mientras
-    /// conviven ambos modelos; los datos existentes se backfillean en la migración.
-    public int? RolId { get; set; }
-    public Rol? RolEntidad { get; set; }
-
+    public string? FotoPerfilUrl { get; set; }
+    public string? FotoPerfilPublicId { get; set; }
     public bool Activo { get; set; } = true;
-
-    /// Bloqueo: distinto de Activo/Desactivar. Desactivar es una decisión
-    /// administrativa reversible normal; Bloquear implica una restricción de
-    /// seguridad (ej. sospecha de acceso indebido) con motivo obligatorio.
     public bool Bloqueado { get; set; }
     public string? MotivoBloqueo { get; set; }
     public DateTime? FechaBloqueo { get; set; }
     public int? BloqueadoPorUsuarioId { get; set; }
-
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
-
     public int? CreadoPorUsuarioId { get; set; }
     public int? ActualizadoPorUsuarioId { get; set; }
     public DateTime? FechaActualizacion { get; set; }
-
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 }

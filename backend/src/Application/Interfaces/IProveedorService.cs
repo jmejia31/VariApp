@@ -10,5 +10,6 @@ public interface IProveedorService
     Task<ProveedorDto?> GetByIdAsync(int id);
     Task<ProveedorDto> CreateAsync(CreateProveedorDto dto);
     Task<ProveedorDto?> UpdateAsync(int id, UpdateProveedorDto dto);
+    Task<ProveedorDto?> CambiarEstadoAsync(int id, bool activo);
     Task<bool> DeleteAsync(int id);
 }

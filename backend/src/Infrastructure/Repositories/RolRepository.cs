@@ -33,14 +33,17 @@ public class RolRepository : IRolRepository
         await _context.Usuarios.CountAsync(u => u.RolId == rolId);
 
     public async Task<int> ContarPermisosAsync(int rolId) =>
-        await _context.RolPermisos.CountAsync(p => p.RolId == rolId && p.Permitido);
+        await _context.RolPermisos.CountAsync(p => p.RolId == rolId);
 
     public async Task<int> ContarAdministradoresActivosAsync(int? excluirRolId = null) =>
         await _context.Usuarios
             .Include(u => u.RolEntidad)
             .CountAsync(u => u.Activo &&
-                u.RolEntidad != null &&
+                !u.Eliminado &&
+                !u.Bloqueado &&
                 u.RolEntidad.EsAdministrador &&
+                u.RolEntidad.Activo &&
+                !u.RolEntidad.Eliminado &&
                 (excluirRolId == null || u.RolId != excluirRolId));
 
     public async Task<int> ContarRolesAdministradorAsync(int? excluirRolId = null) =>
@@ -49,10 +52,7 @@ public class RolRepository : IRolRepository
             (excluirRolId == null || r.Id != excluirRolId));
 
     public async Task AddAsync(Rol rol) => await _context.Roles.AddAsync(rol);
-
     public void Update(Rol rol) => _context.Roles.Update(rol);
-
     public void Remove(Rol rol) => _context.Roles.Remove(rol);
-
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 }

@@ -9,5 +9,6 @@ public interface ICategoriaService
     Task<CategoriaDto?> GetByIdAsync(int id);
     Task<CategoriaDto> CreateAsync(CreateCategoriaDto dto);
     Task<CategoriaDto?> UpdateAsync(int id, UpdateCategoriaDto dto);
+    Task<CategoriaDto?> CambiarEstadoAsync(int id, bool activa);
     Task<bool> DeleteAsync(int id);
 }

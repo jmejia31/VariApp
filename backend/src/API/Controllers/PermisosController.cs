@@ -45,7 +45,17 @@ public class PermisosController : ControllerBase
         return Ok(ApiResponse<MisPermisosDto>.Ok(permisos));
     }
 
-    // ---- Catálogo de permisos (sección 5) ----
+    [HttpGet("mis-permisos/empresa/{empresaId:int}")]
+    public async Task<IActionResult> GetMisPermisosEmpresa(int empresaId)
+    {
+        if (empresaId <= 0) return BadRequest(ApiResponse<object>.Fail("Empresa inválida."));
+
+        var permisos = await _service.GetMisPermisosAsync(empresaId);
+        if (string.IsNullOrWhiteSpace(permisos.Rol))
+            return Forbid();
+
+        return Ok(ApiResponse<MisPermisosDto>.Ok(permisos));
+    }
 
     [HttpGet("catalogo")]
     [RequierePermiso(ModuloSistema.Permisos, AccionPermiso.Ver)]

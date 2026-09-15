@@ -33,12 +33,13 @@ public class CategoriaServiceTests
             .Returns(Task.CompletedTask);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        var resultado = await _service.CreateAsync(new CreateCategoriaDto { Nombre = "Electrónica" });
+        await _service.CreateAsync(new CreateCategoriaDto { Nombre = "Electrónica" });
 
         Assert.NotNull(categoriaCreada);
         Assert.Equal(1, categoriaCreada!.CreadoPorUsuarioId);
         Assert.Equal("admin", categoriaCreada.CreadoPorNombreUsuario);
         Assert.True(categoriaCreada.Activa);
+        Assert.False(categoriaCreada.Eliminada);
     }
 
     [Fact]
@@ -59,9 +60,35 @@ public class CategoriaServiceTests
         _repoMock.Setup(r => r.GetByIdConProductosAsync(1)).ReturnsAsync(categoria);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await _service.DeleteAsync(1);
+        var resultado = await _service.DeleteAsync(1);
 
+        Assert.True(resultado);
         Assert.False(categoria.Activa);
+        Assert.True(categoria.Eliminada);
+        Assert.Equal(1, categoria.EliminadaPorUsuarioId);
+        Assert.NotNull(categoria.FechaEliminacion);
+        _repoMock.Verify(r => r.Update(categoria), Times.Once);
         _repoMock.Verify(r => r.Remove(It.IsAny<Categoria>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CambiarEstadoAsync_NoConvierteDesactivacionEnEliminacion()
+    {
+        var categoria = new Categoria
+        {
+            Id = 2,
+            Nombre = "Audio",
+            Activa = true,
+            Eliminada = false
+        };
+        _repoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(categoria);
+        _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+
+        var resultado = await _service.CambiarEstadoAsync(2, false);
+
+        Assert.NotNull(resultado);
+        Assert.False(categoria.Activa);
+        Assert.False(categoria.Eliminada);
+        Assert.Null(categoria.FechaEliminacion);
     }
 }

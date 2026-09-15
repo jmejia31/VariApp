@@ -13,92 +13,95 @@ public class PermisoService : IPermisoService
     private readonly IRolRepository _rolRepository;
     private readonly IPermisoRepository _permisoRepository;
     private readonly IAuditoriaService _auditoria;
-    private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
     public PermisoService(
         IRolPermisoRepository repository,
         IRolRepository rolRepository,
         IPermisoRepository permisoRepository,
         IAuditoriaService auditoria,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IUsuarioScopeService usuarioScope)
     {
         _repository = repository;
         _rolRepository = rolRepository;
         _permisoRepository = permisoRepository;
         _auditoria = auditoria;
-        _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
+        _ = currentUser;
     }
 
     public async Task<List<PermisoMatrizItemDto>> GetMatrizAsync(int rolId)
     {
+        var rol = await _rolRepository.GetByIdAsync(rolId)
+            ?? throw new BusinessRuleException("El rol seleccionado no existe.");
+
         var existentes = await _repository.GetByRolIdAsync(rolId);
-        var resultado = new List<PermisoMatrizItemDto>();
+        var catalogo = (await _permisoRepository.GetAllAsync())
+            .Where(p => p.Activo && !p.Eliminado)
+            .OrderBy(p => p.Modulo)
+            .ThenBy(p => p.Accion)
+            .ToList();
 
-        foreach (var (modulo, acciones) in CatalogoPermisosBase.Definicion)
+        return catalogo.Select(permiso => new PermisoMatrizItemDto
         {
-            foreach (var accion in acciones)
-            {
-                var fila = existentes.FirstOrDefault(p => p.Modulo == modulo && p.Accion == accion);
-                resultado.Add(new PermisoMatrizItemDto
-                {
-                    Rol = rolId.ToString(),
-                    Modulo = modulo.ToString(),
-                    Accion = accion.ToString(),
-                    Permitido = fila?.Permitido ?? false
-                });
-            }
-        }
-
-        return resultado;
+            Rol = rol.Nombre,
+            Modulo = permiso.Modulo.ToString(),
+            Accion = permiso.Accion.ToString(),
+            Permitido = existentes.Any(p => p.PermisoId == permiso.Id)
+        }).ToList();
     }
 
     public async Task<List<PermisoMatrizItemDto>> UpdateMatrizAsync(int rolId, UpdatePermisoMatrizDto dto)
     {
         var rol = await _rolRepository.GetByIdAsync(rolId)
             ?? throw new BusinessRuleException("El rol seleccionado no existe.");
-
         if (!rol.Activo)
             throw new BusinessRuleException("No se pueden asignar permisos a un rol inactivo.");
 
-        var matrizAnterior = await GetMatrizAsync(rolId);
+        var catalogoActivo = (await _permisoRepository.GetAllAsync())
+            .Where(p => p.Activo && !p.Eliminado)
+            .ToList();
         var nuevaMatriz = new List<RolPermiso>();
-        var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var permisoIds = new HashSet<int>();
 
         foreach (var item in dto.Permisos.Where(p => p.Permitido))
         {
-            if (!Enum.TryParse<ModuloSistema>(item.Modulo, out var modulo) ||
-                !Enum.TryParse<AccionPermiso>(item.Accion, out var accion))
-                throw new BusinessRuleException($"Combinacion invalida '{item.Modulo}.{item.Accion}'.");
-
-            var valido = CatalogoPermisosBase.Definicion.Any(d => d.Modulo == modulo && d.Acciones.Contains(accion));
-            if (!valido)
-                throw new BusinessRuleException($"La accion '{accion}' no aplica al modulo '{modulo}'.");
-
-            var clave = $"{modulo}:{accion}";
-            if (!claves.Add(clave))
-                throw new BusinessRuleException($"El permiso '{clave}' viene duplicado en la solicitud.");
+            if (!Enum.TryParse<ModuloSistema>(item.Modulo, true, out var modulo) ||
+                !Enum.TryParse<AccionPermiso>(item.Accion, true, out var accion))
+                throw new BusinessRuleException($"Combinación inválida '{item.Modulo}.{item.Accion}'.");
 
             var permiso = await _permisoRepository.GetByModuloAccionAsync(modulo, accion)
-                ?? throw new BusinessRuleException($"El permiso '{clave}' no existe, esta inactivo o fue eliminado.");
+                ?? throw new BusinessRuleException($"El permiso '{modulo}:{accion}' no existe, está inactivo o fue eliminado.");
+
+            if (!permisoIds.Add(permiso.Id))
+                throw new BusinessRuleException($"El permiso '{permiso.Codigo}' viene duplicado en la solicitud.");
 
             nuevaMatriz.Add(new RolPermiso
             {
-                Rol = rol.EsAdministrador ? RolUsuario.Administrador : RolUsuario.Vendedor,
                 RolId = rolId,
-                PermisoId = permiso.Id,
-                Modulo = modulo,
-                Accion = accion,
-                Permitido = true
+                PermisoId = permiso.Id
             });
         }
 
+        if (rol.EsAdministrador)
+        {
+            var permisosActivos = catalogoActivo.Select(p => p.Id).ToHashSet();
+            if (!permisoIds.SetEquals(permisosActivos))
+            {
+                throw new BusinessRuleException(
+                    "Los roles administradores deben conservar grants explícitos para todo el catálogo activo.");
+            }
+        }
+
+        var matrizAnterior = await GetMatrizAsync(rolId);
         await _repository.ReemplazarMatrizPorRolIdAsync(rolId, nuevaMatriz);
         var matrizNueva = await GetMatrizAsync(rolId);
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Permisos,
             AccionPermiso.Administrar,
-            $"Matriz de permisos actualizada para el rol '{rol.Nombre}'.",
+            $"Matriz relacional de permisos actualizada para el rol '{rol.Nombre}'.",
             rolId,
             entidad: "RolPermiso",
             valoresAnteriores: matrizAnterior.Where(x => x.Permitido).ToList(),
@@ -109,24 +112,24 @@ public class PermisoService : IPermisoService
 
     public async Task PrecargarMatrizPorDefectoAsync(int rolId, bool esAdministrador)
     {
-        if (esAdministrador) return;
         if (await _repository.TieneMatrizDefinidaAsync(rolId)) return;
 
         var filas = new List<RolPermiso>();
-        foreach (var d in CatalogoPermisosBase.DefaultVendedor)
+        if (esAdministrador)
         {
-            var permiso = await _permisoRepository.GetByModuloAccionAsync(d.Modulo, d.Accion);
-            if (permiso is null) continue;
-
-            filas.Add(new RolPermiso
+            foreach (var permiso in (await _permisoRepository.GetAllAsync()).Where(p => p.Activo && !p.Eliminado))
             {
-                Rol = RolUsuario.Vendedor,
-                RolId = rolId,
-                PermisoId = permiso.Id,
-                Modulo = d.Modulo,
-                Accion = d.Accion,
-                Permitido = true
-            });
+                filas.Add(new RolPermiso { RolId = rolId, PermisoId = permiso.Id });
+            }
+        }
+        else
+        {
+            foreach (var d in CatalogoPermisosBase.DefaultVendedor)
+            {
+                var permiso = await _permisoRepository.GetByModuloAccionAsync(d.Modulo, d.Accion);
+                if (permiso is not null)
+                    filas.Add(new RolPermiso { RolId = rolId, PermisoId = permiso.Id });
+            }
         }
 
         await _repository.AgregarSiFaltaAsync(filas);
@@ -134,57 +137,75 @@ public class PermisoService : IPermisoService
 
     public async Task<MisPermisosDto> GetMisPermisosAsync()
     {
-        if (_currentUser.EsAdministrador)
-        {
-            var todos = CatalogoPermisosBase.Definicion
-                .SelectMany(m => m.Acciones.Select(a => $"{m.Modulo}:{a}"))
-                .ToList();
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return alcance is null
+            ? PermisosVacios()
+            : await ConstruirMisPermisosAsync(alcance.RolId, alcance.RolNombre, alcance.EsAdministrador);
+    }
 
-            return new MisPermisosDto
-            {
-                Rol = _currentUser.Rol?.ToString() ?? "Administrador",
-                EsAdministrador = true,
-                Permisos = todos
-            };
-        }
-
-        var rolId = _currentUser.RolId;
-        List<string> permisos;
-
-        if (rolId.HasValue)
-        {
-            var filas = await _repository.GetByRolIdAsync(rolId.Value);
-            permisos = filas.Where(p => p.Permitido).Select(p => $"{p.Modulo}:{p.Accion}").ToList();
-        }
-        else
-        {
-            var rolLegado = _currentUser.Rol ?? RolUsuario.Vendedor;
-            var filas = await _repository.GetByRolAsync(rolLegado);
-            permisos = filas.Where(p => p.Permitido).Select(p => $"{p.Modulo}:{p.Accion}").ToList();
-        }
-
-        return new MisPermisosDto
-        {
-            Rol = _currentUser.Rol?.ToString() ?? string.Empty,
-            EsAdministrador = false,
-            Permisos = permisos
-        };
+    public async Task<MisPermisosDto> GetMisPermisosAsync(int empresaId)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId);
+        return alcance is null
+            ? PermisosVacios()
+            : await ConstruirMisPermisosAsync(alcance.RolId, alcance.RolNombre, alcance.EsAdministrador);
     }
 
     public async Task<bool> TienePermisoAsync(ModuloSistema modulo, AccionPermiso accion)
     {
-        if (_currentUser.EsAdministrador) return true;
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        if (alcance is null) return false;
 
-        if (_currentUser.RolId.HasValue)
-            return await _repository.TienePermisoPorRolIdAsync(_currentUser.RolId.Value, modulo, accion);
+        return await _repository.TienePermisoPorRolIdAsync(alcance.RolId, modulo, accion);
+    }
 
-        var rolLegado = _currentUser.Rol ?? RolUsuario.Vendedor;
-        return await _repository.TienePermisoAsync(rolLegado, modulo, accion);
+    public async Task<bool> TienePermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion)
+    {
+        if (empresaId <= 0) return false;
+
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId);
+        if (alcance is null) return false;
+
+        return await _repository.TienePermisoPorRolIdAsync(alcance.RolId, modulo, accion);
     }
 
     public async Task VerificarPermisoAsync(ModuloSistema modulo, AccionPermiso accion)
     {
         if (!await TienePermisoAsync(modulo, accion))
-            throw new ForbiddenAccessException($"No tienes permiso para '{accion}' en el modulo '{modulo}'.");
+            throw new ForbiddenAccessException($"No tienes permiso para '{accion}' en el módulo '{modulo}'.");
     }
+
+    public async Task VerificarPermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion)
+    {
+        if (!await TienePermisoAsync(empresaId, modulo, accion))
+            throw new ForbiddenAccessException(
+                $"No tienes permiso para '{accion}' en el módulo '{modulo}' dentro de la empresa solicitada.");
+    }
+
+    private async Task<MisPermisosDto> ConstruirMisPermisosAsync(
+        int rolId,
+        string rolNombre,
+        bool esAdministrador)
+    {
+        var filas = await _repository.GetByRolIdAsync(rolId);
+        var permisos = filas
+            .Where(p => p.Permiso is { Activo: true, Eliminado: false })
+            .Select(p => $"{p.Permiso.Modulo}:{p.Permiso.Accion}")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new MisPermisosDto
+        {
+            Rol = rolNombre,
+            EsAdministrador = esAdministrador,
+            Permisos = permisos
+        };
+    }
+
+    private static MisPermisosDto PermisosVacios() => new()
+    {
+        Rol = string.Empty,
+        EsAdministrador = false,
+        Permisos = new List<string>()
+    };
 }
