@@ -1165,3 +1165,7 @@ Se completó la matriz de evidencia con la captura de recepción aportada por el
 ## 2026-09-15 — Limpieza de evidencia
 
 Se eliminó el salto final innecesario del README; `git diff --check` queda limpio.
+
+## 2026-09-15 — Corrección final del README de evidencia
+
+Se reescribió el README de cierre con saltos de línea limpios y se verificó que la matriz mantenga resultados y limitaciones sin capturas sintéticas.
