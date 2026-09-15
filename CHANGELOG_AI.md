@@ -9,6 +9,14 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-15 — Responsive global — foundation y gate automático
+
+**Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
+
+Se consolidó la base responsive global del frontend: shell con drawer móvil, topbar y contenedores fluidos, controles y medios que respetan su contenedor, diálogos limitados al viewport y primitivas compartidas para grids, filtros, detalle, KPI, acciones y tablas. Se eliminó la dependencia de `overflow-x: hidden` en `body`. Se añadió `docs/FRONTEND_RESPONSIVE_STANDARD.md` y el gate `npm run test:responsive`, que compara el inventario de rutas fuente y recorre 320/360/375/390/412/430/768/1024/1440 px comprobando overflow, clipping, tablas, objetivos táctiles, accesibilidad y drawer.
+
+Validación real: `npm run lint`, `npm run build:prod` y `git diff --check` superados. El build conserva únicamente advertencias Angular preexistentes de proyección/imports; no hubo cambios de backend, secretos, Producción, `main`, WhatsApp ni flujos transaccionales.
+
 ## 2026-09-15 — UX — eliminación de diálogos nativos en flujos empresariales
 
 **Responsable:** ChatGPT/VAEP, ejecución autorizada por Javier Mejía en `Desarrollo`.

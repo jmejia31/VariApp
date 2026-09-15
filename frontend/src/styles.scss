@@ -43,7 +43,6 @@ body {
   min-width: 320px;
   min-height: 100%;
   margin: 0;
-  overflow-x: hidden;
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
@@ -63,6 +62,62 @@ svg,
 video,
 canvas {
   max-width: 100%;
+  height: auto;
+}
+
+/* Contrato global de encogimiento: componentes flex/grid y controles nativos
+   no pueden imponer la anchura de su contenido al viewport. Las tablas usan
+   los shells de datos definidos en el design system para su scroll interno. */
+:where(
+  app-root,
+  router-outlet,
+  main,
+  section,
+  article,
+  form,
+  fieldset,
+  .mat-mdc-card,
+  .mat-mdc-dialog-content,
+  .mat-mdc-tab-body-content
+) {
+  min-width: 0;
+}
+
+:where(input, select, textarea, button) {
+  max-width: 100%;
+}
+
+:where(input, select, textarea) {
+  min-width: 0;
+}
+
+:where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  width: 100%;
+}
+
+:where(.mat-mdc-form-field, .mat-form-field) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+:where(.mat-mdc-form-field-infix, .mat-mdc-text-field-wrapper, .mdc-text-field) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+:where(.mat-mdc-form-field-infix) input,
+:where(.mat-mdc-form-field-infix) textarea,
+:where(.mat-mdc-form-field-infix) select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+:where(pre, code, .long-text) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 button,
@@ -169,13 +224,23 @@ mat-icon {
 }
 
 .mat-mdc-dialog-container .mdc-dialog__surface {
-  max-width: min(94vw, 720px);
-  max-height: min(90dvh, 900px);
+  width: min(100%, 720px);
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
   overflow: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-surface) !important;
   color: var(--color-text) !important;
+}
+
+.cdk-overlay-pane {
+  max-width: calc(100vw - 24px) !important;
+}
+
+.cdk-overlay-pane .mat-mdc-dialog-container {
+  max-width: 100%;
+  max-height: calc(100dvh - 24px);
 }
 
 .app-alert-dialog-panel .mat-mdc-dialog-surface {
@@ -290,6 +355,10 @@ h3,
     width: calc(100vw - 20px) !important;
     max-width: calc(100vw - 20px) !important;
     margin: 10px !important;
+  }
+
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    width: 100%;
   }
 }
 

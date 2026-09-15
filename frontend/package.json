@@ -13,6 +13,7 @@
     "test:e2e:varistorehn-fase4": "playwright test e2e/varistorehn-fase4.spec.ts --config=playwright.config.ts",
     "test:e2e:varistorehn-fase5": "playwright test e2e/varistorehn-fase5.spec.ts --config=playwright.config.ts",
     "test:e2e:varistorehn-fase6": "playwright test e2e/varistorehn-fase6.spec.ts --config=playwright.config.ts",
+    "test:responsive": "playwright test e2e/responsive-global.spec.ts --config=playwright.config.ts",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
