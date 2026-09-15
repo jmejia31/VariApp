@@ -1,8 +1,8 @@
 # Responsive matrix — 2026-09-15 18:50 CST
 
-Estado de la corrida: N_A para la validación del bundle final. `ac46085e` sí completó
-deployment, pero el commit final `74743586` quedó con `Deployment rate limited — retry in
-24 hours`; por eso no se marca PASS del estado final ni se fabrican capturas.
+Estado de la corrida: N_A para la validación visual autenticada de las 155 rutas. El bundle
+final `86e252b9` sí completó deployment; la pestaña CUA autenticada dejó de estar disponible
+para ejecutar la barrida completa. No se marca PASS ni se fabrican capturas.
 
 | Ruta | 320 | 360 | 375 | 390 | 412 | 430 | 768 | 1024 | 1440 | Body overflow | Element clipping | Sidebar | Acciones | Resultado |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

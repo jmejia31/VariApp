@@ -1217,8 +1217,9 @@ en la columna flexible; el ajuste es transversal al componente reutilizado y no 
 ningún flujo transaccional.
 
 El despliegue de `ac46085e` completó y permitió confirmar en el bundle remoto las reglas
-globales y el primer ajuste. El commit final `74743586` fue rechazado por el límite de
-despliegues de Vercel; la evidencia queda marcada `N_A` hasta que ese bundle esté publicado.
+globales y el primer ajuste. El commit final de precio `86e252b9` también completó en Vercel
+a las 19:17:47 CST. La barrida visual autenticada completa sigue marcada `N_A` porque la
+pestaña CUA dejó de estar disponible; no se fabricaron capturas.
 
 ## 2026-09-15 — Integridad server-authoritative de precios
 
