@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/matrices-evaluacion/**'
       - 'scripts/validate_matrix_governance.py'
+      - 'scripts/validate_n8_17_c_data_contracts.py'
       - '.github/workflows/matrix-governance.yml'
   workflow_dispatch:
 
@@ -27,3 +28,5 @@ jobs:
           python-version: '3.12'
       - name: Validar gobierno canónico de matrices
         run: python scripts/validate_matrix_governance.py
+      - name: Validar contratos de datos N8.17.C
+        run: python scripts/validate_n8_17_c_data_contracts.py
