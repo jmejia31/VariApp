@@ -7,6 +7,7 @@ on:
       - 'docs/matrices-evaluacion/**'
       - 'scripts/validate_matrix_governance.py'
       - 'scripts/validate_n8_17_c_data_contracts.py'
+      - 'scripts/validate_n8_17_d_backend_contracts.py'
       - '.github/workflows/matrix-governance.yml'
   workflow_dispatch:
 
@@ -30,3 +31,5 @@ jobs:
         run: python scripts/validate_matrix_governance.py
       - name: Validar contratos de datos N8.17.C
         run: python scripts/validate_n8_17_c_data_contracts.py
+      - name: Validar contratos backend N8.17.D
+        run: python scripts/validate_n8_17_d_backend_contracts.py
