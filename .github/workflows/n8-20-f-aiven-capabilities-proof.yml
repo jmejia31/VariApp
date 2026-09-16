@@ -91,7 +91,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.20.F-proof/4.0'})
+                  'User-Agent':'VariApp-N8.20.F-proof/5.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
@@ -146,8 +146,6 @@ jobs:
           if not current_user_id:
               raise SystemExit('Could not resolve current Aiven token user id')
 
-          # In the current organization API, project_id is the globally unique project name.
-          # Resolve the exact project by project_id and never guess from historical account metadata.
           orgs_payload=get('/organizations')
           orgs=orgs_payload.get('organizations', [])
           matches=[]
@@ -163,12 +161,12 @@ jobs:
               raise SystemExit(f'Expected one exact Aiven organization project match, found {len(matches)}')
           org_id,project_id=matches[0]
 
+          # Read current direct assignments on the exact project.
           perm_payload=get(f'/organization/{quote(org_id, safe="")}/permissions/project/{quote(project_id, safe="")}')
           assignments=perm_payload.get('permissions', []) if isinstance(perm_payload, dict) else perm_payload
           if not isinstance(assignments, list):
               assignments=[]
-
-          effective=[]
+          direct_permissions=[]
           matching_principal_records=0
           for item in assignments:
               if not isinstance(item, dict):
@@ -181,11 +179,31 @@ jobs:
               if isinstance(vals, str):
                   vals=[vals]
               if isinstance(vals, list):
-                  effective.extend(str(x) for x in vals)
+                  direct_permissions.extend(str(x) for x in vals)
 
-          effective=sorted(set(effective))
+          # Aiven documents roles/permissions as cumulative and the legacy GET /project
+          # endpoint remains available until 2027-01-31. Its project_memberships map is
+          # caller-specific and therefore provides an effective project-level readback even
+          # when access is inherited through an organization/unit/group rather than assigned
+          # directly to the user on the project permission resource.
+          legacy_projects=get('/project')
+          project_memberships=[]
+          pm=legacy_projects.get('project_memberships', {}) if isinstance(legacy_projects, dict) else {}
+          if isinstance(pm, dict):
+              vals=pm.get(project) or []
+              if isinstance(vals, str): vals=[vals]
+              if isinstance(vals, list): project_memberships.extend(str(x) for x in vals)
+          pms=legacy_projects.get('project_membership', {}) if isinstance(legacy_projects, dict) else {}
+          if isinstance(pms, dict):
+              val=pms.get(project)
+              if isinstance(val, str): project_memberships.append(val)
+
+          effective=sorted(set(direct_permissions + project_memberships))
+          # Official Aiven roles documentation states that developer and recover roles can
+          # create a service fork; admin/operator/manager or project service write also imply
+          # sufficient service-control authority. No write action is attempted here.
           restore_roles={
-              'admin','operator','role:project:admin','role:project:manager',
+              'admin','operator','developer','role:project:admin','role:project:manager',
               'role:services:recover','project:services:write'
           }
           restore_authorized=any(x in restore_roles for x in effective)
@@ -210,7 +228,7 @@ jobs:
           ])
 
           evidence={
-            'schema':'variapp.aiven-capabilities-proof.v4',
+            'schema':'variapp.aiven-capabilities-proof.v5',
             'authority':'docs/VAEP_AUTHORITY.md',
             'task':'N8.20.F',
             'status':'PASS_AIVEN_CAPABILITIES_IDENTIFIED' if pass_ok else 'NOT_CERTIFIED',
@@ -243,14 +261,19 @@ jobs:
               'recoveryMode':recovery_mode,
               'restorePath':'AIVEN_FORK_AND_RESTORE_CONTROL_PLANE',
               'permissionReadbackProven':True,
-              'matchingPrincipalRecords':matching_principal_records,
+              'matchingDirectPrincipalRecords':matching_principal_records,
+              'directPermissionNames':sorted(set(direct_permissions)),
+              'effectiveProjectMembershipNames':sorted(set(project_memberships)),
+              'effectiveRestoreAuthorityNames':effective,
               'restoreAuthorizationProven':restore_authorized,
-              'effectivePermissionNames':effective,
+              'restorePermissionReference':'https://aiven.io/docs/platform/concepts/permissions',
               'restoreExecutionPerformed':False
             },
             'cost':{
               'actualPlanTierProven':True,
+              'currentPlanIsFreeTier':str(plan).startswith('free-'),
               'basePriceUsdObserved':price_usd,
+              'potentialImpact':'A restore/fork creates or changes provider-managed service capacity and can have provider pricing impact; no fork/restore/plan change was executed in this proof.',
               'paidActionExecuted':False,
               'planChanged':False,
               'restoreExecuted':False,
@@ -281,9 +304,9 @@ jobs:
 
           out=os.path.join(os.environ['RUN_DIR'],'N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json')
           with open(out,'w') as f: json.dump(evidence,f,indent=2)
-          md=f'''# N8.20.F — Aiven DEV capabilities proof\n\n- Estado: `{evidence['status']}`\n- Provider: `AIVEN`\n- Service type: `{stype}`\n- Plan/tier actual: `{plan}`\n- Cloud: `{cloud}`\n- State: `{state}`\n- Backups endpoint readback: `{backup_endpoint_proven}`\n- Backups observados: `{len(backup_list)}`\n- Último backup UTC: `{evidence['actualBackups']['latestBackupTime']}`\n- Recovery mode: `{recovery_mode}`\n- PITR disponible según recovery mode: `{pitr_available}`\n- Retention policy readback: `{retention_proven}`\n- Permission readback: `true`\n- Principal permission records: `{matching_principal_records}`\n- Restore authorization proven: `{restore_authorized}`\n- Base price USD observed: `{price_usd}`\n- Restore ejecutado: `false`\n- Plan cambiado/comprado: `false`\n- Production touched: `false`\n- Secrets exposed: `0`\n\n## Dictamen\n\n`{'N8.20.F tiene evidencia técnica suficiente para REVIEW_FIRST y cierre LISTO_REAL.' if pass_ok else 'N8.20.F NO puede cerrarse todavía; revisar los campos acceptance=false del JSON.'}`\n'''
+          md=f'''# N8.20.F — Aiven DEV capabilities proof\n\n- Estado: `{evidence['status']}`\n- Provider: `AIVEN`\n- Service type: `{stype}`\n- Plan/tier actual: `{plan}`\n- Cloud: `{cloud}`\n- State: `{state}`\n- Backups endpoint readback: `{backup_endpoint_proven}`\n- Backups observados: `{len(backup_list)}`\n- Último backup UTC: `{evidence['actualBackups']['latestBackupTime']}`\n- Recovery mode: `{recovery_mode}`\n- PITR disponible según recovery mode: `{pitr_available}`\n- Retention policy readback: `{retention_proven}`\n- Direct principal records: `{matching_principal_records}`\n- Effective project memberships: `{sorted(set(project_memberships))}`\n- Restore authorization proven: `{restore_authorized}`\n- Base price USD observed: `{price_usd}`\n- Restore ejecutado: `false`\n- Plan cambiado/comprado: `false`\n- Production touched: `false`\n- Secrets exposed: `0`\n\n## Dictamen\n\n`{'N8.20.F tiene evidencia técnica suficiente para REVIEW_FIRST y cierre LISTO_REAL.' if pass_ok else 'N8.20.F NO puede cerrarse todavía; revisar los campos acceptance=false del JSON.'}`\n'''
           with open(os.path.join(os.environ['RUN_DIR'],'README.md'),'w') as f: f.write(md)
-          print(json.dumps({'task':'N8.20.F','pass':pass_ok,'plan':plan,'backupCount':len(backup_list),'recoveryMode':recovery_mode,'restoreAuthorized':restore_authorized,'principalRecords':matching_principal_records,'evidenceDir':os.environ['RUN_DIR']}))
+          print(json.dumps({'task':'N8.20.F','pass':pass_ok,'plan':plan,'backupCount':len(backup_list),'recoveryMode':recovery_mode,'restoreAuthorized':restore_authorized,'effectiveMemberships':sorted(set(project_memberships)),'principalRecords':matching_principal_records,'evidenceDir':os.environ['RUN_DIR']}))
           if not pass_ok:
               raise SystemExit(30)
           PY
