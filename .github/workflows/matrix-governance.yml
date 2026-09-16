@@ -1,0 +1,29 @@
+name: Desarrollo - Gobierno de matrices
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'docs/matrices-evaluacion/**'
+      - 'scripts/validate_matrix_governance.py'
+      - '.github/workflows/matrix-governance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matrix-governance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-matrix-governance:
+    name: MATRIX_ID, catálogo y plantilla
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validar gobierno canónico de matrices
+        run: python scripts/validate_matrix_governance.py
