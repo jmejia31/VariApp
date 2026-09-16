@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Validate N8.16 matrix governance without depending on row order."""
+"""Validate N8.16/N8.17 matrix governance without depending on row order."""
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -12,13 +13,21 @@ MATRIX_ROOT = ROOT / "docs" / "matrices-evaluacion"
 GOV = MATRIX_ROOT / "00_GOBERNANZA"
 CATALOG = GOV / "CATALOGO_MATRICES.md"
 TEMPLATE = GOV / "PLANTILLA_MATRIZ_UI.md"
+BATCH_MANIFEST = GOV / "N8_17_A_BATCH_MANIFEST.json"
 
 ID_RE = re.compile(r"^VAEP-MX::[A-Z0-9_]+::[A-Z0-9_]+$")
 ROW_ID_RE = re.compile(r"^(?:ROW|MATRIX|MX)[-_]?\d+$", re.IGNORECASE)
 PLACEHOLDER_RE = re.compile(r"(?i)(?<![A-Z0-9_])(?:TBD|TODO|POR\s+DEFINIR|PENDIENTE\s+DE\s+DEFINIR)(?![A-Z0-9_])")
+ALLOWED_MATRIX_STATES = {
+    "BASELINE_CREATED",
+    "INVENTORY_COMPLETE",
+    "SPEC_COMPLETE",
+    "IMPLEMENTATION_REVIEWED",
+    "CERTIFIED",
+}
 
 REQUIRED_TEMPLATE_TOKENS = {
-    "identity": ["MATRIX_ID:", "MATRIX_CHANGE_ID:", "MATRIX_VERSION:", "PARENT_MATRIX_ID:", "CONTRACT_KIND:"],
+    "identity": ["MATRIX_ID:", "MATRIX_CHANGE_ID:", "MATRIX_VERSION:", "PARENT_MATRIX_ID:", "CONTRACT_KIND:", "MATRIX_STATE:"],
     "ownership": ["CONTRACT_OWNER:", "DATA_OWNER:", "DEPENDS_ON_MATRIX_IDS:"],
     "data": ["DATA_ENTITIES:", "DB_TABLES:", "DB_FIELDS:", "MIGRATION_REFS:", "FK_CONSTRAINTS:", "INDEX_REFS:", "TRANSACTION_BOUNDARY:", "INTEGRITY_RULES:"],
     "backend": ["API_ROUTE:", "HTTP_METHOD:", "CONTROLLER_ACTION:", "REQUEST_DTO:", "APPLICATION_USE_CASE:", "REPOSITORY:", "BACKGROUND_JOB:", "INTEGRATION_PROVIDER:", "CONFIG_KEYS:"],
@@ -92,6 +101,10 @@ def validate_material_matrix_text(text: str, label: str) -> list[str]:
     matrix_id = extract_material_field(text, "MATRIX_ID:")
     if matrix_id and not ID_RE.fullmatch(matrix_id):
         errors.append(f"{label}: invalid stable MATRIX_ID {matrix_id!r}")
+
+    matrix_state = extract_material_field(text, "MATRIX_STATE:")
+    if matrix_state and not matrix_state.startswith("N/A:") and matrix_state not in ALLOWED_MATRIX_STATES:
+        errors.append(f"{label}: invalid MATRIX_STATE {matrix_state!r}")
     return errors
 
 
@@ -100,7 +113,12 @@ def self_test_negative_contracts() -> list[str]:
     errors: list[str] = []
     valid_lines = []
     for token in REQUIRED_MATERIAL_TOKENS:
-        value = "VAEP-MX::SELF_TEST::VALID" if token == "MATRIX_ID:" else "N/A:self-test"
+        if token == "MATRIX_ID:":
+            value = "VAEP-MX::SELF_TEST::VALID"
+        elif token == "MATRIX_STATE:":
+            value = "INVENTORY_COMPLETE"
+        else:
+            value = "N/A:self-test"
         valid_lines.append(f"- {token} {value}")
     valid = "\n".join(valid_lines) + "\n"
 
@@ -127,6 +145,91 @@ def self_test_negative_contracts() -> list[str]:
     invalid_id_errors = validate_material_matrix_text(invalid_id, "self-test invalid-id fixture")
     if not any("invalid stable MATRIX_ID" in error for error in invalid_id_errors):
         errors.append("self-test invalid-id fixture did not trigger the stable-ID rejection")
+
+    invalid_state = valid.replace("- MATRIX_STATE: INVENTORY_COMPLETE", "- MATRIX_STATE: MATERIAL")
+    invalid_state_errors = validate_material_matrix_text(invalid_state, "self-test invalid-state fixture")
+    if not any("invalid MATRIX_STATE" in error for error in invalid_state_errors):
+        errors.append("self-test invalid-state fixture did not trigger matrix lifecycle rejection")
+
+    return errors
+
+
+def validate_batch_manifest(rows: list[dict[str, str]]) -> list[str]:
+    """N8.17.A: freeze an exact one-time partition of every current catalog MATRIX_ID."""
+    errors: list[str] = []
+    if not BATCH_MANIFEST.is_file():
+        return errors
+
+    try:
+        manifest = json.loads(BATCH_MANIFEST.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"invalid N8.17.A batch manifest JSON: {exc}"]
+
+    batches = manifest.get("batches")
+    if not isinstance(batches, list) or not batches:
+        return ["N8.17.A batch manifest must contain a non-empty batches array"]
+
+    catalog_ids = [row["id"] for row in rows]
+    catalog_by_id = {row["id"]: row for row in rows}
+    manifest_ids: list[str] = []
+    batch_names: list[str] = []
+
+    for index, batch in enumerate(batches, start=1):
+        if not isinstance(batch, dict):
+            errors.append(f"batch {index}: expected object")
+            continue
+        name = batch.get("batch")
+        ids = batch.get("matrix_ids")
+        declared_count = batch.get("count")
+        if not isinstance(name, str) or not name:
+            errors.append(f"batch {index}: missing batch name")
+            continue
+        if name in batch_names:
+            errors.append(f"duplicate batch name: {name}")
+        batch_names.append(name)
+        if not isinstance(ids, list) or not all(isinstance(matrix_id, str) for matrix_id in ids):
+            errors.append(f"batch {name}: matrix_ids must be a string array")
+            continue
+        if declared_count != len(ids):
+            errors.append(f"batch {name}: declared count {declared_count!r} != actual {len(ids)}")
+        if len(ids) != len(set(ids)):
+            errors.append(f"batch {name}: duplicate MATRIX_ID inside batch")
+        for matrix_id in ids:
+            if matrix_id not in catalog_by_id:
+                errors.append(f"batch {name}: unknown MATRIX_ID {matrix_id}")
+            elif catalog_by_id[matrix_id]["domain"] != name:
+                errors.append(
+                    f"batch {name}: MATRIX_ID {matrix_id} belongs to domain "
+                    f"{catalog_by_id[matrix_id]['domain']}"
+                )
+        manifest_ids.extend(ids)
+
+    duplicates = sorted({matrix_id for matrix_id in manifest_ids if manifest_ids.count(matrix_id) > 1})
+    if duplicates:
+        errors.append(f"N8.17.A manifest duplicate MATRIX_ID values: {duplicates}")
+
+    missing = sorted(set(catalog_ids) - set(manifest_ids))
+    extra = sorted(set(manifest_ids) - set(catalog_ids))
+    if missing:
+        errors.append(f"N8.17.A manifest missing catalog MATRIX_ID values: {missing}")
+    if extra:
+        errors.append(f"N8.17.A manifest contains extra MATRIX_ID values: {extra}")
+
+    if manifest.get("expected_total") != len(catalog_ids):
+        errors.append(
+            f"N8.17.A expected_total {manifest.get('expected_total')!r} != catalog count {len(catalog_ids)}"
+        )
+    if manifest.get("frozen_matrix_id_count") != len(catalog_ids):
+        errors.append(
+            "N8.17.A frozen_matrix_id_count "
+            f"{manifest.get('frozen_matrix_id_count')!r} != catalog count {len(catalog_ids)}"
+        )
+    if manifest.get("expected_batch_count") != len(batches):
+        errors.append(
+            f"N8.17.A expected_batch_count {manifest.get('expected_batch_count')!r} != actual {len(batches)}"
+        )
+    if len(manifest_ids) != len(catalog_ids):
+        errors.append(f"N8.17.A manifest occurrences {len(manifest_ids)} != catalog count {len(catalog_ids)}")
 
     return errors
 
@@ -206,6 +309,11 @@ def main() -> int:
         errors.append("template does not explicitly reject row/index identity")
     if "MATERIAL_WITHOUT_ID" not in catalog_text:
         errors.append("catalog does not encode no-material-without-id invariant")
+    for state in ALLOWED_MATRIX_STATES:
+        if state not in template_text:
+            errors.append(f"template missing canonical MATRIX_STATE value: {state}")
+
+    errors.extend(validate_batch_manifest(rows))
 
     governed_matrices, material_errors = validate_material_matrices()
     errors.extend(material_errors)
@@ -215,10 +323,12 @@ def main() -> int:
 
     material = sum(1 for row in rows if row["status"] == "MATERIAL")
     containers = sum(1 for row in rows if row["status"] == "DISCOVERY_CONTAINER")
+    manifest_status = "present" if BATCH_MANIFEST.is_file() else "absent"
     print(
         "matrix governance PASS: "
         f"ids={len(rows)} unique={len(id_set)} material={material} "
-        f"discovery_containers={containers} governed_matrices={governed_matrices}"
+        f"discovery_containers={containers} governed_matrices={governed_matrices} "
+        f"n8_17_batch_manifest={manifest_status}"
     )
     return 0
 
