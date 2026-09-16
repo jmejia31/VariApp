@@ -92,7 +92,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.20.F-proof/2.0'})
+                  'User-Agent':'VariApp-N8.20.F-proof/2.1'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
@@ -125,12 +125,14 @@ jobs:
           if not any(hashlib.sha256(h.encode()).hexdigest()==dev_host_hash for h in candidates):
               raise SystemExit('Selected Aiven service does not match the DEV DB endpoint hash; refusing to inspect another service')
 
-          plan=svc.get('service_plan')
+          # Aiven service readback exposes the active plan as `plan` (legacy payloads may expose `service_plan`).
+          plan=svc.get('plan') or svc.get('service_plan')
           stype=svc.get('service_type')
           cloud=svc.get('cloud_name')
           state=svc.get('state')
           if not plan:
-              raise SystemExit('Aiven API did not return the actual service plan')
+              safe_keys=','.join(sorted(str(k) for k in svc.keys()))
+              raise SystemExit(f'Aiven API did not return the actual service plan; safe top-level keys={safe_keys}')
 
           plan_payload=get(f'/project/{quote(project, safe="")}/service-types/{quote(stype, safe="")}/plans/{quote(plan, safe="")}')
           plan_obj=plan_payload.get('service_plan') if isinstance(plan_payload.get('service_plan'), dict) else plan_payload
