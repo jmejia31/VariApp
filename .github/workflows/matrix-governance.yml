@@ -13,6 +13,8 @@ on:
       - 'scripts/validate_n8_17_h_certification.py'
       - 'scripts/validate_n8_18_b_domain_boundaries.py'
       - 'scripts/validate_n8_18_c_db_mig.py'
+      - 'scripts/validate_n8_18_d_backend_refactor.py'
+      - 'backend/tests/InventoryApp.Tests/Application/N818BackendArchitectureTests.cs'
       - '.github/workflows/matrix-governance.yml'
   workflow_dispatch:
 
@@ -48,3 +50,5 @@ jobs:
         run: python scripts/validate_n8_18_b_domain_boundaries.py
       - name: Validar integridad/migraciones no destructivas N8.18.C
         run: python scripts/validate_n8_18_c_db_mig.py
+      - name: Validar reorganización backend N8.18.D
+        run: python scripts/validate_n8_18_d_backend_refactor.py
