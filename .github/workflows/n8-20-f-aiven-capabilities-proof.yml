@@ -162,7 +162,12 @@ jobs:
                   if str(item.get('principal_id')) == str(current_user_id):
                       effective.extend(item.get('permissions') or [])
           effective=sorted(set(str(x) for x in effective))
-          restore_roles={'admin','developer','role:project:admin','role:services:recover'}
+          # Aiven's Developer role is read/developer access and does not prove fork/restore authority.
+          # Accept only roles/permissions that Aiven documents as able to create a service fork/recovery.
+          restore_roles={
+              'admin','operator','role:project:admin','role:project:manager',
+              'role:services:recover','project:services:write'
+          }
           restore_authorized=any(x in restore_roles for x in effective)
 
           user_config=svc.get('user_config') or {}
