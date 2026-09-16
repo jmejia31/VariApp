@@ -8,12 +8,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-GOV = ROOT / "docs" / "matrices-evaluacion" / "00_GOBERNANZA"
+MATRIX_ROOT = ROOT / "docs" / "matrices-evaluacion"
+GOV = MATRIX_ROOT / "00_GOBERNANZA"
 CATALOG = GOV / "CATALOGO_MATRICES.md"
 TEMPLATE = GOV / "PLANTILLA_MATRIZ_UI.md"
 
 ID_RE = re.compile(r"^VAEP-MX::[A-Z0-9_]+::[A-Z0-9_]+$")
 ROW_ID_RE = re.compile(r"^(?:ROW|MATRIX|MX)[-_]?\d+$", re.IGNORECASE)
+PLACEHOLDER_RE = re.compile(r"(?i)(?<![A-Z0-9_])(?:TBD|TODO|POR\s+DEFINIR|PENDIENTE\s+DE\s+DEFINIR)(?![A-Z0-9_])")
 
 REQUIRED_TEMPLATE_TOKENS = {
     "identity": ["MATRIX_ID:", "MATRIX_CHANGE_ID:", "MATRIX_VERSION:", "PARENT_MATRIX_ID:", "CONTRACT_KIND:"],
@@ -24,6 +26,12 @@ REQUIRED_TEMPLATE_TOKENS = {
     "security": ["AUTHN_REQUIRED:", "AUTHZ_POLICY_OR_PERMISSION:", "RBAC_MODULE_ACTION:", "TENANT_SCOPE:", "AUDIT_EVENTS:", "PII_CLASSIFICATION:", "LOG_REDACTION:", "RATE_LIMIT_POLICY:", "OBSERVABILITY_SIGNALS:"],
     "evidence": ["CI_RUN_REFS:", "RECEIPT_REF:", "REVIEW_FIRST:"],
 }
+
+REQUIRED_MATERIAL_TOKENS = tuple(
+    token
+    for tokens in REQUIRED_TEMPLATE_TOKENS.values()
+    for token in tokens
+)
 
 
 def fail(errors: list[str]) -> int:
@@ -54,6 +62,46 @@ def parse_catalog(text: str) -> tuple[list[dict[str, str]], list[str]]:
             "line": str(line_no),
         })
     return rows, errors
+
+
+def extract_material_field(text: str, token: str) -> str | None:
+    match = re.search(
+        rf"^\s*-\s*{re.escape(token)}\s*(.*?)\s*$",
+        text,
+        flags=re.MULTILINE,
+    )
+    if match is None:
+        return None
+    return match.group(1).strip().strip("`").strip()
+
+
+def validate_material_matrices() -> tuple[int, list[str]]:
+    """Reject incomplete governed matrices and unjustified placeholder field values."""
+    governed = 0
+    errors: list[str] = []
+    for path in sorted(MATRIX_ROOT.rglob("*.md")):
+        if GOV in path.parents:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "MATRIX_ID:" not in text:
+            continue
+        governed += 1
+        relative = path.relative_to(ROOT)
+        for token in REQUIRED_MATERIAL_TOKENS:
+            value = extract_material_field(text, token)
+            if value is None:
+                errors.append(f"{relative}: missing required field {token}")
+                continue
+            if not value:
+                errors.append(f"{relative}: blank required field {token}; use N/A:<reason> when not applicable")
+                continue
+            if PLACEHOLDER_RE.search(value):
+                errors.append(f"{relative}: unjustified placeholder in {token}: {value!r}")
+
+        matrix_id = extract_material_field(text, "MATRIX_ID:")
+        if matrix_id and not ID_RE.fullmatch(matrix_id):
+            errors.append(f"{relative}: invalid stable MATRIX_ID {matrix_id!r}")
+    return governed, errors
 
 
 def main() -> int:
@@ -93,6 +141,9 @@ def main() -> int:
             errors.append(f"line {line}: row/index-derived identity forbidden: {matrix_id}")
         if not row["domain"] or not row["kind"] or not row["implementation"]:
             errors.append(f"line {line}: blank required catalog column")
+        for column in ("domain", "kind", "implementation", "parent", "status", "classification"):
+            if PLACEHOLDER_RE.search(row[column]):
+                errors.append(f"line {line}: unjustified placeholder in catalog {column}: {row[column]!r}")
         if row["parent"] != "ROOT" and row["parent"] not in id_set:
             errors.append(f"line {line}: unknown PARENT_MATRIX_ID {row['parent']}")
         if row["status"] == "MATERIAL_WITHOUT_ID":
@@ -111,12 +162,19 @@ def main() -> int:
     if "MATERIAL_WITHOUT_ID" not in catalog_text:
         errors.append("catalog does not encode no-material-without-id invariant")
 
+    governed_matrices, material_errors = validate_material_matrices()
+    errors.extend(material_errors)
+
     if errors:
         return fail(errors)
 
     material = sum(1 for row in rows if row["status"] == "MATERIAL")
     containers = sum(1 for row in rows if row["status"] == "DISCOVERY_CONTAINER")
-    print(f"matrix governance PASS: ids={len(rows)} unique={len(id_set)} material={material} discovery_containers={containers}")
+    print(
+        "matrix governance PASS: "
+        f"ids={len(rows)} unique={len(id_set)} material={material} "
+        f"discovery_containers={containers} governed_matrices={governed_matrices}"
+    )
     return 0
 
 
