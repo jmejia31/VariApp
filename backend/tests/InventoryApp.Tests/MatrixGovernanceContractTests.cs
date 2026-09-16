@@ -108,6 +108,12 @@ public sealed class MatrixGovernanceContractTests
 
         Assert.Contains("PLACEHOLDER_RE", validator, StringComparison.Ordinal);
         Assert.Contains("validate_material_matrices", validator, StringComparison.Ordinal);
+        Assert.Contains("validate_material_matrix_text", validator, StringComparison.Ordinal);
+        Assert.Contains("self_test_negative_contracts", validator, StringComparison.Ordinal);
+        Assert.Contains("self-test missing-field fixture", validator, StringComparison.Ordinal);
+        Assert.Contains("self-test blank-field fixture", validator, StringComparison.Ordinal);
+        Assert.Contains("self-test placeholder fixture", validator, StringComparison.Ordinal);
+        Assert.Contains("self-test invalid-id fixture", validator, StringComparison.Ordinal);
         Assert.Contains("missing required field", validator, StringComparison.Ordinal);
         Assert.Contains("blank required field", validator, StringComparison.Ordinal);
         Assert.Contains("unjustified placeholder", validator, StringComparison.Ordinal);
