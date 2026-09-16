@@ -48,13 +48,15 @@ static async Task ExecuteAsync(MySqlConnection connection, string sql)
     await command.ExecuteNonQueryAsync();
 }
 
-static async Task<string?> ScalarStringAsync(MySqlConnection connection, string sql)
+static async Task<string?> SessionStatusValueAsync(MySqlConnection connection, string variable)
 {
     await using var command = connection.CreateCommand();
-    command.CommandText = sql;
+    command.CommandText = "SHOW SESSION STATUS LIKE @variable;";
+    command.Parameters.AddWithValue("@variable", variable);
     command.CommandTimeout = 20;
-    var value = await command.ExecuteScalarAsync();
-    return value is null || value is DBNull ? null : Convert.ToString(value);
+    await using var reader = await command.ExecuteReaderAsync();
+    if (!await reader.ReadAsync()) return null;
+    return reader.IsDBNull(1) ? null : reader.GetString(1);
 }
 
 var outputDirectory = args.Length > 0 ? args[0] : ".n820c-proof";
@@ -117,8 +119,8 @@ try
             compileMachine = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
         }
 
-        sslVersion = await ScalarStringAsync(connection, "SELECT VARIABLE_VALUE FROM performance_schema.session_status WHERE VARIABLE_NAME='Ssl_version' LIMIT 1;");
-        sslCipher = await ScalarStringAsync(connection, "SELECT VARIABLE_VALUE FROM performance_schema.session_status WHERE VARIABLE_NAME='Ssl_cipher' LIMIT 1;");
+        sslVersion = await SessionStatusValueAsync(connection, "Ssl_version");
+        sslCipher = await SessionStatusValueAsync(connection, "Ssl_cipher");
 
         await ExecuteAsync(connection, "ROLLBACK;");
     }
