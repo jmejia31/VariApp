@@ -75,6 +75,62 @@ def extract_material_field(text: str, token: str) -> str | None:
     return match.group(1).strip().strip("`").strip()
 
 
+def validate_material_matrix_text(text: str, label: str) -> list[str]:
+    """Validate one material matrix document against the required governance fields."""
+    errors: list[str] = []
+    for token in REQUIRED_MATERIAL_TOKENS:
+        value = extract_material_field(text, token)
+        if value is None:
+            errors.append(f"{label}: missing required field {token}")
+            continue
+        if not value:
+            errors.append(f"{label}: blank required field {token}; use N/A:<reason> when not applicable")
+            continue
+        if PLACEHOLDER_RE.search(value):
+            errors.append(f"{label}: unjustified placeholder in {token}: {value!r}")
+
+    matrix_id = extract_material_field(text, "MATRIX_ID:")
+    if matrix_id and not ID_RE.fullmatch(matrix_id):
+        errors.append(f"{label}: invalid stable MATRIX_ID {matrix_id!r}")
+    return errors
+
+
+def self_test_negative_contracts() -> list[str]:
+    """Exercise the negative matrix rules on in-memory fixtures on every gate run."""
+    errors: list[str] = []
+    valid_lines = []
+    for token in REQUIRED_MATERIAL_TOKENS:
+        value = "VAEP-MX::SELF_TEST::VALID" if token == "MATRIX_ID:" else "N/A:self-test"
+        valid_lines.append(f"- {token} {value}")
+    valid = "\n".join(valid_lines) + "\n"
+
+    valid_errors = validate_material_matrix_text(valid, "self-test valid fixture")
+    if valid_errors:
+        errors.append(f"self-test valid fixture rejected: {valid_errors}")
+
+    missing = valid.replace("- CI_RUN_REFS: N/A:self-test\n", "")
+    missing_errors = validate_material_matrix_text(missing, "self-test missing-field fixture")
+    if not any("missing required field CI_RUN_REFS:" in error for error in missing_errors):
+        errors.append("self-test missing-field fixture did not trigger the required-field rejection")
+
+    blank = valid.replace("- REQUEST_DTO: N/A:self-test", "- REQUEST_DTO:")
+    blank_errors = validate_material_matrix_text(blank, "self-test blank-field fixture")
+    if not any("blank required field REQUEST_DTO:" in error for error in blank_errors):
+        errors.append("self-test blank-field fixture did not trigger the blank-field rejection")
+
+    placeholder = valid.replace("- API_ROUTE: N/A:self-test", "- API_ROUTE: TBD")
+    placeholder_errors = validate_material_matrix_text(placeholder, "self-test placeholder fixture")
+    if not any("unjustified placeholder in API_ROUTE:" in error for error in placeholder_errors):
+        errors.append("self-test placeholder fixture did not trigger the placeholder rejection")
+
+    invalid_id = valid.replace("VAEP-MX::SELF_TEST::VALID", "ROW-17")
+    invalid_id_errors = validate_material_matrix_text(invalid_id, "self-test invalid-id fixture")
+    if not any("invalid stable MATRIX_ID" in error for error in invalid_id_errors):
+        errors.append("self-test invalid-id fixture did not trigger the stable-ID rejection")
+
+    return errors
+
+
 def validate_material_matrices() -> tuple[int, list[str]]:
     """Reject incomplete governed matrices and unjustified placeholder field values."""
     governed = 0
@@ -87,20 +143,7 @@ def validate_material_matrices() -> tuple[int, list[str]]:
             continue
         governed += 1
         relative = path.relative_to(ROOT)
-        for token in REQUIRED_MATERIAL_TOKENS:
-            value = extract_material_field(text, token)
-            if value is None:
-                errors.append(f"{relative}: missing required field {token}")
-                continue
-            if not value:
-                errors.append(f"{relative}: blank required field {token}; use N/A:<reason> when not applicable")
-                continue
-            if PLACEHOLDER_RE.search(value):
-                errors.append(f"{relative}: unjustified placeholder in {token}: {value!r}")
-
-        matrix_id = extract_material_field(text, "MATRIX_ID:")
-        if matrix_id and not ID_RE.fullmatch(matrix_id):
-            errors.append(f"{relative}: invalid stable MATRIX_ID {matrix_id!r}")
+        errors.extend(validate_material_matrix_text(text, str(relative)))
     return governed, errors
 
 
@@ -112,6 +155,8 @@ def main() -> int:
         errors.append(f"missing template: {TEMPLATE.relative_to(ROOT)}")
     if errors:
         return fail(errors)
+
+    errors.extend(self_test_negative_contracts())
 
     catalog_text = CATALOG.read_text(encoding="utf-8")
     template_text = TEMPLATE.read_text(encoding="utf-8")
