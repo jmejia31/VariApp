@@ -7,11 +7,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { firstValueFrom } from 'rxjs';
 
+export type AppAlertKind = 'info' | 'success' | 'warning' | 'error' | 'confirm';
+type LegacyAlertKind = 'advertencia' | 'peligro';
+
 export interface AppAlertData {
   titulo: string;
   mensaje: string;
   detalle?: string;
-  tipo?: 'info' | 'advertencia' | 'peligro';
+  tipo?: AppAlertKind | LegacyAlertKind;
   confirmarTexto?: string;
   cancelarTexto?: string;
   entrada?: { etiqueta: string; valor?: string; requerida?: boolean };
@@ -22,7 +25,7 @@ export interface AppAlertData {
   standalone: true,
   imports: [FormsModule, MatDialogModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
   template: `
-    <section class="app-alert" [class]="'app-alert app-alert--' + (data.tipo || 'info')">
+    <section class="app-alert" [class]="'app-alert app-alert--' + tipoNormalizado">
       <header>
         <span class="app-alert__icon" aria-hidden="true"><mat-icon>{{ icono }}</mat-icon></span>
         <div>
@@ -55,7 +58,7 @@ export interface AppAlertData {
         </button>
         <button
           class="app-alert__confirm"
-          [class.app-alert__confirm--danger]="data.tipo === 'peligro'"
+          [class.app-alert__confirm--danger]="tipoNormalizado === 'error'"
           mat-flat-button
           type="button"
           [disabled]="!!data.entrada?.requerida && !valor.trim()"
@@ -100,12 +103,18 @@ export interface AppAlertData {
       color: currentColor !important;
     }
 
-    .app-alert--advertencia .app-alert__icon {
+    .app-alert--success .app-alert__icon {
+      background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+      color: var(--color-success);
+    }
+
+    .app-alert--warning .app-alert__icon,
+    .app-alert--confirm .app-alert__icon {
       background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
       color: color-mix(in srgb, var(--color-warning) 78%, var(--color-text));
     }
 
-    .app-alert--peligro .app-alert__icon {
+    .app-alert--error .app-alert__icon {
       background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
       color: var(--color-danger);
     }
@@ -214,12 +223,20 @@ export class AppAlertDialogComponent {
     this.valor = data.entrada?.valor ?? '';
   }
 
+  get tipoNormalizado(): AppAlertKind {
+    if (this.data.tipo === 'advertencia') return 'warning';
+    if (this.data.tipo === 'peligro') return 'error';
+    return this.data.tipo ?? 'info';
+  }
+
   get icono(): string {
-    return this.data.tipo === 'peligro'
-      ? 'delete_forever'
-      : this.data.tipo === 'advertencia'
-        ? 'warning'
-        : 'info';
+    switch (this.tipoNormalizado) {
+      case 'success': return 'check_circle';
+      case 'warning': return 'warning';
+      case 'error': return 'error';
+      case 'confirm': return 'help';
+      default: return 'info';
+    }
   }
 
   confirmar(): void {
@@ -233,7 +250,7 @@ export class AppAlertService {
 
   async confirmar(data: AppAlertData): Promise<boolean> {
     const result = await firstValueFrom(this.dialog.open(AppAlertDialogComponent, {
-      data,
+      data: { ...data, tipo: data.tipo ?? 'confirm' },
       width: 'min(94vw, 540px)',
       maxWidth: '94vw',
       panelClass: 'app-alert-dialog-panel',
@@ -245,7 +262,7 @@ export class AppAlertService {
 
   async solicitarTexto(data: AppAlertData): Promise<string | null> {
     const result = await firstValueFrom(this.dialog.open(AppAlertDialogComponent, {
-      data,
+      data: { ...data, tipo: data.tipo ?? 'confirm' },
       width: 'min(94vw, 540px)',
       maxWidth: '94vw',
       panelClass: 'app-alert-dialog-panel',
