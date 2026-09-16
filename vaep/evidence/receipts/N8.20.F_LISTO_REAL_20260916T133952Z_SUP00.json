@@ -1,0 +1,61 @@
+{
+  "schema": "vaep.receipt.v1",
+  "task_id": "N8.20.F",
+  "parent": "N8.20",
+  "lane": "SEC_AUDIT",
+  "branch": "Desarrollo",
+  "status": "LISTO_REAL",
+  "closed_at": "2026-09-16T13:39:52Z",
+  "closer": "SUP00-N820F-CLOSER-20260916T133743Z",
+  "dependency": "N8.20.E",
+  "dependency_status": "LISTO_REAL",
+  "candidate_head": "e083135cbc0d29fe017c93e61d3d667db7730e21",
+  "review_first": {
+    "status": "PASS",
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "artifact": "vaep/evidence/reviews/N8.20.F_REVIEW_FIRST_20260916T133952Z_SUP00.json"
+  },
+  "provider_evidence": {
+    "path": "vaep/evidence/aiven/2026-09-16T132330Z_mcp_readonly_portable.json",
+    "sha256": "19da8e5a1682a365181237055912f44322c4729d86af9a64b62df3ec7ebcc490",
+    "provider": "aiven",
+    "project": "variapp",
+    "service": "variapp-db-testing",
+    "engine": "pg",
+    "platform_version": "18",
+    "plan": "hobbyist",
+    "state": "running",
+    "automated_backups": true,
+    "daily_backups": 2,
+    "backup_time": "00:00:00",
+    "point_in_time_recovery": false,
+    "restore_contract_observed": true,
+    "ssl_required": true,
+    "public_access": true,
+    "high_availability": false,
+    "private_networking": false
+  },
+  "causal_gates": [
+    {
+      "workflow": "vaep-aiven-certify-evidence.yml",
+      "run_id": 35101887861,
+      "head_sha": "e083135cbc0d29fe017c93e61d3d667db7730e21",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "closure_class": "evidence_only_closure",
+  "production_touched": false,
+  "main_touched": false,
+  "deploy_touched": false,
+  "secrets_exposed": 0,
+  "paid_action": false,
+  "restore_executed": false,
+  "false_pass": false,
+  "notes": [
+    "Current service PITR remains false; generic restore/time-travel provider operation metadata is not represented as enabled PITR.",
+    "The previously recorded external blocker is superseded by fresh authorized Aiven read-only control-plane evidence and a successful causal certifier gate."
+  ]
+}

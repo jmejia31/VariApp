@@ -1,0 +1,59 @@
+{
+  "schema": "vaep.review.v1",
+  "task_id": "N8.20.F",
+  "lane": "SEC_AUDIT",
+  "branch": "Desarrollo",
+  "reviewed_at": "2026-09-16T13:39:52Z",
+  "reviewer": "SUP00-N820F-CLOSER-20260916T133743Z",
+  "candidate_head": "e083135cbc0d29fe017c93e61d3d667db7730e21",
+  "review_first": true,
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0
+  },
+  "decision": "PASS",
+  "scope": "Verificar capabilities reales del provider sin compra, upgrade ni exposición de secretos.",
+  "evidence": {
+    "path": "vaep/evidence/aiven/2026-09-16T132330Z_mcp_readonly_portable.json",
+    "sha256": "19da8e5a1682a365181237055912f44322c4729d86af9a64b62df3ec7ebcc490",
+    "source": "authorized Aiven plugin read-only control-plane export",
+    "provider": "aiven",
+    "project": "variapp",
+    "service": "variapp-db-testing",
+    "service_type": "pg",
+    "plan": "hobbyist",
+    "platform_version": "18",
+    "service_state": "running",
+    "service_features": {
+      "automated_backups": true,
+      "point_in_time_recovery": false,
+      "connection_pooling": false,
+      "high_availability": false,
+      "private_networking": false,
+      "vpc_peering": false,
+      "public_access": true,
+      "ssl_required": true,
+      "automatic_maintenance_updates": true,
+      "read_replicas": false
+    },
+    "plan_facts": {
+      "daily_backups": 2,
+      "backup_time": "00:00:00",
+      "disk_space_mb": 7991
+    },
+    "restore_contract_observed": true
+  },
+  "review_notes": [
+    "The service-level feature point_in_time_recovery=false is authoritative for the current DEV service and is not overridden by generic provider restore/time-travel operation semantics.",
+    "Provider restore operation metadata is treated only as an observed provider contract/capability surface; it is not claimed as enabled PITR for this service.",
+    "No secrets, purchase, plan change, restore execution, production access, main mutation, deploy, or PR #2 mutation occurred.",
+    "The prior external-blocker description became stale once the authorized Aiven control-plane evidence was committed and certified; no external blocker remains for N8.20.F."
+  ],
+  "causal_gate": {
+    "workflow": "vaep-aiven-certify-evidence.yml",
+    "run_id": 35101887861,
+    "head_sha": "e083135cbc0d29fe017c93e61d3d667db7730e21",
+    "conclusion": "success"
+  }
+}
