@@ -15,6 +15,8 @@ Debe rechazar, al menos:
 - implementación root duplicada dentro del catálogo inicial;
 - diferencia entre conteo declarado y filas reales;
 - falta de campos obligatorios de identidad/ownership/data/backend/frontend/security/evidence en la plantilla;
+- matrices materializadas incompletas: si un documento fuera de `00_GOBERNANZA` declara `MATRIX_ID:`, todos los campos obligatorios deben existir y tener valor; cuando un campo no aplique debe usarse `N/A:<reason>`;
+- placeholders injustificados (`TBD`, `TODO`, `POR DEFINIR` o `PENDIENTE DE DEFINIR`) en campos obligatorios de una matriz materializada o en columnas canónicas del catálogo;
 - ausencia del invariante `MATERIAL_WITHOUT_ID` prohibido;
 - pérdida de cobertura de cualquiera de los cinco tipos UI representativos exigidos por N8.16.G.
 
