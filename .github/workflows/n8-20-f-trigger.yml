@@ -1,6 +1,6 @@
 name: N8.20.F - Trigger Aiven DEV Proof
 
-# Recovery iteration 3: dispatch after organization/project permission resolution fix.
+# Recovery iteration 4: dispatch after exact current project-id resolution fix.
 on:
   push:
     branches:
