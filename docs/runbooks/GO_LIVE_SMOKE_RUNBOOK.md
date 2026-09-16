@@ -24,10 +24,11 @@ test "$(git branch --show-current)" = "Desarrollo"
 git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
 export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
 export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
-printf '%s\n' "$FRONTEND_URL" "$BACKEND_URL" | grep -Ev 'varistorehn\.vercel\.app|https://variapp-api([./]|$)' >/dev/null
+test "$FRONTEND_URL" = "https://variapp-desarrollo.vercel.app"
+test "$BACKEND_URL" = "https://variapp-api-desarrollo.onrender.com"
 ```
 
-STOP si cualquiera de los destinos corresponde a Producción o si la rama/remoto no coinciden.
+STOP si cualquiera de los destinos corresponde a Producción o si la rama/remoto no coinciden. No sustituir estas constantes por un dominio recibido sin validación explícita.
 
 ## Gate 1 — smoke HTTP sin autenticación ni escritura
 
