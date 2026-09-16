@@ -77,7 +77,7 @@ curl --fail-with-body --silent --show-error --max-time 30 -L -o /dev/null "$FRON
 
 Además debe revisarse el log del deployment actual mediante la superficie autorizada de Render/Vercel. Buscar errores 5xx, restarts repetidos, fallos de conexión DB, excepciones no controladas y errores de assets/build. No copiar valores de variables de entorno ni secretos a la evidencia.
 
-## Gate 4 — control de datos y seguridad
+## Gate 4 — control de datos, rotación y seguridad
 
 Durante hypercare:
 
@@ -90,6 +90,8 @@ Durante hypercare:
 - no reintentar una mutación si existe duda de idempotencia; primero clasificar y revisar.
 
 Toda evidencia debe anonimizar identificadores de cliente/usuario cuando no sean estrictamente necesarios para demostrar el gate.
+
+Los secretos efímeros generados para ensayos se destruyen al finalizar el proceso y nunca se versionan. Si se detecta exposición o sospecha de compromiso de una credencial real, clasificar P0, detener el runbook y solicitar revocación/rotación mediante el proveedor autorizado; N8.23.F no rota ni modifica secretos por sí mismo. Después de una rotación autorizada, repetir health/smoke e iniciar una ventana nueva de hypercare antes de certificar.
 
 ## STOP / recovery
 
