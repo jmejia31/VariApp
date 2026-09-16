@@ -12,6 +12,7 @@ on:
       - 'scripts/validate_n8_17_g_traceability.py'
       - 'scripts/validate_n8_17_h_certification.py'
       - 'scripts/validate_n8_18_b_domain_boundaries.py'
+      - 'scripts/validate_n8_18_c_db_mig.py'
       - '.github/workflows/matrix-governance.yml'
   workflow_dispatch:
 
@@ -45,3 +46,5 @@ jobs:
         run: python scripts/validate_n8_17_h_certification.py
       - name: Validar límites y ownership de dominio N8.18.B
         run: python scripts/validate_n8_18_b_domain_boundaries.py
+      - name: Validar integridad/migraciones no destructivas N8.18.C
+        run: python scripts/validate_n8_18_c_db_mig.py
