@@ -66,7 +66,7 @@ def parse_catalog(text: str) -> tuple[list[dict[str, str]], list[str]]:
 
 def extract_material_field(text: str, token: str) -> str | None:
     match = re.search(
-        rf"^\s*-\s*{re.escape(token)}\s*(.*?)\s*$",
+        rf"^[ \t]*-[ \t]*{re.escape(token)}[ \t]*(.*?)[ \t]*$",
         text,
         flags=re.MULTILINE,
     )
