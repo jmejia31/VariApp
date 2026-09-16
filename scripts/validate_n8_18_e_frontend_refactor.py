@@ -69,6 +69,15 @@ def main() -> None:
         if f'aria-labelledby="{parent_id}"' not in nav_text:
             fail(f"missing accessible parent group {parent_id}")
 
+    report_guard = re.compile(
+        r"@if \(permisosRuntime\.esAdministrador\(\) && "
+        r"permisosRuntime\.puede\('ReportesAdministrativos', 'Ver'\)\) \{\s*"
+        r"<a routerLink=\"/centro-reportes\"",
+        re.MULTILINE,
+    )
+    if not report_guard.search(nav_text):
+        fail("centro-reportes menu visibility must preserve admin + ReportesAdministrativos guard")
+
     if "<app-navigation-menu />" not in shell_text:
         fail("app shell does not render the canonical navigation component")
     if "aria-label=\"Navegación principal\"" not in shell_text:
@@ -103,8 +112,8 @@ def main() -> None:
     print(
         "N8.18.E PASS: "
         f"parents={len(groups)} routes={len(contract_routes)} "
-        "alert_semantics=5 toast_channel=shared remove_safe_deletions=0 "
-        "shell_accessibility=preserved"
+        "alert_semantics=5 toast_channel=shared report_guard=preserved "
+        "remove_safe_deletions=0 shell_accessibility=preserved"
     )
 
 
