@@ -46,6 +46,12 @@ PREARM_BEFORE_CAUSAL_CI=TRUE
 VAEP_CHECKPOINTS=:00,:12,:24,:36,:48
 VAEP_SUPERVISOR_CHECKPOINTS=:05,:17,:29,:41,:53
 VAEP_ALL_ACTIVE_SLOTS=:00,:05,:12,:17,:24,:29,:36,:41,:48,:53
+MANUAL_RUN_SLOT_GUARD=TRUE
+MANUAL_RUN_NEAREST_DUE_SLOT_ONLY=TRUE
+MANUAL_RUN_PAST_WINDOW_MINUTES=3
+MANUAL_RUN_FUTURE_SLOT_PREEMPT_PROHIBITED=TRUE
+MANUAL_RUN_OFF_SLOT_PROHIBITED=TRUE
+MANUAL_RUN_SELECTION_TIEBREAK=LATEST_DUE_SLOT
 DEFECT_RECOVERY_FIRST=TRUE
 FIRST_DETECTOR_OWNS_RECOVERY=TRUE
 NO_REJECT_QUEUE=TRUE
@@ -100,6 +106,18 @@ Reglas absolutas:
 - Un slot no termina en `REPORT_ONLY`, `HANDOFF_ONLY`, `PENDING_REVIEW`, `WAITING` o equivalente si existe acción material segura que el ejecutor puede realizar.
 - Un checkpoint es un disparador, no una frontera de ownership.
 - Tras `LISTO_REAL`, promover el sucesor dependency-valid y continuar same-run si es seguro.
+
+### 2.1 Integridad de slots para `run_now` manual
+
+Una recuperación manual desde chat/controller es excepcional y no puede romper el orden temporal de las diez automatizaciones.
+
+1. Antes de cualquier `run_now`, obtener la hora local fresca en `America/Tegucigalpa` y releer los diez horarios canónicos.
+2. Sólo es elegible manualmente el slot canónico YA VENCIDO más cercano al momento actual, siempre que su minuto canónico haya ocurrido hace como máximo 3 minutos.
+3. Si no existe un slot vencido dentro de esa ventana, NO lanzar otra automatización fuera de hora; dejar que el siguiente slot exacto programado dispare por sí mismo.
+4. Está prohibido adelantar manualmente un slot futuro y está prohibido elegir una automatización más lejana sólo por su nombre, rol, ownership histórico o parent previo.
+5. En empate, gana el slot vencido más reciente. Nunca se salta hacia atrás a un slot antiguo si existe uno más cercano temporalmente.
+6. `run_now` no modifica RRULE, timezone, título ni prompt. El schedule canónico sigue siendo la fuente de cadencia.
+7. Un `run_now` solicitado sólo demuestra que la ejecución inmediata fue pedida; nunca equivale a `ACTIVE_REAL`, progreso material, PASS o `LISTO_REAL` sin readback posterior.
 
 ## 3. Ownership y lease
 
