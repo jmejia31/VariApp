@@ -1,0 +1,270 @@
+name: N8.20.F - Aiven DEV Capabilities Read-only Proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      persist_evidence:
+        description: Persist sanitized evidence back to Desarrollo
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  EVIDENCE_ROOT: docs/evidencias/database-provider/n8-20-f/github-actions
+
+jobs:
+  prove-aiven-dev-capabilities:
+    name: Prove Aiven DEV plan/backups/PITR/restore without secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact Desarrollo head
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 1
+
+      - name: Guard required secrets
+        shell: bash
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+        run: |
+          set -euo pipefail
+          test -n "$AIVEN_TOKEN" || { echo 'AIVEN_TOKEN secret is missing'; exit 20; }
+          test -n "$DEV_DB" || { echo 'VARIAPP_DEV_DB_CONNECTION secret is missing'; exit 21; }
+          echo 'Required secrets are present; values are not printed.'
+
+      - name: Discover matching Aiven DEV MySQL service read-only
+        id: discover
+        shell: bash
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, re, sys, urllib.request, urllib.error
+          from urllib.parse import quote
+
+          token = os.environ['AIVEN_TOKEN']
+          conn = os.environ['DEV_DB']
+
+          def parse_conn(s):
+              out = {}
+              for part in s.split(';'):
+                  if '=' in part:
+                      k,v = part.split('=',1)
+                      out[k.strip().lower()] = v.strip()
+              return out
+
+          cs = parse_conn(conn)
+          host = cs.get('server') or cs.get('host') or cs.get('data source')
+          if not host:
+              raise SystemExit('Could not parse DEV DB host from VARIAPP_DEV_DB_CONNECTION')
+          target_hash = hashlib.sha256(host.lower().encode()).hexdigest()
+
+          def get(url):
+              req = urllib.request.Request(url, headers={
+                  'Authorization': f'aivenv1 {token}',
+                  'Accept': 'application/json',
+                  'User-Agent': 'VariApp-N8.20.F-proof/1.0',
+              })
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      return json.load(r)
+              except urllib.error.HTTPError as e:
+                  body = e.read().decode('utf-8', 'replace')[:1000]
+                  raise SystemExit(f'Aiven API HTTP {e.code}: {body}')
+
+          projects_payload = get('https://api.aiven.io/v1/project')
+          projects = projects_payload.get('projects', [])
+          match = None
+          inspected = 0
+
+          for p in projects:
+              pname = p.get('project_name') or p.get('name')
+              if not pname:
+                  continue
+              services_payload = get(f'https://api.aiven.io/v1/project/{quote(pname, safe="")}/service')
+              for s in services_payload.get('services', []):
+                  if s.get('service_type') != 'mysql':
+                      continue
+                  inspected += 1
+                  candidates = []
+                  for uri_key in ('service_uri', 'service_uri_params'):
+                      val = s.get(uri_key)
+                      if isinstance(val, str):
+                          m = re.search(r'@([^:/?#]+)', val)
+                          if m: candidates.append(m.group(1))
+                  for comp in s.get('connection_info', []) if isinstance(s.get('connection_info'), list) else []:
+                      if isinstance(comp, dict) and comp.get('host'):
+                          candidates.append(comp['host'])
+                  comps = s.get('components')
+                  if isinstance(comps, list):
+                      for comp in comps:
+                          if isinstance(comp, dict) and comp.get('host'):
+                              candidates.append(comp['host'])
+                  if any(hashlib.sha256(str(h).lower().encode()).hexdigest() == target_hash for h in candidates):
+                      match = (pname, s.get('service_name'))
+                      break
+              if match:
+                  break
+
+          if not match:
+              raise SystemExit(f'No Aiven MySQL service matched the DEV DB host hash; inspected={inspected}')
+
+          project, service = match
+          print(f'project={project}')
+          print(f'service={service}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'project={project}\nservice={service}\nhost_sha256={target_hash}\n')
+          PY
+
+      - name: Capture actual service, plan, backup and restore metadata
+        shell: bash
+        env:
+          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
+          PROJECT: ${{ steps.discover.outputs.project }}
+          SERVICE: ${{ steps.discover.outputs.service }}
+          HOST_SHA256: ${{ steps.discover.outputs.host_sha256 }}
+        run: |
+          set -euo pipefail
+          RUN_DIR="$EVIDENCE_ROOT/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$RUN_DIR"
+          export RUN_DIR
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+          from urllib.parse import quote
+          from datetime import datetime, timezone
+
+          token=os.environ['AIVEN_TOKEN']; project=os.environ['PROJECT']; service=os.environ['SERVICE']
+          root='https://api.aiven.io/v1'
+
+          def get(path):
+              req=urllib.request.Request(root+path, headers={
+                  'Authorization': f'aivenv1 {token}', 'Accept':'application/json',
+                  'User-Agent':'VariApp-N8.20.F-proof/1.0'})
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r: return json.load(r)
+              except urllib.error.HTTPError as e:
+                  body=e.read().decode('utf-8','replace')[:1000]
+                  raise SystemExit(f'Aiven API HTTP {e.code} for {path}: {body}')
+
+          svc=get(f'/project/{quote(project, safe="")}/service/{quote(service, safe="")}')
+          s=svc.get('service', svc)
+          plan=s.get('service_plan')
+          stype=s.get('service_type')
+          cloud=s.get('cloud_name')
+          state=s.get('state')
+          if not plan or stype != 'mysql': raise SystemExit('Actual service plan/type not available from Aiven API')
+
+          plan_payload=get(f'/project/{quote(project, safe="")}/service-types/{quote(stype, safe="")}/plans/{quote(plan, safe="")}')
+          plan_obj=plan_payload.get('service_plan', plan_payload)
+          backup_config=plan_obj.get('backup_config') or {}
+
+          backups=get(f'/project/{quote(project, safe="")}/service/{quote(service, safe="")}/backups')
+          backup_list=backups.get('backups', [])
+
+          user_config=s.get('user_config') or {}
+          recovery_mode=backup_config.get('recovery_mode')
+          retention_minutes=backup_config.get('infrequent_oldest_age_minutes') or backup_config.get('frequent_oldest_age_minutes')
+          max_count=backup_config.get('max_count')
+
+          latest=None
+          if backup_list:
+              latest=max(backup_list, key=lambda b: b.get('backup_time',''))
+
+          # Fail closed: plan, concrete backups and provider backup policy must all be observable.
+          pass_ok=bool(plan and backup_config and backup_list and recovery_mode)
+
+          evidence={
+            'schema':'variapp.aiven-capabilities-proof.v1',
+            'authority':'docs/VAEP_AUTHORITY.md',
+            'task':'N8.20.F',
+            'status':'PASS_AIVEN_CAPABILITIES_IDENTIFIED' if pass_ok else 'NOT_CERTIFIED',
+            'capturedAtUtc':datetime.now(timezone.utc).isoformat(),
+            'branch':'Desarrollo',
+            'functionalHead':os.environ.get('GITHUB_SHA'),
+            'githubActions':{'runId':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},
+            'service':{
+              'provider':'AIVEN','serviceType':stype,'servicePlan':plan,'cloudName':cloud,'state':state,
+              'projectName':project,'serviceName':service,'devDbHostSha256':os.environ['HOST_SHA256']
+            },
+            'backupPolicy':{
+              'recoveryMode':recovery_mode,
+              'retentionMinutes':retention_minutes,
+              'maxCount':max_count,
+              'frequentIntervalMinutes':backup_config.get('frequent_interval_minutes'),
+              'frequentOldestAgeMinutes':backup_config.get('frequent_oldest_age_minutes'),
+              'infrequentIntervalMinutes':backup_config.get('infrequent_interval_minutes'),
+              'infrequentOldestAgeMinutes':backup_config.get('infrequent_oldest_age_minutes'),
+              'backupHour':user_config.get('backup_hour'),
+              'backupMinute':user_config.get('backup_minute')
+            },
+            'actualBackups':{
+              'countObserved':len(backup_list),
+              'latestBackupTime': latest.get('backup_time') if latest else None,
+              'latestBackupStorageLocation': latest.get('storage_location') if latest else None,
+              'latestBackupSizeBytes': latest.get('data_size') if latest else None
+            },
+            'restoreCapability':{
+              'providerManagedBackupObserved':bool(backup_list),
+              'recoveryMode':recovery_mode,
+              'pointInTimeRecoveryIndicated': recovery_mode not in (None,'basic'),
+              'restoreExecutionPerformed':False,
+              'restoreAuthorizationChanged':False,
+              'paidActionExecuted':False
+            },
+            'guardrails':{
+              'readOnlyApiCallsOnly':True,'connectionStringPersisted':False,'aivenTokenPersisted':False,
+              'databasePasswordPersisted':False,'productionTouched':False,'mainTouched':False,
+              'planChanged':False,'backupChanged':False,'restoreExecuted':False,'secretsExposed':0
+            },
+            'acceptance':{
+              'actualPlanTierProven':bool(plan),
+              'actualBackupStateProven':bool(backup_list),
+              'actualRetentionPolicyProven':bool(backup_config),
+              'actualRestoreCapabilityProven':bool(recovery_mode),
+              'costImpactConstraint':'READ_ONLY_NO_PURCHASE_NO_PLAN_CHANGE_NO_RESTORE_EXECUTION',
+              'p0':0 if pass_ok else 1,'p1':0
+            }
+          }
+          out=os.path.join(os.environ['RUN_DIR'],'N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json')
+          with open(out,'w') as f: json.dump(evidence,f,indent=2)
+          md=f'''# N8.20.F — Aiven DEV capabilities proof\n\n- Estado: `{evidence['status']}`\n- Provider: `AIVEN`\n- Service type: `{stype}`\n- Plan/tier actual: `{plan}`\n- Cloud: `{cloud}`\n- State: `{state}`\n- Backups observados: `{len(backup_list)}`\n- Último backup UTC: `{evidence['actualBackups']['latestBackupTime']}`\n- Recovery mode: `{recovery_mode}`\n- Retention minutes (control-plane): `{retention_minutes}`\n- Max backups (control-plane): `{max_count}`\n- Restore ejecutado: `false`\n- Plan cambiado/comprado: `false`\n- Production touched: `false`\n- Secrets exposed: `0`\n\n## Dictamen\n\n`{'N8.20.F tiene evidencia técnica suficiente para REVIEW_FIRST y cierre LISTO_REAL.' if pass_ok else 'N8.20.F NO puede cerrarse todavía; evidencia control-plane incompleta.'}`\n'''
+          with open(os.path.join(os.environ['RUN_DIR'],'README.md'),'w') as f: f.write(md)
+          print(json.dumps({'task':'N8.20.F','pass':pass_ok,'plan':plan,'backupCount':len(backup_list),'recoveryMode':recovery_mode,'evidenceDir':os.environ['RUN_DIR']}))
+          if not pass_ok: raise SystemExit(30)
+          PY
+
+      - name: Publish sanitized job summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUN_DIR="$EVIDENCE_ROOT/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          if [ -f "$RUN_DIR/README.md" ]; then cat "$RUN_DIR/README.md" >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Upload sanitized evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n8-20-f-aiven-capabilities-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE_ROOT }}/${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+
+      - name: Persist sanitized evidence to Desarrollo
+        if: ${{ success() && inputs.persist_evidence }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$EVIDENCE_ROOT/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git diff --cached --check
+          git commit -m 'evidence(n8.20.f): certify Aiven DEV capabilities read-only' || exit 0
+          git push origin HEAD:Desarrollo
