@@ -64,6 +64,42 @@ public sealed class MatrixGovernanceContractTests
         Assert.Contains("jamás se deriva de fila, índice, orden visual", template, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void N816G_RepresentativeSamples_CoverEveryCanonicalUiType()
+    {
+        var root = FindRepositoryRoot();
+        var evidencePath = Path.Combine(
+            root,
+            "docs",
+            "matrices-evaluacion",
+            "00_GOBERNANZA",
+            "N8_16_G_TEST_CI.md");
+        var evidence = File.ReadAllText(evidencePath);
+
+        var expectedSamples = new (string Sample, string ContractKind)[]
+        {
+            ("screen", "SCREEN"),
+            ("dialog", "BUSINESS_DIALOG"),
+            ("widget", "EMBEDDED_INTERACTIVE"),
+            ("shell", "SHELL"),
+            ("shared", "SHARED_PRIMITIVE")
+        };
+
+        var sampleRows = evidence
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line => expectedSamples.Any(sample =>
+                line.StartsWith($"| `{sample.Sample}` |", StringComparison.Ordinal)))
+            .ToArray();
+
+        Assert.Equal(expectedSamples.Length, sampleRows.Length);
+        Assert.All(expectedSamples, sample =>
+            Assert.Contains(
+                $"| `{sample.Sample}` | `{sample.ContractKind}` |",
+                evidence,
+                StringComparison.Ordinal));
+        Assert.Contains("fixtures de gobierno, no inventario de producto", evidence, StringComparison.Ordinal);
+    }
+
     private static CatalogRow ParseCatalogRow(string line)
     {
         var cells = line.Trim().Trim('|').Split('|').Select(cell => cell.Trim().Trim('`')).ToArray();
