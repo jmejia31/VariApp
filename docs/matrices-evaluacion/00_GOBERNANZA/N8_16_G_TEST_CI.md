@@ -1,6 +1,6 @@
 # N8.16.G — TEST_CI / gobierno de matrices
 
-Estado: `VALIDATING`.
+Estado: `LISTO_REAL`.
 
 ## Checks automatizados
 
@@ -34,4 +34,16 @@ Estas muestras son **fixtures de gobierno, no inventario de producto ni afirmaci
 
 El test `MatrixGovernanceContractTests` debe leer esta tabla y exigir exactamente las cinco parejas anteriores. Si falta una muestra, si se duplica una clave o si cambia su `CONTRACT_KIND`, el gate falla. Así la aceptación `screen/dialog/widget/shell/shared` queda comprobada por CI sin fabricar componentes productivos.
 
-El gate corre sólo sobre `Desarrollo`, no despliega y no toca datos. El estado pasa a `LISTO_REAL` únicamente después de un run causal terminal `SUCCESS`, REVIEW_FIRST con `P0=0/P1=0` y readback de su job.
+## FIRST_DETECTOR_OWNS_RECOVERY
+
+REVIEW_FIRST detectó que la prueba anterior sólo verificaba strings del validador y no ejecutaba escenarios negativos. Al agregar self-tests ejecutables, el primer gate expuso además un falso negativo real: el extractor usaba `\s*`, que podía consumir el salto de línea y tratar el siguiente campo como valor de un campo vacío. La recuperación same-run quedó cerrada reemplazando ese match por whitespace horizontal (`[ \t]*`) y ejecutando en cada gate fixtures negativas para campo faltante, campo vacío, placeholder injustificado e ID inválido.
+
+Evidencia REVIEW_FIRST: `vaep/evidence/reviews/N8.16.G_REVIEW_FIRST_20260916T015655Z_SUP48.json`. Resultado final: `P0=0`, `P1=0`.
+
+## Gates causales
+
+- Gobierno de matrices sobre `e33efc2810199985968bc2e1e6e43f69dcac816b`: run `35046042251`, job/check `104635949174`, terminal `SUCCESS`. Este run ejecutó el validador ya corregido y sus fixtures negativas.
+- Backend Release/tests sobre `f1a19862158df6ade27911ea71986b5521829bf4`: run `35046000934`, job/check `104635828543`, terminal `SUCCESS`. Ese candidate contiene el contrato `MatrixGovernanceContractTests` que exige la presencia de los self-tests ejecutables.
+- Los commits posteriores de REVIEW_FIRST/documentación son control/evidencia; no cambian producto, esquema, script ni test funcional. Cualquier cambio posterior en gobierno/script/test invalida esta equivalencia y exige nuevo gate causal.
+
+El gate corre sólo sobre `Desarrollo`, no despliega y no toca datos. `N8.16.G` queda certificable en `LISTO_REAL` con REVIEW_FIRST `P0=0/P1=0`; su sucesor dependency-valid es `N8.16.H — DOC_CERT`.
