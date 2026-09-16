@@ -33,12 +33,18 @@ done
 
 RESTORE_ENV_NORMALIZED="$(printf '%s' "$RESTORE_ENVIRONMENT" | tr '[:upper:]' '[:lower:]')"
 TARGET_DB_NORMALIZED="$(printf '%s' "$TARGET_DB_NAME" | tr '[:upper:]' '[:lower:]')"
+TARGET_DB_HOST_NORMALIZED="$(printf '%s' "$TARGET_DB_HOST" | tr '[:upper:]' '[:lower:]')"
 TARGET_DB_SSL_MODE="${TARGET_DB_SSL_MODE:-PREFERRED}"
 TARGET_DB_SSL_MODE="$(printf '%s' "$TARGET_DB_SSL_MODE" | tr '[:lower:]' '[:upper:]')"
 
 case "$RESTORE_ENV_NORMALIZED" in
   ci|desarrollo-descartable|development-disposable) ;;
   *) fail "M11 solo permite restore en CI o Desarrollo descartable. Entorno recibido: $RESTORE_ENVIRONMENT" ;;
+esac
+
+case "$TARGET_DB_HOST_NORMALIZED" in
+  127.0.0.1|localhost|::1) ;;
+  *) fail "Protección fail-closed: M11 solo permite restore contra un servidor MySQL local/descartable del runner; TARGET_DB_HOST remoto bloqueado." ;;
 esac
 
 case "$TARGET_DB_SSL_MODE" in
