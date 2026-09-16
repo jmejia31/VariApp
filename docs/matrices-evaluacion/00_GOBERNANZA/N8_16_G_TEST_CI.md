@@ -4,7 +4,7 @@ Estado: `VALIDATING`.
 
 ## Checks automatizados
 
-El validador canónico es `scripts/validate_matrix_governance.py` y el gate dedicado es `.github/workflows/matrix-governance.yml` (`Desarrollo - Gobierno de matrices`).
+El validador canónico es `scripts/validate_matrix_governance.py` y el gate dedicado es `.github/workflows/matrix-governance.yml` (`Desarrollo - Gobierno de matrices`). El contrato de regresión en backend es `backend/tests/InventoryApp.Tests/MatrixGovernanceContractTests.cs` y forma parte del gate causal de `Desarrollo`.
 
 Debe rechazar, al menos:
 
@@ -15,6 +15,21 @@ Debe rechazar, al menos:
 - implementación root duplicada dentro del catálogo inicial;
 - diferencia entre conteo declarado y filas reales;
 - falta de campos obligatorios de identidad/ownership/data/backend/frontend/security/evidence en la plantilla;
-- ausencia del invariante `MATERIAL_WITHOUT_ID` prohibido.
+- ausencia del invariante `MATERIAL_WITHOUT_ID` prohibido;
+- pérdida de cobertura de cualquiera de los cinco tipos UI representativos exigidos por N8.16.G.
 
-El gate corre sólo sobre `Desarrollo`, no despliega y no toca datos. El estado pasa a `LISTO_REAL` únicamente después de un run causal terminal `SUCCESS` y readback de su job.
+## Muestras representativas de contrato UI
+
+Estas muestras son **fixtures de gobierno, no inventario de producto ni afirmación de implementación**. Su única función es hacer reproducible el contrato de clasificación antes de que los módulos posteriores materialicen matrices visuales concretas.
+
+| muestra | CONTRACT_KIND canónico | semántica mínima validada |
+|---|---|---|
+| `screen` | `SCREEN` | superficie navegable con estado e interacción material |
+| `dialog` | `BUSINESS_DIALOG` | diálogo de negocio con entrada/validación/resultado |
+| `widget` | `EMBEDDED_INTERACTIVE` | unidad embebida con datos, estado o interacción material |
+| `shell` | `SHELL` | contenedor/ruta/menú que organiza superficies dependientes |
+| `shared` | `SHARED_PRIMITIVE` | primitiva compartida con contrato material reutilizable |
+
+El test `MatrixGovernanceContractTests` debe leer esta tabla y exigir exactamente las cinco parejas anteriores. Si falta una muestra, si se duplica una clave o si cambia su `CONTRACT_KIND`, el gate falla. Así la aceptación `screen/dialog/widget/shell/shared` queda comprobada por CI sin fabricar componentes productivos.
+
+El gate corre sólo sobre `Desarrollo`, no despliega y no toca datos. El estado pasa a `LISTO_REAL` únicamente después de un run causal terminal `SUCCESS`, REVIEW_FIRST con `P0=0/P1=0` y readback de su job.
