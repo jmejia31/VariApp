@@ -10,6 +10,8 @@ Baseline de inventario: `N8.15.H` (`158` registros ancla arquitectónicos certif
 - `FEATURE_GROUP` es contenedor de descubrimiento. Sus screens/dialogs/widgets/primitives internos sólo pasan a `MATERIAL` después de materiality review y asignación previa de un ID propio.
 - Por definición de gobierno, `MATERIAL_WITHOUT_ID` es inválido.
 - Aliases no crean nuevas identidades; splits/merges/supersession se documentan explícitamente.
+- La columna `STATUS` de este catálogo raíz expresa **materialidad/descubrimiento** (`MATERIAL | DISCOVERY_CONTAINER`); no es el estado de ciclo de vida de la matriz.
+- El ciclo canónico independiente es `MATRIX_STATE`: `BASELINE_CREATED -> INVENTORY_COMPLETE -> SPEC_COMPLETE -> IMPLEMENTATION_REVIEWED -> CERTIFIED`. `CERTIFIED` exige evidencia material y no se obtiene por la mera existencia de documentación.
 
 ## Catálogo inicial gobernado
 
@@ -67,12 +69,41 @@ Conteo exacto: **49 contract roots** = 1 shell + 48 feature roots inventariados 
 | VAEP-MX::CUSTOMERS_COMMERCIAL::VARISTOREHN | CUSTOMERS_COMMERCIAL | FEATURE_GROUP | `frontend/src/app/features/varistorehn` | VAEP-MX::GOV_CONFIG_INTEGRATIONS::APP_SHELL | DISCOVERY_CONTAINER | KEEP |
 | VAEP-MX::CUSTOMERS_COMMERCIAL::VENTAS | CUSTOMERS_COMMERCIAL | FEATURE_GROUP | `frontend/src/app/features/ventas` | VAEP-MX::GOV_CONFIG_INTEGRATIONS::APP_SHELL | DISCOVERY_CONTAINER | KEEP |
 
+## Estado de matriz canónico en N8.16.H
+
+El mapping de ciclo de vida es exacto y separado de `STATUS`: **los 49/49 contract roots anteriores tienen `MATRIX_STATE = INVENTORY_COMPLETE` en N8.16.H**. La identidad, ownership, parentage, implementación raíz y materialidad/discovery están inventariados, pero N8.17 todavía debe materializar y especificar los contratos hijos de screen/dialog/widget/shared primitive antes de cualquier avance a `SPEC_COMPLETE`.
+
+Distribución exacta en este corte:
+
+| MATRIX_STATE | Conteo |
+|---|---:|
+| BASELINE_CREATED | 0 |
+| INVENTORY_COMPLETE | 49 |
+| SPEC_COMPLETE | 0 |
+| IMPLEMENTATION_REVIEWED | 0 |
+| CERTIFIED | 0 |
+
+Esta asignación es 1:1 y determinística porque su universo es exactamente el conjunto de 49 `MATRIX_ID` de la tabla anterior. Cualquier contrato hijo que N8.17 confirme como material debe agregarse primero al catálogo con `MATRIX_ID`, `PARENT_MATRIX_ID`, materialidad y `MATRIX_STATE` propios; nunca hereda por implícito el estado del feature group.
+
+## Reconciliación con N8.15
+
+Los **158 registros ancla** certificados por N8.15.H son unidades de arquitectura/ownership, no 158 contratos UI. Su composición exacta es: 4 backend source layers + 9 bounded/domain areas + 90 controller files + 48 frontend feature roots + 2 migration roots + 1 DbContext + 3 middleware files + 1 Angular route table principal = 158. N8.16 gobierna como contract roots UI únicamente el shell y los 48 feature roots físicamente inventariados: **49**. No se fabrican `MATRIX_ID` para controllers, migration roots, source layers, middleware o DbContext sólo por ser anchors arquitectónicos.
+
+La correspondencia relevante en este corte es:
+
+- 48/48 frontend feature roots de N8.15.H -> 48/48 `FEATURE_GROUP` con `MATRIX_ID` estable;
+- 1/1 Angular shell/route root -> 1/1 `SHELL` con `MATRIX_ID` estable;
+- total contract roots gobernados -> **49/49 con ID**;
+- anchors arquitectónicos no-UI restantes -> **109**, preservados como evidencia de arquitectura/ownership y no promovidos artificialmente a contrato UI.
+
 ## Exactitud y materialidad
 
 - filas con `MATRIX_ID`: **49/49**;
 - IDs duplicados: **0**;
 - IDs basados en row/index: **0**;
 - contract roots inventariados sin ID: **0**;
-- contratos hijos certificados como `MATERIAL` sin ID: **0**.
+- contratos hijos certificados como `MATERIAL` sin ID: **0**;
+- contract roots sin `MATRIX_STATE` fijado: **0**;
+- `MATRIX_STATE` fuera de la secuencia canónica: **0**.
 
-N8.17 puede ampliar este catálogo con contratos hijos materialmente confirmados. La ampliación es aditiva y conserva IDs existentes.
+N8.17 puede ampliar este catálogo con contratos hijos materialmente confirmados. La ampliación es aditiva, conserva IDs existentes y sólo avanza estados con evidencia causal.
