@@ -10,6 +10,7 @@ on:
       - 'scripts/validate_n8_17_d_backend_contracts.py'
       - 'scripts/validate_n8_17_e_frontend_contracts.py'
       - 'scripts/validate_n8_17_g_traceability.py'
+      - 'scripts/validate_n8_17_h_certification.py'
       - '.github/workflows/matrix-governance.yml'
   workflow_dispatch:
 
@@ -39,3 +40,5 @@ jobs:
         run: python scripts/validate_n8_17_e_frontend_contracts.py
       - name: Validar trazabilidad exhaustiva N8.17.G
         run: python scripts/validate_n8_17_g_traceability.py
+      - name: Validar certificación documental N8.17.H
+        run: python scripts/validate_n8_17_h_certification.py
