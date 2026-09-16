@@ -91,7 +91,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.20.F-proof/3.0'})
+                  'User-Agent':'VariApp-N8.20.F-proof/4.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
@@ -146,26 +146,22 @@ jobs:
           if not current_user_id:
               raise SystemExit('Could not resolve current Aiven token user id')
 
-          # Current Aiven project endpoints no longer guarantee organization_id/project_id.
-          # Resolve the project through the current organization APIs instead.
+          # In the current organization API, project_id is the globally unique project name.
+          # Resolve the exact project by project_id and never guess from historical account metadata.
           orgs_payload=get('/organizations')
           orgs=orgs_payload.get('organizations', [])
-          org_id=None
-          project_id=None
+          matches=[]
           for org in orgs:
               oid=org.get('organization_id')
               if not oid:
                   continue
               projects_payload=get(f'/organization/{quote(oid, safe="")}/projects')
               for p in projects_payload.get('projects', []):
-                  if p.get('project_name') == project:
-                      org_id=oid
-                      project_id=p.get('project_id') or p.get('id')
-                      break
-              if org_id:
-                  break
-          if not org_id or not project_id:
-              raise SystemExit('Could not resolve exact Aiven organization/project IDs through organization APIs')
+                  if str(p.get('project_id')) == str(project):
+                      matches.append((oid, p.get('project_id')))
+          if len(matches) != 1:
+              raise SystemExit(f'Expected one exact Aiven organization project match, found {len(matches)}')
+          org_id,project_id=matches[0]
 
           perm_payload=get(f'/organization/{quote(org_id, safe="")}/permissions/project/{quote(project_id, safe="")}')
           assignments=perm_payload.get('permissions', []) if isinstance(perm_payload, dict) else perm_payload
@@ -214,7 +210,7 @@ jobs:
           ])
 
           evidence={
-            'schema':'variapp.aiven-capabilities-proof.v3',
+            'schema':'variapp.aiven-capabilities-proof.v4',
             'authority':'docs/VAEP_AUTHORITY.md',
             'task':'N8.20.F',
             'status':'PASS_AIVEN_CAPABILITIES_IDENTIFIED' if pass_ok else 'NOT_CERTIFIED',
