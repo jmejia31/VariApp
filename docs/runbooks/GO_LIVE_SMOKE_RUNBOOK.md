@@ -92,20 +92,31 @@ cd ..
 
 Cualquier fallo bloquea el smoke. No se sustituye un build/test real con un HTTP 200 de una versión distinta.
 
-## Gate 4 — Playwright remoto no destructivo
+## Gate 4 — browser smoke público y no destructivo
 
-El `playwright.config.ts` acepta `PLAYWRIGHT_TEST_BASE_URL`. Ejecutar únicamente suites que no requieran credenciales ni escrituras destructivas. El smoke mínimo visual/responsive permitido es:
+No usar suites que inicien sesión con credenciales por defecto durante un smoke remoto. El browser smoke permitido abre únicamente la tienda pública real de Desarrollo y no envía formularios ni mutaciones:
 
 ```bash
 set -euo pipefail
 cd frontend
-export PLAYWRIGHT_TEST_BASE_URL="https://variapp-desarrollo.vercel.app"
+npm ci
 npx playwright install --with-deps chromium
-npm run test:responsive
+node --input-type=module <<'NODE'
+import { chromium } from '@playwright/test';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const response = await page.goto('https://variapp-desarrollo.vercel.app/varistorehn', { waitUntil: 'domcontentloaded', timeout: 45000 });
+if (!response || response.status() >= 400) throw new Error(`HTTP ${response?.status() ?? 'sin respuesta'}`);
+await page.locator('body').waitFor({ state: 'visible' });
+const title = await page.title();
+if (!title.trim()) throw new Error('Documento sin title');
+console.log(JSON.stringify({ url: page.url(), status: response.status(), title }));
+await browser.close();
+NODE
 cd ..
 ```
 
-Si la suite requiere autenticación, tenant bootstrap o datos mutables que no estén autorizados para este scope, STOP y registrar esa suite como no ejecutable en este gate; no inventar usuario/token.
+Si el browser smoke requiere autenticación o datos mutables para demostrar un criterio adicional, ese flujo debe ejecutarse en un gate separado con identidad no productiva autorizada. No inventar usuario, password, cookie ni token.
 
 ## Gate 5 — correlación con versión desplegada
 
@@ -142,4 +153,4 @@ Este runbook no hace rollback por sí solo. Ante fallo posterior a una mutación
 
 ## Evidencia mínima para LISTO
 
-HEAD/equivalencia, timestamps UTC, códigos HTTP, payload sanitizado de `/health/ready`, resultados build/test/lint, resultado Playwright aplicable, deployment id/SHA, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Nunca guardar cookies, JWT, passwords, tokens ni valores de variables de entorno.
+HEAD/equivalencia, timestamps UTC, códigos HTTP, payload sanitizado de `/health/ready`, resultados build/test/lint, resultado del browser smoke público, deployment id/SHA, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Nunca guardar cookies, JWT, passwords, tokens ni valores de variables de entorno.
