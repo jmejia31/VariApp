@@ -47,25 +47,42 @@ for rel in e.get("shared_primitives_evidence", []):
     if not (ROOT / rel).exists():
         fail(f"shared primitive evidence missing: {rel}")
 
+# Parse the canonical markdown table by columns instead of assuming one code span.
+# APP_SHELL intentionally owns both app.component.* and app.routes.ts.
 text = CATALOG.read_text(encoding="utf-8")
-pattern = re.compile(r"^\|\s*(VAEP-MX::[^|]+?)\s*\|[^\n]*?\|\s*`([^`]+)`\s*\|", re.MULTILINE)
-refs = {m.group(1).strip(): m.group(2).strip() for m in pattern.finditer(text)}
+refs = {}
+for line in text.splitlines():
+    if not line.startswith("| VAEP-MX::"):
+        continue
+    cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+    if len(cells) < 7:
+        fail(f"malformed catalog row: {line}")
+    mid = cells[0]
+    implementation_cell = cells[3]
+    implementation_refs = re.findall(r"`([^`]+)`", implementation_cell)
+    if not implementation_refs:
+        fail(f"catalog row has no IMPLEMENTATION_REF: {mid}")
+    if mid in refs:
+        fail(f"duplicate catalog MATRIX_ID: {mid}")
+    refs[mid] = implementation_refs
+
 if set(refs) != set(expected):
     missing_ids = sorted(set(expected) - set(refs))
     extra_ids = sorted(set(refs) - set(expected))
     fail(f"catalog implementation-ref parity mismatch missing={missing_ids} extra={extra_ids}")
 
-for mid, rel in refs.items():
-    if "*" in rel:
-        matches = list(ROOT.glob(rel))
-        if not matches:
-            fail(f"implementation glob resolves empty: {mid} -> {rel}")
-    else:
-        path = ROOT / rel
-        if not path.exists():
-            fail(f"implementation root missing: {mid} -> {rel}")
-        if path.is_dir() and not any(p.suffix in {".ts", ".html", ".scss", ".css"} for p in path.rglob("*")):
-            fail(f"feature root has no UI source files: {mid} -> {rel}")
+for mid, rels in refs.items():
+    for rel in rels:
+        if "*" in rel:
+            matches = list(ROOT.glob(rel))
+            if not matches:
+                fail(f"implementation glob resolves empty: {mid} -> {rel}")
+        else:
+            path = ROOT / rel
+            if not path.exists():
+                fail(f"implementation root missing: {mid} -> {rel}")
+            if path.is_dir() and not any(p.suffix in {".ts", ".html", ".scss", ".css"} for p in path.rglob("*")):
+                fail(f"feature root has no UI source files: {mid} -> {rel}")
 
 if not (ROOT / "frontend/src/app/app.routes.ts").exists():
     fail("canonical Angular route table missing")
