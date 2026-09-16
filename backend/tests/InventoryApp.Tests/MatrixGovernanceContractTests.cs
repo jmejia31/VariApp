@@ -100,6 +100,21 @@ public sealed class MatrixGovernanceContractTests
         Assert.Contains("fixtures de gobierno, no inventario de producto", evidence, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void N816G_Validator_RejectsIncompleteAndUnjustifiedPlaceholderFields()
+    {
+        var root = FindRepositoryRoot();
+        var validator = File.ReadAllText(Path.Combine(root, "scripts", "validate_matrix_governance.py"));
+
+        Assert.Contains("PLACEHOLDER_RE", validator, StringComparison.Ordinal);
+        Assert.Contains("validate_material_matrices", validator, StringComparison.Ordinal);
+        Assert.Contains("missing required field", validator, StringComparison.Ordinal);
+        Assert.Contains("blank required field", validator, StringComparison.Ordinal);
+        Assert.Contains("unjustified placeholder", validator, StringComparison.Ordinal);
+        Assert.Contains("N/A:<reason>", validator, StringComparison.Ordinal);
+        Assert.Contains("TBD|TODO", validator, StringComparison.Ordinal);
+    }
+
     private static CatalogRow ParseCatalogRow(string line)
     {
         var cells = line.Trim().Trim('|').Split('|').Select(cell => cell.Trim().Trim('`')).ToArray();
