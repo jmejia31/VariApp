@@ -14,12 +14,13 @@ Versión de gobierno: `N8.16 / v2`
 - CONTRACT_OWNER:
 - DATA_OWNER:
 - IMPLEMENTATION_STATUS: `DISCOVERED | MATERIAL | IMPLEMENTED | CERTIFIED | SUPERSEDED`
+- MATRIX_STATE: `BASELINE_CREATED | INVENTORY_COMPLETE | SPEC_COMPLETE | IMPLEMENTATION_REVIEWED | CERTIFIED`
 - CLASSIFICATION: `KEEP | CONSOLIDATE | DEPRECATE | REMOVE_SAFE | UNKNOWN`
 - DEPENDS_ON_MATRIX_IDS:
 - ALIASES:
 - SUPERSEDES / SPLIT_FROM / MERGED_FROM:
 
-> `MATRIX_ID` es inmutable y jamás se deriva de fila, índice, orden visual, menú o backlog. Un candidato no puede pasar a `MATERIAL` sin ID registrado en `CATALOGO_MATRICES.md`.
+> `IMPLEMENTATION_STATUS` expresa materialidad/implementación del contrato y no sustituye el ciclo canónico `MATRIX_STATE`. `MATRIX_STATE` sólo avanza con evidencia causal; `CERTIFIED` exige evidencia material. `MATRIX_ID` es inmutable y jamás se deriva de fila, índice, orden visual, menú o backlog. Un candidato no puede pasar a `MATERIAL` sin ID registrado en `CATALOGO_MATRICES.md`.
 
 ## Objetivo y flujo
 - Propósito de negocio:
