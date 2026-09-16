@@ -5,7 +5,7 @@
   "lane": "SEC_AUDIT",
   "branch": "Desarrollo",
   "status": "LISTO_REAL",
-  "closed_at": "2026-09-16T13:39:52Z",
+  "closed_at": "2026-09-16T13:43:34Z",
   "closer": "SUP00-N820F-CLOSER-20260916T133743Z",
   "dependency": "N8.20.E",
   "dependency_status": "LISTO_REAL",
@@ -18,24 +18,36 @@
     "artifact": "vaep/evidence/reviews/N8.20.F_REVIEW_FIRST_20260916T133952Z_SUP00.json"
   },
   "provider_evidence": {
-    "path": "vaep/evidence/aiven/2026-09-16T132330Z_mcp_readonly_portable.json",
-    "sha256": "19da8e5a1682a365181237055912f44322c4729d86af9a64b62df3ec7ebcc490",
-    "provider": "aiven",
+    "path": "docs/evidencias/database-provider/n8-20-f/github-actions/35101887861-1/N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json",
+    "git_blob_sha": "4e3ea5a57fdfde6fa460ad7e89e20baee2645e60",
+    "provider": "AIVEN",
     "project": "variapp",
-    "service": "variapp-db-testing",
-    "engine": "pg",
-    "platform_version": "18",
-    "plan": "hobbyist",
-    "state": "running",
-    "automated_backups": true,
-    "daily_backups": 2,
-    "backup_time": "00:00:00",
-    "point_in_time_recovery": false,
-    "restore_contract_observed": true,
-    "ssl_required": true,
-    "public_access": true,
-    "high_availability": false,
-    "private_networking": false
+    "service": "variapp-mysql",
+    "engine": "mysql",
+    "plan": "free-1-1gb",
+    "cloud": "do-sfo",
+    "state": "RUNNING",
+    "dev_db_host_sha256": "882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0",
+    "backup_recovery_mode": "pitr",
+    "point_in_time_recovery_available": true,
+    "backup_count_observed": 3,
+    "backup_hour": 5,
+    "backup_minute": 2,
+    "restore_path": "AIVEN_FORK_AND_RESTORE_CONTROL_PLANE",
+    "restore_authorization_proven": true,
+    "current_plan_is_free_tier": true,
+    "base_price_usd_observed": null,
+    "paid_action_executed": false,
+    "plan_changed": false,
+    "restore_executed": false
+  },
+  "runtime_cross_check": {
+    "evidence": "docs/evidencias/database-provider/n8-20-c/github-actions/35093112813-1/N8.20.C_DB_PROVIDER_EVIDENCE.json",
+    "engine": "MYSQL",
+    "version": "8.4.8",
+    "provider": "AIVEN",
+    "provider_host_sha256": "882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0",
+    "matches_provider_control_plane_host_hash": true
   },
   "causal_gates": [
     {
@@ -46,6 +58,8 @@
       "conclusion": "success"
     }
   ],
+  "supersedes_source_selection_in_prior_commit": "af8fbcd22ccefa2f9bfb4126cbb1498f5ba7c578",
+  "supersession_reason": "The first SUP00 receipt referenced a non-causal portable PostgreSQL service sample. Current receipt uses the task-specific Aiven MySQL evidence whose redacted DEV host hash matches N8.20.C runtime proof.",
   "closure_class": "evidence_only_closure",
   "production_touched": false,
   "main_touched": false,
@@ -53,9 +67,5 @@
   "secrets_exposed": 0,
   "paid_action": false,
   "restore_executed": false,
-  "false_pass": false,
-  "notes": [
-    "Current service PITR remains false; generic restore/time-travel provider operation metadata is not represented as enabled PITR.",
-    "The previously recorded external blocker is superseded by fresh authorized Aiven read-only control-plane evidence and a successful causal certifier gate."
-  ]
+  "false_pass": false
 }
