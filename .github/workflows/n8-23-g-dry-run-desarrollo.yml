@@ -70,6 +70,11 @@ jobs:
           db_pass="$(openssl rand -hex 24)"
           echo "::add-mask::$db_pass"
 
+          # The product migration chain creates triggers. GitHub's MySQL 8.4
+          # service has binary logging enabled, so an unprivileged application
+          # user needs this server-local trust flag for the isolated CI instance.
+          # This changes only the ephemeral disposable service container.
+          docker exec "$mysql_container" mysql -uroot -proot -e "SET GLOBAL log_bin_trust_function_creators = 1;"
           docker exec "$mysql_container" mysql -uroot -proot -e "CREATE DATABASE \`${db_name}\`; CREATE USER '${db_user}'@'%' IDENTIFIED BY '${db_pass}'; GRANT ALL PRIVILEGES ON \`${db_name}\`.* TO '${db_user}'@'%'; FLUSH PRIVILEGES;"
 
           connection="Server=127.0.0.1;Port=3306;Database=${db_name};User=${db_user};Password=${db_pass};SslMode=None;AllowPublicKeyRetrieval=True;"
