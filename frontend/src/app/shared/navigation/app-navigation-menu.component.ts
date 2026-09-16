@@ -115,7 +115,9 @@ import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service
           <a routerLink="/plan-cuentas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>account_tree</mat-icon> Plan de cuentas</a>
           <a routerLink="/estados-financieros" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>assessment</mat-icon> Estados financieros</a>
         }
-        <a routerLink="/centro-reportes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>analytics</mat-icon> Centro de reportes</a>
+        @if (permisosRuntime.esAdministrador() && permisosRuntime.puede('ReportesAdministrativos', 'Ver')) {
+          <a routerLink="/centro-reportes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>analytics</mat-icon> Centro de reportes</a>
+        }
       </section>
     }
 
