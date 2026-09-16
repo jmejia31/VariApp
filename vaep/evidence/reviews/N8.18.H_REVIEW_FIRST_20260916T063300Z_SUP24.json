@@ -43,12 +43,12 @@
     "workflow": "Desarrollo - Gobierno de matrices",
     "run_id": 35064134507,
     "head_sha": "cf578c2601f4a1cb1e40038dd64fb9e3d89c70b5",
-    "status_at_review": "IN_PROGRESS",
-    "required_before_receipt": "SUCCESS"
+    "status": "COMPLETED",
+    "conclusion": "SUCCESS"
   },
   "p0": 0,
   "p1": 0,
   "p2": 0,
-  "decision": "PASS_PENDING_CAUSAL_GATE_SUCCESS",
-  "next_action": "Require exact-candidate matrix-governance success, then emit LISTO_REAL receipt/readback and promote N8.19.A."
+  "decision": "PASS",
+  "next_action": "Emit LISTO_REAL receipt/readback and promote N8.19.A."
 }
