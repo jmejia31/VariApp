@@ -1,5 +1,6 @@
 name: N8.20.F - Trigger Aiven DEV Proof
 
+# Recovery iteration 2: dispatch after active-plan schema fix.
 on:
   push:
     branches:
