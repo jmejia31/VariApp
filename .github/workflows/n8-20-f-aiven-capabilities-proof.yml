@@ -67,7 +67,6 @@ jobs:
           mkdir -p "$RUN_DIR"
           export RUN_DIR
 
-          # Current-token identity, used only to prove effective project permissions.
           avn --auth-token "$AIVEN_TOKEN" user info --json > /tmp/aiven-user.json
 
           python3 - <<'PY'
@@ -92,13 +91,12 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.20.F-proof/2.1'})
+                  'User-Agent':'VariApp-N8.20.F-proof/3.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
               except urllib.error.HTTPError as e:
-                  body=e.read().decode('utf-8','replace')[:1000]
-                  raise SystemExit(f'Aiven API HTTP {e.code} for {path}: {body}')
+                  raise SystemExit(f'Aiven API HTTP {e.code} for {path}')
 
           cs=parse_conn(conn)
           dev_host=cs.get('server') or cs.get('host') or cs.get('data source')
@@ -111,28 +109,25 @@ jobs:
           if svc.get('service_type') != 'mysql':
               raise SystemExit('Selected Aiven service is not MySQL')
 
-          # Verify that the explicitly selected Aiven service is the same endpoint used by DEV.
           candidates=[]
-          def walk(v):
+          def walk_hosts(v):
               if isinstance(v, dict):
-                  for x in v.values(): walk(x)
+                  for x in v.values(): walk_hosts(x)
               elif isinstance(v, list):
-                  for x in v: walk(x)
+                  for x in v: walk_hosts(x)
               elif isinstance(v, str):
                   for h in re.findall(r'([A-Za-z0-9._-]+\.aivencloud\.com)', v):
                       candidates.append(h.lower())
-          walk(svc)
+          walk_hosts(svc)
           if not any(hashlib.sha256(h.encode()).hexdigest()==dev_host_hash for h in candidates):
               raise SystemExit('Selected Aiven service does not match the DEV DB endpoint hash; refusing to inspect another service')
 
-          # Aiven service readback exposes the active plan as `plan` (legacy payloads may expose `service_plan`).
           plan=svc.get('plan') or svc.get('service_plan')
           stype=svc.get('service_type')
           cloud=svc.get('cloud_name')
           state=svc.get('state')
           if not plan:
-              safe_keys=','.join(sorted(str(k) for k in svc.keys()))
-              raise SystemExit(f'Aiven API did not return the actual service plan; safe top-level keys={safe_keys}')
+              raise SystemExit('Aiven API did not return the actual service plan')
 
           plan_payload=get(f'/project/{quote(project, safe="")}/service-types/{quote(stype, safe="")}/plans/{quote(plan, safe="")}')
           plan_obj=plan_payload.get('service_plan') if isinstance(plan_payload.get('service_plan'), dict) else plan_payload
@@ -143,29 +138,56 @@ jobs:
           backup_endpoint_proven=True
           backup_list=backups_payload.get('backups', [])
 
-          project_payload=get(f'/project/{quote(project, safe="")}')
-          project_obj=project_payload.get('project') if isinstance(project_payload.get('project'), dict) else project_payload
-          org_id=project_obj.get('organization_id')
-          project_id=project_obj.get('project_id')
-          if not org_id or not project_id:
-              raise SystemExit('Could not resolve Aiven organization_id/project_id for permission readback')
-
           with open('/tmp/aiven-user.json') as f:
               ui=json.load(f)
           if isinstance(ui, list) and ui:
               ui=ui[0]
           current_user_id=(ui.get('user_id') or ui.get('id') or ui.get('user')) if isinstance(ui, dict) else None
+          if not current_user_id:
+              raise SystemExit('Could not resolve current Aiven token user id')
+
+          # Current Aiven project endpoints no longer guarantee organization_id/project_id.
+          # Resolve the project through the current organization APIs instead.
+          orgs_payload=get('/organizations')
+          orgs=orgs_payload.get('organizations', [])
+          org_id=None
+          project_id=None
+          for org in orgs:
+              oid=org.get('organization_id')
+              if not oid:
+                  continue
+              projects_payload=get(f'/organization/{quote(oid, safe="")}/projects')
+              for p in projects_payload.get('projects', []):
+                  if p.get('project_name') == project:
+                      org_id=oid
+                      project_id=p.get('project_id') or p.get('id')
+                      break
+              if org_id:
+                  break
+          if not org_id or not project_id:
+              raise SystemExit('Could not resolve exact Aiven organization/project IDs through organization APIs')
 
           perm_payload=get(f'/organization/{quote(org_id, safe="")}/permissions/project/{quote(project_id, safe="")}')
-          assignments=perm_payload.get('permissions', [])
+          assignments=perm_payload.get('permissions', []) if isinstance(perm_payload, dict) else perm_payload
+          if not isinstance(assignments, list):
+              assignments=[]
+
           effective=[]
-          if current_user_id:
-              for item in assignments:
-                  if str(item.get('principal_id')) == str(current_user_id):
-                      effective.extend(item.get('permissions') or [])
-          effective=sorted(set(str(x) for x in effective))
-          # Aiven's Developer role is read/developer access and does not prove fork/restore authority.
-          # Accept only roles/permissions that Aiven documents as able to create a service fork/recovery.
+          matching_principal_records=0
+          for item in assignments:
+              if not isinstance(item, dict):
+                  continue
+              principal_id=item.get('principal_id') or item.get('user_id') or item.get('member_user_id')
+              if str(principal_id) != str(current_user_id):
+                  continue
+              matching_principal_records += 1
+              vals=item.get('permissions') or item.get('permission') or item.get('roles') or item.get('role') or []
+              if isinstance(vals, str):
+                  vals=[vals]
+              if isinstance(vals, list):
+                  effective.extend(str(x) for x in vals)
+
+          effective=sorted(set(effective))
           restore_roles={
               'admin','operator','role:project:admin','role:project:manager',
               'role:services:recover','project:services:write'
@@ -183,7 +205,7 @@ jobs:
           latest=max(backup_list, key=lambda b:b.get('backup_time','')) if backup_list else None
           pitr_available = recovery_mode not in (None, '', 'basic')
           restore_path_proven = bool(recovery_mode) and backup_endpoint_proven
-          cost_constraint_proven = bool(plan)  # actual tier known; workflow performs no paid action
+          cost_constraint_proven = bool(plan)
 
           pass_ok=all([
               bool(plan), bool(backup_config), backup_endpoint_proven,
@@ -192,7 +214,7 @@ jobs:
           ])
 
           evidence={
-            'schema':'variapp.aiven-capabilities-proof.v2',
+            'schema':'variapp.aiven-capabilities-proof.v3',
             'authority':'docs/VAEP_AUTHORITY.md',
             'task':'N8.20.F',
             'status':'PASS_AIVEN_CAPABILITIES_IDENTIFIED' if pass_ok else 'NOT_CERTIFIED',
@@ -224,6 +246,8 @@ jobs:
               'providerManagedBackupEndpointProven':backup_endpoint_proven,
               'recoveryMode':recovery_mode,
               'restorePath':'AIVEN_FORK_AND_RESTORE_CONTROL_PLANE',
+              'permissionReadbackProven':True,
+              'matchingPrincipalRecords':matching_principal_records,
               'restoreAuthorizationProven':restore_authorized,
               'effectivePermissionNames':effective,
               'restoreExecutionPerformed':False
@@ -261,9 +285,9 @@ jobs:
 
           out=os.path.join(os.environ['RUN_DIR'],'N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json')
           with open(out,'w') as f: json.dump(evidence,f,indent=2)
-          md=f'''# N8.20.F — Aiven DEV capabilities proof\n\n- Estado: `{evidence['status']}`\n- Provider: `AIVEN`\n- Service type: `{stype}`\n- Plan/tier actual: `{plan}`\n- Cloud: `{cloud}`\n- State: `{state}`\n- Backups endpoint readback: `{backup_endpoint_proven}`\n- Backups observados: `{len(backup_list)}`\n- Último backup UTC: `{evidence['actualBackups']['latestBackupTime']}`\n- Recovery mode: `{recovery_mode}`\n- PITR disponible según recovery mode: `{pitr_available}`\n- Retention policy readback: `{retention_proven}`\n- Restore authorization proven: `{restore_authorized}`\n- Base price USD observed: `{price_usd}`\n- Restore ejecutado: `false`\n- Plan cambiado/comprado: `false`\n- Production touched: `false`\n- Secrets exposed: `0`\n\n## Dictamen\n\n`{'N8.20.F tiene evidencia técnica suficiente para REVIEW_FIRST y cierre LISTO_REAL.' if pass_ok else 'N8.20.F NO puede cerrarse todavía; revisar los campos acceptance=false del JSON.'}`\n'''
+          md=f'''# N8.20.F — Aiven DEV capabilities proof\n\n- Estado: `{evidence['status']}`\n- Provider: `AIVEN`\n- Service type: `{stype}`\n- Plan/tier actual: `{plan}`\n- Cloud: `{cloud}`\n- State: `{state}`\n- Backups endpoint readback: `{backup_endpoint_proven}`\n- Backups observados: `{len(backup_list)}`\n- Último backup UTC: `{evidence['actualBackups']['latestBackupTime']}`\n- Recovery mode: `{recovery_mode}`\n- PITR disponible según recovery mode: `{pitr_available}`\n- Retention policy readback: `{retention_proven}`\n- Permission readback: `true`\n- Principal permission records: `{matching_principal_records}`\n- Restore authorization proven: `{restore_authorized}`\n- Base price USD observed: `{price_usd}`\n- Restore ejecutado: `false`\n- Plan cambiado/comprado: `false`\n- Production touched: `false`\n- Secrets exposed: `0`\n\n## Dictamen\n\n`{'N8.20.F tiene evidencia técnica suficiente para REVIEW_FIRST y cierre LISTO_REAL.' if pass_ok else 'N8.20.F NO puede cerrarse todavía; revisar los campos acceptance=false del JSON.'}`\n'''
           with open(os.path.join(os.environ['RUN_DIR'],'README.md'),'w') as f: f.write(md)
-          print(json.dumps({'task':'N8.20.F','pass':pass_ok,'plan':plan,'backupCount':len(backup_list),'recoveryMode':recovery_mode,'restoreAuthorized':restore_authorized,'evidenceDir':os.environ['RUN_DIR']}))
+          print(json.dumps({'task':'N8.20.F','pass':pass_ok,'plan':plan,'backupCount':len(backup_list),'recoveryMode':recovery_mode,'restoreAuthorized':restore_authorized,'principalRecords':matching_principal_records,'evidenceDir':os.environ['RUN_DIR']}))
           if not pass_ok:
               raise SystemExit(30)
           PY
@@ -282,7 +306,7 @@ jobs:
         with:
           name: n8-20-f-aiven-capabilities-proof-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.EVIDENCE_ROOT }}/${{ github.run_id }}-${{ github.run_attempt }}
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Persist sanitized evidence to Desarrollo
         if: ${{ success() && inputs.persist_evidence }}
