@@ -46,7 +46,7 @@
       {"route":"/finanzas","modulo":"Finanzas","accion":"Ver"},
       {"route":"/plan-cuentas","modulo":"Finanzas","accion":"Ver"},
       {"route":"/estados-financieros","modulo":"Finanzas","accion":"Ver"},
-      {"route":"/centro-reportes","modulo":"Finanzas|ReportesAdministrativos","accion":"Ver"}
+      {"route":"/centro-reportes","modulo":"ReportesAdministrativos","accion":"Ver","requires_admin":true}
     ]},
     {"id":"administracion","children":[
       {"route":"/usuarios","modulo":"Usuarios","accion":"Ver"},
