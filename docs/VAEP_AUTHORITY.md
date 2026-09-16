@@ -9,6 +9,8 @@ BRANCH=Desarrollo
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 NUMERIC_PROTOCOL_LABELS=PROHIBITED
+CERTIFIED_DONE_STATE=LISTO
+ALTERNATE_DONE_STATES=PROHIBITED
 ```
 
 ```text
@@ -66,17 +68,20 @@ OWNER_INTERVENTION_FIRST_ROW=641
 OWNER_INTERVENTION_ENTRY_AFTER=N8.3.A
 OWNER_INTERVENTION_ALLOWED_PARENTS=N8.15,N8.16,N8.17,N8.18,N8.19,N8.20,N8.21,N8.22,N8.23,N8.24
 OWNER_INTERVENTION_EXIT=N8.24.H
+OWNER_INTERVENTION_REPLAY_START=N8.22.E
 OWNER_INTERVENTION_RESUME_FROM=N8.3.B
 OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE
 POST_INTERVENTION_REVALIDATION_REQUIRED=TRUE
-POST_INTERVENTION_REVALIDATION_START_ROW=721
+POST_INTERVENTION_REVALIDATION_START_ROW=701
+POST_INTERVENTION_REVALIDATION_END_ROW=881
 POST_INTERVENTION_REVALIDATE_EXISTING_LISTO=TRUE
 POST_INTERVENTION_REVALIDATION_BASIS=N8.15,N8.16,N8.17,N8.18
 POST_INTERVENTION_REOPEN_ON_GAP=TRUE
 POST_INTERVENTION_HISTORICAL_STATUS_PRESERVED=TRUE
-POST_INTERVENTION_REVALIDATION_ADMISSION=JIT_REOPEN_ONE_AT_A_TIME
+POST_INTERVENTION_REVALIDATION_ADMISSION=SEQUENTIAL_REVIEW_AFTER_OWNER_BULK_RESET
 POST_INTERVENTION_REVALIDATION_STATE=PENDIENTE
-POST_INTERVENTION_BULK_REOPEN_PROHIBITED=TRUE
+POST_INTERVENTION_BULK_REOPEN_PROHIBITED=FALSE
+OWNER_BULK_REOPEN_701_881_EXECUTED=TRUE
 END_AUTOMATION_POLICY
 ```
 
@@ -95,7 +100,7 @@ VAEP opera exclusivamente con las diez automatizaciones programadas de ChatGPT c
 
 Camino canónico:
 
-`AUTOMATION -> LEASE -> EJECUCIÓN DIRECTA -> TESTS -> REVIEW_FIRST -> GATES -> LISTO_REAL -> PROMOCIÓN`
+`AUTOMATION -> LEASE -> EJECUCIÓN DIRECTA -> TESTS -> REVIEW_FIRST -> GATES -> LISTO -> PROMOCIÓN`
 
 Reglas absolutas:
 
@@ -105,7 +110,8 @@ Reglas absolutas:
 - Las cinco supervisoras `:05/:17/:29/:41/:53` son verifier/recovery/secondary-builder.
 - Un slot no termina en `REPORT_ONLY`, `HANDOFF_ONLY`, `PENDING_REVIEW`, `WAITING` o equivalente si existe acción material segura que el ejecutor puede realizar.
 - Un checkpoint es un disparador, no una frontera de ownership.
-- Tras `LISTO_REAL`, promover el sucesor dependency-valid y continuar same-run si es seguro.
+- Tras `LISTO`, promover el sucesor dependency-valid y continuar same-run si es seguro.
+- `LISTO` es el único estado de cierre certificado. No existen estados alternativos de cierre en COLA ni en las vistas derivadas.
 
 ### 2.1 Integridad de slots para `run_now` manual
 
@@ -117,7 +123,7 @@ Una recuperación manual desde chat/controller es excepcional y no puede romper 
 4. Está prohibido adelantar manualmente un slot futuro y está prohibido elegir una automatización más lejana sólo por su nombre, rol, ownership histórico o parent previo.
 5. En empate, gana el slot vencido más reciente. Nunca se salta hacia atrás a un slot antiguo si existe uno más cercano temporalmente.
 6. `run_now` no modifica RRULE, timezone, título ni prompt. El schedule canónico sigue siendo la fuente de cadencia.
-7. Un `run_now` solicitado sólo demuestra que la ejecución inmediata fue pedida; nunca equivale a `ACTIVE_REAL`, progreso material, PASS o `LISTO_REAL` sin readback posterior.
+7. Un `run_now` solicitado sólo demuestra que la ejecución inmediata fue pedida; nunca equivale a `ACTIVE_REAL`, progreso material, PASS o `LISTO` sin readback posterior.
 
 ## 3. Ownership y lease
 
@@ -147,22 +153,23 @@ Contrato:
 7. Finalizado el scope, marcar `RELEASED`, `COMPLETED`, `HANDOFF_RELEASED` o `SUPERSEDED` con evidencia exacta.
 8. Está prohibido dejar leases fantasmas.
 
-## 4. ACTIVE_REAL y LISTO_REAL
+## 4. ACTIVE_REAL y LISTO
 
 `ACTIVE_REAL` para una automatización directa exige ejecución identificable + lease exclusivo fresco + actividad técnica útil/material reciente.
 
 No son `ACTIVE_REAL`: tarea habilitada, trigger, planner, lease sin progreso, prearm read-only, comentario, Issue ni declaración.
 
-`LISTO_REAL` sólo lo declara VAEP/controller tras:
+`LISTO` sólo lo declara VAEP/controller tras:
 
 - REVIEW_FIRST;
 - DoD material completo;
 - tests/gates/CI aplicables y causales terminales;
 - P0=0 y P1=0;
 - exact-head o equivalencia de control-plane demostrada;
-- receipt/evidencia verificable.
+- receipt/evidencia verificable;
+- write + immediate readback del estado final.
 
-Nunca fingir actividad, PASS, CI, evidencia o LISTO.
+Nunca fingir actividad, PASS, CI, evidencia o LISTO. Un `LISTO` sin estas condiciones es falso positivo y debe volver a `PENDIENTE` para revalidación.
 
 ## 5. Throughput y continuidad
 
@@ -172,7 +179,7 @@ Objetivo contractual:
 - `PARENT_CLOSE_SLA_ROLLING_24H=72`.
 - `PARENT_MAX_DWELL_MINUTES=20`.
 
-La producción se mide por parents certificados `LISTO_REAL`, no por triggers, mensajes, commits administrativos ni workflows verdes.
+La producción se mide por parents certificados `LISTO`, no por triggers, mensajes, commits administrativos ni workflows verdes.
 
 Si `ROLLING60<3`: cerrar primero cualquier parent certificable; drenar REVIEW_FIRST/QA/gate causal; ejecutar sólo el gap material mínimo; promover el siguiente dependency-valid y continuar same-run cuando sea seguro. Nunca filler, falsos cierres, skip de gates o doble writer.
 
@@ -203,25 +210,29 @@ La antigua infraestructura J1–J6/Jules está retirada del runtime de VariApp. 
 
 El runtime vigente y completo es exclusivamente las diez automatizaciones canónicas definidas por este MAESTRO.
 
-## 9. Intervención prioritaria del propietario N8.15–N8.24
+## 9. Revalidación ordenada por el propietario desde COLA 701 hasta 881
 
-Existe un gate deliberado temporal ordenado por el propietario para resolver arquitectura, matrices y preparación pre-go-live antes de continuar el resto del plan histórico.
+El propietario ordenó reabrir los cierres existentes desde la fila 701 hasta la 881 porque la arquitectura y los contratos cambiaron y un cierre histórico no puede suponerse vigente.
 
-Reglas durante `OWNER_INTERVENTION_GATE_ACTIVE=TRUE`:
+Reglas:
 
-1. El ancla física de `COLA` es la fila 640. La primera microtarea de la intervención DEBE estar en la fila 641.
-2. La entrada causal inmediata es `N8.3.A`; la primera tarea de intervención es `N8.15.A`.
-3. Sólo son elegibles materialmente `N8.15` a `N8.24` y sus microtareas dependency-valid.
-4. `UNRELATED_WORKFLOW_BLOCKING_PROHIBITED` no puede usarse para escapar de esta intervención: esto no es un blocker, es un filtro deliberado de admisión.
-5. `OWNER_INTERVENTION_BYPASS_PROHIBITED=TRUE` prevalece sobre selección de trabajo independiente fuera del conjunto permitido.
-6. La pausa temporal fue levantada explícitamente por el propietario. Las diez automatizaciones canónicas quedan autorizadas a reanudarse conservando exactamente títulos, prompts, horarios, timezone y política de notificaciones.
-7. Mientras la intervención esté abierta, las diez canónicas trabajan exclusivamente la cadena `N8.15.A -> ... -> N8.24.H`; ningún `LISTO` histórico posterior autoriza bypass.
-8. Al cerrar `N8.24.H` con evidencia material, se realiza readback global y se reanuda el plan histórico desde la fila 721 (`N8.3.B`), salvo evidencia causal posterior que exija un sucesor más temprano. La reentrada NO confía automáticamente en estados `LISTO` históricos.
-9. Desde la fila 721 en adelante, toda tarea histórica —incluidas las que ya muestran `LISTO`— debe revalidarse contra la arquitectura, catálogo/matrices, contratos, RBAC, backend authority, seguridad, datos, pruebas y criterios resultantes de `N8.15–N8.18`. El estado histórico se preserva como historia, pero no equivale por sí solo a certificación vigente.
-10. Para compatibilidad con `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY`, la revalidación se hace `JIT_REOPEN_ONE_AT_A_TIME`: al llegar causalmente a una fila histórica que figure `LISTO`, el controller preserva su status/evidencia histórica en receipt/observaciones, cambia únicamente esa tarea a `PENDIENTE` con marcador `REVALIDATION_REQUIRED__CURRENT_STANDARD`, hace readback y recién entonces adquiere lease y la revalida. Está prohibido reabrir masivamente la cola.
-11. Si la tarea revalidada sigue cumpliendo completamente, vuelve a `LISTO` con `REVALIDATED_CURRENT_STANDARD` y evidencia causal sin rehacer trabajo inútil. Si existe gap material, se corrige bajo `FIRST_DETECTOR_OWNS_RECOVERY`, se ejecutan pruebas/gates aplicables y sólo entonces vuelve a `LISTO`. Si existe bloqueo externo real, se preserva sólo en su scope y se continúa únicamente trabajo independiente permitido por dependencias; nunca se falsea `PASS`.
-12. Las filas posteriores no se abren hasta que la fila revalidada actual cierre; así se conservan dependencias y se evita doble writer, bypass o cascadas artificiales de bloqueos.
-13. La auditoría forense `N8.19` conserva su scope especial desde `N8.6.G` en adelante y sirve además como control de cierres rápidos, N/A, timestamps y receipts; no reemplaza la revalidación post-matriz de la fila 721+.
-14. `GATE-N8` debe incluir la intervención y la revalidación vigente de sus prerequisitos como condición formal de cierre.
+1. El reset masivo solicitado por el propietario es una excepción explícita y ya ejecutada sobre `COLA!701:881`.
+2. Todo cierre que existía en ese rango fue devuelto a `PENDIENTE`; la evidencia histórica permanece en commits, receipts y columnas de evidencia, pero no certifica el estado actual.
+3. La cadena debe retomarse desde la primera tarea dependency-valid pendiente del rango. Mientras `N8.22.E` esté pendiente, ninguna tarea posterior dependiente puede promoverse.
+4. `N8.23.A` y cualquier otra tarea que hubiera quedado activa pero dependa de un cierre reabierto debe volver a `PENDIENTE` antes de continuar, preservando su evidencia previa como historia.
+5. La revisión es secuencial por dependencias. Está prohibido marcar de nuevo `LISTO` por el hecho de que existan receipts históricos.
+6. Cada tarea debe releerse contra la arquitectura, catálogo/matrices, contratos, RBAC, backend authority, seguridad, datos, pruebas y criterios actuales resultantes de `N8.15–N8.18`.
+7. Si una tarea sigue cumpliendo completamente, puede volver a `LISTO` con `REVALIDATED_CURRENT_STANDARD` y evidencia causal fresca. Si existe gap material, se corrige bajo `FIRST_DETECTOR_OWNS_RECOVERY`, se ejecutan pruebas/gates aplicables y sólo entonces vuelve a `LISTO`.
+8. Si existe bloqueo externo real, se preserva sólo en su scope y se continúa únicamente trabajo independiente permitido por dependencias; nunca se falsea `PASS`.
+9. La auditoría forense `N8.19` mantiene su valor histórico para detectar cierres rápidos, N/A, timestamps y receipts dudosos, pero no sustituye esta revalidación.
+10. `GATE-N8` y los gates posteriores deben cerrarse de nuevo sólo después de que sus prerequisitos reabiertos hayan sido revalidados bajo el estándar actual.
+11. El estado de trabajo visible en `COLA`, `DASHBOARD`, `PLAN_MAESTRO`, `CONFIG` y demás vistas debe usar exclusivamente el enum vigente: `PENDIENTE`, `EN_PROGRESO`, `VALIDANDO`, `LISTO`, `BLOQUEADO`, `CANCELADO`.
+12. Las vistas derivadas deben contar `LISTO` directamente y actualizarse por fórmulas/estado fuente; está prohibido depender de snapshots manuales para el conteo de cola.
+
+## 10. Intervención prioritaria N8.15–N8.24
+
+Mientras `OWNER_INTERVENTION_GATE_ACTIVE=TRUE`, las diez canónicas trabajan exclusivamente la cadena permitida `N8.15.A -> ... -> N8.24.H` y, por la revalidación ordenada, retoman desde el primer punto reabierto dependency-valid dentro de esa cadena (`N8.22.E`). No se permite bypass por estados históricos.
+
+Al cerrar nuevamente `N8.24.H` con evidencia actual, se continúa secuencialmente por las filas posteriores ya reabiertas desde `N8.3.B` y siguientes hasta completar la cola 881 bajo el mismo estándar actual.
 
 Especificación ejecutable del paréntesis: `docs/matrices-evaluacion/00_GOBERNANZA/ESPECIFICACION_EJECUCION_N8_15_N8_24.md`.
