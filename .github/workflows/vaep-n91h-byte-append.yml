@@ -1,0 +1,80 @@
+name: VAEP N9.1.H Canonical Append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n91h-byte-append.yml
+
+permissions:
+  contents: write
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Append N9.1 RC freeze evidence without historical rewrites
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='ERP-N9.1 — Release Candidate — FEATURE FREEZE 2026-09-17'
+          if grep -Fq "$marker" TASKS.md && grep -Fq "$marker" CHANGELOG_AI.md; then
+            echo 'N9.1.H canonical append already present; no write required.'
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          tasks = Path('TASKS.md').read_bytes()
+          changelog = Path('CHANGELOG_AI.md').read_bytes()
+          tasks_hash = subprocess.check_output(['git','hash-object','TASKS.md'], text=True).strip()
+          changelog_hash = subprocess.check_output(['git','hash-object','CHANGELOG_AI.md'], text=True).strip()
+          assert tasks_hash == 'c26ed07676b9f842ec3b107b5765a104bc743d17', tasks_hash
+          assert changelog_hash == '65167d46115368d3a7d3e33a33f9f81d57eb0c9b', changelog_hash
+
+          tasks_append = (
+            "\n\n## ERP-N9.1 — Release Candidate — FEATURE FREEZE 2026-09-17\n\n"
+            "Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.\n\n"
+            "- [x] `GATE-N8` cerrado current-standard con 24/24 prerequisitos H y 24/24 parents PLAN en `LISTO`; receipt `4eadd208322e8f19d84d669fffc70a9de85ba567`.\n"
+            "- [x] Release Candidate funcional fijado por SHA inmutable: `4eadd208322e8f19d84d669fffc70a9de85ba567`.\n"
+            "- [x] Feature freeze activo para `N9.1`: no nuevas features; cualquier cambio de producto invalida la equivalencia y exige nuevo candidate SHA + recertificación causal.\n"
+            "- [x] `N9.1.A-F` cerrados con REVIEW_FIRST y P0=0/P1=0; B-E N/A grounded por ausencia de delta de producto; F verificó controles heredados.\n"
+            "- [x] `N9.1.G TEST_CI`: security `35258962286=SUCCESS`, quality `35258969104=SUCCESS`, backup/restore `35223693868=SUCCESS`, performance `35219847763=SUCCESS`, product delta=0.\n"
+            "- [x] Certificación: `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`.\n"
+            "- [x] `main`, Producción, PR #2 merge, secretos, DNS/certificados y datos productivos no fueron tocados.\n"
+            "- [ ] `N9.1.H` sólo pasa a `LISTO` después de verificar este append y `CHANGELOG_AI.md`, retirar el writer temporal, REVIEW_FIRST final P0=0/P1=0, receipt y write/readback del control-plane.\n"
+          ).encode('utf-8')
+
+          changelog_append = (
+            "\n\n## ERP-N9.1 — Release Candidate — FEATURE FREEZE 2026-09-17\n\n"
+            "**Responsable:** `Tarea Supervisión :24` bajo `docs/VAEP_AUTHORITY.md`.\n\n"
+            "`GATE-N8` cerró current-standard y habilitó `N9.1`. El Release Candidate funcional queda fijado por SHA `4eadd208322e8f19d84d669fffc70a9de85ba567`. `N9.1.A-F` fueron revisados secuencialmente con P0=0/P1=0: no existe delta de dominio, DB/migraciones, backend/API ni frontend/UI requerido por el freeze; seguridad conserva controles heredados. `N9.1.G` certificó equivalencia exacta del producto y cobertura causal con security `35258962286`, quality `35258969104`, backup/restore `35223693868` y performance `35219847763`, todos `SUCCESS`.\n\n"
+            "Feature freeze: no se aceptan nuevas features sobre este candidato. Un cambio de producto obliga a fijar nuevo candidate SHA y recertificar gates aplicables. La certificación está en `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`. Este append es history-preserving y no declara por sí solo `N9.1.H=LISTO`; falta hard verify, REVIEW_FIRST final, receipt y reconciliación write/readback. Sin cambios a `main`, Producción, PR #2 merge, secretos, DNS/certificados ni datos productivos.\n"
+          ).encode('utf-8')
+
+          Path('TASKS.md').write_bytes(tasks + tasks_append)
+          Path('CHANGELOG_AI.md').write_bytes(changelog + changelog_append)
+          PY
+
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md'
+          while read -r additions deletions path; do
+            test "$additions" -gt 0
+            test "$deletions" -eq 0
+            case "$path" in CHANGELOG_AI.md|TASKS.md) ;; *) exit 1 ;; esac
+          done < <(git diff --numstat -- CHANGELOG_AI.md TASKS.md)
+          git diff --check -- CHANGELOG_AI.md TASKS.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add CHANGELOG_AI.md TASKS.md
+          git commit -m '[N9.1.H] append RC freeze canonical rollup'
+          git push origin HEAD:Desarrollo
