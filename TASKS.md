@@ -100,7 +100,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.6.D Application/API completado y certificado.
 - [x] N3.6.E frontend/UX completado y certificado.
 - [x] N3.6.F RBAC/auditoría/seguridad/observabilidad completado y certificado.
-- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase 8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
+- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance #32913854936, Fase 8 #32913854958 y M13 #32913854923 en SUCCESS; P0/P1 funcionales conocidos=0.
 - [x] N3.6.H certificación canónica publicada en `4fe25e8cf656f82e3883f0585fa29358769aa48c` y runbook en `d906393fc26b0073ac782721ea08cb0fa35827b5`.
 - [ ] Cierre formal H pendiente únicamente de reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving y obtener gate causal del rollup final; no false LISTO.
 
@@ -756,3 +756,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Certificación: `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`.
 - [x] `main`, Producción, PR #2 merge, secretos, DNS/certificados y datos productivos no fueron tocados.
 - [ ] `N9.1.H` sólo pasa a `LISTO` después de verificar este append y `CHANGELOG_AI.md`, retirar el writer temporal, REVIEW_FIRST final P0=0/P1=0, receipt y write/readback del control-plane.
+
+
+## ERP-N9.2 — Checklist de salida — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.
+
+- [x] `N9.2.A-G` revalidados current-standard con receipts frescos; P0=0/P1=0 y delta de producto=0 frente al Release Candidate congelado `4eadd208322e8f19d84d669fffc70a9de85ba567`.
+- [x] Gates causales aplicables preservados por equivalencia exacta de producto: security `35258962286=SUCCESS`, quality/regression `35258969104=SUCCESS`, backup/restore `35223693868=SUCCESS` y performance `35219847763=SUCCESS`.
+- [x] `N9.2.G` receipt `vaep/evidence/receipts/N9.2.G_LISTO_20260917T231100Z_SUP24.json` releído; `N9.2.H` REVIEW_FIRST detectó únicamente dos P1 documentales de append en `TASKS.md` y `CHANGELOG_AI.md`, sin P0/P1 de producto.
+- [x] Este append resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
+- [ ] `N9.2.H` sólo pasa a `LISTO` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, hard verify de ambos prefijos, REVIEW_FIRST fresco P0=0/P1=0, receipt y write/readback del control-plane.
+
+**CURRENT_PARENT=N9.2.H. NEXT_PARENT_PREARMED=N9.3.A. No se promueve N9.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
