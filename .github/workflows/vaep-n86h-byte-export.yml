@@ -1,73 +1,14 @@
-name: VAEP N8.10.H Canonical Append
+name: VAEP Byte Export Retired
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - .github/workflows/vaep-n86h-byte-export.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  append:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact head
-        uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 0
-
-      - name: Publish guarded history-preserving rollup
-        shell: bash
-        run: |
-          set -euo pipefail
-          marker='ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17'
-          if grep -Fq "$marker" TASKS.md && grep -Fq "$marker" CHANGELOG_AI.md; then
-            echo 'N8.10.H canonical rollup already present; no write required.'
-            exit 0
-          fi
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import subprocess
-
-          tasks = Path('TASKS.md').read_bytes()
-          changelog = Path('CHANGELOG_AI.md').read_bytes()
-          tasks_hash = subprocess.check_output(['git','hash-object','TASKS.md'], text=True).strip()
-          changelog_hash = subprocess.check_output(['git','hash-object','CHANGELOG_AI.md'], text=True).strip()
-          assert tasks_hash == 'da8db94867981a864e28366223e9c9725aaa50f9', tasks_hash
-          assert changelog_hash == 'b328a72029feb1be9a228e6f91c1c781d7378d72', changelog_hash
-
-          tasks_append = (
-            "\n\n## ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17\n\n"
-            "- `N8.10.A-G`: revalidadas secuencialmente contra el estándar vigente; el histórico fue evidencia de apoyo, nunca auto-cierre.\n"
-            "- Fresh receipts: A `f01038cb`, B `ce1fabb2`, C `4039299b`, D `792ae87b`, E `45d663a3`, F `67541352`, G `4f8426c7`.\n"
-            "- Restore causal actual: run `35223693868`, job `105209822216`, `SUCCESS`; backend current-equivalence PASS; no migration delta.\n"
-            "- RPO engineering `<=24h`; RTO engineering `<=60m`; drill medido `1244s`; P0=0/P1=0.\n"
-            "- Certificación: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md` @ `c186daad`.\n"
-            "- `N8.10.H` exige REVIEW_FIRST final + receipt/readback antes de promover `N8.11.A`.\n"
-          ).encode('utf-8')
-          changelog_append = (
-            "\n\n## ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17\n\n"
-            "`CHATGPT_CONTROLLER` revalidó `N8.10.A-G` sin confiar en cierres históricos: PRE/domain/DB/API/UI/security/TEST_CI quedaron P0=0/P1=0 con receipts frescos. El gate material usa restore actual `35223693868:105209822216:SUCCESS`, equivalencia backend vigente y ausencia de delta de migraciones; RPO `<=24h` y RTO `1244s <= 3600s` permanecen PASS. Certificación current-standard: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md`. Desarrollo only; sin Producción, `main`, PR #2, secretos, DNS/certificados ni restore destructivo del proveedor.\n"
-          ).encode('utf-8')
-          Path('TASKS.md').write_bytes(tasks + tasks_append)
-          Path('CHANGELOG_AI.md').write_bytes(changelog + changelog_append)
-          PY
-
-          changed="$(git diff --name-only)"
-          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md'
-          while read -r additions deletions path; do
-            test "$additions" -gt 0
-            test "$deletions" -eq 0
-            case "$path" in CHANGELOG_AI.md|TASKS.md) ;; *) exit 1 ;; esac
-          done < <(git diff --numstat -- CHANGELOG_AI.md TASKS.md)
-          git diff --check -- CHANGELOG_AI.md TASKS.md
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add CHANGELOG_AI.md TASKS.md
-          git commit -m '[N8.10.H] append current-standard DR rollup'
-          git push origin HEAD:Desarrollo
+      - name: Retired writer guard
+        run: echo 'Historical byte-export writer retired after N8.10.H safe append; no repository writes are permitted.'
