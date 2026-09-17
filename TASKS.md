@@ -120,7 +120,7 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 
 - [x] N3.6.H quedó cerrado realmente antes de iniciar N3.7; el `CHANGELOG_AI.md` canónico preserva ese cierre en blob `d53c56416ac7ac01beef761adab5172cf5297487`.
 - [x] N3.7.A auditoría/preflight — `LISTO_REAL`, Issue #752, P0=0/P1=0.
-- [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
+- [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
 - [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
@@ -689,3 +689,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - RPO engineering `<=24h`; RTO engineering `<=60m`; drill medido `1244s`; P0=0/P1=0.
 - Certificación: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md` @ `c186daad`.
 - `N8.10.H` exige REVIEW_FIRST final + receipt/readback antes de promover `N8.11.A`.
+
+## ERP-N8.11 — Seguridad — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
+
+- [x] N8.11.A-G fueron revalidados secuencialmente contra el estándar vigente; el histórico fue evidencia de apoyo, nunca auto-cierre.
+- [x] N8.11.F `LISTO` con REVIEW_FIRST P0=0/P1=0 y security gate `35258962286=SUCCESS`.
+- [x] N8.11.G `LISTO` con REVIEW_FIRST P0=0/P1=0 y quality/regression gate `35258969104=SUCCESS`; equivalencia de dependencias respaldada por `35233179389=SUCCESS`.
+- [x] Functional head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; certificación current-standard `docs/CERTIFICACION_N8_11_SEGURIDAD_CURRENT_STANDARD.md` publicada antes de este rollup.
+- [x] `main`, Producción, PR #2, secretos, DNS/certificados y datos productivos permanecen intactos.
+- [ ] N8.11.H sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.
+
+**CURRENT_PARENT=N8.11.H. NEXT_PARENT_PREARMED=N8.12.A. No se promueve N8.12.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
