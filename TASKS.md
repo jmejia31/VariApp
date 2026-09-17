@@ -383,7 +383,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
 - [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -420,8 +420,8 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 - [x] Eliminado `vaep/jules-a/dispatch/`: 54 manifests históricos residuales retirados del árbol activo; historia preservada por Git.
 - [x] `TASKS.md` marcado explícitamente como historial/no machine-readable para `CURRENT_PARENT`, `NEXT_ACTION` y estado operativo; consumidores deben leer `CONFIG/COLA/BITACORA` frescos.
-- [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE` y `VAEP_CHECKPOINTS`.
-- [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se retiró el literal runtime de checkpoints.
+- [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE`, `VAEP_CHECKPOINTS`.
+- [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se eliminó el literal runtime de checkpoints.
 - [x] Gate exact-head de hardening `09ee682712ba29d79d235a62415de20c308db7c9`: `VAEP engine lightweight checks #33920294318=SUCCESS`; `VAEP Jules Diagnostic #33920294338=SUCCESS`; `VariApp CI=SKIPPED` no se usa como PASS.
 - [x] Existencia/habilitación de `VAEP MASTER 00/15/30/45/55` verificada externamente en el control-plane de automatizaciones; no depende de que existan cinco cron equivalentes en Git.
 - [x] La limitación local de Bash reportada por Codex es de su entorno Windows y no se usa como PASS; la validación causal se tomó de GitHub Actions.
@@ -690,6 +690,7 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - Certificación: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md` @ `c186daad`.
 - `N8.10.H` exige REVIEW_FIRST final + receipt/readback antes de promover `N8.11.A`.
 
+
 ## ERP-N8.11 — Seguridad — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
 
 Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
@@ -697,7 +698,7 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] N8.11.A-G fueron revalidados secuencialmente contra el estándar vigente; el histórico fue evidencia de apoyo, nunca auto-cierre.
 - [x] N8.11.F `LISTO` con REVIEW_FIRST P0=0/P1=0 y security gate `35258962286=SUCCESS`.
 - [x] N8.11.G `LISTO` con REVIEW_FIRST P0=0/P1=0 y quality/regression gate `35258969104=SUCCESS`; equivalencia de dependencias respaldada por `35233179389=SUCCESS`.
-- [x] Functional head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; certificación current-standard `docs/CERTIFICACION_N8_11_SEGURIDAD_CURRENT_STANDARD.md` publicada antes de este rollup.
+- [x] Functional head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; certificación current-standard `docs/CERTIFICACION_N8_11_SEGURIDAD_CURRENT_STANDARD.md`.
 - [x] `main`, Producción, PR #2, secretos, DNS/certificados y datos productivos permanecen intactos.
 - [ ] N8.11.H sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.
 

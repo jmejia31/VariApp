@@ -1349,3 +1349,12 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 ## ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17
 
 `CHATGPT_CONTROLLER` revalidó `N8.10.A-G` sin confiar en cierres históricos: PRE/domain/DB/API/UI/security/TEST_CI quedaron P0=0/P1=0 con receipts frescos. El gate material usa restore actual `35223693868:105209822216:SUCCESS`, equivalencia backend vigente y ausencia de delta de migraciones; RPO `<=24h` y RTO `1244s <= 3600s` permanecen PASS. Certificación current-standard: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md`. Desarrollo only; sin Producción, `main`, PR #2, secretos, DNS/certificados ni restore destructivo del proveedor.
+
+
+## 2026-09-17 — ERP-N8.11 Seguridad — reconciliación current-standard append-only
+
+**Responsable:** CHATGPT_VAEP / recovery N8.11.H bajo `docs/VAEP_AUTHORITY.md`.
+
+N8.11.A-G fueron revalidados secuencialmente contra el estándar vigente. El functional head probado es `6fd3e28cbf28164d110d6b83756b9094cec654a6`; los gates causales `35258962286` (security) y `35258969104` (quality/regression) terminaron `SUCCESS`, y la auditoría de dependencias `35233179389=SUCCESS` conserva equivalencia para los blobs vigentes. La certificación current-standard es `docs/CERTIFICACION_N8_11_SEGURIDAD_CURRENT_STANDARD.md`. P0=0/P1=0 en el alcance técnico A-G; el riesgo P2 no bloqueante de token frontend en `localStorage` queda fuera del cierre acotado.
+
+Este append resuelve únicamente la reconciliación documental de `CHANGELOG_AI.md`; no declara por sí solo `N8.11.H=LISTO`. El cierre requiere hard verify de prefijo exacto de `TASKS.md` y este archivo, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback antes de promover `N8.12.A`. Sin cambios a `main`, Producción, PR #2, secretos, DNS/certificados ni datos productivos.
