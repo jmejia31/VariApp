@@ -123,7 +123,7 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
-- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS.
+- [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
 - [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
@@ -362,7 +362,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-variapp`.
 - [x] Auditoría exhaustiva de los 38 workflows restantes: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`.
 - [x] `PRODUCT_CI_PRESERVED=PASS`.
-- [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic #33912398627=SUCCESS`.
+- [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic` run `33912398627` = `SUCCESS`.
 - [x] `VariApp CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
 
@@ -383,7 +383,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
 - [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -756,16 +756,3 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Certificación: `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`.
 - [x] `main`, Producción, PR #2 merge, secretos, DNS/certificados y datos productivos no fueron tocados.
 - [ ] `N9.1.H` sólo pasa a `LISTO` después de verificar este append y `CHANGELOG_AI.md`, retirar el writer temporal, REVIEW_FIRST final P0=0/P1=0, receipt y write/readback del control-plane.
-
-
-## ERP-N9.2 — Checklist de salida — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
-
-Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.
-
-- [x] `N9.2.A-G` revalidados current-standard con receipts frescos; P0=0/P1=0 y delta de producto=0 frente al Release Candidate congelado `4eadd208322e8f19d84d669fffc70a9de85ba567`.
-- [x] Gates causales aplicables preservados por equivalencia exacta de producto: security `35258962286=SUCCESS`, quality/regression `35258969104=SUCCESS`, backup/restore `35223693868=SUCCESS` y performance `35219847763=SUCCESS`.
-- [x] `N9.2.G` receipt `vaep/evidence/receipts/N9.2.G_LISTO_20260917T231100Z_SUP24.json` releído; `N9.2.H` REVIEW_FIRST detectó únicamente dos P1 documentales de append en `TASKS.md` y `CHANGELOG_AI.md`, sin P0/P1 de producto.
-- [x] Este append resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
-- [ ] `N9.2.H` sólo pasa a `LISTO` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, hard verify de ambos prefijos, REVIEW_FIRST fresco P0=0/P1=0, receipt y write/readback del control-plane.
-
-**CURRENT_PARENT=N9.2.H. NEXT_PARENT_PREARMED=N9.3.A. No se promueve N9.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
