@@ -576,12 +576,12 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 
 - [x] N7.10.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
 - [x] N7.10.F — seguridad/RBAC/auditoría/observabilidad certificada mediante `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`.
-- [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend, Docker, frontend, higiene y MySQL/migraciones/integración en `SUCCESS`.
+- [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend Release/pruebas, Docker, frontend producción, higiene y MySQL/migraciones/integración en `SUCCESS`.
 - [x] N7.10.H — certificación canónica `docs/CERTIFICACION_N7_10_FACTURACION_FISCAL_ELECTRONICA.md` preparada para cierre documental.
 - [x] Este rollup reconcilia `TASKS.md` y `CHANGELOG_AI.md` mediante append byte-exacto sin reescribir historia previa.
 - [ ] N7.10.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b` y receipt H persistido/releído.
 
-**CURRENT_PARENT=N7.10.H. NEXT_PARENT_PREARMED=GATE-N7. No se promueve GATE-N7 antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+**CURRENT_PARENT=N7.10.H. NEXT_PARENT_PREARMED=GATE-N7. No se promueve GATE-N7 antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
 ## ERP-N8.2 — Compatibilidad de dispositivos — ROLLUP DOCUMENTAL 2026-09-15
 
@@ -655,3 +655,14 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Contrato de seguridad: Production traffic/data=0, auth bypass=false, rate limit disabled=false y datos únicamente sintéticos; artifact `10496399028`, digest `sha256:68f2912c06d84feb0c2c25d148748c6daf02aa61f14b132151aef810f2ecbd9c`.
 - [x] Certificación H canónica materializada en `docs/evidencias/performance/N8.7_CURRENT_STANDARD_MATERIAL_PERFORMANCE_CERTIFICATION_20260917.md`.
 - [ ] N8.7.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, hard verify de este append, receipt H y Sheet write/readback; este rollup no sustituye el cierre.
+
+## ERP-N8.8 — Backup y restauración — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
+
+- [x] N8.8.A-G revalidados current-standard con receipts frescos y REVIEW_FIRST/gates causales aplicables; P0=0/P1=0 en el alcance técnico certificado.
+- [x] M11 backup operativo run `35223693841=SUCCESS` y backup/restauración run `35223693868=SUCCESS` sobre tested head `ab7b5a35cdc91312254b8a96b13ac24c53e28f44`; el drill restauró en MySQL descartable y validó integridad/health sin escribir Producción.
+- [x] Aiven DEV proof read-only run `35223698590`, attempt 4, `SUCCESS`: servicio MySQL `RUNNING`, endpoint de backups accesible, 3 backups observados, PITR disponible, retención legible y capacidad/autorización de restore identificada; el blocker histórico de token expirado quedó resuelto.
+- [x] Equivalencia causal de la superficie backup/restore demostrada por blobs invariantes del workflow y scripts, según `docs/CERTIFICACION_N8_8_BACKUP_CURRENT_STANDARD.md`.
+- [x] `main`, Producción, PR #2, secretos, DNS/certificados, planes y datos productivos permanecen intactos; durante esta revalidación no se ejecutó restore/fork/upgrade contra Aiven.
+- [ ] N8.8.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, hard verify de este append y `CHANGELOG_AI.md`, receipt H y Sheet write/readback; este rollup no sustituye el cierre.
