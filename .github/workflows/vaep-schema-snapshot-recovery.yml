@@ -1,0 +1,96 @@
+name: VAEP Schema Snapshot Recovery
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-schema-snapshot-recovery.yml'
+      - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-schema-snapshot-recovery-desarrollo
+  cancel-in-progress: false
+
+jobs:
+  reconcile-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=vaep_snapshot_probe;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: VAEP-Schema-Recovery-CI-Only-Secret-Longer-Than-32-Characters
+      Jwt__Issuer: VariApp.CI
+      Jwt__Audience: VariApp.CI.Frontend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore and build backend
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln -c Release --no-restore -warnaserror
+
+      - name: Install EF tooling
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Detect and reconcile canonical snapshot drift
+        id: reconcile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd backend
+          if dotnet ef migrations has-pending-model-changes \
+              --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+              --startup-project src/API/InventoryApp.API.csproj \
+              --context AppDbContext; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          name="VAEP_SnapshotReconcile_20260917"
+          dotnet ef migrations add "$name" \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          cd ..
+
+          find backend/src/Infrastructure/Migrations -maxdepth 1 -type f -name "*${name}*.cs" -print -delete
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          test "$(git diff --cached --name-only | wc -l)" -eq 1
+          test "$(git diff --cached --name-only)" = 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Verify reconciled snapshot and backend tests
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          dotnet build InventoryApp.sln -c Release --no-restore -warnaserror
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          dotnet test InventoryApp.sln -c Release --no-build --filter 'Category!=Integration'
+
+      - name: Commit canonical snapshot only when reconciliation was needed
+        if: steps.reconcile.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vaep-supervision-00'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'fix(schema): reconcile canonical EF snapshot after N7 persistence'
+          git push origin HEAD:Desarrollo
