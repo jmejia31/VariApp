@@ -742,3 +742,17 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Certificación current-standard: `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.
 - [x] No se tocó `main`, Producción, PR #2, secretos, DNS/certificados ni datos productivos.
 - [ ] `N8.14.H` sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.
+
+
+## ERP-N9.1 — Release Candidate — FEATURE FREEZE 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.
+
+- [x] `GATE-N8` cerrado current-standard con 24/24 prerequisitos H y 24/24 parents PLAN en `LISTO`; receipt `4eadd208322e8f19d84d669fffc70a9de85ba567`.
+- [x] Release Candidate funcional fijado por SHA inmutable: `4eadd208322e8f19d84d669fffc70a9de85ba567`.
+- [x] Feature freeze activo para `N9.1`: no nuevas features; cualquier cambio de producto invalida la equivalencia y exige nuevo candidate SHA + recertificación causal.
+- [x] `N9.1.A-F` cerrados con REVIEW_FIRST y P0=0/P1=0; B-E N/A grounded por ausencia de delta de producto; F verificó controles heredados.
+- [x] `N9.1.G TEST_CI`: security `35258962286=SUCCESS`, quality `35258969104=SUCCESS`, backup/restore `35223693868=SUCCESS`, performance `35219847763=SUCCESS`, product delta=0.
+- [x] Certificación: `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`.
+- [x] `main`, Producción, PR #2 merge, secretos, DNS/certificados y datos productivos no fueron tocados.
+- [ ] `N9.1.H` sólo pasa a `LISTO` después de verificar este append y `CHANGELOG_AI.md`, retirar el writer temporal, REVIEW_FIRST final P0=0/P1=0, receipt y write/readback del control-plane.

@@ -1380,3 +1380,12 @@ Este append resuelve únicamente la reconciliación documental de `CHANGELOG_AI.
 `N8.14.A-G` quedó revalidado current-standard sin rehacer trabajo correcto. Los gates causales `35258962286` (security), `35258969104` (quality/regression) y `35223693868` (backup/restore MySQL descartable) permanecen `SUCCESS`; `N8.14.G` cerró con REVIEW_FIRST fresco P0=0/P1=0, equivalencia exacta de producto y receipt `232874df8f309cac68638b4f7678c85b9a88adff`. El runbook vigente es `docs/ROLLBACK_RUNBOOK.md` y la certificación final de alcance está en `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.
 
 Este append es estrictamente history-preserving y no declara por sí solo `N8.14.H=LISTO`: el cierre exige hard verify de prefijo/tamaño, REVIEW_FIRST documental final P0=0/P1=0, receipt H y reconciliación write/readback de `COLA/CONFIG/CONTROL_TOWER/PLAN_MAESTRO`. Sin cambios a `main`, Producción, deploys productivos, PR #2, secretos, DNS/certificados ni datos productivos.
+
+
+## ERP-N9.1 — Release Candidate — FEATURE FREEZE 2026-09-17
+
+**Responsable:** `Tarea Supervisión :24` bajo `docs/VAEP_AUTHORITY.md`.
+
+`GATE-N8` cerró current-standard y habilitó `N9.1`. El Release Candidate funcional queda fijado por SHA `4eadd208322e8f19d84d669fffc70a9de85ba567`. `N9.1.A-F` fueron revisados secuencialmente con P0=0/P1=0: no existe delta de dominio, DB/migraciones, backend/API ni frontend/UI requerido por el freeze; seguridad conserva controles heredados. `N9.1.G` certificó equivalencia exacta del producto y cobertura causal con security `35258962286`, quality `35258969104`, backup/restore `35223693868` y performance `35219847763`, todos `SUCCESS`.
+
+Feature freeze: no se aceptan nuevas features sobre este candidato. Un cambio de producto obliga a fijar nuevo candidate SHA y recertificar gates aplicables. La certificación está en `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`. Este append es history-preserving y no declara por sí solo `N9.1.H=LISTO`; falta hard verify, REVIEW_FIRST final, receipt y reconciliación write/readback. Sin cambios a `main`, Producción, PR #2 merge, secretos, DNS/certificados ni datos productivos.
