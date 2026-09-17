@@ -226,7 +226,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Certificación canónica publicada: `docs/CERTIFICACION_N4_5_CUENTAS_POR_PAGAR.md`.
 - [x] Baseline funcional certificado: `541ec12b72912c769c6f54b8821771e509818375`; el HEAD posterior contiene únicamente documentación y manifests de coordinación VAEP/Jules.
 - [x] P0 abiertos=0; P1 abiertos=0 para el alcance A-G según la evidencia canónica revisada.
-- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0.
+- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0/P1=0.
 
 **CURRENT_PARENT=N4.5.H. CLOSABLE_NOW=NO hasta completar la reconciliación documental y los gates exact-head. `N4.6.A` permanece `PREARMED/PROMOTION_HELD`; no se promueve antes del cierre real de N4.5.H.**
 
@@ -689,3 +689,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - RPO engineering `<=24h`; RTO engineering `<=60m`; drill medido `1244s`; P0=0/P1=0.
 - Certificación: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md` @ `c186daad`.
 - `N8.10.H` exige REVIEW_FIRST final + receipt/readback antes de promover `N8.11.A`.
+
+## ERP-N8.11 — Seguridad — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
+
+- [x] N8.11.A-G fueron revalidados secuencialmente contra el estándar vigente; el histórico fue evidencia de apoyo, nunca auto-cierre.
+- [x] N8.11.F `LISTO` con REVIEW_FIRST P0=0/P1=0 y security gate `35258962286=SUCCESS`.
+- [x] N8.11.G `LISTO` con REVIEW_FIRST P0=0/P1=0 y quality/regression gate `35258969104=SUCCESS`; equivalencia de dependencias respaldada por `35233179389=SUCCESS`.
+- [x] Functional head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; certificación current-standard `docs/CERTIFICACION_N8_11_SEGURIDAD_CURRENT_STANDARD.md` publicada antes de este rollup.
+- [x] `main`, Producción, PR #2, secretos, DNS/certificados y datos productivos permanecen intactos.
+- [ ] N8.11.H sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.
+
+**CURRENT_PARENT=N8.11.H. NEXT_PARENT_PREARMED=N8.12.A. No se promueve N8.12.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
