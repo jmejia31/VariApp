@@ -86,19 +86,28 @@ jobs:
         run: |
           set -euo pipefail
           mysql_container='${{ job.services.mysql.id }}'
-          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_perf <<'SQL'
-          INSERT INTO Roles
-            (Id, Nombre, NombreNormalizado, Descripcion, EsSistema, EsAdministrador, Activo, Eliminado, FechaCreacion)
-          VALUES
-            (900001, 'N87 Performance CI', 'N87 PERFORMANCE CI', 'Synthetic CI-only performance role', 1, 0, 1, 0, UTC_TIMESTAMP(6))
-          ON DUPLICATE KEY UPDATE Activo=1, Eliminado=0;
-
-          INSERT INTO Usuarios
-            (Id, NombreUsuario, NombreCompleto, PasswordHash, RolId, Activo, Bloqueado, Eliminado, FechaCreacion)
-          VALUES
-            (900001, 'n87_perf_ci', 'N8.7 Performance CI', '$2b$05$NqNCYCM9rDKm.uorRQORzuSugO7F/LtQi3n3iI3g/QHkqMq5cZ55K', 900001, 1, 0, 0, UTC_TIMESTAMP(6))
-          ON DUPLICATE KEY UPDATE RolId=900001, Activo=1, Bloqueado=0, Eliminado=0;
-          SQL
+          mkdir -p /tmp/n87-hasher
+          cat > /tmp/n87-hasher/n87-hasher.csproj <<'EOF'
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+            <ItemGroup><PackageReference Include="BCrypt.Net-Next" Version="4.0.3" /></ItemGroup>
+          </Project>
+          EOF
+          cat > /tmp/n87-hasher/Program.cs <<'EOF'
+          var password = Environment.GetEnvironmentVariable("N87_PERF_PASSWORD")
+              ?? throw new InvalidOperationException("Synthetic CI password missing");
+          Console.Write(BCrypt.Net.BCrypt.HashPassword(password, workFactor: 5));
+          EOF
+          password_hash="$(dotnet run --project /tmp/n87-hasher/n87-hasher.csproj --configuration Release --nologo)"
+          if [[ "$password_hash" != '$2'* ]]; then
+            echo 'BCrypt hash generation failed.' >&2
+            exit 1
+          fi
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_perf \
+            -e "INSERT INTO Roles (Id, Nombre, NombreNormalizado, Descripcion, EsSistema, EsAdministrador, Activo, Eliminado, FechaCreacion) VALUES (900001, 'N87 Performance CI', 'N87 PERFORMANCE CI', 'Synthetic CI-only performance role', 1, 0, 1, 0, UTC_TIMESTAMP(6)) ON DUPLICATE KEY UPDATE Activo=1, Eliminado=0;"
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_perf \
+            -e "INSERT INTO Usuarios (Id, NombreUsuario, NombreCompleto, PasswordHash, RolId, Activo, Bloqueado, Eliminado, FechaCreacion) VALUES (900001, 'n87_perf_ci', 'N8.7 Performance CI', '${password_hash}', 900001, 1, 0, 0, UTC_TIMESTAMP(6)) ON DUPLICATE KEY UPDATE PasswordHash=VALUES(PasswordHash), RolId=900001, Activo=1, Bloqueado=0, Eliminado=0;"
+          echo 'Synthetic identity seeded with a runtime BCrypt.Net-Next hash.'
 
       - name: Start Development API against ephemeral database
         run: |
