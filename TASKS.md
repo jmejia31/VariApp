@@ -161,7 +161,7 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9
 - [x] N3.9.H quedó cerrado formalmente antes de N3.10; `CHANGELOG_AI.md` contiene el cierre canónico history-preserving.
 - [x] N3.10.A auditoría/preflight — `LISTO_REAL`.
 - [x] N3.10.B dominio/contratos — `LISTO_REAL`; la capacidad de crédito permanece integrada a Cliente y no introduce un motor autónomo de scoring ni una segunda autoridad comercial.
-- [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase8 #33068581188 y M13 #33068581299 SUCCESS.
+- [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 SUCCESS.
 - [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 SUCCESS.
 - [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
 - [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 SUCCESS.
@@ -382,8 +382,8 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - C `33913519551=SUCCESS`
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
-- [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
+- [x] No se usó `[skip ci]` como mecanismo de seguridad.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -446,7 +446,7 @@ Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot 
 Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot histórico stale; la autoridad viva permanece en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
 
 - [x] N6.8.A-G — `LISTO_REAL` con evidencia canónica y P0/P1 atribuibles conocidos=0.
-- [x] N6.8.G — candidate de storage/TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`.
+- [x] N6.8.G — candidate de TEST_CI `f5d29e7471762a3fe6fe735ba98c2ad1f0188727`; causal storage-isolation run `34714029058`, job `103607801664=SUCCESS`.
 - [x] N6.8.H — certificación canónica publicada en `docs/CERTIFICACION_N6_8_STORAGE_AISLADO.md` mediante material DOC_CERT `dae43dfc5a3211643565c7002abcc67a845ef179`.
 - [x] `CHANGELOG_AI.md` reconciliado de forma aditiva/history-preserving en el changeset documental de cierre.
 - [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup; este archivo no cambia por sí mismo el estado machine-readable.
@@ -576,7 +576,7 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 
 - [x] N7.10.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
 - [x] N7.10.F — seguridad/RBAC/auditoría/observabilidad certificada mediante `vaep/evidence/receipts/N7.10.F_LISTO_REAL_20260915T011651Z_SUP00.json`.
-- [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend, Docker, frontend producción, higiene y MySQL/migraciones/integración en `SUCCESS`; backend registró 2263 passed, 0 failed, 0 skipped.
+- [x] N7.10.G — TEST_CI certificado sobre functional candidate `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b`; receipt `vaep/evidence/receipts/N7.10.G_LISTO_REAL_20260915T012330Z_SUP00.json`; workflow causal `34916355954` con backend, Docker, frontend, higiene y MySQL/migraciones/integración en `SUCCESS`.
 - [x] N7.10.H — certificación canónica `docs/CERTIFICACION_N7_10_FACTURACION_FISCAL_ELECTRONICA.md` preparada para cierre documental.
 - [x] Este rollup reconcilia `TASKS.md` y `CHANGELOG_AI.md` mediante append byte-exacto sin reescribir historia previa.
 - [ ] N7.10.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `903901c6b30a4a2d70b4a52dc440ef8fc61adc5b` y receipt H persistido/releído.
