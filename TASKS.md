@@ -729,3 +729,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] `TASKS_ADDITIVE_STATE_RECONCILIATION` queda materializada por este append preservando íntegramente la historia previa.
 
 Este append no cambia por sí solo el estado de `N8.13.H`; el cierre `LISTO` requiere además reconciliación aditiva de `CHANGELOG_AI.md`, REVIEW_FIRST final con P0=0/P1=0, receipt y write/readback del control-plane.
+
+
+## ERP-N8.14 — Rollback — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.
+
+- [x] `N8.14.A-G` fueron revalidados secuencialmente current-standard con receipts frescos; `P0=0/P1=0`.
+- [x] Gates causales: security `35258962286=SUCCESS`, quality/regression `35258969104=SUCCESS`, backup/restore material `35223693868=SUCCESS`.
+- [x] TEST_CI `N8.14.G` certificado por REVIEW_FIRST `9559db0411b3c59dc25ee27972ceef7d7525d495` y receipt `232874df8f309cac68638b4f7678c85b9a88adff`; backend/frontend delta=0 y migraciones sin delta causal.
+- [x] Runbook vigente `docs/ROLLBACK_RUNBOOK.md` blob `0582222439ef7b2d3968d24fa6820e39e05180f3`; workflow M11 vigente blob `5cba214846ace7c45984d23b3e0db013404c3f01`.
+- [x] Certificación current-standard: `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.
+- [x] No se tocó `main`, Producción, PR #2, secretos, DNS/certificados ni datos productivos.
+- [ ] `N8.14.H` sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.

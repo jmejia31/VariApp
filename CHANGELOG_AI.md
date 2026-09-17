@@ -1371,3 +1371,12 @@ Este append resuelve únicamente la reconciliación documental de `CHANGELOG_AI.
 - Fresh material revalidation through `N8.13.G` is preserved as supporting evidence for DOC_CERT; historical receipts are evidence only.
 - `TASKS.md` reconciliation is present with exact-prefix verification at `7aeab0ecb4fc6fb7f0a5fdd452c2ad2dcb8420ec`.
 - `CHANGELOG_AI.md` reconciliation for `N8.13.H` is appended byte-exact/additive-only; final REVIEW_FIRST, receipt, and control-plane readback are separate closure evidence.
+
+
+## ERP-N8.14 — Rollback — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+**Responsable:** `Tarea Supervisión :24` bajo `docs/VAEP_AUTHORITY.md`.
+
+`N8.14.A-G` quedó revalidado current-standard sin rehacer trabajo correcto. Los gates causales `35258962286` (security), `35258969104` (quality/regression) y `35223693868` (backup/restore MySQL descartable) permanecen `SUCCESS`; `N8.14.G` cerró con REVIEW_FIRST fresco P0=0/P1=0, equivalencia exacta de producto y receipt `232874df8f309cac68638b4f7678c85b9a88adff`. El runbook vigente es `docs/ROLLBACK_RUNBOOK.md` y la certificación final de alcance está en `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.
+
+Este append es estrictamente history-preserving y no declara por sí solo `N8.14.H=LISTO`: el cierre exige hard verify de prefijo/tamaño, REVIEW_FIRST documental final P0=0/P1=0, receipt H y reconciliación write/readback de `COLA/CONFIG/CONTROL_TOWER/PLAN_MAESTRO`. Sin cambios a `main`, Producción, deploys productivos, PR #2, secretos, DNS/certificados ni datos productivos.
