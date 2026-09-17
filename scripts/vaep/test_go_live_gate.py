@@ -1,6 +1,10 @@
 import unittest
 
-from go_live_gate import evaluate_go_live_gate
+from go_live_gate import (
+    apply_ready_notification,
+    evaluate_go_live_gate,
+    record_owner_authorization,
+)
 
 
 BASE_STATE = {
@@ -87,6 +91,67 @@ class GoLiveGateTests(unittest.TestCase):
         self.assertFalse(result["notificationRequired"])
         self.assertEqual(result["notificationDedupeKey"], "N8.24:READY_FOR_GO_LIVE")
         self.assertFalse(result["productionWriteAllowed"])
+
+    def test_ready_notification_persistence_is_idempotent(self):
+        evaluation = evaluate_go_live_gate(BASE_STATE, READY_PREREQUISITES)
+        once = apply_ready_notification(
+            BASE_STATE, evaluation, sent_at_utc="2026-09-17T01:00:00Z"
+        )
+        after = evaluate_go_live_gate(once, READY_PREREQUISITES)
+        twice = apply_ready_notification(
+            once, after, sent_at_utc="2026-09-17T01:05:00Z"
+        )
+        self.assertEqual(once, twice)
+        self.assertFalse(after["notificationRequired"])
+        self.assertFalse(twice["productionWriteAllowed"])
+
+    def test_ready_notification_rejected_when_gate_is_not_ready(self):
+        evaluation = evaluate_go_live_gate(
+            BASE_STATE, {**READY_PREREQUISITES, "p0_zero": False}
+        )
+        with self.assertRaises(ValueError):
+            apply_ready_notification(
+                BASE_STATE, evaluation, sent_at_utc="2026-09-17T01:00:00Z"
+            )
+
+    def test_owner_authorization_requires_fresh_explicit_permission(self):
+        with self.assertRaises(PermissionError):
+            record_owner_authorization(
+                BASE_STATE,
+                authorized_by="owner",
+                authorized_at_utc="2026-09-17T01:00:00Z",
+                evidence="explicit approval evidence",
+            )
+        self.assertFalse(BASE_STATE["goLiveAuthorized"])
+
+    def test_owner_authorization_requires_by_at_evidence_atomically(self):
+        with self.assertRaises(ValueError):
+            record_owner_authorization(
+                BASE_STATE,
+                explicit_owner_authorized=True,
+                authorized_by="owner",
+                authorized_at_utc="2026-09-17T01:00:00Z",
+                evidence="",
+            )
+        self.assertFalse(BASE_STATE["goLiveAuthorized"])
+
+    def test_explicit_owner_authorization_records_complete_audit_without_prod_write(self):
+        updated = record_owner_authorization(
+            BASE_STATE,
+            explicit_owner_authorized=True,
+            authorized_by="owner",
+            authorized_at_utc="2026-09-17T01:00:00Z",
+            evidence="approval://test-only",
+        )
+        self.assertTrue(updated["goLiveAuthorized"])
+        self.assertEqual(updated["authorizationAudit"]["authorizedBy"], "owner")
+        self.assertEqual(
+            updated["authorizationAudit"]["authorizedAtUtc"],
+            "2026-09-17T01:00:00Z",
+        )
+        self.assertEqual(updated["authorizationAudit"]["evidence"], "approval://test-only")
+        self.assertFalse(updated["productionWriteAllowed"])
+        self.assertFalse(BASE_STATE["goLiveAuthorized"])
 
     def test_invalid_gate_mode_fails_closed(self):
         state = {**BASE_STATE, "gateMode": "AUTO"}
