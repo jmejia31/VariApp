@@ -1389,3 +1389,13 @@ Este append es estrictamente history-preserving y no declara por sí solo `N8.14
 `GATE-N8` cerró current-standard y habilitó `N9.1`. El Release Candidate funcional queda fijado por SHA `4eadd208322e8f19d84d669fffc70a9de85ba567`. `N9.1.A-F` fueron revisados secuencialmente con P0=0/P1=0: no existe delta de dominio, DB/migraciones, backend/API ni frontend/UI requerido por el freeze; seguridad conserva controles heredados. `N9.1.G` certificó equivalencia exacta del producto y cobertura causal con security `35258962286`, quality `35258969104`, backup/restore `35223693868` y performance `35219847763`, todos `SUCCESS`.
 
 Feature freeze: no se aceptan nuevas features sobre este candidato. Un cambio de producto obliga a fijar nuevo candidate SHA y recertificar gates aplicables. La certificación está en `vaep/evidence/certifications/N9.1_RELEASE_CANDIDATE_FREEZE_20260917T224932Z_SUP24.md`. Este append es history-preserving y no declara por sí solo `N9.1.H=LISTO`; falta hard verify, REVIEW_FIRST final, receipt y reconciliación write/readback. Sin cambios a `main`, Producción, PR #2 merge, secretos, DNS/certificados ni datos productivos.
+
+
+## 2026-09-17 — N9.2 Checklist de salida — cierre current-standard
+
+- N9.2.A–G revalidados y certificados `LISTO` contra el RC vigente, con delta de producto = 0.
+- Gates causales de seguridad, calidad, restore y performance permanecen aplicables y en PASS/SUCCESS según evidencia vigente.
+- `TASKS.md` fue recuperado y verificado append-only con prefijo histórico exacto y cambio neto `+13/-0`.
+- `CHANGELOG_AI.md` se actualiza mediante append-only desde blob completo, preservando byte por byte todo el historial previo.
+- REVIEW_FIRST final requerido: `P0=0 / P1=0`; después receipt/readback y promoción de `N9.3.A`.
+- Seguridad: solo `Desarrollo`; sin `main`, Producción, merge de PR #2, secretos, DNS/certificados ni writes productivos.
