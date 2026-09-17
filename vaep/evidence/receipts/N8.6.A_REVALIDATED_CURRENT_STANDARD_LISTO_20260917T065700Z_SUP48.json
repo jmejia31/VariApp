@@ -1,0 +1,61 @@
+{
+  "schema": "vaep-current-standard-receipt-v1",
+  "task_id": "N8.6.A",
+  "parent": "N8.6",
+  "stage": "PRE",
+  "status": "LISTO",
+  "certification_target": "REVALIDATED_CURRENT_STANDARD",
+  "closed_at_utc": "2026-09-17T06:57:00Z",
+  "executor": "Tarea Supervisión :48",
+  "automation_id": "6aab37d8bf588191800c10ec81dc692c",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "review_first": {
+    "path": "vaep/evidence/reviews/N8.6.A_REVALIDATED_CURRENT_STANDARD_REVIEW_FIRST_20260917T065600Z_SUP48.json",
+    "commit": "8b59ea7c70810904731824990d03118084979198",
+    "result": "PASS",
+    "p0_open": 0,
+    "p1_open": 0
+  },
+  "heads": {
+    "functional_equivalence_base": "86123e689bcc7e1006615ebb34ebc1a79a4f0f5e",
+    "review_head": "8b59ea7c70810904731824990d03118084979198",
+    "review_head_delta": "evidence_only"
+  },
+  "dod": {
+    "actual_state_inspected": true,
+    "scope_and_out_of_scope_documented": true,
+    "affected_components_identified": true,
+    "dependencies_valid": true,
+    "risks_and_acceptance_documented": true,
+    "rollback_strategy_documented": true,
+    "test_strategy_documented": true,
+    "provider_real_proof_not_fabricated": true,
+    "product_delta_required": false
+  },
+  "evidence": {
+    "historical_correction_commit": "7d736f4b5c55efd14fe3802cc7a45ab4e0eaddcb",
+    "current_whatsapp_service_blob": "49a64164d1782aec6258e0325a953c38ebdfcf5d",
+    "corrected_whatsapp_service_blob": "49a64164d1782aec6258e0325a953c38ebdfcf5d",
+    "service_byte_equivalence": true,
+    "current_service_spec_blob": "9b209eafd934a0f0f27d56da6a6a4a87817eb16b",
+    "current_handoff_contract_spec_blob": "03a2b9bc5936b34619ff7fea9f1ed22bfcffaaaf",
+    "causal_gate": "N_A_PRE_NO_PRODUCT_DELTA__CURRENT_CONTRACT_EVIDENCE_VERIFIED"
+  },
+  "operational_recovery": {
+    "phantom_owner_corrected": "VAEP :48 Debt",
+    "phantom_owner_last_physical_run_utc": "2026-09-17T05:53:04Z",
+    "superseded_lease_token": "SUP48-N86A-TAKEOVER-20260917T065234Z",
+    "single_writer_preserved": true
+  },
+  "guards": {
+    "development_only": true,
+    "main_touched": false,
+    "production_touched": false,
+    "provider_write": false,
+    "secrets_exposed": false,
+    "dns_or_certificates_touched": false,
+    "pr2_touched": false
+  },
+  "next": "N8.6.B",
+  "result": "LISTO__REVALIDATED_CURRENT_STANDARD__PRE_PASS__NO_PRODUCT_DELTA__P0_0__P1_0__PROVIDER_REAL_PROOF_DEFERRED_TO_N8.6.G__NEXT_N8.6.B"
+}
