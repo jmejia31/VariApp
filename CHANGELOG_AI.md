@@ -1331,3 +1331,16 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 **Evidencia current-standard:** `N8.8.A-G=LISTO`; `N8.8.G` receipt `vaep/evidence/receipts/N8.8.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T154700Z_SUP36.json`, REVIEW_FIRST P0=0/P1=0, M11 backup/restore causal PASS y Aiven provider proof attempt 4 PASS. `TASKS.md` ya fue reconciliado de forma history-preserving en `1798afc0481bebfd091b92a90f2964a0f17279c3` con `additions=11/deletions=0`. El blob fuente exacto de `CHANGELOG_AI.md` previo a este append es `1e834967da8bea86557132d988d3787365fb75c5`.
 
 **Control:** esta publicación resuelve únicamente el P1 documental de `CHANGELOG_AI.md`. No declara por sí sola `N8.8.H=LISTO`: todavía exige hard verify de prefijo/tamaño, compare con `additions>0/deletions=0`, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, receipt H persistido/releído y reconciliación `COLA/CONFIG` antes de promover `N8.9.A`. Sin cambios a `main`, Producción, deploys, secretos, DNS/certificados ni PR #2.
+
+
+## 2026-09-17 — ERP-N8.9 Restore real — revalidación current-standard append-only
+
+**Responsable:** `CHATGPT_CONTROLLER` bajo `docs/VAEP_AUTHORITY.md`.
+
+**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N8.9.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ya certificado ni ejecutar un restore destructivo del servicio administrado.
+
+**Evidencia current-standard:** `N8.9.A-G=LISTO`; certificación canónica `docs/CERTIFICACION_N8_9_RESTORE.md`; gate causal M11 `35223693868`, job `105209822216`, `SUCCESS`, restaurando el backup en MySQL descartable, validando integridad y arrancando la API contra la base restaurada. La equivalencia vigente del workflow/scripts de backup/restore permanece demostrada y no existe delta de migraciones dentro del scope N8.9. `TASKS.md` fue reconciliado en `34285b38fe15a05763e83668d228d456a1d0ce52` con compare `additions=13/deletions=0`.
+
+**Seguridad:** no se ejecutó restore/fork/upgrade en Aiven, no se tocó Producción, `main`, PR #2, secretos, DNS/certificados ni datos productivos.
+
+**Control:** este append resuelve el último P1 documental. `N8.9.H` sólo puede pasar a `LISTO` tras REVIEW_FIRST documental final P0=0/P1=0, exact-head/equivalencia, receipt persistido/releído y write/readback del control-plane; únicamente entonces puede promoverse `N8.10.A`.
