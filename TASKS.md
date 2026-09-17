@@ -163,7 +163,7 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9
 - [x] N3.10.B dominio/contratos — `LISTO_REAL`; la capacidad de crédito permanece integrada a Cliente y no introduce un motor autónomo de scoring ni una segunda autoridad comercial.
 - [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 SUCCESS.
 - [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 SUCCESS.
-- [x] N3.10.E Frontend/UX — `LISTO_REAL` sobre `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
+- [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
 - [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 SUCCESS.
 - [x] N3.10.G QA/regresión/CI — `LISTO_REAL`, reutilizando la misma autoridad exact-head `98b7777555cd6f7ee881edb76321cd1226ca69eb` sin fabricar evidencia duplicada.
 - [x] N3.10.H documentación/certificación — certificación canónica `docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`; rollup aditivo TASKS+CHANGELOG hard-verificado; P0/P1 atribuibles conocidos=0.
@@ -383,7 +383,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
 - [x] No se usó `[skip ci]` para proteger la limpieza.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -540,7 +540,7 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [x] N7.7.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
 - [x] N7.7.G — functional candidate `7a0765aa37533b8df2e52807f0a63800872c009d`; receipt `vaep/evidence/receipts/N7.7.G_LISTO_REAL_20260914T181734Z_SUP12.json`.
 - [x] N7.7.H — certificación canónica `docs/CERTIFICACION_N7_7_EMAIL_EMPRESARIAL.md` publicada y releída.
-- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
 - [ ] N7.7.H sólo pasa a `LISTO_REAL` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, repetir REVIEW_FIRST con P0=0/P1=0, demostrar equivalencia funcional contra `7a0765aa37533b8df2e52807f0a63800872c009d` y persistir/releer receipt H.
 
 **CURRENT_PARENT=N7.7.H. NEXT_PARENT_PREARMED=N7.8.A. No se promueve N7.8.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
@@ -553,7 +553,7 @@ Este bloque es estrictamente aditivo/history-preserving y supersede únicamente 
 - [x] N7.8.A-G — `LISTO_REAL` con receipts/evidencia VAEP y P0/P1 atribuibles conocidos=0.
 - [x] N7.8.G — functional candidate `b217cc00bfa9bfc452674f0bdacbef52e50186a7`; receipt `vaep/evidence/receipts/N7.8.G_LISTO_REAL_20260914T212600Z_SUP48.json`; gates causales aplicables exact-head en SUCCESS.
 - [x] N7.8.H — certificación canónica `docs/CERTIFICACION_N7_8_PAGOS_ONLINE.md` publicada y releída.
-- [x] Este rollup resuelve únicamente `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
+- [x] Este rollup resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa; `CHANGELOG_AI_ADDITIVE_RECONCILIATION` se publica en el mismo recovery commit mediante append byte-exacto.
 - [ ] N7.8.H sólo pasa a `LISTO_REAL` después de hard verify de prefijo/tamaño, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional contra `b217cc00bfa9bfc452674f0bdacbef52e50186a7` y receipt H persistido/releído.
 
 **CURRENT_PARENT=N7.8.H. No se promueve el sucesor antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
@@ -634,15 +634,3 @@ Este bloque es aditivo e histórico. El estado operativo vigente se determina ú
 - [x] Certificación canónica H materializada en `docs/CERTIFICACION_N8_11_SEGURIDAD.md`.
 
 N8.11.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación de control-plane; este rollup no sustituye el receipt.
-
-## ERP-N8.3 — Compatibilidad de navegadores — REVALIDACIÓN CURRENT STANDARD 2026-09-17
-
-Este bloque es estrictamente aditivo/history-preserving para la reapertura vigente; la autoridad operativa sigue siendo `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`.
-
-- [x] N8.3.E — `LISTO` revalidado current-standard con gate causal `35174604643` sobre functional head `844b3584c4159abe3b9cc854addf49033460985a`; Chromium, Firefox y WebKit PASS.
-- [x] N8.3.F — `LISTO` revalidado current-standard sin delta material adicional de auth/RBAC/auditoría/seguridad y sin secretos.
-- [x] N8.3.G — `LISTO` revalidado current-standard; receipt `vaep/evidence/receipts/N8.3.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T025102Z_SUP36.json`; P0=0/P1=0.
-- [x] N8.3.H — certificación canónica reconciliada en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`; REVIEW_FIRST `vaep/evidence/reviews/N8.3.H_REVALIDATED_CURRENT_STANDARD_REVIEW_FIRST_20260917T025313Z_SUP36.json` con P0=0/P1=0/P2=0.
-- [x] `TASKS.md` reconciliado de forma aditiva/history-preserving como parte del cierre vigente.
-
-N8.3.H sólo pasa a `LISTO` tras reconciliar también `CHANGELOG_AI.md`, persistir y releer el receipt final y completar el write/readback de `COLA/CONFIG`.
