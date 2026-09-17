@@ -89,14 +89,19 @@ jobs:
           mkdir -p /tmp/n87-hasher
           cat > /tmp/n87-hasher/n87-hasher.csproj <<'EOF'
           <Project Sdk="Microsoft.NET.Sdk">
-            <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+            <PropertyGroup>
+              <OutputType>Exe</OutputType>
+              <TargetFramework>net8.0</TargetFramework>
+              <ImplicitUsings>enable</ImplicitUsings>
+              <Nullable>enable</Nullable>
+            </PropertyGroup>
             <ItemGroup><PackageReference Include="BCrypt.Net-Next" Version="4.0.3" /></ItemGroup>
           </Project>
           EOF
           cat > /tmp/n87-hasher/Program.cs <<'EOF'
-          var password = Environment.GetEnvironmentVariable("N87_PERF_PASSWORD")
-              ?? throw new InvalidOperationException("Synthetic CI password missing");
-          Console.Write(BCrypt.Net.BCrypt.HashPassword(password, workFactor: 5));
+          var password = System.Environment.GetEnvironmentVariable("N87_PERF_PASSWORD")
+              ?? throw new System.InvalidOperationException("Synthetic CI password missing");
+          System.Console.Write(BCrypt.Net.BCrypt.HashPassword(password, workFactor: 5));
           EOF
           password_hash="$(dotnet run --project /tmp/n87-hasher/n87-hasher.csproj --configuration Release --nologo)"
           if [[ "$password_hash" != '$2'* ]]; then
