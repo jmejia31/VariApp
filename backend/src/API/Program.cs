@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
 using FluentValidation;
@@ -24,6 +25,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT");
+var isRender = string.Equals(Environment.GetEnvironmentVariable("RENDER"), "true", StringComparison.OrdinalIgnoreCase);
 if (!string.IsNullOrWhiteSpace(port)) builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 builder.Services.AddControllers(options => options.Filters.Add<InventoryApp.API.Filters.MedirRendimientoBusquedaFilter>());
 builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 30 * 1024 * 1024);
@@ -190,22 +192,34 @@ builder.Services.AddAuthentication(options => { options.DefaultAuthenticateSchem
 });
 builder.Services.AddAuthorization();
 var loginRateLimitPerMinute = Math.Clamp(builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60, 5, 300);
-builder.Services.AddRateLimiter(options => { options.RejectionStatusCode = StatusCodes.Status429TooManyRequests; options.OnRejected = async (context, cancellationToken) => { context.HttpContext.Response.ContentType = "application/json"; await context.HttpContext.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."), cancellationToken); }; options.AddPolicy("AuthLogin", httpContext => RateLimitPartition.GetFixedWindowLimiter(partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida", factory: _ => new FixedWindowRateLimiterOptions { AutoReplenishment = true, PermitLimit = loginRateLimitPerMinute, QueueLimit = 0, Window = TimeSpan.FromMinutes(1) })); });
+builder.Services.AddRateLimiter(options => { options.RejectionStatusCode = StatusCodes.Status429TooManyRequests; options.OnRejected = async (context, cancellationToken) => { context.HttpContext.Response.ContentType = "application/json"; await context.HttpContext.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."), cancellationToken); }; options.AddPolicy("AuthLogin", httpContext => RateLimitPartition.GetFixedWindowLimiter(partitionKey: TrustedClientIpResolver.Resolve(httpContext, isRender), factory: _ => new FixedWindowRateLimiterOptions { AutoReplenishment = true, PermitLimit = loginRateLimitPerMinute, QueueLimit = 0, Window = TimeSpan.FromMinutes(1) })); });
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 if (corsOrigins.Length == 0 || corsOrigins.Any(string.IsNullOrWhiteSpace)) throw new InvalidOperationException("Cors:AllowedOrigins debe contener al menos un origen válido.");
 builder.Services.AddCors(options => options.AddPolicy("FrontendPolicy", policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => { options.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryApp API", Version = "v1" }); options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Name = "Authorization", Type = SecuritySchemeType.Http, Scheme = "Bearer", BearerFormat = "JWT", In = ParameterLocation.Header, Description = "Ingresa: Bearer {tu token}" }); options.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() } }); });
 var app = builder.Build();
-var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
-forwardedHeadersOptions.KnownNetworks.Clear(); forwardedHeadersOptions.KnownProxies.Clear(); app.UseForwardedHeaders(forwardedHeadersOptions);
+if (isRender)
+{
+    app.Use(async (context, next) =>
+    {
+        context.Request.Scheme = Uri.UriSchemeHttps;
+        await next();
+    });
+}
+else
+{
+    var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
+    app.UseForwardedHeaders(forwardedHeadersOptions);
+}
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestObservabilityMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) => { context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff"); context.Response.Headers.TryAdd("X-Frame-Options", "DENY"); context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer"); context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()"); await next(); });
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"); if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
-app.UseHttpsRedirection(); app.UseCors("FrontendPolicy"); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
+if (!isRender) app.UseHttpsRedirection();
+app.UseCors("FrontendPolicy"); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "InventoryApp API" })).ExcludeFromDescription();
 app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) => { var databaseReady = false; try { databaseReady = await db.Database.CanConnectAsync(cancellationToken); } catch { databaseReady = false; } return databaseReady ? Results.Ok(new { status = "ready", database = "connected" }) : Results.Json(new { status = "not_ready", database = "unavailable" }, statusCode: StatusCodes.Status503ServiceUnavailable); }).ExcludeFromDescription();
 app.MapControllers();
@@ -226,3 +240,20 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var seedFiscalService = new SeedFiscalService(db); await seedFiscalService.SeedDefaultsAsync();
 }
 await app.RunAsync();
+
+public static class TrustedClientIpResolver
+{
+    public static string Resolve(HttpContext context, bool isRender)
+    {
+        if (isRender &&
+            context.Request.Headers.TryGetValue("CF-Connecting-IP", out var values) &&
+            values.Count == 1)
+        {
+            var raw = values[0]?.Trim();
+            if (!string.IsNullOrWhiteSpace(raw) && IPAddress.TryParse(raw, out var parsed))
+                return parsed.ToString();
+        }
+
+        return context.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida";
+    }
+}
