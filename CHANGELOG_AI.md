@@ -1363,3 +1363,11 @@ Este append resuelve únicamente la reconciliación documental de `CHANGELOG_AI.
 ## ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17
 
 `Tarea Supervisión :36` revalidó `N8.12.A-G` bajo current-standard con REVIEW_FIRST/DoD/receipts frescos. El runtime conserva métricas HTTP de cardinalidad acotada, correlation/trace context, señales estructuradas de 5xx/latencia y health/readiness sin exponer secretos; `RequestObservabilityTests` y `SecurityBoundaryContractTests` están incluidos en el árbol exacto probado. Gates causales `35258962286` y `35258969104` permanecen `SUCCESS` sobre `6fd3e28c`, equivalente a los árboles de producto actuales. Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md`. Desarrollo only; sin Producción, `main`, merge PR #2, secretos, DNS/certificados ni writes productivos.
+
+
+## 2026-09-17 - N8.13 staging current-standard revalidation
+
+- Scope: `N8.13.A` through `N8.13.H` on `Desarrollo`; no `main`, Production, or PR #2 writes.
+- Fresh material revalidation through `N8.13.G` is preserved as supporting evidence for DOC_CERT; historical receipts are evidence only.
+- `TASKS.md` reconciliation is present with exact-prefix verification at `7aeab0ecb4fc6fb7f0a5fdd452c2ad2dcb8420ec`.
+- `CHANGELOG_AI.md` reconciliation for `N8.13.H` is appended byte-exact/additive-only; final REVIEW_FIRST, receipt, and control-plane readback are separate closure evidence.
