@@ -1,11 +1,13 @@
-"""Fail-closed GO_LIVE_GATE readiness and admission evaluation for VAEP N8.24.
+"""Fail-closed GO_LIVE_GATE controls for VAEP N8.24.
 
-This module is deliberately side-effect free. It calculates gate decisions but never
-writes to Production, performs deployments, or persists owner authorization.
+All functions are deliberately side-effect free. They calculate decisions or proposed
+control-state transitions; they never write to Production, deploy, or silently invent
+owner authorization.
 """
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any, Mapping
 
 
@@ -31,14 +33,7 @@ def evaluate_go_live_gate(
     *,
     explicit_execution_authorized: bool = False,
 ) -> dict[str, Any]:
-    """Evaluate technical readiness and future execution admission fail-closed.
-
-    Owner authorization is accepted only when ``goLiveAuthorized`` is the literal
-    boolean ``True``. A future execution additionally needs an explicit execution
-    authorization for that execution. Even then, this evaluator reports admission
-    only; ``productionWriteAllowed`` remains ``False`` because this module has no
-    Production write capability.
-    """
+    """Evaluate technical readiness and future execution admission fail-closed."""
 
     if not isinstance(state, Mapping):
         result = _base_result(
@@ -118,3 +113,79 @@ def evaluate_go_live_gate(
     result["notificationDedupeKey"] = dedupe_key
     result["futureExecutionAdmitted"] = True
     return result
+
+
+def apply_ready_notification(
+    state: Mapping[str, Any],
+    evaluation: Mapping[str, Any],
+    *,
+    sent_at_utc: str,
+) -> dict[str, Any]:
+    """Return proposed control state after the single READY notification is sent.
+
+    The transition is accepted only for READY_FOR_GO_LIVE while owner authorization
+    is still false. Re-applying the same gate-version notification is idempotent.
+    """
+
+    if not isinstance(state, Mapping) or not isinstance(evaluation, Mapping):
+        raise ValueError("state and evaluation must be mappings")
+    if state.get("goLiveAuthorized") is True:
+        raise ValueError("ready notification is only for pending owner authorization")
+    if evaluation.get("technicalState") != READY_STATE:
+        raise ValueError("gate is not technically ready")
+
+    dedupe_key = str(evaluation.get("notificationDedupeKey") or "").strip()
+    if not dedupe_key:
+        raise ValueError("notification dedupe key is required")
+    if not str(sent_at_utc or "").strip():
+        raise ValueError("sent_at_utc is required")
+
+    updated = deepcopy(dict(state))
+    current = updated.get("readyNotification")
+    if isinstance(current, Mapping) and current.get("dedupeKey") == dedupe_key:
+        return updated
+
+    updated["readyNotification"] = {
+        "dedupeKey": dedupe_key,
+        "sentAtUtc": sent_at_utc,
+    }
+    updated["technicalState"] = READY_STATE
+    updated["productionWriteAllowed"] = False
+    updated["updatedAtUtc"] = sent_at_utc
+    return updated
+
+
+def record_owner_authorization(
+    state: Mapping[str, Any],
+    *,
+    explicit_owner_authorized: bool = False,
+    authorized_by: str | None = None,
+    authorized_at_utc: str | None = None,
+    evidence: str | None = None,
+) -> dict[str, Any]:
+    """Return proposed authorization state only with fresh explicit owner evidence.
+
+    This function does not perform or admit Production execution. BY/AT/EVIDENCE are
+    mandatory and are written together with the boolean authorization to avoid an
+    unaudited or partially-audited transition.
+    """
+
+    if not isinstance(state, Mapping):
+        raise ValueError("state must be a mapping")
+    if explicit_owner_authorized is not True:
+        raise PermissionError("fresh explicit owner authorization is required")
+
+    audit = {
+        "authorizedBy": str(authorized_by or "").strip(),
+        "authorizedAtUtc": str(authorized_at_utc or "").strip(),
+        "evidence": str(evidence or "").strip(),
+    }
+    if not all(audit.values()):
+        raise ValueError("authorization audit requires BY/AT/EVIDENCE")
+
+    updated = deepcopy(dict(state))
+    updated["goLiveAuthorized"] = True
+    updated["productionWriteAllowed"] = False
+    updated["authorizationAudit"] = audit
+    updated["updatedAtUtc"] = audit["authorizedAtUtc"]
+    return updated
