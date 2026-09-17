@@ -1,83 +1,14 @@
-name: VAEP N9.2.H byte-safe CHANGELOG append
+name: VAEP N9.2.H byte-safe CHANGELOG append (retired)
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - .github/workflows/vaep-n92h-byte-append.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  append-changelog:
+  retired:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact trigger commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-
-      - name: Append N9.2 closure byte-safely
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import subprocess
-
-          path = Path("CHANGELOG_AI.md")
-          expected_blob = "144b001c69c35203d500edb1ef5362ed52c1c677"
-          actual_blob = subprocess.check_output(["git", "hash-object", str(path)], text=True).strip()
-          if actual_blob != expected_blob:
-              raise SystemExit(f"CHANGELOG blob drift: expected {expected_blob}, got {actual_blob}")
-
-          old = path.read_bytes()
-          block = """
-
-## 2026-09-17 — ERP-N9.2 — Checklist de salida — reconciliación current-standard
-
-**Responsable:** Tarea Supervisión :36, recuperación/verificación en `Desarrollo`.
-
-Se reconcilia de forma estrictamente aditiva el cierre documental de N9.2. `N9.2.A-G` cuentan con REVIEW_FIRST/receipts current-standard, P0=0/P1=0 y delta de producto=0 frente al Release Candidate funcional `4eadd208322e8f19d84d669fffc70a9de85ba567`. Los gates causales preservados por equivalencia son security `35258962286=SUCCESS`, quality/regression `35258969104=SUCCESS`, backup/restore `35223693868=SUCCESS` y performance `35219847763=SUCCESS`.
-
-`TASKS.md` ya fue reconciliado con prefijo histórico exacto. Este bloque resuelve únicamente `CHANGELOG_AI_ADDITIVE_RECONCILIATION`; `N9.2.H` no se considera `LISTO` hasta completar la verificación byte-exact, REVIEW_FIRST fresco P0=0/P1=0, receipt y write/readback del control-plane. No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos productivos.
-""".encode("utf-8")
-
-          marker = b"## 2026-09-17 \xe2\x80\x94 ERP-N9.2 \xe2\x80\x94 Checklist de salida \xe2\x80\x94 reconciliaci\xc3\xb3n current-standard"
-          if marker in old:
-              raise SystemExit("N9.2 CHANGELOG closure block already present; refusing duplicate append")
-
-          new = old + block
-          if not new.startswith(old) or len(new) <= len(old):
-              raise SystemExit("prefix/addition invariant failed before write")
-          path.write_bytes(new)
-          if path.read_bytes()[:len(old)] != old:
-              raise SystemExit("prefix invariant failed after write")
-          PY
-
-          changed="$(git diff --name-only)"
-          test "$changed" = "CHANGELOG_AI.md"
-          numstat="$(git diff --numstat -- CHANGELOG_AI.md)"
-          echo "$numstat"
-          adds="$(printf '%s\n' "$numstat" | awk '{print $1}')"
-          dels="$(printf '%s\n' "$numstat" | awk '{print $2}')"
-          test "$adds" != "-"
-          test "$dels" != "-"
-          test "$adds" -gt 0
-          test "$dels" -eq 0
-          git diff --check
-
-      - name: Commit and push append only
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "vaep-supervisor-36"
-          git config user.email "93171442+jmejia31@users.noreply.github.com"
-          git add -- CHANGELOG_AI.md
-          git diff --cached --name-only | grep -Fx 'CHANGELOG_AI.md'
-          test "$(git diff --cached --name-only | wc -l)" -eq 1
-          git commit -m "[N9.2.H] append CHANGELOG current-standard closure"
-          git push origin HEAD:Desarrollo
+      - run: echo "N9.2.H append writer retired; read-only."
