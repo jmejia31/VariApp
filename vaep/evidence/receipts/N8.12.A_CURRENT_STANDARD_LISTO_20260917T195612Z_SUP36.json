@@ -45,8 +45,8 @@
   "writeReadback": {
     "preflightReadback": true,
     "reviewReadback": true,
-    "receiptReadback": "PENDING_SELF_READBACK",
-    "controlPlaneReadback": "PENDING_AFTER_RECEIPT_COMMIT"
+    "receiptReadback": true,
+    "controlPlaneReadback": "PENDING_AFTER_RECEIPT_FINALIZATION"
   },
   "successor": {
     "parent": "N8.12.B",
