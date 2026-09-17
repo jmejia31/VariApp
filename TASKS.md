@@ -666,3 +666,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Equivalencia causal de la superficie backup/restore demostrada por blobs invariantes del workflow y scripts, según `docs/CERTIFICACION_N8_8_BACKUP_CURRENT_STANDARD.md`.
 - [x] `main`, Producción, PR #2, secretos, DNS/certificados, planes y datos productivos permanecen intactos; durante esta revalidación no se ejecutó restore/fork/upgrade contra Aiven.
 - [ ] N8.8.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, hard verify de este append y `CHANGELOG_AI.md`, receipt H y Sheet write/readback; este rollup no sustituye el cierre.
+
+## ERP-N8.9 — Restore real — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
+
+- [x] N8.9.A-G fueron revalidados current-standard con receipts frescos, REVIEW_FIRST y P0=0/P1=0 en su alcance aplicable.
+- [x] El gate causal M11 `35223693868`, job `105209822216`, restauró materialmente el backup en MySQL descartable, verificó integridad y arrancó la API con `/health` y `/health/ready` en PASS; Producción no fue tocada.
+- [x] La equivalencia current-standard del workflow y scripts de backup/restore permanece demostrada; no existe delta de migraciones dentro del scope que invalide el gate causal.
+- [x] Certificación canónica materializada en `docs/CERTIFICACION_N8_9_RESTORE.md`; no se afirma ni ejecuta restore destructivo/fork/upgrade sobre Aiven.
+- [x] Este append resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` sin reescribir historia previa.
+- [ ] N8.9.H sólo pasa a `LISTO` después de completar `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, REVIEW_FIRST documental final P0=0/P1=0, receipt y write/readback del control-plane.
+
+**CURRENT_PARENT=N8.9.H. NEXT_PARENT_PREARMED=N8.10.A. No se promueve N8.10.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
