@@ -1309,3 +1309,15 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 **Evidencia current-standard:** `N8.6.A-G=LISTO` bajo revalidación vigente; `N8.6.G` receipt `vaep/evidence/receipts/N8.6.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T084800Z_SUP36.json`, REVIEW_FIRST P0=0/P1=0 y gate causal de handoff `wa.me` en PASS. El contrato certificado es `USER_INITIATED_HANDOFF`: no se afirma envío server-side, delivery ni read receipt de Meta/Twilio. `TASKS.md` ya fue reconciliado de forma aditiva con compare `additions=11/deletions=0`.
 
 **Control:** esta publicación resuelve únicamente el P1 documental de `CHANGELOG_AI.md`. No declara por sí sola `N8.6.H=LISTO`: todavía exige REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, receipt H persistido/releído y reconciliación de `COLA/CONFIG` antes de promover `N8.7.A`. Sin cambios a `main`, Producción, deploys, secretos, DNS/certificados ni PR #2.
+
+## 2026-09-17 — ERP-N8.7 Performance — certificación current-standard append-only
+
+**Responsable:** `CHATGPT_CONTROLLER` bajo `docs/VAEP_AUTHORITY.md`.
+
+**Objetivo/alcance:** reconciliar documentalmente N8.7.H sin reabrir producto ni convertir una corrida Development en SLA/SLO de Producción. Esta entrada preserva byte-for-byte toda la historia previa y agrega únicamente la evidencia current-standard de N8.7.
+
+**Evidencia:** functional head `45f069e9997e0cb9de4682844ff64dc9addc8674`; workflow `N8.7.G - Performance proof` run `35219847763=SUCCESS`; REVIEW_FIRST G `12cb5b02bad4a5d1dc22581d276738525fff9d3f`; receipt G `cb4ed1ce54ff2767a0c8c0080d55395173cac74c`; artifact `10496399028` con digest `sha256:68f2912c06d84feb0c2c25d148748c6daf02aa61f14b132151aef810f2ecbd9c`; pruebas dirigidas 18/18; 18,594 requests materiales y 0 fallos; contrato de seguridad PASS con Production traffic/data=0, sin auth bypass ni rate-limit disable y datos únicamente sintéticos.
+
+**Documentación:** `docs/evidencias/performance/N8.7_CURRENT_STANDARD_MATERIAL_PERFORMANCE_CERTIFICATION_20260917.md`, junto con los preflight/guards A/F ya existentes. No aplica nuevo OpenAPI, ADR ni ERD porque el cierre no introduce contrato HTTP, decisión arquitectónica ni cambio de dominio/esquema.
+
+**Control:** esta entrada resuelve el changelog append-only requerido por DOC_CERT, pero no declara por sí sola `N8.7.H=LISTO`; el cierre depende todavía de REVIEW_FIRST final P0=0/P1=0, receipt y write/readback. No se tocó `main`, Producción, PR #2, secretos, DNS ni certificados.

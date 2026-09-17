@@ -645,3 +645,13 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Certificación current-standard materializada en `docs/CERTIFICACION_N8_6_WHATSAPP_REAL.md`; no se enviaron mensajes externos durante la revalidación.
 - [x] `main`, Producción, PR #2, secretos, DNS/certificados y datos productivos permanecen intactos.
 - [ ] N8.6.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, receipt verificable y write/readback del control-plane; este bloque por sí solo no cierra H.
+
+## ERP-N8.7 — Performance — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye receipt ni readback.
+
+- [x] N8.7.A-F revalidados current-standard con preflight/guardas; P0=0/P1=0.
+- [x] N8.7.G `LISTO` con functional head `45f069e9997e0cb9de4682844ff64dc9addc8674`; workflow `N8.7.G - Performance proof` run `35219847763=SUCCESS`; pruebas dirigidas 18/18; perfiles load/stress/endurance/volume con 18,594 requests y 0 fallos.
+- [x] Contrato de seguridad: Production traffic/data=0, auth bypass=false, rate limit disabled=false y datos únicamente sintéticos; artifact `10496399028`, digest `sha256:68f2912c06d84feb0c2c25d148748c6daf02aa61f14b132151aef810f2ecbd9c`.
+- [x] Certificación H canónica materializada en `docs/evidencias/performance/N8.7_CURRENT_STANDARD_MATERIAL_PERFORMANCE_CERTIFICATION_20260917.md`.
+- [ ] N8.7.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, hard verify de este append, receipt H y Sheet write/readback; este rollup no sustituye el cierre.
