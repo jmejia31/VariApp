@@ -100,7 +100,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.6.D Application/API completado y certificado.
 - [x] N3.6.E frontend/UX completado y certificado.
 - [x] N3.6.F RBAC/auditoría/seguridad/observabilidad completado y certificado.
-- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance #32913854936, Fase 8 #32913854958 y M13 #32913854923 en SUCCESS; P0/P1 funcionales conocidos=0.
+- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase 8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
 - [x] N3.6.H certificación canónica publicada en `4fe25e8cf656f82e3883f0585fa29358769aa48c` y runbook en `d906393fc26b0073ac782721ea08cb0fa35827b5`.
 - [ ] Cierre formal H pendiente únicamente de reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving y obtener gate causal del rollup final; no false LISTO.
 
