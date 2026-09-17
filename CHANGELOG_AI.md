@@ -138,7 +138,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 - Se unificó la gobernanza documental en `V3.25_CURRENT`, cierre por padre y checkpoints `:00/:15/:30/:45/:55`, preservando control-plane global v4.6.
 - v3.20/v3.21 quedaron marcados como historia; continúan ATTEMPT1+R2, R3 prohibido, QA takeover, HEAD freeze, evidencia causal y protección de `Desarrollo`/main/Producción.
 - Se aclaró que el Sheet registra/describe automatizaciones y el sistema de tareas ejecuta; no se modificó ni afirmó ejecución de una automatización real.
-- Cambio exclusivamente documental/de gobierno, con `[skip ci]`; no modifica código funcional, main, Producción, PR #2, auto-merge ni ramas.
+- Cambio exclusivamente documental; sin código, workflows, infraestructura, secretos ni Sheet.
 
 ## 2026-08-24 — Codex — reconciliación documental ChatGPT/VAEP
 
@@ -350,7 +350,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación final sobre `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`:** ERP-N0.6 `31754907625` SUCCESS; Desarrollo build/tests `31754907682` SUCCESS; recovery MySQL `31754907598` SUCCESS; M11 backup/restore `31754907601` SUCCESS; Fase 8 `31754907626` SUCCESS; aceptación integral `31754907600` SUCCESS; M13 `31754907614` SUCCESS. Las pruebas críticas demuestran que la FK tipada manda aunque el snapshot legacy discrepe, que el bridge sólo cubre escritores legacy sin FK y que un mismatch tipado/legacy falla cerrado.
 
-**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó main, Producción, merge/auto-merge de PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
 
 ## 2026-08-13 — ERP-N0.5 MetodoPago — CIERRE FORMAL
 
@@ -478,7 +478,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Evidencia funcional:** `5fe605cc93470a4f4b90f73185016b9e15bc622e`, publicado por fast-forward exclusivamente en `Desarrollo`.
 
-**Validación real:** CI general run `31575657900`: job `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
+**Validación real:** CI general run `31575657900`: `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
 
 **Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
@@ -751,9 +751,9 @@ Riesgos y pendientes: GitHub Actions debe confirmar en el siguiente run que los 
 
 ## 2026-09-03 15:07:51 -06:00 - RCA P0 Vercel y aislamiento Desarrollo/Producción
 
-Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cbf11ea65f42bef13`. La consulta read-only del equipo `VariApp` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/VariApp`: `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
+Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cb227f11ea65f42bef13`. La consulta read-only del equipo `VariApp` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/VariApp`: `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
 
-RCA confirmado: `varistorehn` acepta pushes de `Desarrollo` mediante Git Integration y crea deployments de fuente `git` con `githubCommitRef=Desarrollo`, `target=null` y alias `varistorehn-git-desarrollo-vari-app.vercel.app`. Ocurrió para `eaacb832dfc78723ad9cb7d119d88a32c62a0047` y nuevamente para `2658d5b0139e85957463cbf11ea65f42bef13`. Por tanto, fijar solamente `Production Branch=main` no basta: debe deshabilitarse la creación de Preview Deployments de `Desarrollo` en el proyecto `varistorehn` mediante la configuración de Git Integration/Preview Branches, conservando producción en `main`. El conector read-only no expone ni permite editar esos campos; no se realizó cambio externo.
+RCA confirmado: `varistorehn` acepta pushes de `Desarrollo` mediante Git Integration y crea deployments de fuente `git` con `githubCommitRef=Desarrollo`, `target=null` y alias `varistorehn-git-desarrollo-vari-app.vercel.app`. Ocurrió para `eaacb832dfc78723ad9cb7d119d88a32c62a0047` y nuevamente para `2658d5b0139e85957463cb227f11ea65f42bef13`. Por tanto, fijar solamente `Production Branch=main` no basta: debe deshabilitarse la creación de Preview Deployments de `Desarrollo` en el proyecto `varistorehn` mediante la configuración de Git Integration/Preview Branches, conservando producción en `main`. El conector read-only no expone ni permite editar esos campos; no se realizó cambio externo.
 
 Estado observado: para `2658d5b...`, `Vercel - variapp-desarrollo` quedó `FAILURE` con `Deployment rate limited - retry in 24 hours`; `Vercel - varistorehn` quedó `SUCCESS`. `variapp-desarrollo` sí generó su deployment para `Desarrollo` (`target=production`, alias `variapp-desarrollo-git-desarrollo-vari-app.vercel.app`), consistente con el diseño documentado. La duplicación real de builds/deployments quedó probada en ambos proyectos.
 
@@ -1331,15 +1331,3 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 **Evidencia current-standard:** `N8.8.A-G=LISTO`; `N8.8.G` receipt `vaep/evidence/receipts/N8.8.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T154700Z_SUP36.json`, REVIEW_FIRST P0=0/P1=0, M11 backup/restore causal PASS y Aiven provider proof attempt 4 PASS. `TASKS.md` ya fue reconciliado de forma history-preserving en `1798afc0481bebfd091b92a90f2964a0f17279c3` con `additions=11/deletions=0`. El blob fuente exacto de `CHANGELOG_AI.md` previo a este append es `1e834967da8bea86557132d988d3787365fb75c5`.
 
 **Control:** esta publicación resuelve únicamente el P1 documental de `CHANGELOG_AI.md`. No declara por sí sola `N8.8.H=LISTO`: todavía exige hard verify de prefijo/tamaño, compare con `additions>0/deletions=0`, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, receipt H persistido/releído y reconciliación `COLA/CONFIG` antes de promover `N8.9.A`. Sin cambios a `main`, Producción, deploys, secretos, DNS/certificados ni PR #2.
-
-## 2026-09-17 — ERP-N8.9 Restore real — revalidación current-standard append-only
-
-**Responsable:** Tarea Supervisión :36 bajo `docs/VAEP_AUTHORITY.md`.
-
-**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N8.9.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ya certificado ni ejecutar un restore destructivo del servicio administrado.
-
-**Evidencia current-standard:** `N8.9.A-G=LISTO`; certificación canónica `docs/CERTIFICACION_N8_9_RESTORE.md`; gate causal M11 `35223693868`, job `105209822216`, `SUCCESS`, restaurando el backup en MySQL descartable, validando integridad y arrancando la API contra la base restaurada. La equivalencia vigente del workflow/scripts de backup/restore permanece demostrada y no existe delta de migraciones dentro del scope N8.9. `TASKS.md` fue reconciliado en el commit inmediatamente anterior con compare `additions=13/deletions=0`.
-
-**Seguridad:** no se ejecutó restore/fork/upgrade en Aiven, no se tocó Producción, `main`, PR #2, secretos, DNS/certificados ni datos productivos.
-
-**Control:** este append resuelve el último P1 documental. `N8.9.H` sólo puede pasar a `LISTO` tras REVIEW_FIRST documental final P0=0/P1=0, exact-head/equivalencia, receipt persistido/releído y write/readback del control-plane; únicamente entonces puede promoverse `N8.10.A`.
