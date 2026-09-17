@@ -1344,3 +1344,8 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 **Seguridad:** no se ejecutó restore/fork/upgrade en Aiven, no se tocó Producción, `main`, PR #2, secretos, DNS/certificados ni datos productivos.
 
 **Control:** este append resuelve el último P1 documental. `N8.9.H` sólo puede pasar a `LISTO` tras REVIEW_FIRST documental final P0=0/P1=0, exact-head/equivalencia, receipt persistido/releído y write/readback del control-plane; únicamente entonces puede promoverse `N8.10.A`.
+
+
+## ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17
+
+`CHATGPT_CONTROLLER` revalidó `N8.10.A-G` sin confiar en cierres históricos: PRE/domain/DB/API/UI/security/TEST_CI quedaron P0=0/P1=0 con receipts frescos. El gate material usa restore actual `35223693868:105209822216:SUCCESS`, equivalencia backend vigente y ausencia de delta de migraciones; RPO `<=24h` y RTO `1244s <= 3600s` permanecen PASS. Certificación current-standard: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md`. Desarrollo only; sin Producción, `main`, PR #2, secretos, DNS/certificados ni restore destructivo del proveedor.

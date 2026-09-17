@@ -679,3 +679,13 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [ ] N8.9.H sólo pasa a `LISTO` después de completar `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, REVIEW_FIRST documental final P0=0/P1=0, receipt y write/readback del control-plane.
 
 **CURRENT_PARENT=N8.9.H. NEXT_PARENT_PREARMED=N8.10.A. No se promueve N8.10.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+
+## ERP-N8.10 Disaster Recovery — revalidación current-standard 2026-09-17
+
+- `N8.10.A-G`: revalidadas secuencialmente contra el estándar vigente; el histórico fue evidencia de apoyo, nunca auto-cierre.
+- Fresh receipts: A `f01038cb`, B `ce1fabb2`, C `4039299b`, D `792ae87b`, E `45d663a3`, F `67541352`, G `4f8426c7`.
+- Restore causal actual: run `35223693868`, job `105209822216`, `SUCCESS`; backend current-equivalence PASS; no migration delta.
+- RPO engineering `<=24h`; RTO engineering `<=60m`; drill medido `1244s`; P0=0/P1=0.
+- Certificación: `docs/CERTIFICACION_N8_10_DISASTER_RECOVERY_CURRENT_STANDARD_20260917.md` @ `c186daad`.
+- `N8.10.H` exige REVIEW_FIRST final + receipt/readback antes de promover `N8.11.A`.
