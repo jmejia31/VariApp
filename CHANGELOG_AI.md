@@ -1321,3 +1321,13 @@ Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando 
 **Documentación:** `docs/evidencias/performance/N8.7_CURRENT_STANDARD_MATERIAL_PERFORMANCE_CERTIFICATION_20260917.md`, junto con los preflight/guards A/F ya existentes. No aplica nuevo OpenAPI, ADR ni ERD porque el cierre no introduce contrato HTTP, decisión arquitectónica ni cambio de dominio/esquema.
 
 **Control:** esta entrada resuelve el changelog append-only requerido por DOC_CERT, pero no declara por sí sola `N8.7.H=LISTO`; el cierre depende todavía de REVIEW_FIRST final P0=0/P1=0, receipt y write/readback. No se tocó `main`, Producción, PR #2, secretos, DNS ni certificados.
+
+## 2026-09-17 — ERP-N8.8 Backup — certificación current-standard append-only
+
+**Responsable:** VAEP :48 Debt bajo `docs/VAEP_AUTHORITY.md`.
+
+**Objetivo/alcance:** reconciliar documentalmente `N8.8.H` de forma estrictamente aditiva/history-preserving, sin reabrir el runtime ya certificado ni ampliar el alcance de backup/restore más allá de Desarrollo.
+
+**Evidencia current-standard:** `N8.8.A-G=LISTO`; `N8.8.G` receipt `vaep/evidence/receipts/N8.8.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T154700Z_SUP36.json`, REVIEW_FIRST P0=0/P1=0, M11 backup/restore causal PASS y Aiven provider proof attempt 4 PASS. `TASKS.md` ya fue reconciliado de forma history-preserving en `1798afc0481bebfd091b92a90f2964a0f17279c3` con `additions=11/deletions=0`. El blob fuente exacto de `CHANGELOG_AI.md` previo a este append es `1e834967da8bea86557132d988d3787365fb75c5`.
+
+**Control:** esta publicación resuelve únicamente el P1 documental de `CHANGELOG_AI.md`. No declara por sí sola `N8.8.H=LISTO`: todavía exige hard verify de prefijo/tamaño, compare con `additions>0/deletions=0`, REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, receipt H persistido/releído y reconciliación `COLA/CONFIG` antes de promover `N8.9.A`. Sin cambios a `main`, Producción, deploys, secretos, DNS/certificados ni PR #2.
