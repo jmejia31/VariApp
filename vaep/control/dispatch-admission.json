@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": false,
-  "reason": "TASKS_ONLY__OPEN_ONLY_CURRENT_PARENT__SINGLE_WRITER__START_PROOF_HARD__PASS_THROUGH_PROHIBITED__NO_FILLER__NO_JULES",
-  "updatedAtUtc": "2026-09-17T00:34:41Z"
+  "allowExistingActiveSessions": true,
+  "reason": "OPEN_ONLY_INVARIANT_REPAIR__TASK_EXECUTION_GATES_ONLY",
+  "updatedAtUtc": "2026-09-17T00:35:09Z"
 }
