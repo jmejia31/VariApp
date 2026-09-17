@@ -1,0 +1,79 @@
+name: VAEP N8.14.H Canonical Append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n814h-byte-append.yml
+
+permissions:
+  contents: write
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Publish guarded history-preserving N8.14 rollup
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='ERP-N8.14 — Rollback — REVALIDACIÓN CURRENT-STANDARD 2026-09-17'
+          if grep -Fq "$marker" TASKS.md && grep -Fq "$marker" CHANGELOG_AI.md; then
+            echo 'N8.14.H canonical rollup already present; no write required.'
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          tasks = Path('TASKS.md').read_bytes()
+          changelog = Path('CHANGELOG_AI.md').read_bytes()
+          tasks_hash = subprocess.check_output(['git','hash-object','TASKS.md'], text=True).strip()
+          changelog_hash = subprocess.check_output(['git','hash-object','CHANGELOG_AI.md'], text=True).strip()
+          assert tasks_hash == '5d1aeb0bb094726ee276e6c088c1fe9fc33add73', tasks_hash
+          assert changelog_hash == '5086435bdd9d54c81de808962754bf16898a3006', changelog_hash
+
+          tasks_append = (
+            "\n\n## ERP-N8.14 — Rollback — REVALIDACIÓN CURRENT-STANDARD 2026-09-17\n\n"
+            "Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.\n\n"
+            "- [x] `N8.14.A-G` fueron revalidados secuencialmente current-standard con receipts frescos; `P0=0/P1=0`.\n"
+            "- [x] Gates causales: security `35258962286=SUCCESS`, quality/regression `35258969104=SUCCESS`, backup/restore material `35223693868=SUCCESS`.\n"
+            "- [x] TEST_CI `N8.14.G` certificado por REVIEW_FIRST `9559db0411b3c59dc25ee27972ceef7d7525d495` y receipt `232874df8f309cac68638b4f7678c85b9a88adff`; backend/frontend delta=0 y migraciones sin delta causal.\n"
+            "- [x] Runbook vigente `docs/ROLLBACK_RUNBOOK.md` blob `0582222439ef7b2d3968d24fa6820e39e05180f3`; workflow M11 vigente blob `5cba214846ace7c45984d23b3e0db013404c3f01`.\n"
+            "- [x] Certificación current-standard: `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.\n"
+            "- [x] No se tocó `main`, Producción, PR #2, secretos, DNS/certificados ni datos productivos.\n"
+            "- [ ] `N8.14.H` sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.\n"
+          ).encode('utf-8')
+
+          changelog_append = (
+            "\n\n## ERP-N8.14 — Rollback — REVALIDACIÓN CURRENT-STANDARD 2026-09-17\n\n"
+            "**Responsable:** `Tarea Supervisión :24` bajo `docs/VAEP_AUTHORITY.md`.\n\n"
+            "`N8.14.A-G` quedó revalidado current-standard sin rehacer trabajo correcto. Los gates causales `35258962286` (security), `35258969104` (quality/regression) y `35223693868` (backup/restore MySQL descartable) permanecen `SUCCESS`; `N8.14.G` cerró con REVIEW_FIRST fresco P0=0/P1=0, equivalencia exacta de producto y receipt `232874df8f309cac68638b4f7678c85b9a88adff`. El runbook vigente es `docs/ROLLBACK_RUNBOOK.md` y la certificación final de alcance está en `vaep/evidence/certifications/N8.14_ROLLBACK_CURRENT_STANDARD_CERT_20260917T223414Z_SUP24.md`.\n\n"
+            "Este append es estrictamente history-preserving y no declara por sí solo `N8.14.H=LISTO`: el cierre exige hard verify de prefijo/tamaño, REVIEW_FIRST documental final P0=0/P1=0, receipt H y reconciliación write/readback de `COLA/CONFIG/CONTROL_TOWER/PLAN_MAESTRO`. Sin cambios a `main`, Producción, deploys productivos, PR #2, secretos, DNS/certificados ni datos productivos.\n"
+          ).encode('utf-8')
+
+          Path('TASKS.md').write_bytes(tasks + tasks_append)
+          Path('CHANGELOG_AI.md').write_bytes(changelog + changelog_append)
+          PY
+
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md'
+          while read -r additions deletions path; do
+            test "$additions" -gt 0
+            test "$deletions" -eq 0
+            case "$path" in CHANGELOG_AI.md|TASKS.md) ;; *) exit 1 ;; esac
+          done < <(git diff --numstat -- CHANGELOG_AI.md TASKS.md)
+          git diff --check -- CHANGELOG_AI.md TASKS.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add CHANGELOG_AI.md TASKS.md
+          git commit -m '[N8.14.H] append current-standard rollback rollup'
+          git push origin HEAD:Desarrollo
