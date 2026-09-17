@@ -124,8 +124,9 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
 - [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
 - [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
-- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
-- [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
+- [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL / QA_TAKEOVER_CERTIFIED` sobre `0d621920f8ebd0a7bb3f1b3af30ffbadd0f91f9c`; Issue #851 cerrado, P0/P1=0.
+- [x] N3.7.G QA/regresión/CI — `LISTO_REAL / QA_REGRESSION_CERTIFIED`; Issue #858 cerrado, P0/P1=0.
+- [x] Certificación canónica publicada: `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`.
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
 **Promoción de N3.8 permanece bloqueada hasta N3.7.H=LISTO.**
@@ -359,7 +360,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - `.github/workflows/vaep-n39h-exact-publish.yml`
   - `.github/workflows/vaep-n310h-exact-publish.yml`
   - `.github/workflows/vaep-n311h-exact-changelog-publisher.yml`
-- [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-variapp`.
+- [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-variapp`.
 - [x] Auditoría exhaustiva de los 38 workflows restantes: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`.
 - [x] `PRODUCT_CI_PRESERVED=PASS`.
 - [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic` run `33912398627` = `SUCCESS`.
@@ -714,3 +715,16 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - Observabilidad certificada: métricas acotadas, correlation/trace context, alert logs estructurados y health/readiness secret-safe; sin delta de schema/frontend.
 - Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md` @ `7ce5e060`.
 - `N8.12.H` requiere REVIEW_FIRST final + receipt/readback antes de promover `N8.13.A`.
+
+## ERP-N8.13 — Staging comparable a producción — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
+
+Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; este archivo no sustituye receipt ni readback.
+
+- [x] `N8.13.F` revalidado current-standard: SEC_AUDIT, REVIEW_FIRST PASS, `P0=0/P1=0`, gates de seguridad/calidad causales en `SUCCESS`, árboles de producto exact-equivalent y receipt fresco.
+- [x] `N8.13.G` revalidado current-standard: TEST_CI, `P0=0/P1=0/P2=0`, runtime de Desarrollo `READY`, raíz `200`, `/api/health/ready=200` con base conectada y routing de Desarrollo confirmado.
+- [x] La referencia activa de producción se inspeccionó sólo read-only (`varistorehn`, `main`, SHA `85b4e02814823e9671803c23798a6ff0bf05c8f6`); no hubo deploy ni write productivo.
+- [x] Certificación/runbook current-standard: `vaep/evidence/certifications/N8.13_STAGING_CURRENT_STANDARD_CERT_20260917T205649Z_VAEP48.md`.
+- [x] Este append resuelve `TASKS_ADDITIVE_STATE_RECONCILIATION` preservando byte-for-byte toda historia previa.
+- [ ] `N8.13.H` sólo pasa a `LISTO` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, hard verify de ambos appends, receipt H persistido/releído y write/readback del control-plane.
+
+**CURRENT_PARENT=N8.13.H. NEXT_PARENT_PREARMED=N8.14.A. No se promueve N8.14.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
