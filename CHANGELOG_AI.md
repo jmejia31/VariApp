@@ -857,7 +857,7 @@ Se bloquearon explícitamente `frontend/vercel.json` y `frontend/scripts/vercel-
 
 El instalador captura y restaura el XML de una tarea previa, o elimina únicamente una tarea nueva durante rollback. Se ampliaron self-tests funcionales de contrato, patch causal, artifacts ambiguos, staging, aislamiento, watermark/idempotencia y planes de rollback. No se instaló AntiG, no se creó Scheduled Task real y no se tocaron main, Producción, Vercel, secretos ni BD productiva.
 
-La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\agy\bin\agy.exe`, evitando dependencia de un PATH interactivo no refrescado. El self-test corrige el manejo de stderr informativo de Git y evalúa el éxito únicamente mediante el exit code nativo.
+La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\\agy\\bin\\agy.exe`, evitando dependencia de un PATH interactivo no refrescado. El self-test corrige el manejo de stderr informativo de Git y evalúa el éxito únicamente mediante el exit code nativo.
 
 ## 2026-09-04 — ERP-N4.7 Asientos Contables — ROLLUP DOCUMENTAL
 
@@ -1197,8 +1197,7 @@ Se cerró la cobertura causal de compatibilidad del storefront en Chromium, Fire
 N8.3.F y N8.3.G quedaron `LISTO_REAL` con REVIEW_FIRST P0=0/P1=0/P2=0. El workflow usa permisos `contents: read`, no consume secretos y sirve Angular únicamente en `127.0.0.1`. N8.3 no introduce delta backend, persistencia, migraciones, autenticación, RBAC, Producción ni deploy. La certificación canónica se materializó en `docs/CERTIFICACION_N8_3_NAVEGADORES.md`.
 
 Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
-
-- N8.1.G delegated browser UAT captured on Desarrollo at 2026-09-15T15:10:49.1317092Z (exact head 0e1854c42941e3eaf74af88628f99f197ddfbf89): real CUA observations cover purchasing, sales/invoicing, payments, BI, RBAC, inventory and native-dialog modal behavior. Finance has a pre-existing sale-movement reconciliation mismatch (Pendiente vs invoice Pagada); WhatsApp/email provider scope is unconfigured. No synthetic PNG/JPG or human PASS was created; literal N8.1 human acceptance and external Sheet readback remain required. Evidence: vaep\evidence\browser\N8.1.G\N8.1.G_DELEGATED_BROWSER_UAT_CAPTURED_20260915T151049Z.json.
+- N8.1.G delegated browser UAT captured on Desarrollo at 2026-09-15T15:10:49.1317092Z (exact head 0e1854c42941e3eaf74af88628f99f197ddfbf89): real CUA observations cover purchasing, sales/invoicing, payments, BI, RBAC, inventory and native-dialog modal behavior. Finance has a pre-existing sale-movement reconciliation mismatch (Pendiente vs invoice Pagada); WhatsApp/email provider scope is unconfigured. No synthetic PNG/JPG or human PASS was created; literal N8.1 human acceptance and external Sheet readback remain required. Evidence: vaep\\evidence\\browser\\N8.1.G\\N8.1.G_DELEGATED_BROWSER_UAT_CAPTURED_20260915T151049Z.json.
 
 
 - Evidence JSON normalization follow-up for the authenticated delegated UAT capture (same browser observations; syntax corrected before consumption).
@@ -1363,3 +1362,13 @@ Este append resuelve únicamente la reconciliación documental de `CHANGELOG_AI.
 ## ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17
 
 `Tarea Supervisión :36` revalidó `N8.12.A-G` bajo current-standard con REVIEW_FIRST/DoD/receipts frescos. El runtime conserva métricas HTTP de cardinalidad acotada, correlation/trace context, señales estructuradas de 5xx/latencia y health/readiness sin exponer secretos; `RequestObservabilityTests` y `SecurityBoundaryContractTests` están incluidos en el árbol exacto probado. Gates causales `35258962286` y `35258969104` permanecen `SUCCESS` sobre `6fd3e28c`, equivalente a los árboles de producto actuales. Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md`. Desarrollo only; sin Producción, `main`, merge PR #2, secretos, DNS/certificados ni writes productivos.
+
+## 2026-09-17 — ERP-N8.13 Staging comparable a producción — revalidación current-standard append-only
+
+**Responsable:** Tarea Supervisión :12 bajo `docs/VAEP_AUTHORITY.md`.
+
+`N8.13.A-G` fueron revalidados secuencialmente contra el estándar vigente. `N8.13.F/G` conservan REVIEW_FIRST fresco con `P0=0/P1=0`; los gates causales `35258962286` y `35258969104` permanecen `SUCCESS`. El functional tested head `6fd3e28cbf28164d110d6b83756b9094cec654a6` es product-equivalent a los árboles actuales backend `f8db476310130c169ddb5d8c4ea03cfbab9617f6` y frontend `3d7847eb8817b14942746f1e31114e56c15efbdd`.
+
+El runtime DEV `variapp-desarrollo` fue verificado READY, con raíz HTTP 200 y `/api/health/ready` HTTP 200 y base conectada; el target backend es `variapp-api-desarrollo.onrender.com`. Producción fue inspeccionada únicamente read-only; no hubo deploy, cambio de variables, secretos, DNS/certificados ni datos productivos. Certificación current-standard: `vaep/evidence/certifications/N8.13_STAGING_CURRENT_STANDARD_CERT_20260917T205649Z_VAEP48.md`.
+
+Este append resuelve `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N8.13.H` de forma history-preserving. No declara por sí solo `N8.13.H=LISTO`: el cierre requiere REVIEW_FIRST final `P0=0/P1=0`, exact-head/equivalencia, receipt y write/readback antes de promover `N8.14.A`.
