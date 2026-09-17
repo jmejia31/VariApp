@@ -1,5 +1,6 @@
 name: N8.3 - Compatibilidad de navegadores
 
+# Current-standard revalidation trigger for N8.3.E (Desarrollo only).
 on:
   push:
     branches:
