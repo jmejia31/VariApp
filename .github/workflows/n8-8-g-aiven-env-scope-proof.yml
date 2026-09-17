@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   prove-environment-token:
-    name: Prove Aiven token from GitHub Environment without exposing secrets
+    name: Prove normalized Aiven token from GitHub Environment without exposing secrets
     environment: Desarrollo
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -29,11 +29,7 @@ jobs:
           test -n "$DEV_DB" || { echo 'VARIAPP_DEV_DB_CONNECTION unavailable in effective job scope'; exit 21; }
           echo 'Required secret names are available; values are not printed.'
 
-      - name: Install official Aiven CLI
-        shell: bash
-        run: python3 -m pip install --quiet aiven-client
-
-      - name: Authenticate and prove exact DEV MySQL backup control plane
+      - name: Normalize token in-memory and prove exact DEV MySQL backup control plane
         shell: bash
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
@@ -42,12 +38,17 @@ jobs:
           SERVICE: variapp-mysql
         run: |
           set -euo pipefail
-          avn --auth-token "$AIVEN_TOKEN" user info --json >/tmp/aiven-user.json
           python3 - <<'PY'
           import hashlib, json, os, re, urllib.request, urllib.error
           from urllib.parse import quote
 
-          token=os.environ['AIVEN_TOKEN']
+          raw=os.environ['AIVEN_TOKEN']
+          token=raw.strip()
+          if len(token) >= 2 and token[0] == token[-1] and token[0] in ('"', "'"):
+              token=token[1:-1].strip()
+          if not token:
+              raise SystemExit('Normalized AIVEN_TOKEN is empty')
+
           conn=os.environ['DEV_DB']
           project=os.environ['PROJECT']
           service=os.environ['SERVICE']
@@ -57,7 +58,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.8.G-env-scope-proof/1.0'})
+                  'User-Agent':'VariApp-N8.8.G-normalized-token-proof/1.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
@@ -105,7 +106,7 @@ jobs:
 
           result={
               'task':'N8.8.G',
-              'status':'PASS_AIVEN_ENV_SCOPE_CURRENT',
+              'status':'PASS_AIVEN_NORMALIZED_TOKEN_CURRENT',
               'provider':'AIVEN',
               'serviceType':'mysql',
               'plan':plan,
@@ -114,6 +115,7 @@ jobs:
               'recoveryMode':recovery_mode,
               'pointInTimeRecoveryAvailable': recovery_mode not in (None,'','basic'),
               'devEndpointMatch':True,
+              'normalizationApplied': token != raw,
               'productionTouched':False,
               'secretValuesPrinted':False
           }
