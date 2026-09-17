@@ -96,7 +96,7 @@ jobs:
           INSERT INTO Usuarios
             (Id, NombreUsuario, NombreCompleto, PasswordHash, RolId, Activo, Bloqueado, Eliminado, FechaCreacion)
           VALUES
-            (900001, 'n87_perf_ci', 'N8.7 Performance CI', '$2y$05$NqNCYCM9rDKm.uorRQORzuSugO7F/LtQi3n3iI3g/QHkqMq5cZ55K', 900001, 1, 0, 0, UTC_TIMESTAMP(6))
+            (900001, 'n87_perf_ci', 'N8.7 Performance CI', '$2b$05$NqNCYCM9rDKm.uorRQORzuSugO7F/LtQi3n3iI3g/QHkqMq5cZ55K', 900001, 1, 0, 0, UTC_TIMESTAMP(6))
           ON DUPLICATE KEY UPDATE RolId=900001, Activo=1, Bloqueado=0, Eliminado=0;
           SQL
 
