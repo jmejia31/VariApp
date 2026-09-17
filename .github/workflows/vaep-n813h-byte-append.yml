@@ -1,0 +1,79 @@
+name: VAEP N8.13.H byte-exact append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - '.github/workflows/vaep-n813h-byte-append.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  append-change-log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Append exact bytes with blob guard
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+
+          expected_blob = "bccafe6049b184a8aa1116ce04dc1b14364f7a47"
+          actual_blob = subprocess.check_output(
+              ["git", "rev-parse", "HEAD:CHANGELOG_AI.md"], text=True
+          ).strip()
+          if actual_blob != expected_blob:
+              raise SystemExit(
+                  f"CHANGELOG blob drift: expected {expected_blob}, got {actual_blob}"
+              )
+
+          path = Path("CHANGELOG_AI.md")
+          old = path.read_bytes()
+          block = (
+              "\n\n## 2026-09-17 - N8.13 staging current-standard revalidation\n\n"
+              "- Scope: `N8.13.A` through `N8.13.H` on `Desarrollo`; no `main`, Production, or PR #2 writes.\n"
+              "- Fresh material revalidation through `N8.13.G` is preserved as supporting evidence for DOC_CERT; historical receipts are evidence only.\n"
+              "- `TASKS.md` reconciliation is present with exact-prefix verification at `7aeab0ecb4fc6fb7f0a5fdd452c2ad2dcb8420ec`.\n"
+              "- `CHANGELOG_AI.md` reconciliation for `N8.13.H` is appended byte-exact/additive-only; final REVIEW_FIRST, receipt, and control-plane readback are separate closure evidence.\n"
+          ).encode("utf-8")
+          if block in old:
+              raise SystemExit("Append block already present; refusing duplicate")
+
+          new = old + block
+          if new[:len(old)] != old:
+              raise SystemExit("Prefix invariant failed before write")
+          path.write_bytes(new)
+          roundtrip = path.read_bytes()
+          if roundtrip[:len(old)] != old or roundtrip[len(old):] != block:
+              raise SystemExit("Byte-exact roundtrip verification failed")
+
+          print(f"old_bytes={len(old)}")
+          print(f"new_bytes={len(roundtrip)}")
+          print("prefix_exact=true")
+          print(f"old_blob={actual_blob}")
+
+      - name: Verify additive-only diff and push
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only -- CHANGELOG_AI.md)" = "CHANGELOG_AI.md"
+          nums="$(git diff --numstat -- CHANGELOG_AI.md)"
+          adds="$(printf '%s\n' "$nums" | awk '{print $1}')"
+          dels="$(printf '%s\n' "$nums" | awk '{print $2}')"
+          test "$adds" -gt 0
+          test "$dels" -eq 0
+          git diff --check
+          printf 'numstat=%s\n' "$nums"
+          git config user.name "VAEP Supervisor"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add CHANGELOG_AI.md
+          git commit -m "[N8.13.H] append current-standard CHANGELOG byte-exact"
+          git push origin HEAD:Desarrollo
