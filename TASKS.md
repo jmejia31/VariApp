@@ -703,3 +703,14 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [ ] N8.11.H sólo pasa a `LISTO` después de hard verify de este append y `CHANGELOG_AI.md`, REVIEW_FIRST final P0=0/P1=0, receipt H y write/readback del control-plane.
 
 **CURRENT_PARENT=N8.11.H. NEXT_PARENT_PREARMED=N8.12.A. No se promueve N8.12.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+
+## ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17
+
+- `N8.12.A-G`: revalidadas secuencialmente contra el estándar vigente; el histórico se usó sólo como evidencia de apoyo.
+- Fresh receipts/heads: A `4c985d47`, B `fe63d184`, C `8b51e8bd`, D `9b546c6f`, E `af6ac708`, F `fbe60716`, G `6d50b299`.
+- Functional tested head `6fd3e28c`; backend tree `f8db4763`, API tree `9bd27071`, tests tree `e0cf8fcc`, frontend tree `3d7847eb` exact-equivalent.
+- Causal gates: security `35258962286:SUCCESS`; quality/regression `35258969104:SUCCESS`.
+- Observabilidad certificada: métricas acotadas, correlation/trace context, alert logs estructurados y health/readiness secret-safe; sin delta de schema/frontend.
+- Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md` @ `7ce5e060`.
+- `N8.12.H` requiere REVIEW_FIRST final + receipt/readback antes de promover `N8.13.A`.
