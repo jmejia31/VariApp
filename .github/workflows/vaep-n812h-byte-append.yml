@@ -1,75 +1,13 @@
-name: VAEP N8.12.H Canonical Append
+name: VAEP N8.12.H Canonical Append (retired)
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - .github/workflows/vaep-n812h-byte-append.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  append:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact head
-        uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 0
-
-      - name: Publish guarded history-preserving N8.12 rollup
-        shell: bash
-        run: |
-          set -euo pipefail
-          marker='ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17'
-          if grep -Fq "$marker" TASKS.md && grep -Fq "$marker" CHANGELOG_AI.md; then
-            echo 'N8.12.H canonical rollup already present; no write required.'
-            exit 0
-          fi
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import subprocess
-
-          tasks = Path('TASKS.md').read_bytes()
-          changelog = Path('CHANGELOG_AI.md').read_bytes()
-          tasks_hash = subprocess.check_output(['git','hash-object','TASKS.md'], text=True).strip()
-          changelog_hash = subprocess.check_output(['git','hash-object','CHANGELOG_AI.md'], text=True).strip()
-          assert tasks_hash == '4e63eaf8e8a8de80c9fe27ad4fb46d67bd14867f', tasks_hash
-          assert changelog_hash == 'c7aa2456d6a231045ee13839c5c83b34bea6c2a9', changelog_hash
-
-          tasks_append = (
-            "\n\n## ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17\n\n"
-            "- `N8.12.A-G`: revalidadas secuencialmente contra el estándar vigente; el histórico se usó sólo como evidencia de apoyo.\n"
-            "- Fresh receipts/heads: A `4c985d47`, B `fe63d184`, C `8b51e8bd`, D `9b546c6f`, E `af6ac708`, F `fbe60716`, G `6d50b299`.\n"
-            "- Functional tested head `6fd3e28c`; backend tree `f8db4763`, API tree `9bd27071`, tests tree `e0cf8fcc`, frontend tree `3d7847eb` exact-equivalent.\n"
-            "- Causal gates: security `35258962286:SUCCESS`; quality/regression `35258969104:SUCCESS`.\n"
-            "- Observabilidad certificada: métricas acotadas, correlation/trace context, alert logs estructurados y health/readiness secret-safe; sin delta de schema/frontend.\n"
-            "- Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md` @ `7ce5e060`.\n"
-            "- `N8.12.H` requiere REVIEW_FIRST final + receipt/readback antes de promover `N8.13.A`.\n"
-          ).encode('utf-8')
-          changelog_append = (
-            "\n\n## ERP-N8.12 Observabilidad — revalidación current-standard 2026-09-17\n\n"
-            "`Tarea Supervisión :36` revalidó `N8.12.A-G` bajo current-standard con REVIEW_FIRST/DoD/receipts frescos. El runtime conserva métricas HTTP de cardinalidad acotada, correlation/trace context, señales estructuradas de 5xx/latencia y health/readiness sin exponer secretos; `RequestObservabilityTests` y `SecurityBoundaryContractTests` están incluidos en el árbol exacto probado. Gates causales `35258962286` y `35258969104` permanecen `SUCCESS` sobre `6fd3e28c`, equivalente a los árboles de producto actuales. Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md`. Desarrollo only; sin Producción, `main`, merge PR #2, secretos, DNS/certificados ni writes productivos.\n"
-          ).encode('utf-8')
-
-          Path('TASKS.md').write_bytes(tasks + tasks_append)
-          Path('CHANGELOG_AI.md').write_bytes(changelog + changelog_append)
-          PY
-
-          changed="$(git diff --name-only)"
-          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md'
-          while read -r additions deletions path; do
-            test "$additions" -gt 0
-            test "$deletions" -eq 0
-            case "$path" in CHANGELOG_AI.md|TASKS.md) ;; *) exit 1 ;; esac
-          done < <(git diff --numstat -- CHANGELOG_AI.md TASKS.md)
-          git diff --check -- CHANGELOG_AI.md TASKS.md
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add CHANGELOG_AI.md TASKS.md
-          git commit -m '[N8.12.H] append current-standard observability rollup'
-          git push origin HEAD:Desarrollo
+      - run: echo 'Retired after successful guarded N8.12.H append; read-only and manual only.'
