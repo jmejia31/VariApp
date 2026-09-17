@@ -62,3 +62,20 @@ Si fuera necesario revertir exclusivamente N8.3, retirar de `Desarrollo` los tre
 - P2 abiertos atribuibles: 0.
 
 N8.3.H sólo pasa a `LISTO_REAL` mediante REVIEW_FIRST documental, receipt verificable y reconciliación del control-plane; este documento por sí solo no sustituye ese cierre.
+
+## Revalidación current-standard — 2026-09-17
+
+La revalidación posterior al cambio de arquitectura conserva el historial anterior y certifica de nuevo la superficie vigente de N8.3 sobre `Desarrollo`.
+
+- Functional head causal: `844b3584c4159abe3b9cc854addf49033460985a`.
+- Workflow causal fresco: `N8.3 - Compatibilidad de navegadores`, run `35174604643`, job `105053421253`, terminal `success`.
+- Resultado dirigido: `npm ci`, lint y build de producción PASS; Chromium, Firefox y WebKit `3/3 PASS`; artifact `10478007909`, SHA-256 `c51744d40ff790ff4f87545fb8b8a028424a0074d5100f3de860d902d771973a`.
+- N8.3.E revalidado: `vaep/evidence/receipts/N8.3.E_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T024817Z_SUP36.json`.
+- N8.3.F revalidado N/A grounded para SEC_AUDIT: `vaep/evidence/receipts/N8.3.F_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T024949Z_SUP36.json`.
+- N8.3.G revalidado: `vaep/evidence/receipts/N8.3.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T025102Z_SUP36.json`.
+- El contrato vigente está en `docs/N8_3_BROWSER_SUPPORT.md`; limita N8.3 a renderizado, navegación, interacción y regresión E2E frontend y excluye backend, API, persistencia, RBAC, tenant isolation, secretos, deploy y Producción.
+- Desde el functional head hasta los receipts E/F/G sólo se añadieron evidencias VAEP; no hubo delta funcional adicional antes de esta reconciliación documental.
+- P0 abiertos atribuibles a N8.3: 0. P1 abiertos atribuibles a N8.3: 0.
+- `main`, Producción, deploy, secretos y PR #2 permanecen intactos.
+
+Este apéndice actualiza la evidencia documental vigente sin borrar ni reescribir la certificación histórica del 2026-09-15. El estado operativo fresco continúa perteneciendo a `CONFIG/COLA` y sólo N8.3.H puede cerrar mediante REVIEW_FIRST, receipt verificable y write/readback del control-plane.
