@@ -1298,3 +1298,14 @@ Se certificó la cadena N8.11.A-G. El delta material de backend quedó cubierto 
 La certificación final se materializó en `docs/CERTIFICACION_N8_11_SEGURIDAD.md`. N8.11.H es documental y no introduce delta de runtime, esquema, datos, secretos, Producción ni deploy. Fallos/cancelaciones de workflows no causales no se utilizaron para fabricar PASS.
 
 Este registro es histórico y no falsea H: N8.11.H sólo es `LISTO_REAL` cuando exista su REVIEW_FIRST documental, receipt final y readback/reconciliación del control-plane.
+
+
+## 2026-09-17 — ERP-N8.6 WhatsApp real — revalidación current-standard append-only
+
+**Responsable:** VAEP :48 Debt bajo `docs/VAEP_AUTHORITY.md`.
+
+**Objetivo/alcance:** resolver `CHANGELOG_AI_ADDITIVE_RECONCILIATION` de `N8.6.H` de forma estrictamente aditiva/history-preserving, sin reabrir runtime ya revalidado ni ampliar el alcance de WhatsApp hacia una API de proveedor inexistente.
+
+**Evidencia current-standard:** `N8.6.A-G=LISTO` bajo revalidación vigente; `N8.6.G` receipt `vaep/evidence/receipts/N8.6.G_REVALIDATED_CURRENT_STANDARD_LISTO_20260917T084800Z_SUP36.json`, REVIEW_FIRST P0=0/P1=0 y gate causal de handoff `wa.me` en PASS. El contrato certificado es `USER_INITIATED_HANDOFF`: no se afirma envío server-side, delivery ni read receipt de Meta/Twilio. `TASKS.md` ya fue reconciliado de forma aditiva con compare `additions=11/deletions=0`.
+
+**Control:** esta publicación resuelve únicamente el P1 documental de `CHANGELOG_AI.md`. No declara por sí sola `N8.6.H=LISTO`: todavía exige REVIEW_FIRST fresco P0=0/P1=0, equivalencia funcional, receipt H persistido/releído y reconciliación de `COLA/CONFIG` antes de promover `N8.7.A`. Sin cambios a `main`, Producción, deploys, secretos, DNS/certificados ni PR #2.
