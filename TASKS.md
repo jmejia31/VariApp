@@ -382,8 +382,8 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - C `33913519551=SUCCESS`
   - D `33913519538=SUCCESS`
 - [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
-- [x] No se usó `[skip ci]` como mecanismo de seguridad.
-- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con esos manifests; los próximos dispatches consumen MASTER.
+- [x] No se usó `[skip ci]` para proteger la limpieza.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
