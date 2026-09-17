@@ -126,7 +126,7 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
 - [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
-- [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0/P1=0 pasa a `LISTO`.
+- [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
 **Promoción de N3.8 permanece bloqueada hasta N3.7.H=LISTO.**
 ## ERP-N3.8 — Nota de débito de cliente — CIERRE CONDICIONAL/N/A
@@ -714,18 +714,3 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - Observabilidad certificada: métricas acotadas, correlation/trace context, alert logs estructurados y health/readiness secret-safe; sin delta de schema/frontend.
 - Certificación: `docs/CERTIFICACION_N8_12_OBSERVABILIDAD_CURRENT_STANDARD.md` @ `7ce5e060`.
 - `N8.12.H` requiere REVIEW_FIRST final + receipt/readback antes de promover `N8.13.A`.
-
-
-## ERP-N8.13 — Staging comparable a producción — REVALIDACIÓN CURRENT-STANDARD 2026-09-17
-
-Este bloque es estrictamente aditivo/history-preserving. El estado operativo vigente continúa exclusivamente en `CONFIG/COLA` bajo `docs/VAEP_AUTHORITY.md`; esta bitácora no sustituye REVIEW_FIRST, receipt ni readback.
-
-- [x] `N8.13.A-G` fueron revalidados secuencialmente contra el estándar vigente; el histórico se usó sólo como evidencia de apoyo.
-- [x] `N8.13.F` y `N8.13.G` quedaron certificados con REVIEW_FIRST fresco y `P0=0/P1=0`; gates causales `35258962286=SUCCESS` y `35258969104=SUCCESS`.
-- [x] Functional tested head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; árboles equivalentes vigentes: backend `f8db476310130c169ddb5d8c4ea03cfbab9617f6`, frontend `3d7847eb8817b14942746f1e31114e56c15efbdd`.
-- [x] Runtime DEV verificado: `variapp-desarrollo` READY, raíz HTTP 200 y `/api/health/ready` HTTP 200 con base de datos conectada; target backend `variapp-api-desarrollo.onrender.com`.
-- [x] Comparación con Producción se realizó sólo read-only; no hubo deploy, cambio de variables, secretos, DNS, certificados ni datos productivos.
-- [x] Certificación current-standard: `vaep/evidence/certifications/N8.13_STAGING_CURRENT_STANDARD_CERT_20260917T205649Z_VAEP48.md`.
-- [x] `TASKS_ADDITIVE_STATE_RECONCILIATION` queda materializada por este append preservando íntegramente la historia previa.
-
-Este append no cambia por sí solo el estado de `N8.13.H`; el cierre `LISTO` requiere además reconciliación aditiva de `CHANGELOG_AI.md`, REVIEW_FIRST final con P0=0/P1=0, receipt y write/readback del control-plane.
