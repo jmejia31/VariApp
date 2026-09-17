@@ -1,7 +1,9 @@
+using System.Net;
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.Api.Controllers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -70,5 +72,41 @@ public sealed class SecurityBoundaryContractTests
             .ToArray();
 
         Assert.Equal(new[] { nameof(InboundWebhooksController.ReceiveAsync) }, anonymousDeclaredMethods);
+    }
+
+    [Fact]
+    public void RateLimitClientIp_EnRender_UsaCfConnectingIpValida()
+    {
+        var context = new DefaultHttpContext();
+        context.Connection.RemoteIpAddress = IPAddress.Parse("10.0.0.10");
+        context.Request.Headers["CF-Connecting-IP"] = "203.0.113.25";
+
+        var key = global::TrustedClientIpResolver.Resolve(context, isRender: true);
+
+        Assert.Equal("203.0.113.25", key);
+    }
+
+    [Fact]
+    public void RateLimitClientIp_EnRender_RechazaHeaderMalformado_Y_UsaSocket()
+    {
+        var context = new DefaultHttpContext();
+        context.Connection.RemoteIpAddress = IPAddress.Parse("10.0.0.10");
+        context.Request.Headers["CF-Connecting-IP"] = "no-es-una-ip";
+
+        var key = global::TrustedClientIpResolver.Resolve(context, isRender: true);
+
+        Assert.Equal("10.0.0.10", key);
+    }
+
+    [Fact]
+    public void RateLimitClientIp_FueraDeRender_NoConfiaEnCfConnectingIp()
+    {
+        var context = new DefaultHttpContext();
+        context.Connection.RemoteIpAddress = IPAddress.Parse("192.0.2.40");
+        context.Request.Headers["CF-Connecting-IP"] = "203.0.113.25";
+
+        var key = global::TrustedClientIpResolver.Resolve(context, isRender: false);
+
+        Assert.Equal("192.0.2.40", key);
     }
 }
