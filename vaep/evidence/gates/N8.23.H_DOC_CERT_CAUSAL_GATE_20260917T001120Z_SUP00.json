@@ -3,7 +3,7 @@
   "task": "N8.23.H",
   "parent": "N8.23",
   "stage": "DOC_CERT",
-  "timestamp_utc": "2026-09-17T00:11:20Z",
+  "timestamp_utc": "2026-09-17T00:10:47Z",
   "candidate_head": "bf0d29e5bc844f5222a2b1038369d35345952053",
   "base_head_before_scope": "3424abe85752ce25e37a9651035c3f60a0dd36ac",
   "gate": "ROLLBACK_EVIDENCE_AND_RUNBOOK_CERT_CAUSAL",
@@ -55,5 +55,6 @@
     "runtime_source_changed": false,
     "provider_configuration_changed": false
   },
-  "result": "PASS"
+  "result": "PASS",
+  "timestamp_repair": "FIRST_DETECTOR_OWNS_RECOVERY: content timestamp aligned to actual commit time; filename retained for immutable path continuity."
 }
