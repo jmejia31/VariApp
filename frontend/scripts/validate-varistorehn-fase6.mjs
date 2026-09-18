@@ -147,8 +147,9 @@ for (const required of [
   'variante.ModeloId == solicitud.ModeloId',
   'string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)',
   'string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal)',
-  'if (stock < solicitud.Unidades)',
-  'Total = precio * solicitud.Unidades',
+  'if (stock <= 0 || stock < solicitud.Unidades)',
+  'var precioVigente = oferta?.PrecioOferta ?? precio;',
+  'Total = precioVigente * solicitud.Unidades',
   'var subtotal = lineas.Sum(linea => linea.Total)',
   'Guid.NewGuid().ToString("N")',
   'TimeSpan.FromMinutes(10)'
