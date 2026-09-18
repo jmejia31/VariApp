@@ -84,12 +84,13 @@ jobs:
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -e "
-            DELETE FROM Permisos WHERE Modulo IN (21,22,23) AND Accion IN (25,26,27);
+            DELETE FROM Permisos WHERE Modulo=23 AND Accion=27;
 
             INSERT INTO Permisos
               (Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
-            VALUES
-              ('CI.N04.DUP.22.26','CI N0.4 duplicate','Permiso CI para duplicate mapped-vs-legacy.',22,26,1,1,0,UTC_TIMESTAMP(6));
+            SELECT
+              'CI.N04.DUP.22.26','CI N0.4 duplicate','Permiso CI para duplicate mapped-vs-legacy.',22,26,1,1,0,UTC_TIMESTAMP(6)
+            WHERE NOT EXISTS (SELECT 1 FROM Permisos WHERE Modulo=22 AND Accion=26);
 
             SET @admin_role_id := (SELECT Id FROM Roles WHERE NombreNormalizado='ADMINISTRADOR' ORDER BY Id LIMIT 1);
             SET @dup_perm_id := (SELECT Id FROM Permisos WHERE Modulo=22 AND Accion=26 ORDER BY Id LIMIT 1);
@@ -210,10 +211,15 @@ jobs:
             --context AppDbContext
 
           docker exec "$c" mysql -uroot -proot inventoryapp_n04_down_negative -e "
+            INSERT INTO Permisos
+              (Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
+            SELECT 'CI.N04.DOWN.31.29','CI N0.4 downgrade','Permiso CI para guard de downgrade.',31,29,1,1,0,UTC_TIMESTAMP(6)
+            WHERE NOT EXISTS (SELECT 1 FROM Permisos WHERE Modulo=31 AND Accion=29);
+
             INSERT INTO Roles (Nombre,NombreNormalizado,Descripcion,EsSistema,EsAdministrador,Activo,Eliminado,FechaCreacion)
             VALUES ('CI Dynamic','CI_DYNAMIC','Rol CI no representable en formato legacy.',0,0,1,0,UTC_TIMESTAMP(6));
             SET @dynamic_role_id := LAST_INSERT_ID();
-            SET @perm_id := (SELECT Id FROM Permisos ORDER BY Id LIMIT 1);
+            SET @perm_id := (SELECT Id FROM Permisos WHERE Modulo=31 AND Accion=29 ORDER BY Id LIMIT 1);
             INSERT INTO RolPermisos (RolId,PermisoId) VALUES (@dynamic_role_id,@perm_id);
           "
 
