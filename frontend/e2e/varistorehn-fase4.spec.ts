@@ -363,7 +363,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await activarBaseDatos(page);
     const barra = page.locator('.mobile-buy-bar');
     await expect(barra).toBeVisible();
-    await expect(barra).toContainText('Últimas 3 unidades');
+    await expect(barra).toContainText('Últimas unidades · 3 unidades');
     const cta = barra.getByRole('button', { name: 'Agregar' });
     expect(await cta.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBeGreaterThanOrEqual(44);
 
