@@ -814,3 +814,13 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0` preservado por equivalencia de producto; aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF).
 - [x] Certificación canónica: `docs/CERTIFICACION_N9_6_HYPERCARE.md`.
 - [x] N9.6.H materializa este registro y su bloque correspondiente en `CHANGELOG_AI.md` mediante append byte-safe; `LISTO` sólo se declara tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar el writer temporal, REVIEW_FIRST final, receipt y write/readback.
+
+
+## ERP-N9.7 — Postmortem — cierre current-standard 2026-09-18
+
+- [x] N9.7.A–G revalidados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Postmortem materializado en `docs/POSTMORTEM_N9_7.md`; certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`.
+- [x] Sin delta causal de producto, contratos, schema, tests o runtime frente al functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+- [x] Aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF) y Hypercare DEV `35319732966` SUCCESS conservados como gates causales por equivalencia demostrada.
+- [x] Incidencias internas observadas y recuperadas same-run quedaron documentadas como aprendizaje; no persisten blockers P0/P1.
+- [x] N9.7.H materializa este registro y el bloque correspondiente de `CHANGELOG_AI.md` mediante append byte-safe; LISTO sólo tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar writer temporal, REVIEW_FIRST final, receipt y write/readback.

@@ -1435,3 +1435,14 @@ N9.6 fue revalidado bajo el estándar current-standard. En N9.6.A se detectó y 
 N9.6.B–E resultaron N/A materiales porque Hypercare no introdujo cambios de dominio, contratos, persistencia, migraciones, backend/API ni frontend/UX. N9.6.F confirmó los controles anónimos fail-closed y N9.6.G conservó como causal la aceptación exact-product `35316302603` (`100/100` Playwright + SMTP/PDF) por equivalencia demostrada con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`, complementada por el gate Hypercare DEV fresco.
 
 La certificación canónica quedó en `docs/CERTIFICACION_N9_6_HYPERCARE.md`. No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se añade de forma estrictamente append-only junto con `TASKS.md`; el cierre `LISTO` de N9.6.H y del parent N9.6 requiere todavía el readback final, REVIE_FIRST P0=0/P1=0 y receipt posterior al append.
+
+
+## 2026-09-18 — ERP-N9.7 — Postmortem current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+Se completó la revalidación current-standard de N9.7. El PRE quedó materializado en `docs/POSTMORTEM_N9_7.md` y la certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`. Se documentaron exclusivamente incidencias observadas y recuperaciones demostradas: un probe temporal de Hypercare con alcance de entorno incorrecto, un primer writer append-only con error de construcción y el riesgo de drift temporal repo/control-plane durante cierres encadenados. Los defectos internos accionables fueron corregidos same-run y no permanecen como blockers.
+
+N9.7.B–E resultaron N/A materiales por ausencia demostrada de cambios de dominio, contratos, persistencia/schema/migraciones, backend/API y frontend/UX. N9.7.F revalidó que no existe delta de seguridad/RBAC de producto ni exposición de secretos. N9.7.G conservó como evidencia causal la aceptación exact-product `35316302603` en SUCCESS con `100/100` Playwright más SMTP/PDF y el gate Hypercare DEV `35319732966` en SUCCESS, sustentados por equivalencia de producto con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+
+No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se agrega exclusivamente mediante append byte-safe junto con `TASKS.md`; el cierre LISTO de N9.7.H y del parent N9.7 requiere todavía el readback final, REVIEW_FIRST P0=0/P1=0 y receipt posterior al append.
