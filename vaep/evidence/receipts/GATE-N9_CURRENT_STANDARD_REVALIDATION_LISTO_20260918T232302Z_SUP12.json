@@ -9,7 +9,7 @@
   "role": "SUPERVISOR_RECOVERY_VERIFIER_SECONDARY_BUILDER",
   "authority": "docs/VAEP_AUTHORITY.md",
   "review": "vaep/evidence/reviews/GATE-N9_CURRENT_STANDARD_REVALIDATION_20260918T232234Z_SUP12.json",
-  "reviewCommit": "c2cb7e5a76bd55e31bdeff29339af28ebb2e25fb",
+  "reviewCommit": "9c1b4f53759c3b6e423f02d9a3caae12e889f9b7",
   "testedProductHead": "f1845628e4524bbd71eff9f119e243933f7e3523",
   "dependencyProof": "COLA 701:881 = 181/181 LISTO; GATE-N9 prior LISTO; 56/56 N9 microtasks LISTO; 7/7 H parents LISTO; successor NONE",
   "currentStandardScope": {
@@ -21,7 +21,7 @@
     "apiUi": "PASS",
     "testsAndGates": "PASS",
     "documentationEvidence": "PASS",
-    "equivalence": "tested product head certified; subsequent evidence-only commits require final compare/readback"
+    "equivalence": "PASS__tested product head to certification evidence lineage contains only fresh review/receipt control-plane evidence; mandatory post-write branch compare/readback is the exact-head proof"
   },
   "freshOwnerDelta": {
     "base": "ca34fb398055498733a8b0a4b067644de39bc44f",
@@ -50,8 +50,9 @@
   },
   "writeReadback": {
     "reviewReadback": "PASS",
-    "receiptReadback": "PENDING_SELF_READBACK",
-    "finalHeadEquivalence": "PENDING_POST_WRITE_COMPARE"
+    "receiptInitialReadback": "PASS",
+    "equivalencePreFinalization": "PASS__F1845628_TO_2B884143_ONLY_REVIEW_AND_RECEIPT_FILES",
+    "finalExactHeadProof": "MANDATORY_POST_WRITE_BRANCH_COMPARE_AND_CONTROL_SHEET_READBACK"
   },
   "safety": "Desarrollo only; no main, Producción, PR #2, secrets, DNS or certificates touched",
   "result": "LISTO__GATE_N9_CURRENT_STANDARD_REVALIDATED__REVIEW_FIRST_PASS__DOD_MATERIAL__P0_0__P1_0__181_OF_181_LISTO__10_OF_10_EXACT_HEAD_ACTIONS_SUCCESS__NO_SUCCESSOR"
