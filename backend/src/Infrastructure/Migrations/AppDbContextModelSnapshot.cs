@@ -247,9 +247,6 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("EmpresaId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -3448,11 +3445,6 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("Ambito")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
 
                     b.Property<int?>("ActualizadoPorUsuarioId")
                         .HasColumnType("int");
@@ -8546,6 +8538,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("Ambito")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<int?>("ActualizadoPorUsuarioId")
                         .HasColumnType("int");
 
@@ -8576,6 +8573,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -9804,55 +9804,21 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioRolPlataforma", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activa")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("ActualizadoPorNombreUsuario")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<int?>("ActualizadoPorUsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreadoPorNombreUsuario")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<int?>("CreadoPorUsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaActualizacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("RolId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
+                    b.Property<bool>("Activa").ValueGeneratedOnAdd().HasColumnType("tinyint(1)").HasDefaultValue(true);
+                    b.Property<string>("ActualizadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
+                    b.Property<int?>("ActualizadoPorUsuarioId").HasColumnType("int");
+                    b.Property<string>("CreadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
+                    b.Property<int?>("CreadoPorUsuarioId").HasColumnType("int");
+                    b.Property<DateTime>("FechaActualizacion").HasColumnType("datetime(6)");
+                    b.Property<DateTime>("FechaCreacion").HasColumnType("datetime(6)");
+                    b.Property<int>("RolId").HasColumnType("int");
+                    b.Property<int>("UsuarioId").HasColumnType("int");
                     b.HasKey("Id");
-
-                    b.HasIndex("RolId")
-                        .HasDatabaseName("IX_UsuarioRolesPlataforma_RolId");
-
-                    b.HasIndex("UsuarioId", "Activa")
-                        .HasDatabaseName("IX_UsuarioRolesPlataforma_UsuarioId_Activa");
-
-                    b.HasIndex("UsuarioId", "RolId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_UsuarioRolesPlataforma_UsuarioId_RolId");
-
+                    b.HasIndex("RolId").HasDatabaseName("IX_UsuarioRolesPlataforma_RolId");
+                    b.HasIndex("UsuarioId", "Activa").HasDatabaseName("IX_UsuarioRolesPlataforma_UsuarioId_Activa");
+                    b.HasIndex("UsuarioId", "RolId").IsUnique().HasDatabaseName("UX_UsuarioRolesPlataforma_UsuarioId_RolId");
                     b.ToTable("UsuarioRolesPlataforma", null, t =>
                         {
                             t.HasCheckConstraint("CK_UsuarioRolesPlataforma_RolId", "`RolId` > 0");
