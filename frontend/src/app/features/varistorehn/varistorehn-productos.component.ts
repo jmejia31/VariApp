@@ -13,8 +13,10 @@ import {
   ProductoCatalogoPublico,
   ProductoTienda,
   crearCatalogoEjemplo,
+  etiquetaDisponibilidad,
   filtrarProductos,
-  mapearProducto
+  mapearProducto,
+  precioVenta
 } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
@@ -64,6 +66,8 @@ export class VaristorehnProductosComponent implements OnInit {
   readonly categoriaSlug = signal('');
   readonly categoriaActiva = signal('');
   readonly soloDisponibles = signal(false);
+  readonly soloOfertas = signal(false);
+  readonly soloOfertasPagina = signal(false);
   readonly precioMinimo = signal<number | null>(null);
   readonly precioMaximo = signal<number | null>(null);
   readonly orden = signal<OrdenCatalogo>('relevancia');
@@ -82,6 +86,7 @@ export class VaristorehnProductosComponent implements OnInit {
     busqueda: this.busqueda(),
     categoria: this.categoriaActiva(),
     soloDisponibles: this.soloDisponibles(),
+    soloOfertas: this.soloOfertas() || this.soloOfertasPagina(),
     precioMinimo: this.precioMinimo(),
     precioMaximo: this.precioMaximo(),
     orden: this.orden()
@@ -92,7 +97,7 @@ export class VaristorehnProductosComponent implements OnInit {
     return this.resultados().slice(inicio, inicio + this.tamanoPagina);
   });
   readonly hayFiltros = computed(() => Boolean(
-    this.busqueda().trim() || this.categoriaSlug() || this.soloDisponibles()
+    this.busqueda().trim() || this.categoriaSlug() || this.soloDisponibles() || this.soloOfertas()
       || this.precioMinimo() !== null || this.precioMaximo() !== null || this.orden() !== 'relevancia'
   ));
   readonly categoriaFiltroInvalida = computed(() => Boolean(
@@ -102,6 +107,7 @@ export class VaristorehnProductosComponent implements OnInit {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
+    ofertas: VARISTOREHN_PATHS.ofertas,
     categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
@@ -110,10 +116,14 @@ export class VaristorehnProductosComponent implements OnInit {
   private cargaCategorias?: Subscription;
 
   ngOnInit(): void {
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.soloOfertasPagina.set(data['soloOfertas'] === true);
+    });
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.busqueda.set((params.get('q') || '').trim().slice(0, 180));
       this.categoriaSlug.set((params.get('categoria') || '').trim().slice(0, 180));
       this.soloDisponibles.set(params.get('disponible') === '1');
+      this.soloOfertas.set(params.get('oferta') === '1');
       this.precioMinimo.set(this.numeroQuery(params.get('precioMin')));
       this.precioMaximo.set(this.numeroQuery(params.get('precioMax')));
       const ordenQuery = params.get('orden');
@@ -169,6 +179,11 @@ export class VaristorehnProductosComponent implements OnInit {
     this.pagina.set(1);
     this.sincronizarUrl();
   }
+  cambiarOfertas(valor: boolean): void {
+    this.soloOfertas.set(valor);
+    this.pagina.set(1);
+    this.sincronizarUrl();
+  }
   cambiarPrecioMinimo(valor: string): void {
     this.precioMinimo.set(this.numeroQuery(valor));
     this.pagina.set(1);
@@ -186,7 +201,7 @@ export class VaristorehnProductosComponent implements OnInit {
   }
   limpiarFiltros(): void {
     this.busqueda.set(''); this.categoriaSlug.set(''); this.categoriaActiva.set('');
-    this.soloDisponibles.set(false); this.precioMinimo.set(null); this.precioMaximo.set(null);
+    this.soloDisponibles.set(false); this.soloOfertas.set(false); this.precioMinimo.set(null); this.precioMaximo.set(null);
     this.orden.set('relevancia'); this.pagina.set(1);
     this.sincronizarUrl();
   }
@@ -219,7 +234,16 @@ export class VaristorehnProductosComponent implements OnInit {
 
   imagenValida(url?: string): boolean { return Boolean(url && !this.imagenesFallidas().has(url)); }
   errorImagen(url: string): void { this.imagenesFallidas.update(actual => new Set([...actual, url])); }
-  stockBajo(modelo: ModeloTienda): boolean { return modelo.disponible && modelo.stock > 0 && modelo.stock <= 3; }
+  stockBajo(modelo: ModeloTienda): boolean { return modelo.estadoDisponibilidad === 'lowStock'; }
+  textoDisponibilidad(modelo: ModeloTienda): string { return etiquetaDisponibilidad(modelo); }
+  precioActual(producto: ProductoTienda, modelo: ModeloTienda): number { return precioVenta(producto, modelo); }
+  tieneOferta(modelo: ModeloTienda): boolean {
+    return modelo.ofertaActiva && modelo.precioOferta !== null && modelo.precioOferta < modelo.precio;
+  }
+  ahorro(modelo: ModeloTienda): number { return Math.max(0, modelo.precio - (modelo.precioOferta ?? modelo.precio)); }
+  porcentajeAhorro(modelo: ModeloTienda): number {
+    return modelo.precio > 0 ? Math.round(this.ahorro(modelo) * 100 / modelo.precio) : 0;
+  }
 
   moneda(valor: number): string {
     try { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: this.identidad.config().moneda || 'HNL' }).format(valor); }
@@ -292,6 +316,7 @@ export class VaristorehnProductosComponent implements OnInit {
         q: q || null,
         categoria: categoria || null,
         disponible: this.soloDisponibles() ? '1' : null,
+        oferta: this.soloOfertas() && !this.soloOfertasPagina() ? '1' : null,
         precioMin: this.precioMinimo(),
         precioMax: this.precioMaximo(),
         orden: this.orden() === 'relevancia' ? null : this.orden(),

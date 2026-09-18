@@ -89,6 +89,7 @@ fieldset > button small { color: var(--color-text-muted); font-size: .62rem; }
 .availability { position: absolute; z-index: 1; top: 12px; left: 12px; min-height: 28px; padding: 5px 9px; display: inline-flex; align-items: center; border-radius: 999px; background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface)); color: var(--color-success); font-size: .6rem; font-weight: 800; }
 .availability.low { background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-warning); }
 .availability.off { background: color-mix(in srgb, var(--color-danger) 9%, var(--color-surface)); color: var(--color-danger); }
+.discount-badge { position: absolute; z-index: 1; top: 12px; right: 12px; min-height: 28px; padding: 5px 9px; display: inline-flex; align-items: center; border-radius: 999px; background: var(--color-danger); color: var(--color-on-primary); font-size: .6rem; font-weight: 900; letter-spacing: .02em; }
 .product-body { min-width: 0; flex: 1; padding: 18px; display: flex; flex-direction: column; }
 .product-category { color: var(--color-primary); font-size: .6rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .product-body h2 { margin-top: 6px; font-size: 1rem; line-height: 1.35; letter-spacing: -.02em; }

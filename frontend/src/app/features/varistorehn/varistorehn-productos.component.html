@@ -33,9 +33,11 @@
   <main id="catalogo-productos" class="container products-page" [attr.aria-busy]="estadoCatalogo() === 'loading'">
     <header class="page-heading">
       <div>
-        <p class="eyebrow">CATÁLOGO PÚBLICO</p>
-        <h1>Productos</h1>
-        <p>Busca, filtra y compara el catálogo disponible de {{ identidad.config().nombreComercial }}.</p>
+        <p class="eyebrow">{{ soloOfertasPagina() ? 'PROMOCIONES VIGENTES' : 'CATÁLOGO PÚBLICO' }}</p>
+        <h1>{{ soloOfertasPagina() ? 'Ofertas' : 'Productos' }}</h1>
+        <p>{{ soloOfertasPagina()
+          ? 'Promociones vigentes calculadas por la tienda. Cuando vence una oferta, el precio vuelve automáticamente a su valor normal.'
+          : 'Busca, filtra y compara el catálogo disponible de ' + identidad.config().nombreComercial + '.' }}</p>
       </div>
       <span class="source-indicator"><i></i>{{ utilizarDatosBaseDatos() ? 'Datos de la tienda' : 'Datos de ejemplo' }}</span>
     </header>
@@ -80,6 +82,16 @@
             <span>Solo disponibles</span>
           </label>
         </fieldset>
+
+        @if (!soloOfertasPagina()) {
+          <fieldset>
+            <legend>Promociones</legend>
+            <label class="check">
+              <input #ofertas type="checkbox" [checked]="soloOfertas()" (change)="cambiarOfertas(ofertas.checked)">
+              <span>Solo productos en oferta</span>
+            </label>
+          </fieldset>
+        }
 
         <fieldset>
           <legend>Rango de precio</legend>
@@ -150,8 +162,11 @@
               <article class="product-card">
                 <div class="product-media">
                   <span class="availability" [class.off]="!modelo.disponible" [class.low]="stockBajo(modelo)">
-                    {{ !modelo.disponible ? 'Agotado' : stockBajo(modelo) ? 'Pocas unidades' : 'Disponible' }}
+                    {{ textoDisponibilidad(modelo) }}
                   </span>
+                  @if (tieneOferta(modelo)) {
+                    <span class="discount-badge">-{{ porcentajeAhorro(modelo) }}%</span>
+                  }
                   @if (imagenValida(modelo.imagenes[0])) {
                     <img [src]="modelo.imagenes[0]" [alt]="producto.nombre" loading="lazy" (error)="errorImagen(modelo.imagenes[0])">
                   } @else {
@@ -186,12 +201,12 @@
 
                   <div class="product-bottom">
                     <div class="price-copy">
-                      @if (producto.precioOferta !== null && producto.precioOferta >= 0 && producto.precioOferta < modelo.precio) {
-                        <span><del>{{ moneda(modelo.precio) }}</del> · Oferta</span>
-                        <strong>{{ moneda(producto.precioOferta) }}</strong>
+                      @if (tieneOferta(modelo)) {
+                        <span><del>{{ moneda(modelo.precio) }}</del> · Ahorras {{ moneda(ahorro(modelo)) }}</span>
+                        <strong>{{ moneda(precioActual(producto, modelo)) }}</strong>
                       } @else {
                         <span>{{ producto.modelos.length > 1 ? 'Precio del modelo' : 'Precio' }}</span>
-                        <strong>{{ moneda(modelo.precio) }}</strong>
+                        <strong>{{ moneda(precioActual(producto, modelo)) }}</strong>
                       }
                     </div>
                     @if (producto.slug) {
@@ -222,7 +237,7 @@
     <footer class="store-footer">
       <div class="container footer-grid">
         <div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
-        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.categorias">Categorías</a></div>
+        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.ofertas">Ofertas</a><a [href]="enlaces.categorias">Categorías</a></div>
         <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a>@if (permiteWhatsapp) { <span>Pedidos por WhatsApp</span> }</div>
       </div>
       <div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div>
