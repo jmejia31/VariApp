@@ -42,7 +42,7 @@
     "ui": "PASS_NO_UI_DELTA_IN_FRESH_5_COMMIT_SCOPE",
     "testsAndCausalGates": "PASS",
     "documentationAndEvidence": "PASS",
-    "headEquivalence": "PASS_PENDING_CONTROL_PLANE_EVIDENCE_COMMIT_READBACK"
+    "headEquivalence": "PASS__F1845628_TO_2B884143_ONLY_REVIEW_AND_RECEIPT_EVIDENCE_FILES__FINAL_READBACK_REQUIRED_AFTER_RECEIPT_UPDATE"
   },
   "freshDelta": {
     "base": "ca34fb398055498733a8b0a4b067644de39bc44f",
