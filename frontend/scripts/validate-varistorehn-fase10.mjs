@@ -55,7 +55,8 @@ expect(checkoutHtml.includes('[attr.aria-busy]="procesando()"'), 'Las acciones a
 expect(checkoutHtml.includes("procesando() ? 'Abriendo pago seguro…'"), 'El CTA de pago debe mostrar feedback loading.');
 
 for (const html of [productoHtml, carritoHtml, checkoutHtml]) {
-  expect(!/<img(?![^>]*\balt=)[^>]*>/i.test(html), 'Toda imagen HTML del flujo público debe tener alt.');
+  const imagenes = [...html.matchAll(/<img\\b[^>]*>/gi)].map(match => match[0]);
+  expect(imagenes.every(tag => /(?:\\balt|\\[alt\\])\\s*=/.test(tag)), 'Toda imagen HTML del flujo público debe tener alt o [alt].');
 }
 for (const scss of [productoScss, carritoScss, checkoutScss]) {
   expect(scss.includes(':focus-visible'), 'Cada pantalla crítica debe mantener foco visible de teclado.');
