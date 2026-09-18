@@ -7,6 +7,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -65,7 +66,7 @@ public sealed class ReportesInventarioReconciliacionSecurityContractTests
         scope.Setup(x => x.ObtenerActualAsync())
             .ReturnsAsync(new UsuarioScopeActual(1, 1, "Administrador", true));
         var permisos = new Mock<IPermisoService>();
-        permisos.Setup(x => x.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver))
+        permisos.Setup(x => x.TienePermisoAsync(1, ModuloSistema.Finanzas, AccionPermiso.Ver))
             .ReturnsAsync(false);
         var auditoria = new Mock<IAuditoriaService>();
         auditoria.Setup(x => x.RegistrarAsync(
@@ -82,7 +83,14 @@ public sealed class ReportesInventarioReconciliacionSecurityContractTests
             .Returns(Task.CompletedTask);
 
         var controller = new ReportesInventarioReconciliacionController(
-            context, scope.Object, permisos.Object, auditoria.Object);
+            context, scope.Object, permisos.Object, auditoria.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            }
+        };
+        controller.HttpContext.Request.Headers["X-Empresa-Id"] = "1";
 
         var result = await controller.Get(
             new ReporteInventarioReconciliacionFiltroDto { Page = 1, PageSize = 10 },
