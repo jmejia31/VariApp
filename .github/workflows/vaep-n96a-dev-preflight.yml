@@ -1,0 +1,87 @@
+name: VAEP N9.6.A DEV Hypercare Preflight
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n96a-dev-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  dev-hypercare-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKEND_URL: https://variapp-api-desarrollo.onrender.com
+      FRONTEND_URL: https://variapp-desarrollo.vercel.app
+    steps:
+      - name: DEV backend health readiness and latency
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in /health /health/ready; do
+            body="$(mktemp)"
+            code="$(curl -sS --max-time 45 -o "$body" -w '%{http_code}' "$BACKEND_URL$path")"
+            test "$code" -ge 200 && test "$code" -lt 300
+            curl -sS --max-time 45 -o /dev/null -w "${path}_code=%{http_code} total=%{time_total} connect=%{time_connect} ttfb=%{time_starttransfer}\n" "$BACKEND_URL$path"
+            echo "${path}_status=$code"
+            python3 - "$path" "$body" <<'PY'
+          import json, sys
+          label, path = sys.argv[1:]
+          raw = open(path, encoding='utf-8').read()
+          try:
+              obj = json.loads(raw)
+          except Exception:
+              print(label, raw[:1000])
+              raise SystemExit(0)
+          print(label, json.dumps(obj, ensure_ascii=False, sort_keys=True)[:2000])
+          if label == '/health/ready':
+              text = json.dumps(obj).lower()
+              if 'connected' not in text and 'healthy' not in text and 'ready' not in text:
+                  raise SystemExit('readiness body lacks positive dependency signal')
+          PY
+          done
+
+      - name: DEV frontend shell and latency
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          code="$(curl -sSL --max-time 45 -o "$body" -w '%{http_code}' "$FRONTEND_URL/")"
+          test "$code" -ge 200 && test "$code" -lt 400
+          grep -Eiq '<app-root|<title>.*Vari' "$body"
+          echo "frontend_status=$code"
+          for i in 1 2 3; do
+            curl -sSL --max-time 45 -o /dev/null -w "frontend_sample_${i} code=%{http_code} total=%{time_total} connect=%{time_connect} ttfb=%{time_starttransfer}\n" "$FRONTEND_URL/"
+          done
+
+      - name: DEV protected critical surfaces fail closed anonymously
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            /productos
+            /existencias-variante
+            /compras
+            /ventas
+            /facturas
+            /pagos-online
+            /permisos/catalogo
+            /ventas/reportes/resumen
+          )
+          for path in "${paths[@]}"; do
+            code="$(curl -sS --max-time 30 -o /tmp/body -w '%{http_code}' "$BACKEND_URL$path")"
+            case "$code" in
+              401|403) ;;
+              *) echo "::error::$path returned $code, expected 401/403"; cat /tmp/body; exit 1 ;;
+            esac
+            echo "$path -> $code"
+          done
+
+      - name: DEV preflight summary
+        run: |
+          echo 'N9.6.A DEV-only read-only preflight PASS.'
+          echo 'No credentials used. No business mutation endpoint invoked.'
