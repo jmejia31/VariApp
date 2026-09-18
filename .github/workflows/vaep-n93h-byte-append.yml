@@ -26,49 +26,28 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import base64
           import subprocess
 
           expected = {
               "TASKS.md": "09d2ab1d1fa7eff8a0db55b997f0478301b74199",
               "CHANGELOG_AI.md": "98c1ef97025d0a393c82fdd3c0d19f2ebf1ad5e5",
           }
-          blocks = {
-              "TASKS.md": """
-
-## ERP-N9.3 — Backup pre-release — cierre current-standard 2026-09-18
-
-- [x] N9.3.A-G revalidados/certificados current-standard con REVIEW_FIRST y P0=0/P1=0.
-- [x] Backup real de Desarrollo ejecutado por M11 run `35288756204`: definición/protecciones, proveedor y backup+restore concluyeron `success`.
-- [x] Artifact cifrado `10525951057`, digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; retención 14 días.
-- [x] Restore drill del mismo artifact en MySQL descartable: 132 tablas base, 104 migraciones EF, checksums y row-counts verificados, `status=SUCCESS`, `productionTouched=false`.
-- [x] N9.3.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; la certificación `LISTO` sólo se emite después del readback y REVIEW_FIRST final.
-
-**N9.3 no se promueve por este texto aislado: el cierre autoritativo requiere receipt/readback current-standard en COLA/CONFIG. No se tocó main, Producción, PR #2, secretos, DNS ni certificados.**
-""".encode("utf-8"),
-              "CHANGELOG_AI.md": """
-
-## 2026-09-18 — ERP-N9.3 — Backup pre-release current-standard
-
-**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
-
-Se revalidó N9.3 de extremo a extremo. El gate material fue M11 run `35288756204`: validación de definición/protecciones, certificación segura del proveedor y backup cifrado real de Desarrollo + restore drill del mismo artifact concluyeron `success`. El artifact `10525951057` quedó con digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; el restore aislado verificó checksums y row-counts para 132 tablas base y 104 migraciones EF, con `productionTouched=false`.
-
-N9.3.B/D/E se mantuvieron como N/A grounded donde el backup no exige cambios de dominio, API o UI; N9.3.C/F/G certificaron backup/restore, seguridad y gates causales. P0=0/P1=0 antes del cierre final. Este append es estrictamente aditivo y forma parte de N9.3.H; `LISTO` sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar este writer temporal y persistir receipt/readback. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
-""".encode("utf-8"),
+          encoded = {
+              "TASKS.md": "CgojIyBFUlAtTjkuMyDigJQgQmFja3VwIHByZS1yZWxlYXNlIOKAlCBjaWVycmUgY3VycmVudC1zdGFuZGFyZCAyMDI2LTA5LTE4CgotIFt4XSBOOS4zLkEtRyByZXZhbGlkYWRvcy9jZXJ0aWZpY2Fkb3MgY3VycmVudC1zdGFuZGFyZCBjb24gUkVWSUVXX0ZJUlNUIHkgUDA9MC9QMT0wLgotIFt4XSBCYWNrdXAgcmVhbCBkZSBEZXNhcnJvbGxvIGVqZWN1dGFkbyBwb3IgTTExIHJ1biBgMzUyODg3NTYyMDRgOiBkZWZpbmljacOzbi9wcm90ZWNjaW9uZXMsIHByb3ZlZWRvciB5IGJhY2t1cCtyZXN0b3JlIGNvbmNsdXllcm9uIGBzdWNjZXNzYC4KLSBbeF0gQXJ0aWZhY3QgY2lmcmFkbyBgMTA1MjU5NTEwNTdgLCBkaWdlc3QgYHNoYTI1NjpjYTA5ZTgwYmJhMGNjNDQxOTZmOTdmNWEzYWZjNDIxNDFiZTA0NzFmNjVkZDVjM2MxN2RjYmI0MzQ5MTcxZTdkYDsgcmV0ZW5jacOzbiAxNCBkw61hcy4KLSBbeF0gUmVzdG9yZSBkcmlsbCBkZWwgbWlzbW8gYXJ0aWZhY3QgZW4gTXlTUUwgZGVzY2FydGFibGU6IDEzMiB0YWJsYXMgYmFzZSwgMTA0IG1pZ3JhY2lvbmVzIEVGLCBjaGVja3N1bXMgeSByb3ctY291bnRzIHZlcmlmaWNhZG9zLCBgc3RhdHVzPVNVQ0NFU1NgLCBgcHJvZHVjdGlvblRvdWNoZWQ9ZmFsc2VgLgotIFt4XSBOOS4zLkggbWF0ZXJpYWxpemEgZXN0ZSByZWdpc3RybyB5IGxhIGVudHJhZGEgYWRpdGl2YSBjb3JyZXNwb25kaWVudGUgZW4gYENIQU5HRUxPR19BSS5tZGAgcHJlc2VydmFuZG8gYnl0ZSBwb3IgYnl0ZSBlbCBwcmVmaWpvIGhpc3TDs3JpY287IGxhIGNlcnRpZmljYWNpw7NuIGBMSVNUT2Agc8OzbG8gc2UgZW1pdGUgZGVzcHXDqXMgZGVsIHJlYWRiYWNrIHkgUkVWSUVXX0ZJUlNUIGZpbmFsLgoKKipOOS4zIG5vIHNlIHByb211ZXZlIHBvciBlc3RlIHRleHRvIGFpc2xhZG86IGVsIGNpZXJyZSBhdXRvcml0YXRpdm8gcmVxdWllcmUgcmVjZWlwdC9yZWFkYmFjayBjdXJyZW50LXN0YW5kYXJkIGVuIENPTEEvQ09ORklHLiBObyBzZSB0b2PDsyBtYWluLCBQcm9kdWNjacOzbiwgUFIgIzIsIHNlY3JldG9zLCBETlMgbmkgY2VydGlmaWNhZG9zLioqCg==",
+              "CHANGELOG_AI.md": "CgojIyAyMDI2LTA5LTE4IOKAlCBFUlAtTjkuMyDigJQgQmFja3VwIHByZS1yZWxlYXNlIGN1cnJlbnQtc3RhbmRhcmQKCioqUmVzcG9uc2FibGU6KiogVGFyZWEgU3VwZXJ2aXNpw7NuIDoyNCwgYERlc2Fycm9sbG9gIMO6bmljYW1lbnRlLgoKU2UgcmV2YWxpZMOzIE45LjMgZGUgZXh0cmVtbyBhIGV4dHJlbW8uIEVsIGdhdGUgbWF0ZXJpYWwgZnVlIE0xMSBydW4gYDM1Mjg4NzU2MjA0YDogdmFsaWRhY2nDs24gZGUgZGVmaW5pY2nDs24vcHJvdGVjY2lvbmVzLCBjZXJ0aWZpY2FjacOzbiBzZWd1cmEgZGVsIHByb3ZlZWRvciB5IGJhY2t1cCBjaWZyYWRvIHJlYWwgZGUgRGVzYXJyb2xsbyArIHJlc3RvcmUgZHJpbGwgZGVsIG1pc21vIGFydGlmYWN0IGNvbmNsdXllcm9uIGBzdWNjZXNzYC4gRWwgYXJ0aWZhY3QgYDEwNTI1OTUxMDU3YCBxdWVkw7MgY29uIGRpZ2VzdCBgc2hhMjU2OmNhMDllODBiYmEwY2M0NDE5NmY5N2Y1YTNhZmM0MjE0MWJlMDQ3MWY2NWRkNWMzYzE3ZGNiYjQzNDkxNzFlN2RgOyBlbCByZXN0b3JlIGFpc2xhZG8gdmVyaWZpY8OzIGNoZWNrc3VtcyB5IHJvdy1jb3VudHMgcGFyYSAxMzIgdGFibGFzIGJhc2UgeSAxMDQgbWlncmFjaW9uZXMgRUYsIGNvbiBgcHJvZHVjdGlvblRvdWNoZWQ9ZmFsc2VgLgoKTjkuMy5CL0QvRSBzZSBtYW50dXZpZXJvbiBjb21vIE4vQSBncm91bmRlZCBkb25kZSBlbCBiYWNrdXAgbm8gZXhpZ2UgY2FtYmlvcyBkZSBkb21pbmlvLCBBUEkgbyBVSTsgTjkuMy5DL0YvRyBjZXJ0aWZpY2Fyb24gYmFja3VwL3Jlc3RvcmUsIHNlZ3VyaWRhZCB5IGdhdGVzIGNhdXNhbGVzLiBQMD0wL1AxPTAgYW50ZXMgZGVsIGNpZXJyZSBmaW5hbC4gRXN0ZSBhcHBlbmQgZXMgZXN0cmljdGFtZW50ZSBhZGl0aXZvIHkgZm9ybWEgcGFydGUgZGUgTjkuMy5IOyBgTElTVE9gIHPDs2xvIHNlIGRlY2xhcmEgZGVzcHXDqXMgZGUgdmVyaWZpY2FyIHByZWZpam8gaGlzdMOzcmljbyBleGFjdG8sIGBhZGRpdGlvbnM+MC9kZWxldGlvbnM9MGAsIHJldGlyYXIgZXN0ZSB3cml0ZXIgdGVtcG9yYWwgeSBwZXJzaXN0aXIgcmVjZWlwdC9yZWFkYmFjay4gTm8gc2UgbW9kaWZpY2Fyb24gYG1haW5gLCBQcm9kdWNjacOzbiwgUFIgIzIsIHNlY3JldG9zLCBETlMgbmkgY2VydGlmaWNhZG9zLgo=",
           }
 
-          old_bytes = {}
           for name, expected_blob in expected.items():
               path = Path(name)
               actual_blob = subprocess.check_output(["git", "hash-object", str(path)], text=True).strip()
               if actual_blob != expected_blob:
                   raise SystemExit(f"{name} blob drift: expected {expected_blob}, got {actual_blob}")
               old = path.read_bytes()
-              old_bytes[name] = old
-              marker = b"ERP-N9.3"
-              if marker in old:
+              if b"ERP-N9.3" in old:
                   raise SystemExit(f"{name} already contains N9.3 closure marker; refusing duplicate append")
-              new = old + blocks[name]
+              block = base64.b64decode(encoded[name])
+              new = old + block
               if not new.startswith(old) or len(new) <= len(old):
                   raise SystemExit(f"{name} prefix/addition invariant failed before write")
               path.write_bytes(new)
