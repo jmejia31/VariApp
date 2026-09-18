@@ -41,6 +41,7 @@ public class CreateProductoDto
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; } = 5;
     public int? CategoriaId { get; set; }
+    public bool EsDestacado { get; set; }
     public int? ColorId { get; set; }
     public int? TallaId { get; set; }
     public int? MarcaId { get; set; }

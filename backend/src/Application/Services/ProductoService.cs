@@ -77,6 +77,7 @@ public class ProductoService : IProductoService
             Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             TipoInventario = dto.TipoInventario,
             CategoriaId = dto.CategoriaId,
+            EsDestacado = dto.EsDestacado,
             Activo = true,
             Eliminado = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
@@ -119,6 +120,7 @@ public class ProductoService : IProductoService
                 producto.Nombre,
                 producto.TipoInventario,
                 producto.CategoriaId,
+                producto.EsDestacado,
                 ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null)
             });
 
@@ -138,6 +140,7 @@ public class ProductoService : IProductoService
             producto.TipoInventario,
             producto.Descripcion,
             producto.CategoriaId,
+            producto.EsDestacado,
             Imagenes = imagenesGenerales.Count,
             ImagenPrincipalId = producto.ImagenPrincipal?.Id
         };
@@ -152,6 +155,7 @@ public class ProductoService : IProductoService
         producto.Nombre = dto.Nombre.Trim();
         producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
         producto.CategoriaId = dto.CategoriaId;
+        producto.EsDestacado = dto.EsDestacado;
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
@@ -241,6 +245,7 @@ public class ProductoService : IProductoService
                 producto.TipoInventario,
                 producto.Descripcion,
                 producto.CategoriaId,
+                producto.EsDestacado,
                 Imagenes = imagenesGenerales.Count,
                 ImagenPrincipalId = producto.ImagenPrincipal?.Id
             });

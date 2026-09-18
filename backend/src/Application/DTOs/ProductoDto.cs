@@ -20,6 +20,7 @@ public class ProductoDto
     public bool EstaAgotado { get; set; }
     public string EstadoInventario { get; set; } = string.Empty;
     public bool Activo { get; set; }
+    public bool EsDestacado { get; set; }
 
     public int? CategoriaId { get; set; }
     public string? CategoriaNombre { get; set; }
