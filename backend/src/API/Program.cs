@@ -203,6 +203,27 @@ if (swaggerEnabled)
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
+var maintenanceEnabled = app.Configuration.GetValue<bool>("Maintenance:Enabled");
+if (maintenanceEnabled)
+{
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/health"))
+        {
+            await next();
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        context.Response.Headers["Retry-After"] = "300";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            status = 503,
+            title = "Servicio temporalmente en mantenimiento",
+            detail = "VariApp se encuentra temporalmente en mantenimiento programado."
+        });
+    });
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new
