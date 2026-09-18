@@ -792,3 +792,15 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] Commit productivo estabilizado 7f140442d598aaea36b39952bad5ebd9ab4f2613; deploy final dep-damb4lqjnfac73efl1pg LIVE.
 - [x] Última migración observada 20260914232400_N7_10_C_DocumentoFiscalPersistencia; reinicio final indicó database already up to date.
 - [ ] N9.4.H se declara LISTO únicamente tras hard verify de este append y CHANGELOG_AI, retiro del writer temporal, REVIEW_FIRST final, receipt y readback del control-plane.
+
+
+## ERP-N9.5 — Smoke test — cierre current-standard 2026-09-18
+
+- [x] N9.5.A-F preservados/revalidados current-standard en la cadena vigente.
+- [x] N9.5.G QA/regresión/CI certificado con REVIEW_FIRST `P0=0/P1=0` sobre functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+- [x] Admission exact-head `35316302522` SUCCESS.
+- [x] Aceptación integral exact-head `35316302603` SUCCESS: Playwright `100/100`, SMTP/PDF SUCCESS; artifact `10535867520`, digest `sha256:5b073d44217948a3cafd2938d6a1ed24f3c36e5b3234450ec1e1ab09085fd85a`.
+- [x] Certificación canónica materializada en `docs/CERTIFICACION_N9_5_SMOKE_TEST.md`.
+- [x] N9.5.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; su `LISTO` sólo es válido tras REVIEW_FIRST, receipt y readback posteriores a este append.
+
+**El parent N9.5 sólo queda formalmente `LISTO` cuando COLA/CONFIG/PLAN_MAESTRO y el receipt fresco de N9.5.H confirman el cierre; este texto aislado no auto-certifica estado ni autoriza promoción.**

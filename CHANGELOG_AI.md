@@ -1413,3 +1413,14 @@ N9.3.B/D/E se mantuvieron como N/A grounded donde el backup no exige cambios de 
 ## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18
 
 La liberación productiva autorizada fue ejecutada bajo ventana de mantenimiento. La base MySQL fue migrada hasta 20260914232400_N7_10_C_DocumentoFiscalPersistencia; el incidente N0.4 por duplicados RBAC legacy se resolvió con migración retry-safe y certificación causal exact-head 35304697573/105474385670 SUCCESS (2328/2328 tests y guards/postchecks completos). Producción quedó LIVE sobre 7f140442d598aaea36b39952bad5ebd9ab4f2613, deploy dep-damb4lqjnfac73efl1pg, maintenance OFF, EF sin migraciones pendientes y sin hard errors/503 posteriores en el corte validado. N9.4.D/E quedaron N/A grounded; F/G certificados P0=0/P1=0. El cierre H exige todavía verificación byte-safe de este append, REVIEW_FIRST, receipt y readback.
+
+
+## 2026-09-18 — ERP-N9.5 — Smoke test current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+La revalidación current-standard de N9.5 corrigió same-run los defects causales encontrados en N9.5.G y congeló como functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`. El admission exact-head `35316302522` y la aceptación integral `35316302603` terminaron `SUCCESS`; Playwright reportó `100/100` pruebas PASS y la validación SMTP/PDF también concluyó correctamente. El artifact de aceptación es `10535867520` con digest `sha256:5b073d44217948a3cafd2938d6a1ed24f3c36e5b3234450ec1e1ab09085fd85a`.
+
+El REVIEW_FIRST de N9.5.G quedó en `vaep/evidence/reviews/N9.5.G_REVIEW_FIRST_20260918T070531Z_SUP24.json` y su receipt en `vaep/evidence/receipts/N9.5.G_RECEIPT_20260918T070609Z_SUP24.json`, con `P0=0/P1=0`. La certificación canónica del parent se materializó en `docs/CERTIFICACION_N9_5_SMOKE_TEST.md`. Los commits posteriores al functional head que sólo añaden evidencia/documentación son equivalentes por construcción y no modifican producto/runtime.
+
+Este bloque forma parte de N9.5.H y se añade de forma estrictamente aditiva junto con `TASKS.md`; `LISTO` para H y para el parent N9.5 sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar el writer temporal, ejecutar REVIEW_FIRST final, persistir receipt y hacer write/readback de COLA/CONFIG/PLAN_MAESTRO. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
