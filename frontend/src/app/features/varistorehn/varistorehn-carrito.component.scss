@@ -11,3 +11,8 @@
 @media(max-width:680px){.container{width:min(100% - 26px,1240px)}.preview-panel{align-items:stretch;flex-direction:column}.preview-copy{margin:0}.segmented{width:100%}.segmented button{flex:1}.cart-page{padding-top:16px}.cart-heading{align-items:flex-start;flex-direction:column}.cart-heading h1{font-size:clamp(2rem,10vw,2.8rem)}.cart-item{grid-template-columns:92px minmax(0,1fr);gap:13px;padding:14px}.item-media{width:92px;height:92px}.item-title-row{gap:8px}.remove-button span{display:none}.item-details{grid-column:1/-1;grid-template-columns:1fr 1fr;gap:14px}.quantity-field{grid-column:1/-1;order:3}.quantity-control{width:100%;grid-template-columns:52px minmax(70px,1fr) 52px}.quantity-control input{width:100%}.item-total{text-align:right}.state-actions,.state-actions .button{width:100%}.footer-grid{grid-template-columns:1fr;gap:18px}}
 @media(max-width:390px){.container{width:min(100% - 20px,1240px)}.cart-item{grid-template-columns:78px minmax(0,1fr);gap:10px}.item-media{width:78px;height:78px;padding:8px}.item-title-row h2{font-size:.88rem}.item-details{gap:10px}.cart-summary{padding:20px 17px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Fase 9 — oferta rehidratada desde la autoridad pública */
+.item-price del { display: block; color: var(--color-text-muted); font-size: .66rem; }
+.item-price span { display: block; margin-top: 2px; color: var(--color-success); font-size: .62rem; font-weight: 700; }

@@ -23,6 +23,7 @@ import {
   ProductoCatalogoPublico,
   ProductoTienda,
   crearCatalogoEjemplo,
+  etiquetaDisponibilidad,
   mapearProducto,
   precioVenta,
   telefonoWhatsapp
@@ -112,6 +113,10 @@ export class VaristorehnProductoComponent implements OnInit {
     return producto && modelo ? precioVenta(producto, modelo) : 0;
   });
   readonly tienePromocion = computed(() => this.precioActual() < this.precioNormal());
+  readonly ahorroActual = computed(() => Math.max(0, this.precioNormal() - this.precioActual()));
+  readonly porcentajeAhorroActual = computed(() =>
+    this.precioNormal() > 0 ? Math.round(this.ahorroActual() * 100 / this.precioNormal()) : 0);
+  readonly ofertaNombre = computed(() => this.modeloSeleccionado()?.ofertaNombre || 'Oferta vigente');
   readonly stockSeleccionado = computed(() => this.modeloSeleccionado()?.stock ?? 0);
   readonly puedeSeleccionarCantidad = computed(() => Boolean(this.modeloSeleccionado()?.disponible && this.stockRestante() > 0));
   readonly unidadesEnCarrito = computed(() => {
@@ -154,6 +159,7 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
+    ofertas: VARISTOREHN_PATHS.ofertas,
     categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
@@ -289,12 +295,17 @@ export class VaristorehnProductoComponent implements OnInit {
     this.imagenesFallidas.update(actual => new Set([...actual, url]));
     if (url === this.imagenActual() && this.lightboxAbierto()) this.cerrarLightbox(false);
   }
-  stockBajo(): boolean { const stock = this.stockSeleccionado(); return stock > 0 && stock <= 3; }
+  stockBajo(): boolean { return this.modeloSeleccionado()?.estadoDisponibilidad === 'lowStock'; }
   textoDisponibilidad(): string {
     const modelo = this.modeloSeleccionado();
-    if (!modelo?.disponible) return 'Agotado';
-    if (this.stockBajo()) return `Últimas ${modelo.stock} unidades`;
-    return `${modelo.stock} ${modelo.stock === 1 ? 'unidad disponible' : 'unidades disponibles'}`;
+    if (!modelo) return 'Agotado';
+    const estado = etiquetaDisponibilidad(modelo);
+    if (estado === 'Agotado') return estado;
+    return `${estado} · ${modelo.stock} ${modelo.stock === 1 ? 'unidad' : 'unidades'}`;
+  }
+  precioModelo(modelo: ModeloTienda): number {
+    const producto = this.producto();
+    return producto ? precioVenta(producto, modelo) : modelo.precio;
   }
   rutaProducto(producto: ProductoTienda): string { return producto.slug ? VARISTOREHN_PATHS.producto(producto.slug) : VARISTOREHN_PATHS.productos; }
   rutaCategoria(): string {
