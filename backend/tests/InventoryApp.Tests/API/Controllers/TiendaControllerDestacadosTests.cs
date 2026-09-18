@@ -76,10 +76,11 @@ public sealed class TiendaControllerDestacadosTests
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 
         var model = Assert.IsAssignableFrom<IModel>(modelProperty.GetValue(snapshot));
-        var producto = Assert.NotNull(model.FindEntityType("InventoryApp.Domain.Entities.Producto"));
-        Assert.NotNull(producto.FindProperty("EsDestacado"));
+        var producto = model.FindEntityType("InventoryApp.Domain.Entities.Producto");
+        Assert.NotNull(producto);
+        Assert.NotNull(producto!.FindProperty("EsDestacado"));
         Assert.NotNull(producto.FindProperty("Activo"));
         Assert.Contains(producto.GetIndexes(), index =>
-            index.GetDatabaseName() == "IX_Productos_EsDestacado_Activo");
+            index.Properties.Select(property => property.Name).SequenceEqual(new[] { "EsDestacado", "Activo" }));
     }
 }
