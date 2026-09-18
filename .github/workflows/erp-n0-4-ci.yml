@@ -84,10 +84,7 @@ jobs:
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -e "
-            INSERT INTO Permisos
-              (Id,Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
-            VALUES
-              (9401,'CARGASMASIVAS.IMPORTAR','CargasMasivas - Importar','Permiso representativo N0.4',23,27,1,1,0,UTC_TIMESTAMP(6));
+            DELETE FROM Permisos WHERE Modulo=23 AND Accion=27;
 
             INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido,RolId,PermisoId)
             VALUES
@@ -134,7 +131,9 @@ jobs:
           # El usuario administrador histórico debe sobrevivir; N0.4 no puede borrarlo.
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Usuarios u JOIN Roles r ON r.Id=u.RolId WHERE u.Id=1 AND r.NombreNormalizado='ADMINISTRADOR';")" = '1'
 
-          # El grant permitido se transforma a relación explícita y la fila denegada desaparece.
+          # El grant permitido se transforma a relación explícita, incluso si
+          # el catálogo Permisos no tenía todavía ese par, y la denegación desaparece.
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Permisos WHERE Modulo=23 AND Accion=27 AND Codigo='LEGACY.N04.23.27';")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos rp JOIN Roles r ON r.Id=rp.RolId JOIN Permisos p ON p.Id=rp.PermisoId WHERE r.NombreNormalizado='ADMINISTRADOR' AND p.Modulo=23 AND p.Accion=27;")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9411;")" = '0'
 

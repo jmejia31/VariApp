@@ -29,11 +29,13 @@ SET @violaciones :=
               FROM Permisos p
              WHERE p.Modulo = rp.Modulo
                AND p.Accion = rp.Accion
-        ))
+        )
+        AND (rp.Modulo NOT BETWEEN 1 AND 31 OR rp.Accion NOT BETWEEN 1 AND 29))
   + (SELECT COUNT(*)
        FROM RolPermisos rp
       WHERE rp.Permitido = 1
         AND rp.PermisoId IS NOT NULL
-        AND NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId));
+        AND NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId)
+        AND (rp.Modulo NOT BETWEEN 1 AND 31 OR rp.Accion NOT BETWEEN 1 AND 29));
 
 SELECT @violaciones AS BloqueosN04;
