@@ -15,6 +15,12 @@ public class Permiso
     public ModuloSistema Modulo { get; set; }
     public AccionPermiso Accion { get; set; }
 
+    /// <summary>
+    /// Define si el permiso pertenece al plano empresarial o al plano global
+    /// de plataforma. Los permisos existentes se mantienen como Empresa.
+    /// </summary>
+    public AmbitoAutorizacion Ambito { get; set; } = AmbitoAutorizacion.Empresa;
+
     public bool EsSistema { get; set; }
     public bool Activo { get; set; } = true;
     public bool Eliminado { get; set; }
