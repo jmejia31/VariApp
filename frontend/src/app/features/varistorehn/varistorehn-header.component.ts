@@ -11,6 +11,7 @@ import {
   inject,
   signal
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 import { telefonoWhatsapp } from './varistorehn.catalog';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
@@ -19,7 +20,7 @@ import { IconoTiendaComponent } from './varistorehn.visual';
 @Component({
   selector: 'app-varistorehn-header',
   standalone: true,
-  imports: [CommonModule, IconoTiendaComponent],
+  imports: [CommonModule, RouterLink, IconoTiendaComponent],
   templateUrl: './varistorehn-header.component.html',
   styleUrl: './varistorehn-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
