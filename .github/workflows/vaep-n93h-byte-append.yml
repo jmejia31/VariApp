@@ -1,85 +1,14 @@
-name: VAEP N9.3.H byte-safe closure append
+name: VAEP N9.3.H byte-safe closure append (retired)
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - .github/workflows/vaep-n93h-byte-append.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  append-closure:
+  retired:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout exact trigger commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-
-      - name: Append N9.3 closure byte-safely
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import base64
-          import subprocess
-
-          expected = {
-              "TASKS.md": "09d2ab1d1fa7eff8a0db55b997f0478301b74199",
-              "CHANGELOG_AI.md": "98c1ef97025d0a393c82fdd3c0d19f2ebf1ad5e5",
-          }
-          encoded = {
-              "TASKS.md": "CgojIyBFUlAtTjkuMyDigJQgQmFja3VwIHByZS1yZWxlYXNlIOKAlCBjaWVycmUgY3VycmVudC1zdGFuZGFyZCAyMDI2LTA5LTE4CgotIFt4XSBOOS4zLkEtRyByZXZhbGlkYWRvcy9jZXJ0aWZpY2Fkb3MgY3VycmVudC1zdGFuZGFyZCBjb24gUkVWSUVXX0ZJUlNUIHkgUDA9MC9QMT0wLgotIFt4XSBCYWNrdXAgcmVhbCBkZSBEZXNhcnJvbGxvIGVqZWN1dGFkbyBwb3IgTTExIHJ1biBgMzUyODg3NTYyMDRgOiBkZWZpbmljacOzbi9wcm90ZWNjaW9uZXMsIHByb3ZlZWRvciB5IGJhY2t1cCtyZXN0b3JlIGNvbmNsdXllcm9uIGBzdWNjZXNzYC4KLSBbeF0gQXJ0aWZhY3QgY2lmcmFkbyBgMTA1MjU5NTEwNTdgLCBkaWdlc3QgYHNoYTI1NjpjYTA5ZTgwYmJhMGNjNDQxOTZmOTdmNWEzYWZjNDIxNDFiZTA0NzFmNjVkZDVjM2MxN2RjYmI0MzQ5MTcxZTdkYDsgcmV0ZW5jacOzbiAxNCBkw61hcy4KLSBbeF0gUmVzdG9yZSBkcmlsbCBkZWwgbWlzbW8gYXJ0aWZhY3QgZW4gTXlTUUwgZGVzY2FydGFibGU6IDEzMiB0YWJsYXMgYmFzZSwgMTA0IG1pZ3JhY2lvbmVzIEVGLCBjaGVja3N1bXMgeSByb3ctY291bnRzIHZlcmlmaWNhZG9zLCBgc3RhdHVzPVNVQ0NFU1NgLCBgcHJvZHVjdGlvblRvdWNoZWQ9ZmFsc2VgLgotIFt4XSBOOS4zLkggbWF0ZXJpYWxpemEgZXN0ZSByZWdpc3RybyB5IGxhIGVudHJhZGEgYWRpdGl2YSBjb3JyZXNwb25kaWVudGUgZW4gYENIQU5HRUxPR19BSS5tZGAgcHJlc2VydmFuZG8gYnl0ZSBwb3IgYnl0ZSBlbCBwcmVmaWpvIGhpc3TDs3JpY287IGxhIGNlcnRpZmljYWNpw7NuIGBMSVNUT2Agc8OzbG8gc2UgZW1pdGUgZGVzcHXDqXMgZGVsIHJlYWRiYWNrIHkgUkVWSUVXX0ZJUlNUIGZpbmFsLgoKKipOOS4zIG5vIHNlIHByb211ZXZlIHBvciBlc3RlIHRleHRvIGFpc2xhZG86IGVsIGNpZXJyZSBhdXRvcml0YXRpdm8gcmVxdWllcmUgcmVjZWlwdC9yZWFkYmFjayBjdXJyZW50LXN0YW5kYXJkIGVuIENPTEEvQ09ORklHLiBObyBzZSB0b2PDsyBtYWluLCBQcm9kdWNjacOzbiwgUFIgIzIsIHNlY3JldG9zLCBETlMgbmkgY2VydGlmaWNhZG9zLioqCg==",
-              "CHANGELOG_AI.md": "CgojIyAyMDI2LTA5LTE4IOKAlCBFUlAtTjkuMyDigJQgQmFja3VwIHByZS1yZWxlYXNlIGN1cnJlbnQtc3RhbmRhcmQKCioqUmVzcG9uc2FibGU6KiogVGFyZWEgU3VwZXJ2aXNpw7NuIDoyNCwgYERlc2Fycm9sbG9gIMO6bmljYW1lbnRlLgoKU2UgcmV2YWxpZMOzIE45LjMgZGUgZXh0cmVtbyBhIGV4dHJlbW8uIEVsIGdhdGUgbWF0ZXJpYWwgZnVlIE0xMSBydW4gYDM1Mjg4NzU2MjA0YDogdmFsaWRhY2nDs24gZGUgZGVmaW5pY2nDs24vcHJvdGVjY2lvbmVzLCBjZXJ0aWZpY2FjacOzbiBzZWd1cmEgZGVsIHByb3ZlZWRvciB5IGJhY2t1cCBjaWZyYWRvIHJlYWwgZGUgRGVzYXJyb2xsbyArIHJlc3RvcmUgZHJpbGwgZGVsIG1pc21vIGFydGlmYWN0IGNvbmNsdXllcm9uIGBzdWNjZXNzYC4gRWwgYXJ0aWZhY3QgYDEwNTI1OTUxMDU3YCBxdWVkw7MgY29uIGRpZ2VzdCBgc2hhMjU2OmNhMDllODBiYmEwY2M0NDE5NmY5N2Y1YTNhZmM0MjE0MWJlMDQ3MWY2NWRkNWMzYzE3ZGNiYjQzNDkxNzFlN2RgOyBlbCByZXN0b3JlIGFpc2xhZG8gdmVyaWZpY8OzIGNoZWNrc3VtcyB5IHJvdy1jb3VudHMgcGFyYSAxMzIgdGFibGFzIGJhc2UgeSAxMDQgbWlncmFjaW9uZXMgRUYsIGNvbiBgcHJvZHVjdGlvblRvdWNoZWQ9ZmFsc2VgLgoKTjkuMy5CL0QvRSBzZSBtYW50dXZpZXJvbiBjb21vIE4vQSBncm91bmRlZCBkb25kZSBlbCBiYWNrdXAgbm8gZXhpZ2UgY2FtYmlvcyBkZSBkb21pbmlvLCBBUEkgbyBVSTsgTjkuMy5DL0YvRyBjZXJ0aWZpY2Fyb24gYmFja3VwL3Jlc3RvcmUsIHNlZ3VyaWRhZCB5IGdhdGVzIGNhdXNhbGVzLiBQMD0wL1AxPTAgYW50ZXMgZGVsIGNpZXJyZSBmaW5hbC4gRXN0ZSBhcHBlbmQgZXMgZXN0cmljdGFtZW50ZSBhZGl0aXZvIHkgZm9ybWEgcGFydGUgZGUgTjkuMy5IOyBgTElTVE9gIHPDs2xvIHNlIGRlY2xhcmEgZGVzcHXDqXMgZGUgdmVyaWZpY2FyIHByZWZpam8gaGlzdMOzcmljbyBleGFjdG8sIGBhZGRpdGlvbnM+MC9kZWxldGlvbnM9MGAsIHJldGlyYXIgZXN0ZSB3cml0ZXIgdGVtcG9yYWwgeSBwZXJzaXN0aXIgcmVjZWlwdC9yZWFkYmFjay4gTm8gc2UgbW9kaWZpY2Fyb24gYG1haW5gLCBQcm9kdWNjacOzbiwgUFIgIzIsIHNlY3JldG9zLCBETlMgbmkgY2VydGlmaWNhZG9zLgo=",
-          }
-
-          for name, expected_blob in expected.items():
-              path = Path(name)
-              actual_blob = subprocess.check_output(["git", "hash-object", str(path)], text=True).strip()
-              if actual_blob != expected_blob:
-                  raise SystemExit(f"{name} blob drift: expected {expected_blob}, got {actual_blob}")
-              old = path.read_bytes()
-              if b"ERP-N9.3" in old:
-                  raise SystemExit(f"{name} already contains N9.3 closure marker; refusing duplicate append")
-              block = base64.b64decode(encoded[name])
-              new = old + block
-              if not new.startswith(old) or len(new) <= len(old):
-                  raise SystemExit(f"{name} prefix/addition invariant failed before write")
-              path.write_bytes(new)
-              if path.read_bytes()[:len(old)] != old:
-                  raise SystemExit(f"{name} prefix invariant failed after write")
-          PY
-
-          changed="$(git diff --name-only | sort)"
-          expected_changed="$(printf '%s\n' CHANGELOG_AI.md TASKS.md | sort)"
-          test "$changed" = "$expected_changed"
-
-          for file in TASKS.md CHANGELOG_AI.md; do
-            numstat="$(git diff --numstat -- "$file")"
-            echo "$numstat"
-            adds="$(printf '%s\n' "$numstat" | awk '{print $1}')"
-            dels="$(printf '%s\n' "$numstat" | awk '{print $2}')"
-            test "$adds" != "-"
-            test "$dels" != "-"
-            test "$adds" -gt 0
-            test "$dels" -eq 0
-          done
-          git diff --check
-
-      - name: Commit and push append only
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "vaep-supervisor-24"
-          git config user.email "93171442+jmejia31@users.noreply.github.com"
-          git add -- TASKS.md CHANGELOG_AI.md
-          test "$(git diff --cached --name-only | wc -l)" -eq 2
-          git diff --cached --name-only | grep -Fx 'TASKS.md'
-          git diff --cached --name-only | grep -Fx 'CHANGELOG_AI.md'
-          git commit -m "[N9.3.H] append closure records byte-safely"
-          git push origin HEAD:Desarrollo
+      - run: echo "Retired after successful N9.3.H byte-safe append."
