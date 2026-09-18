@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 10
     env:
       BACKEND_URL: https://variapp-api.onrender.com
-      FRONTEND_URL: https://variapp-frontend.vercel.app
+      FRONTEND_URL: https://varistorehn.vercel.app
     steps:
       - uses: actions/checkout@v4
 
