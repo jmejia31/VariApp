@@ -58,7 +58,7 @@ expect(homeTs.includes('productos.map(mapearProducto)'), 'Los destacados reales 
 expect(!homeTs.includes('.filter(p => p.disponible).slice(0, 3)'), 'No se deben fabricar destacados reales escogiendo productos disponibles arbitrarios.');
 expect(storeService.includes('urlDestacados') && storeService.includes('/destacados'), 'El servicio debe separar el endpoint público de destacados.');
 expect(storeService.includes('obtenerDestacados(limite = 4)'), 'El servicio debe exponer una lectura limitada de destacados.');
-expect(adminProductModel.includes('esDestacado: boolean') && adminProductModel.includes('esDestacado?: boolean'), 'El modelo administrativo debe transportar la bandera persistida de destacado.');
+expect(adminProductModel.includes('esDestacado?: boolean'), 'El modelo administrativo debe transportar la bandera de destacado sin romper consumidores legacy.');
 expect(adminProductService.includes("formData.append('EsDestacado'"), 'El CRUD de productos debe enviar EsDestacado al backend.');
 expect(adminFormTs.includes('esDestacado: [false]') && adminFormTs.includes('p.esDestacado === true'), 'El formulario administrativo debe permitir editar la bandera de destacado.');
 expect(homeHtml.includes('Aún no hay productos marcados como destacados'), 'La fuente real sin destacados debe tener un estado comercial honesto.');
