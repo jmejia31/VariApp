@@ -1,0 +1,77 @@
+name: VAEP N9.4.H Production Release Append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n94h-release-append.yml
+
+permissions:
+  contents: write
+
+jobs:
+  append:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Publish guarded history-preserving N9.4 rollup
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18'
+          if grep -Fq "$marker" TASKS.md && grep -Fq "$marker" CHANGELOG_AI.md; then
+            echo 'N9.4.H canonical rollup already present; no write required.'
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          tasks = Path('TASKS.md').read_bytes()
+          changelog = Path('CHANGELOG_AI.md').read_bytes()
+          tasks_hash = subprocess.check_output(['git','hash-object','TASKS.md'], text=True).strip()
+          changelog_hash = subprocess.check_output(['git','hash-object','CHANGELOG_AI.md'], text=True).strip()
+          assert tasks_hash == '0ac27c00436ac47769c32ec1f90f37bf49097101', tasks_hash
+          assert changelog_hash == '4890bfe6254b093a1f70d24a976b080334ccd148', changelog_hash
+
+          tasks_append = (
+            "\n\n## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18\n\n"
+            "- [x] N9.4.C: APPLY/postcheck productivo completado con respaldo confirmado previamente por el propietario; Producción quedó LIVE, DB al día y maintenance OFF.\n"
+            "- [x] Incidente N0.4 de duplicados RBAC legacy recuperado de forma retry-safe sin abrir tráfico durante la migración.\n"
+            "- [x] Certificación exact-head N0.4 run 35304697573 / job 105474385670 SUCCESS: backend 2328/2328, preflight, APPLY, aislamiento, deduplicación, guards fail-closed y snapshot EF PASS.\n"
+            "- [x] N9.4.D/E: N/A grounded sin fabricar backend/API ni frontend/UX; no había delta material requerido por el procedimiento.\n"
+            "- [x] N9.4.F/G: seguridad/observabilidad y CI current-standard PASS, P0=0/P1=0.\n"
+            "- [x] Commit productivo estabilizado 7f140442d598aaea36b39952bad5ebd9ab4f2613; deploy final dep-damb4lqjnfac73efl1pg LIVE.\n"
+            "- [x] Última migración observada 20260914232400_N7_10_C_DocumentoFiscalPersistencia; reinicio final indicó database already up to date.\n"
+            "- [ ] N9.4.H se declara LISTO únicamente tras hard verify de este append y CHANGELOG_AI, retiro del writer temporal, REVIEW_FIRST final, receipt y readback del control-plane.\n"
+          ).encode('utf-8')
+
+          changelog_append = (
+            "\n\n## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18\n\n"
+            "La liberación productiva autorizada fue ejecutada bajo ventana de mantenimiento. La base MySQL fue migrada hasta 20260914232400_N7_10_C_DocumentoFiscalPersistencia; el incidente N0.4 por duplicados RBAC legacy se resolvió con migración retry-safe y certificación causal exact-head 35304697573/105474385670 SUCCESS (2328/2328 tests y guards/postchecks completos). Producción quedó LIVE sobre 7f140442d598aaea36b39952bad5ebd9ab4f2613, deploy dep-damb4lqjnfac73efl1pg, maintenance OFF, EF sin migraciones pendientes y sin hard errors/503 posteriores en el corte validado. N9.4.D/E quedaron N/A grounded; F/G certificados P0=0/P1=0. El cierre H exige todavía verificación byte-safe de este append, REVIEW_FIRST, receipt y readback.\n"
+          ).encode('utf-8')
+
+          Path('TASKS.md').write_bytes(tasks + tasks_append)
+          Path('CHANGELOG_AI.md').write_bytes(changelog + changelog_append)
+          PY
+
+          changed="$(git diff --name-only)"
+          test "$changed" = $'CHANGELOG_AI.md\nTASKS.md'
+          while read -r additions deletions path; do
+            test "$additions" -gt 0
+            test "$deletions" -eq 0
+            case "$path" in CHANGELOG_AI.md|TASKS.md) ;; *) exit 1 ;; esac
+          done < <(git diff --numstat -- CHANGELOG_AI.md TASKS.md)
+          git diff --check -- CHANGELOG_AI.md TASKS.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add CHANGELOG_AI.md TASKS.md
+          git commit -m '[N9.4.H] append production release rollup'
+          git push origin HEAD:Desarrollo
