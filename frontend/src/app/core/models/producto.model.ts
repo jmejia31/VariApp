@@ -73,7 +73,7 @@ export interface Producto {
   estaAgotado: boolean;
   estadoInventario: string;
   activo: boolean;
-  esDestacado: boolean;
+  esDestacado?: boolean;
   categoriaId?: number;
   categoriaNombre?: string;
   colorId?: number;
