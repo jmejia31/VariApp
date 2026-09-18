@@ -49,7 +49,11 @@ public sealed class TiendaControllerDestacadosTests
             });
 
         var categorias = new Mock<ICategoriaService>(MockBehavior.Strict);
-        var controller = new TiendaController(productos.Object, categorias.Object);
+        var promociones = new Mock<IPromocionPublicaService>();
+        promociones.Setup(service => service.ResolverAsync(
+                It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<decimal>(), It.IsAny<DateTime>()))
+            .ReturnsAsync((OfertaPublicaDto?)null);
+        var controller = new TiendaController(productos.Object, categorias.Object, promociones.Object);
 
         var result = await controller.GetProductosDestacados(99);
 
