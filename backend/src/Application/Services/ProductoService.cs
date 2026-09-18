@@ -155,7 +155,8 @@ public class ProductoService : IProductoService
         producto.Nombre = dto.Nombre.Trim();
         producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
         producto.CategoriaId = dto.CategoriaId;
-        producto.EsDestacado = dto.EsDestacado;
+        if (dto.EsDestacado.HasValue)
+            producto.EsDestacado = dto.EsDestacado.Value;
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
