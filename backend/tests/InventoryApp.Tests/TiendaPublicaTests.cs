@@ -117,6 +117,39 @@ public class TiendaPublicaTests
     }
 
     [Fact]
+    public async Task ValidarCheckout_MismaVarianteConMetadatosDistintos_NoPuedeSuperarStockTotal()
+    {
+        var productos = new Mock<IProductoService>();
+        productos.Setup(x => x.GetByIdAsync(61)).ReturnsAsync(new ProductoDto
+        {
+            Id = 61, Nombre = "Variante autoritativa", Activo = true,
+            Variantes = new List<ProductoVarianteDto>
+            {
+                new() { Id = 601, ProductoId = 61, Activo = true, Precio = 100m, Cantidad = 99, ModeloId = 4, ModeloNombre = "Real" }
+            }
+        });
+
+        var inventario = new Mock<IInventarioPublicoService>();
+        inventario.Setup(x => x.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>
+            {
+                [601] = new() { ProductoVarianteId = 601, CantidadDisponible = 5, TieneFuenteAutoritativa = true }
+            });
+
+        var controller = CrearController(productos: productos, inventario: inventario);
+        var resultado = await controller.ValidarCheckout(new ValidarCheckoutTiendaDto
+        {
+            Items = new List<CheckoutTiendaItemRequestDto>
+            {
+                new() { ProductoId = 61, ProductoVarianteId = 601, ModeloId = 4, ModeloNombre = "Real", MarcaNombre = "A", Unidades = 3 },
+                new() { ProductoId = 61, ProductoVarianteId = 601, ModeloId = 999, ModeloNombre = "Manipulado", MarcaNombre = "B", Unidades = 3 }
+            }
+        });
+
+        Assert.IsType<ConflictObjectResult>(resultado);
+    }
+
+    [Fact]
     public void PublicSlug_EsLegibleYResuelvePorIdEstable()
     {
         Assert.Equal("cafe-especial-14-27", PublicSlug.Create("Café Especial 14\"", 27));
