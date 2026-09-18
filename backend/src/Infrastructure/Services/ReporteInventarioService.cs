@@ -24,7 +24,23 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var tenant = await _usuarioScope.ObtenerUnicoActualAsync(cancellationToken);
+        if (tenant is null)
+            return Empty<ReporteInventarioStockHealthDto>(filtro.Page, filtro.PageSize);
+
+        return await ObtenerStockHealthAsync(tenant.EmpresaId, filtro, cancellationToken);
+    }
+
+    public async Task<PagedResult<ReporteInventarioStockHealthDto>> ObtenerStockHealthAsync(
+        int empresaId,
+        ReporteInventarioStockHealthFiltroDto filtro,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(filtro);
+        if (empresaId <= 0)
+            return Empty<ReporteInventarioStockHealthDto>(filtro.Page, filtro.PageSize);
+
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId, cancellationToken);
         if (alcance is null)
             return Empty<ReporteInventarioStockHealthDto>(filtro.Page, filtro.PageSize);
 
@@ -33,7 +49,11 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         var hasta = filtro.Hasta ?? now;
         var cutoff = now.AddDays(-filtro.Dias);
 
-        var existencias = _context.Set<ExistenciaVariante>().AsNoTracking().AsQueryable();
+        // N6 tenant boundary: every inventory row must belong to the Empresa selected
+        // by the already-validated tenant context. Nullable/legacy ownership fails closed.
+        var existencias = _context.Set<ExistenciaVariante>()
+            .AsNoTracking()
+            .Where(e => e.Almacen.Sucursal.EmpresaId == empresaId);
         if (!alcance.EsAdministrador)
             existencias = existencias.Where(e => e.CreadoPorUsuarioId == alcance.UsuarioId);
         if (filtro.ProductoId.HasValue)
@@ -47,13 +67,12 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (filtro.UbicacionAlmacenId.HasValue)
             existencias = existencias.Where(e => e.UbicacionAlmacenId == filtro.UbicacionAlmacenId.Value);
 
-        var movimientos = _context.Set<MovimientoInventario>().AsNoTracking().AsQueryable();
+        var movimientos = _context.Set<MovimientoInventario>()
+            .AsNoTracking()
+            .Where(m => m.Almacen != null && m.Almacen.Sucursal.EmpresaId == empresaId);
         if (!alcance.EsAdministrador)
             movimientos = movimientos.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
 
-        // Aggregate the movement stream once and join the compact read shape back to stock.
-        // This removes the two correlated scans that were executed for every existence row
-        // while preserving the public DTO/filter/sort contract.
         var movimientoStats = movimientos
             .GroupBy(m => new { m.ProductoVarianteId, m.AlmacenId, m.UbicacionAlmacenId })
             .Select(g => new
@@ -155,7 +174,23 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var tenant = await _usuarioScope.ObtenerUnicoActualAsync(cancellationToken);
+        if (tenant is null)
+            return Empty<ReporteInventarioReconciliacionDto>(filtro.Page, filtro.PageSize);
+
+        return await ObtenerReporteReconciliacionAsync(tenant.EmpresaId, filtro, cancellationToken);
+    }
+
+    public async Task<PagedResult<ReporteInventarioReconciliacionDto>> ObtenerReporteReconciliacionAsync(
+        int empresaId,
+        ReporteInventarioReconciliacionFiltroDto filtro,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(filtro);
+        if (empresaId <= 0)
+            return Empty<ReporteInventarioReconciliacionDto>(filtro.Page, filtro.PageSize);
+
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId, cancellationToken);
         if (alcance is null)
             return Empty<ReporteInventarioReconciliacionDto>(filtro.Page, filtro.PageSize);
 
@@ -168,7 +203,8 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (!requested.HasValue || requested == OrigenReconciliacionInventario.Conteo)
         {
             var source = _context.Set<ConteoInventarioDetalle>().AsNoTracking()
-                .Where(d => d.Diferencia != null && d.CantidadContada != null &&
+                .Where(d => d.Almacen.Sucursal.EmpresaId == empresaId &&
+                            d.Diferencia != null && d.CantidadContada != null &&
                             (d.ConteoInventario.Estado == EstadoConteoInventario.Cerrado || d.ConteoInventario.Estado == EstadoConteoInventario.Aprobado));
             if (!alcance.EsAdministrador) source = source.Where(d => d.ConteoInventario.CreadoPorUsuarioId == alcance.UsuarioId);
             source = ApplyConteoFilters(source, filtro);
@@ -205,7 +241,9 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (!requested.HasValue || requested == OrigenReconciliacionInventario.Transferencia)
         {
             var source = _context.Set<TransferenciaInventarioDetalle>().AsNoTracking()
-                .Where(d => d.TransferenciaInventario.Estado == EstadoTransferenciaInventario.Recibida &&
+                .Where(d => d.TransferenciaInventario.AlmacenOrigen.Sucursal.EmpresaId == empresaId &&
+                            d.TransferenciaInventario.AlmacenDestino.Sucursal.EmpresaId == empresaId &&
+                            d.TransferenciaInventario.Estado == EstadoTransferenciaInventario.Recibida &&
                             d.CantidadDespachada > 0 &&
                             d.CantidadRecibida + d.CantidadFaltante + d.CantidadDanada == d.CantidadDespachada);
             if (!alcance.EsAdministrador) source = source.Where(d => d.TransferenciaInventario.CreadoPorUsuarioId == alcance.UsuarioId);
@@ -246,7 +284,8 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (!requested.HasValue || requested == OrigenReconciliacionInventario.Ajuste)
         {
             var source = _context.Set<AjusteInventarioDetalle>().AsNoTracking()
-                .Where(d => d.AjusteInventario.Estado == EstadoAjusteInventario.Confirmado &&
+                .Where(d => d.Almacen != null && d.Almacen.Sucursal.EmpresaId == empresaId &&
+                            d.AjusteInventario.Estado == EstadoAjusteInventario.Confirmado &&
                             d.CantidadAnteriorSnapshot.HasValue &&
                             d.CantidadNuevaSnapshot.HasValue &&
                             d.CostoUnitarioSnapshot.HasValue);
