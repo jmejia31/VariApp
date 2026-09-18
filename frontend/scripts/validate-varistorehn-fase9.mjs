@@ -8,7 +8,7 @@ const rootDir = path.resolve(frontendDir, '..');
 const readFrontend = name => readFile(path.join(frontendDir, name), 'utf8');
 const readRoot = name => readFile(path.join(rootDir, name), 'utf8');
 
-const [routes, models, catalog, productsTs, productsHtml, detailTs, detailHtml, cartHtml, headerHtml, controller, promoService] = await Promise.all([
+const [routes, models, catalog, productsTs, productsHtml, detailTs, detailHtml, cartHtml, headerHtml, controller, promoService, inventoryService, inventoryRepository] = await Promise.all([
   readFrontend('src/app/app.routes.ts'),
   readFrontend('src/app/features/varistorehn/varistorehn.models.ts'),
   readFrontend('src/app/features/varistorehn/varistorehn.catalog.ts'),
@@ -19,7 +19,9 @@ const [routes, models, catalog, productsTs, productsHtml, detailTs, detailHtml, 
   readFrontend('src/app/features/varistorehn/varistorehn-carrito.component.html'),
   readFrontend('src/app/features/varistorehn/varistorehn-header.component.html'),
   readRoot('backend/src/API/Controllers/TiendaController.cs'),
-  readRoot('backend/src/Application/Services/PromocionPublicaService.cs')
+  readRoot('backend/src/Application/Services/PromocionPublicaService.cs'),
+  readRoot('backend/src/Application/Services/InventarioPublicoService.cs'),
+  readRoot('backend/src/Infrastructure/Repositories/ExistenciaVarianteRepository.cs')
 ]);
 
 const failures = [];
@@ -45,6 +47,16 @@ expect(promoService.includes('FechaInicio') && promoService.includes('FechaFin')
 expect(promoService.includes('TipoDescuento.Porcentaje'), 'Solo reglas reproducibles por unidad deben convertirse en precio público.');
 expect(controller.includes('precioVigente = oferta?.PrecioOferta ?? precio'), 'Checkout debe recalcular el mismo precio promocional.');
 expect(controller.includes('stock <= 0 || stock < solicitud.Unidades'), 'Checkout debe bloquear explícitamente stock 0.');
+expect(controller.includes('_inventarioPublicoService.ObtenerPorVariantesAsync'), 'Catálogo y checkout deben consultar la autoridad pública de ExistenciaVariante.');
+expect(inventoryService.includes('GetRaizOperativaPorVariantesAsync') && inventoryService.includes('CantidadDisponible = 0'),
+  'Una variante sin existencia autoritativa debe fallar cerrada en stock 0.');
+expect(inventoryRepository.includes('e.UbicacionAlmacenId == null'), 'El stock público debe usar la existencia raíz del almacén.');
+expect(inventoryRepository.includes('TipoAlmacen.Tienda') && inventoryRepository.includes('TipoAlmacen.Bodega'),
+  'El stock público solo debe agregar almacenes operativos Tienda/Bodega.');
+expect(inventoryRepository.includes('e.Almacen.Sucursal.Activa') && inventoryRepository.includes('!e.Almacen.Sucursal.Eliminado'),
+  'El stock público no debe sumar sucursales inactivas o eliminadas.');
+expect(!controller.includes('stock = Math.Max(0, varianteSeleccionada.Cantidad);'),
+  'Checkout no debe confiar directamente en ProductoVariante.Cantidad cuando existe autoridad de existencias.');
 
 if (failures.length) {
   console.error('Fase 9 — validación de ofertas e inventario FALLÓ:');

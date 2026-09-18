@@ -16,12 +16,17 @@ on:
       - 'backend/src/Application/DTOs/ProductoCatalogoPublicoDto.cs'
       - 'backend/src/Application/DTOs/OfertaPublicaDto.cs'
       - 'backend/src/Application/Interfaces/IPromocionPublicaService.cs'
+      - 'backend/src/Application/Interfaces/IInventarioPublicoService.cs'
       - 'backend/src/Application/Interfaces/IDescuentoRepository.cs'
+      - 'backend/src/Application/Interfaces/IExistenciaVarianteRepository.cs'
       - 'backend/src/Application/Services/PromocionPublicaService.cs'
+      - 'backend/src/Application/Services/InventarioPublicoService.cs'
+      - 'backend/src/Infrastructure/Repositories/ExistenciaVarianteRepository.cs'
       - 'backend/src/Domain/Entities/Descuento.cs'
       - 'backend/src/Infrastructure/Repositories/DescuentoRepository.cs'
       - 'backend/tests/InventoryApp.Tests/TiendaPublicaTests.cs'
       - 'backend/tests/InventoryApp.Tests/PromocionPublicaServiceTests.cs'
+      - 'backend/tests/InventoryApp.Tests/InventarioPublicoServiceTests.cs'
       - 'backend/tests/InventoryApp.Tests/API/Controllers/TiendaController*.cs'
       - 'scripts/quality/priority4_quality_audit.py'
       - '.github/workflows/varistorehn-fase9-regression.yml'
@@ -50,7 +55,7 @@ jobs:
       - run: dotnet restore InventoryApp.sln
       - run: dotnet build InventoryApp.sln --configuration Release --no-restore
       - name: Pruebas Fase 9
-        run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "FullyQualifiedName~TiendaPublicaTests|FullyQualifiedName~PromocionPublicaServiceTests"
+        run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "FullyQualifiedName~TiendaPublicaTests|FullyQualifiedName~PromocionPublicaServiceTests|FullyQualifiedName~InventarioPublicoServiceTests|FullyQualifiedName~TiendaController"
 
   frontend:
     name: Fase 9 - regresion publica acumulada
