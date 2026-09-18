@@ -297,5 +297,7 @@
     </div>
   </dialog>
 
-  <div class="sr-only" role="status" aria-live="polite">{{ aviso() }}</div>
+  @if (aviso()) {
+    <div class="feedback-toast" role="status" aria-live="polite" aria-atomic="true">{{ aviso() }}</div>
+  }
 </div>
