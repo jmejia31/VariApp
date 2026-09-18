@@ -125,16 +125,13 @@ SET @n04_bad_users := (
        OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = u.RolId)
 );
 ");
-            migrationBuilder.Sql(@"
-SET @n04_guard := IF(
-    @n04_bad_users = 0,
-    'SELECT 1',
-    'SIGNAL SQLSTATE ''45000'' SET MESSAGE_TEXT = ''ERP-N0.4 bloqueada: existen usuarios sin RolId relacional válido'''
-);
-");
-            migrationBuilder.Sql("PREPARE n04_stmt FROM @n04_guard;");
-            migrationBuilder.Sql("EXECUTE n04_stmt;");
-            migrationBuilder.Sql("DEALLOCATE PREPARE n04_stmt;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_users;");
+            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_users (Id INT NOT NULL PRIMARY KEY);");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Id) VALUES (1);");
+            // Fail closed sin PREPARE/SIGNAL: si hay usuarios inválidos, este segundo
+            // INSERT duplica la PK y aborta la migración de forma compatible con Aiven/MySQL.
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Id) SELECT 1 WHERE @n04_bad_users <> 0;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_users;");
 
             migrationBuilder.Sql(@"
 SET @n04_bad_grants := (
@@ -146,16 +143,12 @@ SET @n04_bad_grants := (
        OR NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId)
 );
 ");
-            migrationBuilder.Sql(@"
-SET @n04_guard := IF(
-    @n04_bad_grants = 0,
-    'SELECT 1',
-    'SIGNAL SQLSTATE ''45000'' SET MESSAGE_TEXT = ''ERP-N0.4 bloqueada: existen grants legacy sin mapeo relacional válido'''
-);
-");
-            migrationBuilder.Sql("PREPARE n04_stmt FROM @n04_guard;");
-            migrationBuilder.Sql("EXECUTE n04_stmt;");
-            migrationBuilder.Sql("DEALLOCATE PREPARE n04_stmt;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_grants;");
+            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_grants (Id INT NOT NULL PRIMARY KEY);");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Id) VALUES (1);");
+            // Mismo guard compatible con Aiven para grants no representables.
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Id) SELECT 1 WHERE @n04_bad_grants <> 0;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_grants;");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_RolPermisos_Roles_RolId",
