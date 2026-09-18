@@ -35,7 +35,7 @@ public sealed class InventarioPublicoServiceTests
     public async Task ObtenerPorVariantesAsync_SinExistenciaAutoritativa_FallaCerradoEnCero()
     {
         var repo = new Mock<IExistenciaVarianteRepository>();
-        repo.Setup(x => x.GetRaizOperativaPorVariantesAsync(It.IsAny<IReadOnlyCollection<int>>()))
+        repo.Setup(x => x.GetOperativasPublicasPorVariantesAsync(It.IsAny<IReadOnlyCollection<int>>()))
             .ReturnsAsync(new List<ExistenciaVariante>());
 
         var resultado = await new InventarioPublicoService(repo.Object)
