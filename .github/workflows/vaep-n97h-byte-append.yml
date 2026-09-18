@@ -1,0 +1,107 @@
+name: VAEP N9.7.H byte-safe closure append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n97h-byte-append.yml
+
+permissions:
+  contents: write
+
+jobs:
+  append-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact trigger commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Append N9.7 closure byte-safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          expected = {
+              "TASKS.md": "07ac618b6b1d5a73a7fcbd2412aa51e4402fc6eb",
+              "CHANGELOG_AI.md": "3bd27a519a6f3d94577eeec9cf0e2a5c0045e7ce",
+          }
+          blocks = {
+              "TASKS.md": """
+
+## ERP-N9.7 — Postmortem — cierre current-standard 2026-09-18
+
+- [x] N9.7.A–G revalidados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Postmortem materializado en `docs/POSTMORTEM_N9_7.md`; certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`.
+- [x] Sin delta causal de producto, contratos, schema, tests o runtime frente al functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+- [x] Aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF) y Hypercare DEV `35319732966` SUCCESS conservados como gates causales por equivalencia demostrada.
+- [x] Incidencias internas observadas y recuperadas same-run quedaron documentadas como aprendizaje; no persisten blockers P0/P1.
+- [x] N9.7.H materializa este registro y el bloque correspondiente de `CHANGELOG_AI.md` mediante append byte-safe; LISTO sólo tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar writer temporal, REVIEW_FIRST final, receipt y write/readback.
+""",
+              "CHANGELOG_AI.md": """
+
+## 2026-09-18 — ERP-N9.7 — Postmortem current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+Se completó la revalidación current-standard de N9.7. El PRE quedó materializado en `docs/POSTMORTEM_N9_7.md` y la certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`. Se documentaron exclusivamente incidencias observadas y recuperaciones demostradas: un probe temporal de Hypercare con alcance de entorno incorrecto, un primer writer append-only con error de construcción y el riesgo de drift temporal repo/control-plane durante cierres encadenados. Los defectos internos accionables fueron corregidos same-run y no permanecen como blockers.
+
+N9.7.B–E resultaron N/A materiales por ausencia demostrada de cambios de dominio, contratos, persistencia/schema/migraciones, backend/API y frontend/UX. N9.7.F revalidó que no existe delta de seguridad/RBAC de producto ni exposición de secretos. N9.7.G conservó como evidencia causal la aceptación exact-product `35316302603` en SUCCESS con `100/100` Playwright más SMTP/PDF y el gate Hypercare DEV `35319732966` en SUCCESS, sustentados por equivalencia de producto con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+
+No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se agrega exclusivamente mediante append byte-safe junto con `TASKS.md`; el cierre LISTO de N9.7.H y del parent N9.7 requiere todavía el readback final, REVIEW_FIRST P0=0/P1=0 y receipt posterior al append.
+""",
+          }
+
+          for name, expected_blob in expected.items():
+              path = Path(name)
+              actual_blob = subprocess.check_output(["git", "hash-object", str(path)], text=True).strip()
+              if actual_blob != expected_blob:
+                  raise SystemExit(f"{name} blob drift: expected {expected_blob}, got {actual_blob}")
+              old = path.read_bytes()
+              if b"ERP-N9.7" in old:
+                  raise SystemExit(f"{name} already contains ERP-N9.7 marker; refusing duplicate append")
+              block = blocks[name].encode("utf-8")
+              new = old + block
+              if len(new) <= len(old) or not new.startswith(old):
+                  raise SystemExit(f"{name} pre-write append invariant failed")
+              path.write_bytes(new)
+              written = path.read_bytes()
+              if written[:len(old)] != old:
+                  raise SystemExit(f"{name} historical prefix changed")
+          PY
+
+          changed="$(git diff --name-only | sort)"
+          expected_changed="$(printf '%s\n' CHANGELOG_AI.md TASKS.md | sort)"
+          test "$changed" = "$expected_changed"
+
+          for file in TASKS.md CHANGELOG_AI.md; do
+            numstat="$(git diff --numstat -- "$file")"
+            echo "$numstat"
+            adds="$(printf '%s\n' "$numstat" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$numstat" | awk '{print $2}')"
+            test "$adds" != "-"
+            test "$dels" != "-"
+            test "$adds" -gt 0
+            test "$dels" -eq 0
+          done
+          git diff --check
+
+      - name: Commit and push append only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "vaep-supervisor-24"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add -- TASKS.md CHANGELOG_AI.md
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git diff --cached --name-only | grep -Fx 'TASKS.md'
+          git diff --cached --name-only | grep -Fx 'CHANGELOG_AI.md'
+          git commit -m "[N9.7.H] append Postmortem closure records byte-safely"
+          git push origin HEAD:Desarrollo
