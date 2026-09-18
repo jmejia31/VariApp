@@ -62,29 +62,37 @@
             <div class="field-grid">
               <label class="field">
                 <span>Nombre completo <b aria-hidden="true">*</b></span>
-                <input type="text" formControlName="nombre" autocomplete="name" maxlength="120" aria-describedby="nombre-ayuda">
+                <input type="text" formControlName="nombre" autocomplete="name" maxlength="120"
+                  [attr.aria-invalid]="mostrarError('nombre') ? 'true' : null"
+                  [attr.aria-describedby]="mostrarError('nombre') ? 'nombre-ayuda nombre-error' : 'nombre-ayuda'">
                 <small id="nombre-ayuda">Lo usaremos para identificar tu solicitud.</small>
-                @if (mostrarError('nombre')) { <em role="alert">Ingresa un nombre válido de al menos 2 caracteres.</em> }
+                @if (mostrarError('nombre')) { <em id="nombre-error" role="alert">Ingresa un nombre válido de al menos 2 caracteres.</em> }
               </label>
 
               <label class="field">
                 <span>Teléfono <b aria-hidden="true">*</b></span>
-                <input type="tel" formControlName="telefono" autocomplete="tel" maxlength="24" aria-describedby="telefono-ayuda">
+                <input type="tel" formControlName="telefono" autocomplete="tel" inputmode="tel" maxlength="24"
+                  [attr.aria-invalid]="mostrarError('telefono') ? 'true' : null"
+                  [attr.aria-describedby]="mostrarError('telefono') ? 'telefono-ayuda telefono-error' : 'telefono-ayuda'">
                 <small id="telefono-ayuda">Incluye código de país si estás fuera de Honduras.</small>
-                @if (mostrarError('telefono')) { <em role="alert">Ingresa un teléfono válido.</em> }
+                @if (mostrarError('telefono')) { <em id="telefono-error" role="alert">Ingresa un teléfono válido.</em> }
               </label>
 
               <label class="field">
                 <span>Correo electrónico</span>
-                <input type="email" formControlName="correo" autocomplete="email" maxlength="160">
-                @if (mostrarError('correo')) { <em role="alert">Revisa el formato del correo.</em> }
+                <input type="email" formControlName="correo" autocomplete="email" inputmode="email" maxlength="160"
+                  [attr.aria-invalid]="mostrarError('correo') ? 'true' : null"
+                  [attr.aria-describedby]="mostrarError('correo') ? 'correo-error' : null">
+                @if (mostrarError('correo')) { <em id="correo-error" role="alert">Revisa el formato del correo.</em> }
               </label>
 
               <label class="field field-wide">
                 <span>Notas para el comercio</span>
-                <textarea formControlName="notas" rows="4" maxlength="600" placeholder="Indicaciones opcionales sobre tu solicitud"></textarea>
-                <small>Máximo 600 caracteres. No incluyas información de tarjetas.</small>
-                @if (mostrarError('notas')) { <em role="alert">Las notas superan el límite permitido.</em> }
+                <textarea formControlName="notas" rows="4" maxlength="600" placeholder="Indicaciones opcionales sobre tu solicitud"
+                  [attr.aria-invalid]="mostrarError('notas') ? 'true' : null"
+                  [attr.aria-describedby]="mostrarError('notas') ? 'notas-ayuda notas-error' : 'notas-ayuda'"></textarea>
+                <small id="notas-ayuda">Máximo 600 caracteres. No incluyas información de tarjetas.</small>
+                @if (mostrarError('notas')) { <em id="notas-error" role="alert">Las notas superan el límite permitido.</em> }
               </label>
             </div>
           </form>
@@ -145,12 +153,12 @@
               <div class="payment-title"><app-store-icon nombre="tarjeta" /><div><h3>Tarjeta</h3><p>La captura de la tarjeta ocurre únicamente en el proveedor de pago seguro.</p></div></div>
               @if (!utilizarDatosBaseDatos()) {
                 <p class="option-warning">Vista previa: no se realizará ningún cobro.</p>
-                <button type="button" class="button ghost full" (click)="continuarTarjeta()" [disabled]="procesando() || !validacionVigente()">Simular continuación segura</button>
+                <button type="button" class="button ghost full" (click)="continuarTarjeta()" [disabled]="procesando() || !validacionVigente()" [attr.aria-busy]="procesando()">{{ procesando() ? 'Procesando…' : 'Simular continuación segura' }}</button>
               } @else if (!tarjetaConfigurada()) {
                 <p class="option-warning" role="status">Pago con tarjeta no disponible hasta que el comercio configure un proveedor seguro.</p>
                 <button type="button" class="button ghost full" disabled>Tarjeta no disponible</button>
               } @else {
-                <button type="button" class="button primary full" (click)="continuarTarjeta()" [disabled]="procesando() || !validacionVigente()">Ir al pago seguro</button>
+                <button type="button" class="button primary full" (click)="continuarTarjeta()" [disabled]="procesando() || !validacionVigente()" [attr.aria-busy]="procesando()">{{ procesando() ? 'Abriendo pago seguro…' : 'Ir al pago seguro' }}</button>
               }
             </article>
           }
