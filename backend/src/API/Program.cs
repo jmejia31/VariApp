@@ -253,8 +253,10 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var repairService = new ProductionDataRepairService(db);
     var repairResult = await repairService.RepairAsync();
     app.Logger.LogInformation(
-        "ProductionDataRepair EmpresasTotales={EmpresasTotales} MembresiasLegacyCreadas={MembresiasLegacyCreadas}",
+        "ProductionDataRepair EmpresasTotales={EmpresasTotales} EmpresaConfiguracionesActivas={EmpresaConfiguracionesActivas} EmpresaMaterializadaId={EmpresaMaterializadaId} MembresiasLegacyCreadas={MembresiasLegacyCreadas}",
         repairResult.EmpresasTotales,
+        repairResult.EmpresaConfiguracionesActivas,
+        repairResult.EmpresaMaterializadaId,
         repairResult.MembresiasLegacyCreadas);
     var seedPermisoService = new SeedPermisoService(db); await seedPermisoService.SeedDefaultsAsync();
     var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim(); var adminPassword = app.Configuration["SeedAdmin:Password"];
