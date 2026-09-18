@@ -59,6 +59,7 @@ export class VaristorehnHeaderComponent {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
+    ofertas: VARISTOREHN_PATHS.ofertas,
     categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;

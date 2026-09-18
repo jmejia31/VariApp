@@ -48,7 +48,7 @@ expect(!/#[0-9a-f]{3,8}\b/i.test(scss), 'Fase 8 no debe introducir colores hexad
 
 expect(service.includes('obtenerCatalogo()'), 'La hidratación actual debe conservar el catálogo completo mientras el carrito dependa de él.');
 expect(cart.includes('restaurarCarrito(originales, productos)'), 'No se debe sustituir la revalidación canónica del carrito por una página parcial.');
-expect(!ts.includes('soloOfertas'), 'Fase 8 no debe inventar autoridad de ofertas antes de Fase 9.');
+expect(ts.includes('soloOfertas'), 'Tras Fase 9, el filtro opcional de ofertas debe consumir la autoridad comercial real.');
 
 if (failures.length) {
   console.error('Fase 8 — validación de búsqueda, filtros y ordenamiento FALLÓ:');

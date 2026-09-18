@@ -15,8 +15,16 @@ export interface ModeloCatalogoPublico {
   marcaNombre?: string;
   sku?: string | null;
   precio: number;
+  precioOferta?: number | null;
+  ofertaActiva?: boolean;
+  ofertaNombre?: string | null;
+  ofertaInicioUtc?: string | null;
+  ofertaFinUtc?: string | null;
+  ahorro?: number;
+  porcentajeAhorro?: number;
   cantidadDisponible: number;
   estaAgotado: boolean;
+  estadoDisponibilidad?: string;
   imagenes: ImagenCatalogo[];
 }
 
@@ -32,8 +40,15 @@ export interface ProductoCatalogoPublico {
   modeloNombre?: string;
   precio: number;
   precioOferta?: number | null;
+  ofertaActiva?: boolean;
+  ofertaNombre?: string | null;
+  ofertaInicioUtc?: string | null;
+  ofertaFinUtc?: string | null;
+  ahorro?: number;
+  porcentajeAhorro?: number;
   cantidadDisponible: number;
   estaAgotado: boolean;
+  estadoDisponibilidad?: string;
   sku?: string | null;
   activo?: boolean;
   esDestacado?: boolean;
@@ -60,8 +75,16 @@ export interface ModeloTienda {
   marca: string;
   sku: string;
   precio: number;
+  precioOferta: number | null;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  ofertaInicioUtc: string | null;
+  ofertaFinUtc: string | null;
+  ahorro: number;
+  porcentajeAhorro: number;
   stock: number;
   disponible: boolean;
+  estadoDisponibilidad: EstadoDisponibilidad;
   imagenes: string[];
 }
 
@@ -77,8 +100,15 @@ export interface ProductoTienda {
   sku: string;
   precio: number;
   precioOferta: number | null;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  ofertaInicioUtc: string | null;
+  ofertaFinUtc: string | null;
+  ahorro: number;
+  porcentajeAhorro: number;
   stock: number;
   disponible: boolean;
+  estadoDisponibilidad: EstadoDisponibilidad;
   activo: boolean;
   destacado: boolean;
   fechaCreacion: string | null;
@@ -107,6 +137,11 @@ export interface ItemCarrito {
   nombre: string;
   modelo: string;
   precio: number;
+  precioNormal: number;
+  ahorro: number;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  estadoDisponibilidad: EstadoDisponibilidad;
   stock: number;
   unidades: number;
   imagen: string;
@@ -196,6 +231,7 @@ export interface FiltrosCatalogo {
   busqueda: string;
   categoria: string;
   soloDisponibles: boolean;
+  soloOfertas: boolean;
   precioMinimo: number | null;
   precioMaximo: number | null;
   orden: OrdenCatalogo;

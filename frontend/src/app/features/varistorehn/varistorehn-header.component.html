@@ -73,6 +73,7 @@
   <nav class="container store-nav" aria-label="Navegación de tienda">
     <a [routerLink]="enlaces.inicio">Inicio</a>
     <a [routerLink]="enlaces.productos">Productos</a>
+    <a [routerLink]="enlaces.ofertas">Ofertas</a>
     <a [routerLink]="enlaces.categorias">Categorías</a>
     <span class="nav-divider" aria-hidden="true"></span>
     <button type="button" class="nav-all" [attr.aria-pressed]="!categoriaActiva" (click)="seleccionarCategoria('')"><app-store-icon nombre="rejilla" /> Todas</button>
@@ -103,6 +104,7 @@
     <nav aria-label="Navegación móvil">
       <a #primerEnlaceMovil [routerLink]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
       <a [routerLink]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
+      <a [routerLink]="enlaces.ofertas" (click)="cerrarMenuMovil(false)">Ofertas</a>
       <a [routerLink]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
       <a [href]="enlaces.contacto" (click)="cerrarMenuMovil(false)">Contacto</a>
     </nav>
