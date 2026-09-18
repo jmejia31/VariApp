@@ -1,0 +1,95 @@
+name: N9.5 Production Read-Only Smoke
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/n95-production-readonly-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BACKEND_URL: https://variapp-api.onrender.com
+      FRONTEND_URL: https://variapp-frontend.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Health and readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(mktemp)"
+          ready="$(mktemp)"
+          code_health="$(curl -sS --max-time 30 -o "$health" -w '%{http_code}' "$BACKEND_URL/health")"
+          code_ready="$(curl -sS --max-time 30 -o "$ready" -w '%{http_code}' "$BACKEND_URL/health/ready")"
+          test "$code_health" -ge 200 && test "$code_health" -lt 300
+          test "$code_ready" -ge 200 && test "$code_ready" -lt 300
+          echo "health_status=$code_health"
+          echo "ready_status=$code_ready"
+          python3 - "$health" "$ready" <<'PY'
+          import json, sys
+          for label,path in zip(("health","ready"),sys.argv[1:]):
+              raw=open(path,encoding="utf-8").read()
+              try:
+                  obj=json.loads(raw)
+                  print(label, json.dumps(obj, ensure_ascii=False, sort_keys=True)[:2000])
+              except Exception:
+                  print(label, raw[:1000])
+          PY
+
+      - name: Frontend public shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          code="$(curl -sSL --max-time 45 -D "$headers" -o "$body" -w '%{http_code}' "$FRONTEND_URL/")"
+          test "$code" -ge 200 && test "$code" -lt 400
+          grep -Eiq '<app-root|<title>.*Vari' "$body"
+          echo "frontend_status=$code"
+          grep -Ei '^(server|content-type|strict-transport-security|x-vercel-id):' "$headers" || true
+
+      - name: Protected critical surfaces reject anonymous access
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            /productos
+            /existencias-variante
+            /compras
+            /ventas
+            /facturas
+            /pagos-online
+            /permisos/catalogo
+            /ventas/reportes/resumen
+          )
+          for path in "${paths[@]}"; do
+            code="$(curl -sS --max-time 30 -o /tmp/body -w '%{http_code}' "$BACKEND_URL$path")"
+            case "$code" in
+              401|403) ;;
+              *) echo "::error::$path returned $code, expected 401/403"; cat /tmp/body; exit 1 ;;
+            esac
+            echo "$path -> $code"
+          done
+
+      - name: Auth endpoint exists without mutating login audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 -X POST -o /tmp/authbody -w '%{http_code}' "$BACKEND_URL/auth/renovar")"
+          case "$code" in
+            401|403) ;;
+            *) echo "::error::/auth/renovar returned $code, expected 401/403"; cat /tmp/authbody; exit 1 ;;
+          esac
+          echo "/auth/renovar -> $code"
+
+      - name: Production smoke summary
+        run: |
+          echo 'Read-only production smoke PASS.'
+          echo 'No credentials used, no POST/PUT/PATCH/DELETE business mutation invoked.'
