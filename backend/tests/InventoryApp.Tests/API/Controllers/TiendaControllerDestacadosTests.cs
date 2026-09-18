@@ -82,5 +82,9 @@ public sealed class TiendaControllerDestacadosTests
         Assert.NotNull(producto.FindProperty("Activo"));
         Assert.Contains(producto.GetIndexes(), index =>
             index.Properties.Select(property => property.Name).SequenceEqual(new[] { "EsDestacado", "Activo" }));
+
+        var banco = model.FindEntityType("InventoryApp.Domain.Entities.Catalogos.Banco");
+        Assert.NotNull(banco);
+        Assert.Null(banco!.FindProperty("EsDestacado"));
     }
 }
