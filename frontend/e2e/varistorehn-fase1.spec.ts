@@ -187,7 +187,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.getByRole('status').filter({ hasText: '2 productos encontrados' })).toBeVisible();
     expect(peticionesCatalogo).toBe(1);
     await expect(page.locator('article.product-card')).toHaveCount(2);
-    await expect(page.locator('article.product-card')).not.toContainText('Laptop Pro 14');
+    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toHaveCount(0);
 
     const header = page.locator('app-varistorehn-header');
     const search = header.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
