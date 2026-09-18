@@ -1446,3 +1446,15 @@ Se completó la revalidación current-standard de N9.7. El PRE quedó materializ
 N9.7.B–E resultaron N/A materiales por ausencia demostrada de cambios de dominio, contratos, persistencia/schema/migraciones, backend/API y frontend/UX. N9.7.F revalidó que no existe delta de seguridad/RBAC de producto ni exposición de secretos. N9.7.G conservó como evidencia causal la aceptación exact-product `35316302603` en SUCCESS con `100/100` Playwright más SMTP/PDF y el gate Hypercare DEV `35319732966` en SUCCESS, sustentados por equivalencia de producto con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
 
 No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se agrega exclusivamente mediante append byte-safe junto con `TASKS.md`; el cierre LISTO de N9.7.H y del parent N9.7 requiere todavía el readback final, REVIEW_FIRST P0=0/P1=0 y receipt posterior al append.
+
+
+## 2026-09-18 — VariStoreHN Fase 8: búsqueda, filtros y ordenamiento
+- Alcance: catálogo público `/varistorehn/productos`, sin modificar Fases 0–7 ni superficies administrativas.
+- Se incorporó rango de precio mínimo/máximo, disponibilidad, categoría, búsqueda normalizada y orden por relevancia, precio, recientes y nombre.
+- `q`, `categoria`, `disponible`, `precioMin`, `precioMax`, `orden` y `pagina` se hidratan desde URL y se sincronizan para compartir/recargar el estado.
+- La búsqueda conserva normalización de acentos y mayúsculas mediante la regla pura del catálogo.
+- En móvil los filtros siguen cerrados por defecto y el panel abierto queda acotado al viewport.
+- Se preservó deliberadamente `obtenerCatalogo()` para rehidratar el carrito contra el catálogo completo: sustituirlo por una página remota parcial podría eliminar referencias persistidas de otras páginas.
+- El filtro de ofertas no se fabrica en Fase 8: el contrato público vigente no posee autoridad temporal de promociones; queda para Fase 9, tal como prevé el Plan Maestro con “si aplica”.
+- Añadidos validador estático, Playwright Fase 8 y workflow acumulado Fases 1–8.
+- MAPA_ARQUITECTURA: NO_APLICA — se amplía comportamiento dentro del catálogo público existente, sin cambiar capas, datos, tenancy, seguridad, jobs ni ownership.
