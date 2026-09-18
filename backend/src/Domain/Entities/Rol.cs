@@ -11,6 +11,21 @@ public class Rol
     public string? Descripcion { get; set; }
     public bool EsSistema { get; set; }
     public bool EsAdministrador { get; set; }
+
+    /// <summary>
+    /// Delimita la autoridad del rol. Empresa mantiene el RBAC tenant actual;
+    /// Plataforma queda reservado para autoridad global del SaaS.
+    /// </summary>
+    public InventoryApp.Domain.Enums.AmbitoAutorizacion Ambito { get; set; } =
+        InventoryApp.Domain.Enums.AmbitoAutorizacion.Empresa;
+
+    /// <summary>
+    /// Propietario opcional de un rol empresarial personalizado.
+    /// Null + Ambito Empresa representa un rol empresarial de sistema/plantilla.
+    /// Debe permanecer null para roles de Plataforma.
+    /// </summary>
+    public int? EmpresaId { get; set; }
+
     public bool Activo { get; set; } = true;
     public bool Eliminado { get; set; }
 
