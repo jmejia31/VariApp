@@ -20,6 +20,10 @@ const empresa = {
   whatsApp: '9876-5432'
 };
 
+const imagenData = (texto: string) => `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="white"/><text x="400" y="300" text-anchor="middle" font-size="48">${texto}</text></svg>`
+)}`;
+
 async function preparar(page: Page): Promise<void> {
   await page.route('http://localhost:5005/empresa-configuracion/publica', route => route.fulfill({
     status: 200,
@@ -55,9 +59,6 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/varistorehn/producto/demo-producto-1');
 
-    const principal = page.locator('.main-image-button');
-    await expect(principal).toBeVisible();
-
     const agregar = page.getByRole('button', { name: 'Agregar al carrito', exact: true });
     await expect(agregar).toBeEnabled();
     await agregar.click();
@@ -82,24 +83,51 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
 
   test('fullscreen abre, permite swipe táctil, cierra y devuelve foco', async ({ page }) => {
     await preparar(page);
+    const imagenes = [imagenData('Imagen uno'), imagenData('Imagen dos')];
+    const detalle = {
+      id: 9101, slug: 'producto-fase10', nombre: 'Producto Fase 10', descripcion: 'Detalle accesible.',
+      categoriaId: 21, categoriaNombre: 'Tecnología', marcaNombre: 'Marca F10', precio: 1500,
+      precioOferta: null, ofertaActiva: false, ofertaNombre: null, ahorro: 0, porcentajeAhorro: 0,
+      cantidadDisponible: 5, estaAgotado: false, estadoDisponibilidad: 'Disponible', sku: 'F10-9101',
+      activo: true, esDestacado: false, imagenes: imagenes.map((url, i) => ({ url, orden: i + 1, esPrincipal: i === 0 })),
+      modelos: [{
+        productoVarianteId: 91010, modeloId: 910100, modeloNombre: 'Base', marcaNombre: 'Marca F10',
+        sku: 'F10-9101-A', precio: 1500, precioOferta: null, ofertaActiva: false, ofertaNombre: null,
+        ahorro: 0, porcentajeAhorro: 0, cantidadDisponible: 5, estaAgotado: false,
+        estadoDisponibilidad: 'Disponible', imagenes: imagenes.map((url, i) => ({ url, orden: i + 1, esPrincipal: i === 0 }))
+      }]
+    };
+
+    await page.route('**/tienda/productos?*', route => route.fulfill({
+      status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ success: true, data: { items: [detalle], page: 1, pageSize: 96, totalCount: 1 } })
+    }));
+    await page.route('**/tienda/productos/*', route => route.fulfill({
+      status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ success: true, data: detalle })
+    }));
+    await page.route('**/tienda/categorias', route => route.fulfill({
+      status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ success: true, data: [{ id: 21, slug: 'tecnologia-21', nombre: 'Tecnología', descripcion: '', totalProductos: 1 }] })
+    }));
+
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/varistorehn/producto/demo-producto-1');
+    await page.goto('/varistorehn/producto/producto-fase10');
+    await page.getByRole('group', { name: 'Origen de datos' }).getByRole('button', { name: 'Base de datos' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Producto Fase 10' })).toBeVisible();
 
     const principal = page.locator('.main-image-button');
+    await expect(principal).toBeVisible();
     await principal.click();
     const dialogo = page.locator('dialog.lightbox');
     await expect(dialogo).toBeVisible();
 
     const contador = dialogo.locator('.lightbox-controls span');
-    const antes = await contador.textContent();
+    await expect(contador).toHaveText('1 / 2');
     const stage = dialogo.locator('.lightbox-stage');
-    const box = await stage.boundingBox();
-    if (box) {
-      await stage.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: box.x + box.width * .8, clientY: box.y + box.height * .5 });
-      await stage.dispatchEvent('pointerup', { pointerType: 'touch', clientX: box.x + box.width * .2, clientY: box.y + box.height * .5 });
-    }
-    const total = Number((antes || '1 / 1').split('/')[1]?.trim() || '1');
-    if (total > 1) await expect(contador).not.toHaveText(antes || '');
+    await stage.dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'touch', clientX: 310, clientY: 220, isPrimary: true });
+    await stage.dispatchEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 170, clientY: 224, isPrimary: true });
+    await expect(contador).toHaveText('2 / 2');
 
     await dialogo.getByRole('button', { name: 'Cerrar imagen ampliada' }).click();
     await expect(dialogo).not.toBeVisible();
