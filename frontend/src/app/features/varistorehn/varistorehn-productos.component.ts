@@ -64,8 +64,9 @@ export class VaristorehnProductosComponent implements OnInit {
   readonly categoriaSlug = signal('');
   readonly categoriaActiva = signal('');
   readonly soloDisponibles = signal(false);
+  readonly precioMinimo = signal<number | null>(null);
   readonly precioMaximo = signal<number | null>(null);
-  readonly orden = signal<OrdenCatalogo>('destacados');
+  readonly orden = signal<OrdenCatalogo>('relevancia');
   readonly pagina = signal(1);
   readonly tamanoPagina = 12;
   readonly filtrosAbiertos = signal(false);
@@ -81,6 +82,7 @@ export class VaristorehnProductosComponent implements OnInit {
     busqueda: this.busqueda(),
     categoria: this.categoriaActiva(),
     soloDisponibles: this.soloDisponibles(),
+    precioMinimo: this.precioMinimo(),
     precioMaximo: this.precioMaximo(),
     orden: this.orden()
   }));
@@ -90,7 +92,8 @@ export class VaristorehnProductosComponent implements OnInit {
     return this.resultados().slice(inicio, inicio + this.tamanoPagina);
   });
   readonly hayFiltros = computed(() => Boolean(
-    this.busqueda().trim() || this.categoriaSlug() || this.soloDisponibles() || this.precioMaximo() !== null
+    this.busqueda().trim() || this.categoriaSlug() || this.soloDisponibles()
+      || this.precioMinimo() !== null || this.precioMaximo() !== null || this.orden() !== 'relevancia'
   ));
   readonly categoriaFiltroInvalida = computed(() => Boolean(
     !this.cargandoCategorias() && !this.errorCategorias() && this.categoriaSlug() && !this.categoriaActiva()
@@ -110,7 +113,11 @@ export class VaristorehnProductosComponent implements OnInit {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.busqueda.set((params.get('q') || '').trim().slice(0, 180));
       this.categoriaSlug.set((params.get('categoria') || '').trim().slice(0, 180));
-      this.pagina.set(1);
+      this.soloDisponibles.set(params.get('disponible') === '1');
+      this.precioMinimo.set(this.numeroQuery(params.get('precioMin')));
+      this.precioMaximo.set(this.numeroQuery(params.get('precioMax')));
+      this.orden.set(this.ordenQuery(params.get('orden')));
+      this.pagina.set(this.paginaQuery(params.get('pagina')));
       this.aplicarCategoriaDesdeSlug();
     });
     this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.recargar());
@@ -154,23 +161,35 @@ export class VaristorehnProductosComponent implements OnInit {
     this.sincronizarUrl();
   }
 
-  cambiarDisponibilidad(valor: boolean): void { this.soloDisponibles.set(valor); this.pagina.set(1); }
-  cambiarPrecio(valor: string): void {
-    const numero = Number(valor);
-    this.precioMaximo.set(valor.trim() && Number.isFinite(numero) && numero >= 0 ? numero : null);
+  cambiarDisponibilidad(valor: boolean): void {
+    this.soloDisponibles.set(valor);
     this.pagina.set(1);
+    this.sincronizarUrl();
+  }
+  cambiarPrecioMinimo(valor: string): void {
+    this.precioMinimo.set(this.numeroQuery(valor));
+    this.pagina.set(1);
+    this.sincronizarUrl();
+  }
+  cambiarPrecio(valor: string): void {
+    this.precioMaximo.set(this.numeroQuery(valor));
+    this.pagina.set(1);
+    this.sincronizarUrl();
   }
   cambiarOrden(valor: string): void {
-    if (['destacados', 'precio-asc', 'precio-desc', 'nombre'].includes(valor)) this.orden.set(valor as OrdenCatalogo);
+    this.orden.set(this.ordenQuery(valor));
     this.pagina.set(1);
+    this.sincronizarUrl();
   }
   limpiarFiltros(): void {
     this.busqueda.set(''); this.categoriaSlug.set(''); this.categoriaActiva.set('');
-    this.soloDisponibles.set(false); this.precioMaximo.set(null); this.orden.set('destacados'); this.pagina.set(1);
+    this.soloDisponibles.set(false); this.precioMinimo.set(null); this.precioMaximo.set(null);
+    this.orden.set('relevancia'); this.pagina.set(1);
     this.sincronizarUrl();
   }
   cambiarPagina(cambio: number): void {
     this.pagina.set(Math.max(1, Math.min(this.totalPaginas(), this.pagina() + cambio)));
+    this.sincronizarUrl();
     this.irInicioCatalogo();
   }
 
@@ -256,10 +275,34 @@ export class VaristorehnProductosComponent implements OnInit {
     const categoria = this.categoriaSlug();
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { q: q || null, categoria: categoria || null },
-      queryParamsHandling: 'merge',
+      queryParams: {
+        q: q || null,
+        categoria: categoria || null,
+        disponible: this.soloDisponibles() ? '1' : null,
+        precioMin: this.precioMinimo(),
+        precioMax: this.precioMaximo(),
+        orden: this.orden() === 'relevancia' ? null : this.orden(),
+        pagina: this.pagina() > 1 ? this.pagina() : null
+      },
       replaceUrl: true
     });
+  }
+
+  private numeroQuery(valor: string | null): number | null {
+    if (valor === null || !valor.trim()) return null;
+    const numero = Number(valor);
+    return Number.isFinite(numero) && numero >= 0 ? numero : null;
+  }
+
+  private paginaQuery(valor: string | null): number {
+    const numero = Number(valor);
+    return Number.isSafeInteger(numero) && numero > 0 ? numero : 1;
+  }
+
+  private ordenQuery(valor: string | null): OrdenCatalogo {
+    return ['relevancia', 'destacados', 'precio-asc', 'precio-desc', 'recientes', 'nombre'].includes(valor || '')
+      ? valor as OrdenCatalogo
+      : 'relevancia';
   }
 
   private irInicioCatalogo(): void {

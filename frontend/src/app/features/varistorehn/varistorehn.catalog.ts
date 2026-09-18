@@ -102,14 +102,34 @@ export function filtrarProductos(productos: ProductoTienda[], filtros: FiltrosCa
     return p.activo
       && (!filtros.categoria || p.categoria === filtros.categoria)
       && (!filtros.soloDisponibles || p.disponible)
+      && (filtros.precioMinimo === null || p.precio >= filtros.precioMinimo)
       && (filtros.precioMaximo === null || p.precio <= filtros.precioMaximo)
       && palabras.every(palabra => texto.includes(palabra));
   });
   switch (filtros.orden) {
     case 'precio-asc': return resultado.sort((a, b) => a.precio - b.precio);
     case 'precio-desc': return resultado.sort((a, b) => b.precio - a.precio);
+    case 'recientes': return resultado.sort((a, b) =>
+      (Date.parse(b.fechaCreacion || '') || 0) - (Date.parse(a.fechaCreacion || '') || 0)
+      || a.nombre.localeCompare(b.nombre, 'es'));
     case 'nombre': return resultado.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-    default: return resultado.sort((a, b) => Number(b.disponible) - Number(a.disponible));
+    case 'relevancia': {
+      const consulta = normalizarTexto(filtros.busqueda);
+      const puntuar = (producto: ProductoTienda): number => {
+        if (!consulta) return Number(producto.destacado) * 10 + Number(producto.disponible);
+        const nombre = normalizarTexto(producto.nombre);
+        const sku = normalizarTexto([producto.sku, ...producto.modelos.map(modelo => modelo.sku)].join(' '));
+        if (nombre === consulta || sku.split(/\s+/).includes(consulta)) return 1000;
+        if (nombre.startsWith(consulta)) return 700;
+        if (nombre.includes(consulta)) return 500;
+        return Number(producto.destacado) * 10 + Number(producto.disponible);
+      };
+      return resultado.sort((a, b) => puntuar(b) - puntuar(a) || a.nombre.localeCompare(b.nombre, 'es'));
+    }
+    default: return resultado.sort((a, b) =>
+      Number(b.destacado) - Number(a.destacado)
+      || Number(b.disponible) - Number(a.disponible)
+      || a.nombre.localeCompare(b.nombre, 'es'));
   }
 }
 

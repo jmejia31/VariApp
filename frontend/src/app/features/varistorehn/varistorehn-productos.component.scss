@@ -176,3 +176,19 @@ fieldset > button small { color: var(--color-text-muted); font-size: .62rem; }
   .pagination .button { flex: 1; }
   .pagination span { width: 100%; order: -1; text-align: center; }
 }
+
+
+/* Fase 8 — rango de precio y panel móvil acotado */
+.price-range { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.price-separator { color: var(--color-text-muted); font-weight: 800; }
+.price-range .price-field { min-width: 0; }
+.price-range .price-field input { width: 100%; min-width: 0; }
+
+@media (max-width: 760px) {
+  .filters.open { max-height: min(70vh, 620px); overflow: auto; overscroll-behavior: contain; }
+}
+
+@media (max-width: 380px) {
+  .price-range { grid-template-columns: 1fr; }
+  .price-separator { display: none; }
+}

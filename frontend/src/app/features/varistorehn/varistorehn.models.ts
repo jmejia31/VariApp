@@ -190,12 +190,13 @@ export interface ReciboPedidoPublico {
   lineas: CheckoutLineaValidada[];
 }
 
-export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
+export type OrdenCatalogo = 'destacados' | 'relevancia' | 'precio-asc' | 'precio-desc' | 'recientes' | 'nombre';
 
 export interface FiltrosCatalogo {
   busqueda: string;
   categoria: string;
   soloDisponibles: boolean;
+  precioMinimo: number | null;
   precioMaximo: number | null;
   orden: OrdenCatalogo;
 }
