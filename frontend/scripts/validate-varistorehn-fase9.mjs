@@ -52,8 +52,9 @@ expect(inventoryService.includes('GetOperativasPublicasPorVariantesAsync') && in
   'Una variante sin existencia autoritativa debe fallar cerrada en stock 0.');
 const inventoryPublicQuery = inventoryRepository.split('GetOperativasPublicasPorVariantesAsync')[1]
   ?.split('public async Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync')[0] ?? '';
-expect(inventoryPublicQuery.length > 0 && !inventoryPublicQuery.includes('UbicacionAlmacenId == null'),
-  'El total público no debe ignorar stock físico ubicado dentro de un almacén operativo.');
+expect(inventoryPublicQuery.length > 0
+    && /e\.UbicacionAlmacenId\s*==\s*null\s*\|\|/.test(inventoryPublicQuery),
+  'El total público debe incluir existencias raíz y también stock físico ubicado dentro de un almacén operativo.');
 expect(inventoryRepository.includes('TipoAlmacen.Tienda') && inventoryRepository.includes('TipoAlmacen.Bodega'),
   'El stock público solo debe agregar almacenes operativos Tienda/Bodega.');
 expect(inventoryRepository.includes('e.Almacen.Sucursal.Activa') && inventoryRepository.includes('!e.Almacen.Sucursal.Eliminado'),
