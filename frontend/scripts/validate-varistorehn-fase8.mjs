@@ -41,6 +41,8 @@ expect(html.includes('Solo disponibles'), 'La UI debe exponer disponibilidad.');
 expect(html.includes('value="relevancia"') && html.includes('value="recientes"'), 'La UI debe exponer relevancia y recientes.');
 expect(html.includes('No encontramos coincidencias') && html.includes('Limpiar filtros'), 'Debe existir estado sin resultados recuperable.');
 expect(html.includes('[attr.aria-expanded]="filtrosAbiertos()"'), 'El disparador móvil debe exponer su estado.');
+expect(ts.includes('normalizarPagina()'), 'Las URLs con página fuera de rango deben autocorregirse tras conocer los resultados.');
+expect(ts.includes("if (valor === 'destacados') return 'relevancia'"), 'El alias legacy destacados debe normalizarse al orden canónico relevancia.');
 expect(scss.includes('max-height: min(70vh, 620px)'), 'El panel móvil abierto debe quedar acotado al viewport.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(scss), 'Fase 8 no debe introducir colores hexadecimales fuera del tema.');
 

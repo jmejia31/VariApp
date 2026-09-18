@@ -75,6 +75,27 @@ test.describe('VariStoreHn Fase 8 — búsqueda, filtros y ordenamiento', () => 
     await expect(page).toHaveURL(/orden=nombre.*pagina=2|pagina=2.*orden=nombre/);
   });
 
+  test('URL con página fuera de rango se autocorrige sin dejar el grid vacío', async ({ page }) => {
+    await prepararEmpresa(page);
+    await page.goto('/varistorehn/productos?categoria=demo-categoria-2&orden=nombre&pagina=999');
+
+    await expect(page.getByRole('status').filter({ hasText: '3 productos encontrados' })).toBeVisible();
+    await expect(page.locator('article.product-card')).toHaveCount(3);
+    await expect(page.getByText('Página', { exact: false }).filter({ hasText: '1 de 1' })).toHaveCount(0);
+    await expect(page).toHaveURL(/categoria=demo-categoria-2/);
+    await expect(page).toHaveURL(/orden=nombre/);
+    await expect(page).not.toHaveURL(/pagina=999/);
+  });
+
+  test('orden legacy destacados se normaliza a relevancia y limpia la URL', async ({ page }) => {
+    await prepararEmpresa(page);
+    await page.goto('/varistorehn/productos?orden=destacados');
+
+    await expect(page.getByLabel('Ordenar por')).toHaveValue('relevancia');
+    await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
+    await expect(page).not.toHaveURL(/orden=destacados/);
+  });
+
   test('sin resultados ofrece limpiar filtros y recupera URL canónica', async ({ page }) => {
     await prepararEmpresa(page);
     await page.goto('/varistorehn/productos?q=no-existe&precioMin=99999&disponible=1');

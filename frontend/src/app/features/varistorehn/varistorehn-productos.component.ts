@@ -116,9 +116,12 @@ export class VaristorehnProductosComponent implements OnInit {
       this.soloDisponibles.set(params.get('disponible') === '1');
       this.precioMinimo.set(this.numeroQuery(params.get('precioMin')));
       this.precioMaximo.set(this.numeroQuery(params.get('precioMax')));
-      this.orden.set(this.ordenQuery(params.get('orden')));
+      const ordenQuery = params.get('orden');
+      this.orden.set(this.ordenQuery(ordenQuery));
       this.pagina.set(this.paginaQuery(params.get('pagina')));
       this.aplicarCategoriaDesdeSlug();
+      if (ordenQuery && ordenQuery !== this.orden()) queueMicrotask(() => this.sincronizarUrl());
+      this.normalizarPagina();
     });
     this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.recargar());
   }
@@ -240,6 +243,7 @@ export class VaristorehnProductosComponent implements OnInit {
         const resultado = this.carritoStore.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
         if (resultado.ajustado) this.aviso.set(this.carritoStore.aviso());
         this.cargando.set(false);
+        this.normalizarPagina();
       },
       error: () => {
         this.errorCatalogo.set('No pudimos cargar el catálogo. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
@@ -258,8 +262,17 @@ export class VaristorehnProductosComponent implements OnInit {
       ? this.servicio.obtenerCategorias().pipe(map(categorias => categorias.map(mapearCategoriaTienda)))
       : of(crearCategoriasTiendaEjemplo());
     this.cargaCategorias = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: categorias => { this.categorias.set(categorias); this.cargandoCategorias.set(false); this.aplicarCategoriaDesdeSlug(); },
-      error: () => { this.errorCategorias.set('No pudimos cargar las categorías públicas. Los demás filtros siguen disponibles.'); this.cargandoCategorias.set(false); }
+      next: categorias => {
+        this.categorias.set(categorias);
+        this.cargandoCategorias.set(false);
+        this.aplicarCategoriaDesdeSlug();
+        this.normalizarPagina();
+      },
+      error: () => {
+        this.errorCategorias.set('No pudimos cargar las categorías públicas. Los demás filtros siguen disponibles.');
+        this.cargandoCategorias.set(false);
+        this.normalizarPagina();
+      }
     });
   }
 
@@ -300,9 +313,18 @@ export class VaristorehnProductosComponent implements OnInit {
   }
 
   private ordenQuery(valor: string | null): OrdenCatalogo {
-    return ['relevancia', 'destacados', 'precio-asc', 'precio-desc', 'recientes', 'nombre'].includes(valor || '')
+    if (valor === 'destacados') return 'relevancia';
+    return ['relevancia', 'precio-asc', 'precio-desc', 'recientes', 'nombre'].includes(valor || '')
       ? valor as OrdenCatalogo
       : 'relevancia';
+  }
+
+  private normalizarPagina(): void {
+    if (this.cargando() || this.cargandoCategorias() || this.errorCatalogo()) return;
+    const paginaValida = Math.max(1, Math.min(this.pagina(), this.totalPaginas()));
+    if (paginaValida === this.pagina()) return;
+    this.pagina.set(paginaValida);
+    this.sincronizarUrl();
   }
 
   private irInicioCatalogo(): void {

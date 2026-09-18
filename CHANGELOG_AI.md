@@ -1458,3 +1458,11 @@ No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni dat
 - El filtro de ofertas no se fabrica en Fase 8: el contrato público vigente no posee autoridad temporal de promociones; queda para Fase 9, tal como prevé el Plan Maestro con “si aplica”.
 - Añadidos validador estático, Playwright Fase 8 y workflow acumulado Fases 1–8.
 - MAPA_ARQUITECTURA: NO_APLICA — se amplía comportamiento dentro del catálogo público existente, sin cambiar capas, datos, tenancy, seguridad, jobs ni ownership.
+
+
+## 2026-09-18 — Auditoría quirúrgica VariStoreHN Fase 8
+- Hallazgo corregido: una URL compartida con `pagina` mayor al total podía dejar el grid vacío y mostrar un estado de paginación incoherente.
+- La página ahora se acota al rango válido después de cargar catálogo/categorías y también ante navegación por historial.
+- Hardening adicional: el alias histórico `orden=destacados` se normaliza a `relevancia` y se limpia de la URL para que el `select` no quede con un valor sin opción visible.
+- Playwright Fase 8 cubre ambos casos y el validador estático impide retirar estas protecciones accidentalmente.
+- MAPA_ARQUITECTURA: NO_APLICA — corrección local de estado/URL en el catálogo público; no cambia capas, datos, tenancy, seguridad ni contratos HTTP.
