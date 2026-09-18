@@ -1,13 +1,18 @@
-using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
 using InventoryApp.Application.Common;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Services;
 
+/// <summary>
+/// Mantiene catálogos RBAC y grants explícitos de roles administradores.
+/// Desde ERP-N0.4 no migra ni consulta RolUsuario/Modulo/Accion/Permitido en RolPermiso.
+/// </summary>
 public class SeedPermisoService
 {
+    private const string AdministradorNormalizado = "ADMINISTRADOR";
+    private const string VendedorNormalizado = "VENDEDOR";
     private readonly AppDbContext _context;
 
     public SeedPermisoService(AppDbContext context)
@@ -18,68 +23,123 @@ public class SeedPermisoService
     public async Task SeedDefaultsAsync()
     {
         await SeedCatalogoPermisosAsync();
+        await _context.SaveChangesAsync();
 
-        var defaults = new Dictionary<RolUsuario, List<(ModuloSistema Modulo, AccionPermiso Accion, bool Permitido)>>()
+        var roles = await SeedRolesSistemaAsync();
+        await _context.SaveChangesAsync();
+
+        // EsAdministrador ya no es un bypass de autorización. Para conservar el
+        // acceso administrativo los roles administradores reciben grants explícitos.
+        await AsegurarGrantsAdministradoresAsync();
+
+        if (roles.VendedorCreado)
+            await SeedVendedorInicialAsync(roles.Vendedor);
+
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task<(Rol Administrador, Rol Vendedor, bool VendedorCreado)> SeedRolesSistemaAsync()
+    {
+        var existentes = await _context.Roles.IgnoreQueryFilters().ToListAsync();
+
+        var administrador = existentes.FirstOrDefault(r =>
+            r.NombreNormalizado == AdministradorNormalizado ||
+            string.Equals(r.Nombre, "Administrador", StringComparison.OrdinalIgnoreCase));
+        if (administrador is null)
         {
-            [RolUsuario.Administrador] = new()
+            administrador = new Rol
             {
-                (ModuloSistema.Dashboard, AccionPermiso.Ver, true),
-                (ModuloSistema.Productos, AccionPermiso.Ver, true),
-                (ModuloSistema.Productos, AccionPermiso.Crear, true),
-                (ModuloSistema.Productos, AccionPermiso.Editar, true),
-                (ModuloSistema.Productos, AccionPermiso.Eliminar, true),
-                (ModuloSistema.Categorias, AccionPermiso.Ver, true),
-                (ModuloSistema.Categorias, AccionPermiso.Crear, true),
-                (ModuloSistema.Categorias, AccionPermiso.Editar, true),
-                (ModuloSistema.Categorias, AccionPermiso.Eliminar, true),
-                (ModuloSistema.Compras, AccionPermiso.Ver, true),
-                (ModuloSistema.Compras, AccionPermiso.Crear, true),
-                (ModuloSistema.Compras, AccionPermiso.Editar, true),
-                (ModuloSistema.Compras, AccionPermiso.Confirmar, true),
-                (ModuloSistema.Compras, AccionPermiso.Anular, true),
-                (ModuloSistema.Ventas, AccionPermiso.Ver, true),
-                (ModuloSistema.Ventas, AccionPermiso.Crear, true),
-                (ModuloSistema.Ventas, AccionPermiso.Editar, true),
-                (ModuloSistema.Ventas, AccionPermiso.Confirmar, true),
-                (ModuloSistema.Ventas, AccionPermiso.Anular, true),
-                (ModuloSistema.Facturacion, AccionPermiso.Ver, true),
-                (ModuloSistema.Finanzas, AccionPermiso.Ver, true),
-                (ModuloSistema.Finanzas, AccionPermiso.Crear, true),
-                (ModuloSistema.Finanzas, AccionPermiso.Anular, true),
-                (ModuloSistema.Inventario, AccionPermiso.Ver, true),
-                (ModuloSistema.Proveedores, AccionPermiso.Ver, true),
-                (ModuloSistema.Proveedores, AccionPermiso.Crear, true),
-                (ModuloSistema.Proveedores, AccionPermiso.Editar, true),
-                (ModuloSistema.Proveedores, AccionPermiso.Eliminar, true),
-                (ModuloSistema.Clientes, AccionPermiso.Ver, true),
-                (ModuloSistema.Clientes, AccionPermiso.Crear, true),
-                (ModuloSistema.Clientes, AccionPermiso.Editar, true),
-                (ModuloSistema.Clientes, AccionPermiso.Eliminar, true),
-                (ModuloSistema.Auditoria, AccionPermiso.Ver, true)
-            }
-        };
-
-        foreach (var (rol, entries) in defaults)
+                Nombre = "Administrador",
+                NombreNormalizado = AdministradorNormalizado,
+                Descripcion = "Rol de sistema con grants administrativos explícitos.",
+                EsSistema = true,
+                EsAdministrador = true,
+                Activo = true,
+                Eliminado = false,
+                FechaCreacion = DateTime.UtcNow
+            };
+            _context.Roles.Add(administrador);
+        }
+        else
         {
-            foreach (var (modulo, accion, permitido) in entries)
-            {
-                var existing = await _context.RolPermisos
-                    .FirstOrDefaultAsync(p => p.Rol == rol && p.Modulo == modulo && p.Accion == accion);
+            administrador.NombreNormalizado = AdministradorNormalizado;
+            administrador.EsSistema = true;
+            administrador.EsAdministrador = true;
+            administrador.Activo = true;
+            administrador.Eliminado = false;
+        }
 
-                if (existing is null)
-                {
-                    _context.RolPermisos.Add(new RolPermiso
-                    {
-                        Rol = rol,
-                        Modulo = modulo,
-                        Accion = accion,
-                        Permitido = permitido
-                    });
-                }
-            }
+        var vendedor = existentes.FirstOrDefault(r =>
+            r.NombreNormalizado == VendedorNormalizado ||
+            string.Equals(r.Nombre, "Vendedor", StringComparison.OrdinalIgnoreCase));
+        var vendedorCreado = vendedor is null;
+        if (vendedor is null)
+        {
+            vendedor = new Rol
+            {
+                Nombre = "Vendedor",
+                NombreNormalizado = VendedorNormalizado,
+                Descripcion = "Rol de sistema para operación comercial con permisos administrables.",
+                EsSistema = true,
+                EsAdministrador = false,
+                Activo = true,
+                Eliminado = false,
+                FechaCreacion = DateTime.UtcNow
+            };
+            _context.Roles.Add(vendedor);
+        }
+        else if (string.IsNullOrWhiteSpace(vendedor.NombreNormalizado))
+        {
+            vendedor.NombreNormalizado = VendedorNormalizado;
         }
 
         await _context.SaveChangesAsync();
+        return (administrador, vendedor, vendedorCreado);
+    }
+
+    private async Task AsegurarGrantsAdministradoresAsync()
+    {
+        var administradores = await _context.Roles
+            .IgnoreQueryFilters()
+            .Where(r => r.EsAdministrador && r.Activo && !r.Eliminado)
+            .ToListAsync();
+        if (administradores.Count == 0) return;
+
+        var permisos = await _context.Permisos
+            .IgnoreQueryFilters()
+            .Where(p => p.Activo && !p.Eliminado)
+            .ToListAsync();
+
+        var rolIds = administradores.Select(r => r.Id).ToList();
+        var existentes = await _context.RolPermisos
+            .Where(rp => rolIds.Contains(rp.RolId))
+            .Select(rp => new { rp.RolId, rp.PermisoId })
+            .ToListAsync();
+        var claves = existentes.Select(x => (x.RolId, x.PermisoId)).ToHashSet();
+
+        foreach (var rol in administradores)
+        {
+            foreach (var permiso in permisos)
+            {
+                if (claves.Add((rol.Id, permiso.Id)))
+                    _context.RolPermisos.Add(new RolPermiso { RolId = rol.Id, PermisoId = permiso.Id });
+            }
+        }
+    }
+
+    private async Task SeedVendedorInicialAsync(Rol vendedor)
+    {
+        foreach (var (modulo, accion) in CatalogoPermisosBase.DefaultVendedor)
+        {
+            var permiso = await _context.Permisos
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Modulo == modulo && p.Accion == accion && p.Activo && !p.Eliminado);
+            if (permiso is null) continue;
+
+            var existe = await _context.RolPermisos.AnyAsync(rp => rp.RolId == vendedor.Id && rp.PermisoId == permiso.Id);
+            if (!existe)
+                _context.RolPermisos.Add(new RolPermiso { RolId = vendedor.Id, PermisoId = permiso.Id });
+        }
     }
 
     private async Task SeedCatalogoPermisosAsync()
@@ -89,25 +149,28 @@ public class SeedPermisoService
             foreach (var accion in acciones)
             {
                 var permiso = await _context.Permisos
+                    .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(p => p.Modulo == modulo && p.Accion == accion);
 
+                var codigo = $"{modulo}.{accion}".ToUpperInvariant();
                 if (permiso is null)
                 {
                     _context.Permisos.Add(new Permiso
                     {
-                        Codigo = $"{modulo}.{accion}".ToUpperInvariant(),
+                        Codigo = codigo,
                         Nombre = $"{modulo} - {accion}",
                         Descripcion = $"Permite {accion} en {modulo}.",
                         Modulo = modulo,
                         Accion = accion,
                         EsSistema = true,
                         Activo = true,
-                        Eliminado = false
+                        Eliminado = false,
+                        FechaCreacion = DateTime.UtcNow
                     });
                     continue;
                 }
 
-                permiso.Codigo = $"{modulo}.{accion}".ToUpperInvariant();
+                permiso.Codigo = codigo;
                 permiso.Nombre = $"{modulo} - {accion}";
                 permiso.Descripcion = $"Permite {accion} en {modulo}.";
                 permiso.EsSistema = true;

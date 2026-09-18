@@ -3,10 +3,12 @@ export interface Perfil {
   nombreUsuario: string;
   nombreCompleto: string;
   rol: string;
+  fotoPerfilUrl?: string;
   fechaCreacion: string;
 }
 
 export interface ActualizarPerfilValue {
+  nombreUsuario: string;
   nombreCompleto: string;
 }
 

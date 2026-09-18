@@ -73,6 +73,9 @@ export class ImpuestoFormComponent implements OnInit {
           productoIdsTexto: i.productoIds.join(', '), categoriaIdsTexto: i.categoriaIds.join(', '),
           clienteExentoIdsTexto: i.clienteExentoIds.join(', '), proveedorExentoIdsTexto: i.proveedorExentoIds.join(', ')
         });
+        // Codigo es la identidad técnica estable usada por el seed y por
+        // snapshots/integraciones. Puede definirse al crear, no renombrarse.
+        this.form.controls.codigo.disable({ emitEvent: false });
       });
     }
   }

@@ -7,6 +7,13 @@ public class DashboardResumenDto
     public int TotalUnidades { get; set; }
     public decimal ValorTotalInventario { get; set; }
     public decimal ValorPotencialVenta { get; set; }
+    public int TotalProductosMercaderia { get; set; }
+    public int TotalProductosInsumosAdministrativos { get; set; }
+    public int TotalUnidadesMercaderia { get; set; }
+    public int TotalUnidadesInsumosAdministrativos { get; set; }
+    public decimal ValorInventarioCostoMercaderia { get; set; }
+    public decimal ValorInventarioCostoInsumosAdministrativos { get; set; }
+    public decimal ValorPotencialVentaMercaderia { get; set; }
     public List<ProductoDto> ProductosStockBajo { get; set; } = new();
     public List<ProductoDto> UltimosAgregados { get; set; } = new();
 

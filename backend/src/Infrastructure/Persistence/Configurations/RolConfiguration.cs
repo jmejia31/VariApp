@@ -14,17 +14,18 @@ public class RolConfiguration : IEntityTypeConfiguration<Rol>
         builder.Property(r => r.Nombre).IsRequired().HasMaxLength(80);
         builder.Property(r => r.NombreNormalizado).IsRequired().HasMaxLength(80);
         builder.Property(r => r.Descripcion).HasMaxLength(300);
-
         builder.HasIndex(r => r.NombreNormalizado).IsUnique();
 
         builder.HasMany(r => r.Usuarios)
             .WithOne(u => u.RolEntidad)
             .HasForeignKey(u => u.RolId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(r => r.Permisos)
-            .WithOne()
+            .WithOne(p => p.RolEntidad)
             .HasForeignKey(p => p.RolId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

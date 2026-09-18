@@ -24,27 +24,29 @@ public class JwtService : IJwtService
             ?? throw new InvalidOperationException("Jwt:Secret no está configurado.");
         var issuer = jwtSettings["Issuer"];
         var audience = jwtSettings["Audience"];
-        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 30;
-        expiraMinutos = Math.Clamp(expiraMinutos, 1, 30);
 
+        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 35;
+        expiraMinutos = Math.Clamp(expiraMinutos, 35, 720);
         var expiraEn = DateTime.UtcNow.AddMinutes(expiraMinutos);
 
-        var esAdministrador = usuario.RolEntidad?.EsAdministrador ?? (usuario.Rol == Domain.Enums.RolUsuario.Administrador);
+        if (usuario.RolId <= 0 || usuario.RolEntidad is null || usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
+            throw new InvalidOperationException("El usuario no tiene un rol relacional activo válido.");
+
+        var nombreRol = usuario.RolEntidad.Nombre;
+        var esAdministrador = usuario.RolEntidad.EsAdministrador;
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("id", usuario.Id.ToString()),
-            new Claim("nombreUsuario", usuario.NombreUsuario),
-            new Claim("nombreCompleto", usuario.NombreCompleto),
-            new Claim("rol", usuario.Rol.ToString()),
-            new Claim("esAdministrador", esAdministrador.ToString()),
-            new Claim(ClaimTypes.Role, usuario.Rol.ToString())
+            new(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new("id", usuario.Id.ToString()),
+            new("nombreUsuario", usuario.NombreUsuario),
+            new("nombreCompleto", usuario.NombreCompleto),
+            new("rolId", usuario.RolId.ToString()),
+            new("rol", nombreRol),
+            new("esAdministrador", esAdministrador.ToString()),
+            new(ClaimTypes.Role, nombreRol)
         };
-
-        if (usuario.RolId.HasValue)
-            claims.Add(new Claim("rolId", usuario.RolId.Value.ToString()));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -54,10 +56,8 @@ public class JwtService : IJwtService
             audience: audience,
             claims: claims,
             expires: expiraEn,
-            signingCredentials: creds
-        );
+            signingCredentials: creds);
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-        return (tokenString, expiraEn);
+        return (new JwtSecurityTokenHandler().WriteToken(token), expiraEn);
     }
 }

@@ -19,5 +19,18 @@ public enum ModuloSistema
     Permisos = 15,
     Descuentos = 16,
     Impuestos = 17,
-    MovimientosInventario = 18
+    MovimientosInventario = 18,
+    Colores = 19,
+    Tallas = 20,
+    Marcas = 21,
+    Modelos = 22,
+    CargasMasivas = 23,
+    ReportesAdministrativos = 24,
+    TiposClientes = 25,
+    InsumosAdministrativos = 26,
+    MetodosPago = 27,
+    Sucursales = 28,
+    Almacenes = 29,
+    UbicacionesAlmacen = 30,
+    Caja = 31
 }

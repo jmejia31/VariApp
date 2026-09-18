@@ -1,24 +1,16 @@
-using InventoryApp.Domain.Enums;
-
 namespace InventoryApp.Domain.Entities;
 
+/// <summary>
+/// Grant relacional explícito entre un rol y un permiso.
+/// La existencia de la fila significa permitido; su ausencia significa denegado.
+/// </summary>
 public class RolPermiso
 {
     public int Id { get; set; }
 
-    /// Enum legado, se conserva por compatibilidad durante la migración a roles dinámicos.
-    public RolUsuario Rol { get; set; }
+    public int RolId { get; set; }
+    public Rol RolEntidad { get; set; } = null!;
 
-    /// FK al catálogo dinámico de roles. Nullable mientras conviven ambos modelos;
-    /// se vuelve la fuente de verdad una vez migrados los datos existentes.
-    public int? RolId { get; set; }
-
-    /// FK al catálogo dinámico de permisos (Domain.Entities.Permiso). Nullable
-    /// mientras conviven ambos modelos; Modulo/Accion se conservan para no
-    /// romper filas existentes ni el filtro RequierePermiso actual.
-    public int? PermisoId { get; set; }
-
-    public ModuloSistema Modulo { get; set; }
-    public AccionPermiso Accion { get; set; }
-    public bool Permitido { get; set; }
+    public int PermisoId { get; set; }
+    public Permiso Permiso { get; set; } = null!;
 }

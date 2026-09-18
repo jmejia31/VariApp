@@ -31,6 +31,14 @@ export class CategoriaService {
     return this.http.put<ApiResponse<Categoria>>(`${this.apiUrl}/${id}`, value);
   }
 
+  activar(id: number): Observable<ApiResponse<Categoria>> {
+    return this.http.patch<ApiResponse<Categoria>>(`${this.apiUrl}/${id}/activar`, {});
+  }
+
+  desactivar(id: number): Observable<ApiResponse<Categoria>> {
+    return this.http.patch<ApiResponse<Categoria>>(`${this.apiUrl}/${id}/desactivar`, {});
+  }
+
   delete(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }

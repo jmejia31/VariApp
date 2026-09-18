@@ -65,3 +65,55 @@ public class UpdateEmpresaConfiguracionDto
     public string? TextoFactura { get; set; }
     public string? TextoReportes { get; set; }
 }
+
+/// <summary>
+/// Contrato tenant-first para la configuración independiente de una empresa.
+/// Nunca expone CorreoSecretoReferencia ni ninguna credencial en claro.
+/// </summary>
+public sealed class ConfigEmpresaTenantDto
+{
+    public int EmpresaId { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+    public string? Rtn { get; set; }
+    public string? Direccion { get; set; }
+    public string? LogoUrl { get; set; }
+    public string Moneda { get; set; } = "HNL";
+    public string ZonaHoraria { get; set; } = "America/Tegucigalpa";
+    public string ImpuestosJson { get; set; } = "{}";
+    public string EmisionJson { get; set; } = "{}";
+    public string? CorreoRemitente { get; set; }
+    public string? CorreoNombreRemitente { get; set; }
+    public bool CorreoConfigurado { get; set; }
+    public long Version { get; set; }
+    public IReadOnlyList<PlantillaCorreoEmpresaDto> PlantillasCorreo { get; set; } = Array.Empty<PlantillaCorreoEmpresaDto>();
+}
+
+public sealed class UpdateConfigEmpresaTenantDto
+{
+    public string Nombre { get; set; } = string.Empty;
+    public string? Rtn { get; set; }
+    public string? Direccion { get; set; }
+    public string Moneda { get; set; } = "HNL";
+    public string ZonaHoraria { get; set; } = "America/Tegucigalpa";
+    public string ImpuestosJson { get; set; } = "{}";
+    public string EmisionJson { get; set; } = "{}";
+    public string? CorreoRemitente { get; set; }
+    public string? CorreoNombreRemitente { get; set; }
+    public long Version { get; set; }
+}
+
+public sealed class PlantillaCorreoEmpresaDto
+{
+    public string TipoPlantilla { get; set; } = string.Empty;
+    public string Asunto { get; set; } = string.Empty;
+    public string Cuerpo { get; set; } = string.Empty;
+    public bool Activa { get; set; }
+}
+
+public sealed class UpdatePlantillaCorreoEmpresaDto
+{
+    public string Asunto { get; set; } = string.Empty;
+    public string Cuerpo { get; set; } = string.Empty;
+    public bool Activa { get; set; } = true;
+    public long Version { get; set; }
+}

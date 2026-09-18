@@ -11,7 +11,11 @@ public class CategoriaConfiguration : IEntityTypeConfiguration<Categoria>
         builder.ToTable("Categorias");
         builder.Property(c => c.Nombre).IsRequired().HasMaxLength(100);
         builder.Property(c => c.Descripcion).HasMaxLength(500);
-        builder.HasIndex(c => c.Nombre).IsUnique();
+        builder.Property(c => c.Activa).HasDefaultValue(true);
+        builder.Property(c => c.Eliminada).HasDefaultValue(false);
+        builder.HasIndex(c => c.Nombre).HasDatabaseName("IX_Categorias_Nombre");
+        builder.HasIndex(c => new { c.Eliminada, c.Activa }).HasDatabaseName("IX_Categorias_Estado");
+        builder.HasQueryFilter(c => !c.Eliminada);
 
         builder.HasMany(c => c.Productos)
             .WithOne(p => p.Categoria)

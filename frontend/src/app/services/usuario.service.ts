@@ -5,6 +5,14 @@ import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
 import { CreateUsuarioValue, UpdateUsuarioValue, Usuario, UsuarioDetalle } from '../core/models/usuario.model';
 
+export interface UsuarioEmpresa {
+  id: number;
+  usuarioId: number;
+  empresaId: number;
+  rolId: number;
+  activa: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
   private readonly apiUrl = `${environment.apiUrl}/usuarios`;
@@ -45,5 +53,21 @@ export class UsuarioService {
 
   eliminar(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
+  }
+
+  getEmpresas(id: number): Observable<ApiResponse<UsuarioEmpresa[]>> {
+    return this.http.get<ApiResponse<UsuarioEmpresa[]>>(`${this.apiUrl}/${id}/empresas`);
+  }
+
+  asignarEmpresa(id: number, empresaId: number, rolId: number): Observable<ApiResponse<UsuarioEmpresa>> {
+    return this.http.post<ApiResponse<UsuarioEmpresa>>(`${this.apiUrl}/${id}/empresas`, { empresaId, rolId });
+  }
+
+  cambiarRolEmpresa(id: number, empresaId: number, rolId: number): Observable<ApiResponse<UsuarioEmpresa>> {
+    return this.http.put<ApiResponse<UsuarioEmpresa>>(`${this.apiUrl}/${id}/empresas/${empresaId}/rol`, { rolId });
+  }
+
+  cambiarEstadoEmpresa(id: number, empresaId: number, activa: boolean): Observable<ApiResponse<UsuarioEmpresa>> {
+    return this.http.put<ApiResponse<UsuarioEmpresa>>(`${this.apiUrl}/${id}/empresas/${empresaId}/estado`, { activa });
   }
 }

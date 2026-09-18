@@ -67,6 +67,24 @@ public class CategoriasController : ControllerBase
         return Ok(ApiResponse<CategoriaDto>.Ok(actualizada, "Categoría actualizada correctamente."));
     }
 
+    [HttpPatch("{id:int}/activar")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Activar)]
+    public async Task<IActionResult> Activar(int id)
+    {
+        var categoria = await _categoriaService.CambiarEstadoAsync(id, true);
+        if (categoria is null) return NotFound(ApiResponse<object>.Fail("Categoría no encontrada."));
+        return Ok(ApiResponse<CategoriaDto>.Ok(categoria, "Categoría activada correctamente."));
+    }
+
+    [HttpPatch("{id:int}/desactivar")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Desactivar)]
+    public async Task<IActionResult> Desactivar(int id)
+    {
+        var categoria = await _categoriaService.CambiarEstadoAsync(id, false);
+        if (categoria is null) return NotFound(ApiResponse<object>.Fail("Categoría no encontrada."));
+        return Ok(ApiResponse<CategoriaDto>.Ok(categoria, "Categoría desactivada correctamente."));
+    }
+
     [HttpDelete("{id:int}")]
     [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)

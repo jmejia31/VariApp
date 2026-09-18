@@ -31,11 +31,32 @@ public class ImpuestoAplicadoDto
 
 public class ResultadoCalculoDto
 {
+    public decimal ImporteBruto { get; set; }
+    public decimal ImporteProductos { get; set; }
     public decimal Subtotal { get; set; }
+    public decimal SubtotalNeto
+    {
+        get => Subtotal;
+        set => Subtotal = value;
+    }
+
     public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
     public decimal TotalDescuento { get; set; }
     public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
     public decimal TotalImpuesto { get; set; }
+    public decimal ImpuestoIncluido { get; set; }
+    public decimal ImpuestoAdicional { get; set; }
+
+    public int? CostoEnvioId { get; set; }
+    public string? CostoEnvioNombre { get; set; }
+    public string? CostoEnvioDepartamento { get; set; }
+    public string? CostoEnvioCiudad { get; set; }
+    public string? CostoEnvioZona { get; set; }
+    public string? CostoEnvioModalidad { get; set; }
+    public decimal CostoEnvio { get; set; }
+    public bool EnvioExonerado { get; set; }
+    public string? MotivoExoneracionEnvio { get; set; }
+
     public decimal Total { get; set; }
 }
 
@@ -43,6 +64,9 @@ public class CalcularVentaRequest
 {
     public int? ClienteId { get; set; }
     public string? CodigoPromocional { get; set; }
+    public int? CostoEnvioId { get; set; }
+    public bool EnvioExonerado { get; set; }
+    public string? MotivoExoneracionEnvio { get; set; }
     public List<VentaDetalleInputDto> Detalles { get; set; } = new();
 }
 
