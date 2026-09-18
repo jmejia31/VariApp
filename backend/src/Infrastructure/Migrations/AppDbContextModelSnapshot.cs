@@ -236,7 +236,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<bool>("EsDestacado")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<int?>("EliminadoPorUsuarioId")
                         .HasColumnType("int");
