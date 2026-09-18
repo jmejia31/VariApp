@@ -235,6 +235,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("EsDestacado")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int?>("EliminadoPorUsuarioId")
                         .HasColumnType("int");
 
@@ -7664,6 +7667,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
+
+                    b.HasIndex("EsDestacado", "Activo")
+                        .HasDatabaseName("IX_Productos_EsDestacado_Activo");
 
                     b.HasIndex("ColorId")
                         .HasDatabaseName("IX_Productos_ColorId");
