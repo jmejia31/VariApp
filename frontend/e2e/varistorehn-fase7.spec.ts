@@ -96,11 +96,13 @@ test.describe('VariStoreHn Fase 7 — home comercial', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Laptop Pro 14', exact: true })).toBeVisible();
   });
 
-  test('fuente real carga categorías reales, no descarga catálogo completo ni fabrica destacados', async ({ page }) => {
+  test('fuente real consulta destacados limitados sin descargar el catálogo completo', async ({ page }) => {
     await prepararEmpresa(page);
-    let solicitudesProductos = 0;
+    let solicitudesCatalogoCompleto = 0;
+    let solicitudesDestacados = 0;
     page.on('request', request => {
-      if (/\/tienda\/productos(?:\?|$)/.test(request.url())) solicitudesProductos += 1;
+      if (/\/tienda\/productos(?:\?|$)/.test(request.url())) solicitudesCatalogoCompleto += 1;
+      if (/\/tienda\/productos\/destacados(?:\?|$)/.test(request.url())) solicitudesDestacados += 1;
     });
     await page.route('**/tienda/categorias', async route => {
       await route.fulfill({
@@ -116,6 +118,47 @@ test.describe('VariStoreHn Fase 7 — home comercial', () => {
         })
       });
     });
+    await page.route('**/tienda/productos/destacados?*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: [{
+            id: 501,
+            slug: 'laptop-real-501',
+            nombre: 'Laptop Real Destacada',
+            descripcion: 'Producto destacado persistido',
+            categoriaId: 72,
+            categoriaNombre: 'Oficina real',
+            marcaNombre: 'Marca real',
+            modeloNombre: 'Pro',
+            precio: 12345,
+            precioOferta: null,
+            cantidadDisponible: 5,
+            estaAgotado: false,
+            sku: 'REAL-501',
+            activo: true,
+            esDestacado: true,
+            fechaCreacion: '2026-09-18T12:00:00Z',
+            imagenPrincipalUrl: null,
+            imagenes: [],
+            modelos: [{
+              productoVarianteId: 9001,
+              modeloId: 77,
+              modeloNombre: '16 GB / 512 GB',
+              marcaNombre: 'Marca real',
+              sku: 'REAL-501',
+              precio: 12345,
+              cantidadDisponible: 5,
+              estaAgotado: false,
+              imagenes: []
+            }]
+          }]
+        })
+      });
+    });
 
     await abrirHome(page);
     await activarBaseDatos(page);
@@ -123,12 +166,39 @@ test.describe('VariStoreHn Fase 7 — home comercial', () => {
     await expect(page.locator('.category-card')).toHaveCount(2);
     await expect(page.getByRole('button', { name: 'Explorar Hogar real' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Explorar Oficina real' })).toBeVisible();
+    await expect(page.locator('.featured-card')).toHaveCount(1);
+    await expect(page.locator('.featured-card')).toContainText('Laptop Real Destacada');
+    await expect(page.getByText('Destacado de la tienda', { exact: true })).toBeVisible();
+    await expect.poll(() => solicitudesCatalogoCompleto).toBe(0);
+    await expect.poll(() => solicitudesDestacados).toBe(1);
+  });
+
+  test('fuente real sin destacados mantiene fallback comercial honesto', async ({ page }) => {
+    await prepararEmpresa(page);
+    await page.route('**/tienda/categorias', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ success: true, data: [] })
+      });
+    });
+    await page.route('**/tienda/productos/destacados?*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ success: true, data: [] })
+      });
+    });
+
+    await abrirHome(page);
+    await activarBaseDatos(page);
+
     await expect(page.locator('.featured-card')).toHaveCount(0);
     await expect(page.getByText('Aún no hay productos marcados como destacados', { exact: true })).toBeVisible();
     await expect(page.getByText('El home no elige productos arbitrarios', { exact: false })).toBeVisible();
-    await expect.poll(() => solicitudesProductos).toBe(0);
   });
-
   test('error de categorías reales permanece visible y nunca cae silenciosamente a demo', async ({ page }) => {
     await prepararEmpresa(page);
     await page.route('**/tienda/categorias', async route => {
@@ -137,6 +207,14 @@ test.describe('VariStoreHn Fase 7 — home comercial', () => {
         contentType: 'application/json',
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ success: false, message: 'Servicio no disponible' })
+      });
+    });
+    await page.route('**/tienda/productos/destacados?*', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ success: true, data: [] })
       });
     });
 
