@@ -19,7 +19,7 @@ namespace InventoryApp.API.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/saas/tenants/{empresaId:int}")]
+[Route("saas/tenants/{empresaId:int}")]
 public sealed class SuscripcionesSaaSController : ControllerBase
 {
     private readonly ISuscripcionesSaaSService _service;
