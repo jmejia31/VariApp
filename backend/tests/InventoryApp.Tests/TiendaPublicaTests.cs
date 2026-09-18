@@ -313,9 +313,12 @@ public class TiendaPublicaTests
                 .ReturnsAsync((OfertaPublicaDto?)null);
         }
 
-        inventario ??= new Mock<IInventarioPublicoService>();
-        inventario.Setup(x => x.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
-            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+        if (inventario is null)
+        {
+            inventario = new Mock<IInventarioPublicoService>();
+            inventario.Setup(x => x.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+        }
 
         return new TiendaController(
             (productos ?? new Mock<IProductoService>()).Object,
