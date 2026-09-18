@@ -156,7 +156,11 @@ test.describe('VariStoreHn Fase 9 — ofertas e inventario', () => {
     await expect(page.locator('article.product-card')).toHaveCount(1);
     await page.reload();
     await expect(page.getByRole('checkbox', { name: 'Solo productos en oferta' })).toBeChecked();
-    await expect(page.locator('article.product-card')).toHaveCount(1);
     await expect(page).toHaveURL(/oferta=1/);
+
+    // La fuente BD es un control de vista previa de desarrollo, no estado URL persistente.
+    // Rehidratarla tras la recarga mantiene la prueba enfocada en la persistencia del filtro.
+    await activarBaseDatos(page);
+    await expect(page.locator('article.product-card')).toHaveCount(1);
   });
 });
