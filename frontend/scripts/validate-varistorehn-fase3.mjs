@@ -99,7 +99,7 @@ expect(productsHtml.includes("[attr.aria-label]=\"'Agregar ' + producto.nombre\"
 expect(productsHtml.includes('destinoSaltar="#catalogo-productos"'), 'El header compartido debe saltar al contenido real de Fase 3.');
 expect(productsHtml.includes("[href]=\"'/varistorehn/producto/' + producto.slug\""), 'Ver producto debe navegar por slug al detalle público cuando Fase 4 está activa.');
 expect(productsHtml.includes('Ver producto'), 'La tarjeta debe conservar una acción explícita Ver producto.');
-expect(productsHtml.includes('producto.precioOferta'), 'La tarjeta debe diferenciar un precio promocional público cuando aplique.');
+expect(productsHtml.includes('tieneOferta(modelo)') && productsHtml.includes('precioActual(producto, modelo)'), 'La tarjeta debe diferenciar el precio promocional autoritativo por variante cuando aplique.');
 
 expect(!/#[0-9a-f]{3,8}\b/i.test(productsScss), 'Fase 3 no debe introducir colores hexadecimales fuera del tema global.');
 expect(!/\brgb(?:a)?\s*\(/i.test(productsScss), 'Fase 3 no debe introducir colores RGB paralelos al tema.');
