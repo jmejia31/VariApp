@@ -30,6 +30,34 @@ public sealed class N65FTenantPermissionIsolationTests
     }
 
     [Fact]
+    public async Task RequierePermiso_resuelve_unica_membresia_activa_sin_header()
+    {
+        var fake = new TenantAwarePermisoService();
+        var contextoUnico = new UsuarioTenantScopeActual(
+            UsuarioId: 7,
+            EmpresaId: 31,
+            RolId: 5,
+            RolNombre: "Administrador",
+            EsAdministrador: true);
+        var context = CreateContext(fake, contextoUnico: contextoUnico);
+        var filter = new RequierePermisoAttribute(ModuloSistema.Usuarios, AccionPermiso.Ver);
+        var nextInvoked = false;
+
+        await filter.OnActionExecutionAsync(context, async () =>
+        {
+            nextInvoked = true;
+            return await Task.FromResult(new ActionExecutedContext(
+                context,
+                new List<IFilterMetadata>(),
+                context.Controller));
+        });
+
+        Assert.True(nextInvoked);
+        Assert.Equal(31, fake.EmpresaVerificada);
+        Assert.False(fake.LegacyInvocado);
+    }
+
+    [Fact]
     public async Task RequierePermiso_valida_el_rol_de_la_membresia_del_tenant_solicitado()
     {
         var fake = new TenantAwarePermisoService();
@@ -69,10 +97,12 @@ public sealed class N65FTenantPermissionIsolationTests
 
     private static ActionExecutingContext CreateContext(
         TenantAwarePermisoService permisoService,
-        int? empresaId = null)
+        int? empresaId = null,
+        UsuarioTenantScopeActual? contextoUnico = null)
     {
         var services = new ServiceCollection()
             .AddSingleton<IPermisoService>(permisoService)
+            .AddSingleton<IUsuarioScopeService>(new FixedUsuarioScopeService(contextoUnico))
             .BuildServiceProvider();
 
         var httpContext = new DefaultHttpContext
@@ -100,6 +130,28 @@ public sealed class N65FTenantPermissionIsolationTests
             context,
             new List<IFilterMetadata>(),
             context.Controller));
+
+    private sealed class FixedUsuarioScopeService : IUsuarioScopeService
+    {
+        private readonly UsuarioTenantScopeActual? _contextoUnico;
+
+        public FixedUsuarioScopeService(UsuarioTenantScopeActual? contextoUnico)
+        {
+            _contextoUnico = contextoUnico;
+        }
+
+        public Task<UsuarioScopeActual?> ObtenerActualAsync() =>
+            Task.FromResult<UsuarioScopeActual?>(null);
+
+        public Task<UsuarioTenantScopeActual?> ObtenerActualAsync(
+            int empresaId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<UsuarioTenantScopeActual?>(null);
+
+        public Task<UsuarioTenantScopeActual?> ObtenerUnicoActualAsync(
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(_contextoUnico);
+    }
 
     private sealed class TenantAwarePermisoService : IPermisoService
     {

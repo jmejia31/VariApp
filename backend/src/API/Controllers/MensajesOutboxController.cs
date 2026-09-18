@@ -51,7 +51,7 @@ public sealed class MensajesOutboxController : ControllerBase
         // El filtro de permiso autoriza el tenant indicado en X-Empresa-Id. La ruta
         // no puede apuntar a otro tenant: de lo contrario un usuario con permiso en
         // A y mera membresía en B podría reutilizar el permiso de A para escribir en B.
-        var empresaAutorizada = TenantPermissionContext.RequireEmpresaId(HttpContext);
+        var empresaAutorizada = await TenantPermissionContext.RequireEmpresaIdAsync(HttpContext, cancellationToken);
         if (empresaAutorizada != empresaId)
         {
             if (_auditoria is not null)

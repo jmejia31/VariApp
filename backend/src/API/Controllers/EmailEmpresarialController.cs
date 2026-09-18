@@ -45,7 +45,7 @@ public sealed class EmailEmpresarialController : ControllerBase
         [FromBody] RegistrarEmailEmpresarialRequest request,
         CancellationToken cancellationToken)
     {
-        if (!TenantCoincide(empresaId))
+        if (!await TenantCoincideAsync(empresaId, cancellationToken))
             return Problema(403, "Contexto tenant inconsistente", "El tenant autorizado no coincide con la ruta.", "EMAIL_TENANT_CONTEXT_MISMATCH");
 
         if (string.IsNullOrWhiteSpace(idempotencyKey))
@@ -85,7 +85,7 @@ public sealed class EmailEmpresarialController : ControllerBase
         Guid mensajeId,
         CancellationToken cancellationToken)
     {
-        if (!TenantCoincide(empresaId))
+        if (!await TenantCoincideAsync(empresaId, cancellationToken))
             return Problema(403, "Contexto tenant inconsistente", "El tenant autorizado no coincide con la ruta.", "EMAIL_TENANT_CONTEXT_MISMATCH");
 
         try
@@ -111,7 +111,7 @@ public sealed class EmailEmpresarialController : ControllerBase
         [FromQuery] int tamano = 50,
         CancellationToken cancellationToken = default)
     {
-        if (!TenantCoincide(empresaId))
+        if (!await TenantCoincideAsync(empresaId, cancellationToken))
             return Problema(403, "Contexto tenant inconsistente", "El tenant autorizado no coincide con la ruta.", "EMAIL_TENANT_CONTEXT_MISMATCH");
 
         try
@@ -135,8 +135,8 @@ public sealed class EmailEmpresarialController : ControllerBase
         }
     }
 
-    private bool TenantCoincide(int empresaId) =>
-        TenantPermissionContext.RequireEmpresaId(HttpContext) == empresaId;
+    private async Task<bool> TenantCoincideAsync(int empresaId, CancellationToken cancellationToken) =>
+        await TenantPermissionContext.RequireEmpresaIdAsync(HttpContext, cancellationToken) == empresaId;
 
     private static bool EsColisionIdempotencia(DbUpdateException exception)
     {

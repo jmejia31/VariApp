@@ -250,7 +250,12 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-    var repairService = new ProductionDataRepairService(db); await repairService.RepairAsync();
+    var repairService = new ProductionDataRepairService(db);
+    var repairResult = await repairService.RepairAsync();
+    app.Logger.LogInformation(
+        "ProductionDataRepair EmpresasTotales={EmpresasTotales} MembresiasLegacyCreadas={MembresiasLegacyCreadas}",
+        repairResult.EmpresasTotales,
+        repairResult.MembresiasLegacyCreadas);
     var seedPermisoService = new SeedPermisoService(db); await seedPermisoService.SeedDefaultsAsync();
     var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim(); var adminPassword = app.Configuration["SeedAdmin:Password"];
     if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword) && !await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername))

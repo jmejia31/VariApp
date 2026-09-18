@@ -41,4 +41,14 @@ public interface IUsuarioScopeService
         int empresaId,
         CancellationToken cancellationToken = default) =>
         Task.FromResult<UsuarioTenantScopeActual?>(null);
+
+    /// <summary>
+    /// Resuelve automáticamente el único contexto tenant válido del usuario
+    /// autenticado. Devuelve null cuando no existe exactamente una membresía
+    /// activa verificable; por tanto 0 o múltiples empresas permanecen
+    /// fail-closed y requieren selección explícita.
+    /// </summary>
+    Task<UsuarioTenantScopeActual?> ObtenerUnicoActualAsync(
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<UsuarioTenantScopeActual?>(null);
 }
