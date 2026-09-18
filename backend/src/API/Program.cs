@@ -219,7 +219,29 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) => { context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff"); context.Response.Headers.TryAdd("X-Frame-Options", "DENY"); context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer"); context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()"); await next(); });
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"); if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
 if (!isRender) app.UseHttpsRedirection();
-app.UseCors("FrontendPolicy"); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
+app.UseCors("FrontendPolicy"); app.UseRateLimiter();
+var maintenanceEnabled = app.Configuration.GetValue<bool>("Maintenance:Enabled");
+if (maintenanceEnabled)
+{
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/health"))
+        {
+            await next();
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        context.Response.Headers["Retry-After"] = "300";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            status = 503,
+            title = "Servicio temporalmente en mantenimiento",
+            detail = "VariApp se encuentra temporalmente en mantenimiento programado."
+        });
+    });
+}
+app.UseAuthentication(); app.UseAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "InventoryApp API" })).ExcludeFromDescription();
 app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) => { var databaseReady = false; try { databaseReady = await db.Database.CanConnectAsync(cancellationToken); } catch { databaseReady = false; } return databaseReady ? Results.Ok(new { status = "ready", database = "connected" }) : Results.Json(new { status = "not_ready", database = "unavailable" }, statusCode: StatusCodes.Status503ServiceUnavailable); }).ExcludeFromDescription();
 app.MapControllers();
