@@ -58,6 +58,10 @@ expect(inventoryRepository.includes('TipoAlmacen.Tienda') && inventoryRepository
   'El stock público solo debe agregar almacenes operativos Tienda/Bodega.');
 expect(inventoryRepository.includes('e.Almacen.Sucursal.Activa') && inventoryRepository.includes('!e.Almacen.Sucursal.Eliminado'),
   'El stock público no debe sumar sucursales inactivas o eliminadas.');
+expect(inventoryPublicQuery.includes('e.UbicacionAlmacenId == null')
+    && inventoryPublicQuery.includes('e.UbicacionAlmacen.Activa')
+    && inventoryPublicQuery.includes('!e.UbicacionAlmacen.Eliminado'),
+  'El stock público debe excluir ubicaciones internas inactivas o eliminadas sin descartar existencias raíz.');
 expect(!controller.includes('stock = Math.Max(0, varianteSeleccionada.Cantidad);'),
   'Checkout no debe confiar directamente en ProductoVariante.Cantidad cuando existe autoridad de existencias.');
 
