@@ -50,7 +50,10 @@ expect(controller.includes('stock <= 0 || stock < solicitud.Unidades'), 'Checkou
 expect(controller.includes('_inventarioPublicoService.ObtenerPorVariantesAsync'), 'Catálogo y checkout deben consultar la autoridad pública de ExistenciaVariante.');
 expect(inventoryService.includes('GetOperativasPublicasPorVariantesAsync') && inventoryService.includes('CantidadDisponible = 0'),
   'Una variante sin existencia autoritativa debe fallar cerrada en stock 0.');
-expect(!inventoryRepository.includes('e.UbicacionAlmacenId == null'), 'El total público no debe ignorar stock físico ubicado dentro de un almacén operativo.');
+const inventoryPublicQuery = inventoryRepository.split('GetOperativasPublicasPorVariantesAsync')[1]
+  ?.split('public async Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync')[0] ?? '';
+expect(inventoryPublicQuery.length > 0 && !inventoryPublicQuery.includes('UbicacionAlmacenId == null'),
+  'El total público no debe ignorar stock físico ubicado dentro de un almacén operativo.');
 expect(inventoryRepository.includes('TipoAlmacen.Tienda') && inventoryRepository.includes('TipoAlmacen.Bodega'),
   'El stock público solo debe agregar almacenes operativos Tienda/Bodega.');
 expect(inventoryRepository.includes('e.Almacen.Sucursal.Activa') && inventoryRepository.includes('!e.Almacen.Sucursal.Eliminado'),
