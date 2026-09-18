@@ -1424,3 +1424,14 @@ La revalidación current-standard de N9.5 corrigió same-run los defects causale
 El REVIEW_FIRST de N9.5.G quedó en `vaep/evidence/reviews/N9.5.G_REVIEW_FIRST_20260918T070531Z_SUP24.json` y su receipt en `vaep/evidence/receipts/N9.5.G_RECEIPT_20260918T070609Z_SUP24.json`, con `P0=0/P1=0`. La certificación canónica del parent se materializó en `docs/CERTIFICACION_N9_5_SMOKE_TEST.md`. Los commits posteriores al functional head que sólo añaden evidencia/documentación son equivalentes por construcción y no modifican producto/runtime.
 
 Este bloque forma parte de N9.5.H y se añade de forma estrictamente aditiva junto con `TASKS.md`; `LISTO` para H y para el parent N9.5 sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar el writer temporal, ejecutar REVIEW_FIRST final, persistir receipt y hacer write/readback de COLA/CONFIG/PLAN_MAESTRO. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
+
+
+## 2026-09-18 — ERP-N9.6 — Hypercare current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+N9.6 fue revalidado bajo el estándar current-standard. En N9.6.A se detectó y corrigió same-run un probe temporal que apuntaba a URLs de Producción, incompatible con la autoridad vigente. El probe se retiró y se sustituyó por un one-shot estrictamente Desarrollo-only contra `variapp-api-desarrollo.onrender.com` y `variapp-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y validó health/readiness/latencia del backend DEV, shell/latencia del frontend DEV y comportamiento fail-closed anónimo de superficies críticas. El proyecto Vercel `variapp-desarrollo` no mostró runtime errors en la ventana fresca consultada.
+
+N9.6.B–E resultaron N/A materiales porque Hypercare no introdujo cambios de dominio, contratos, persistencia, migraciones, backend/API ni frontend/UX. N9.6.F confirmó los controles anónimos fail-closed y N9.6.G conservó como causal la aceptación exact-product `35316302603` (`100/100` Playwright + SMTP/PDF) por equivalencia demostrada con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`, complementada por el gate Hypercare DEV fresco.
+
+La certificación canónica quedó en `docs/CERTIFICACION_N9_6_HYPERCARE.md`. No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se añade de forma estrictamente append-only junto con `TASKS.md`; el cierre `LISTO` de N9.6.H y del parent N9.6 requiere todavía el readback final, REVIE_FIRST P0=0/P1=0 y receipt posterior al append.

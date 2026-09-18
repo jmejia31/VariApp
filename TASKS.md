@@ -804,3 +804,13 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] N9.5.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; su `LISTO` sólo es válido tras REVIEW_FIRST, receipt y readback posteriores a este append.
 
 **El parent N9.5 sólo queda formalmente `LISTO` cuando COLA/CONFIG/PLAN_MAESTRO y el receipt fresco de N9.5.H confirman el cierre; este texto aislado no auto-certifica estado ni autoriza promoción.**
+
+
+## ERP-N9.6 — Hypercare — cierre current-standard 2026-09-18
+
+- [x] N9.6.A–G revalidados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Recovery same-run: retirado el probe temporal que apuntaba a Producción; reemplazado por verificación one-shot estrictamente DEV y luego retirado.
+- [x] Gate Hypercare DEV `35319732966` SUCCESS: backend health/readiness/latencia, frontend shell/latencia y superficies críticas anónimas fail-closed.
+- [x] Functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0` preservado por equivalencia de producto; aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF).
+- [x] Certificación canónica: `docs/CERTIFICACION_N9_6_HYPERCARE.md`.
+- [x] N9.6.H materializa este registro y su bloque correspondiente en `CHANGELOG_AI.md` mediante append byte-safe; `LISTO` sólo se declara tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar el writer temporal, REVIEW_FIRST final, receipt y write/readback.
