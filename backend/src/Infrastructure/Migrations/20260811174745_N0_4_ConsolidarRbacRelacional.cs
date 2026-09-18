@@ -105,11 +105,42 @@ SET rp.RolId = r.Id
 WHERE rp.Permitido = 1 AND rp.RolId IS NULL;
 ");
 
+            // La base productiva puede tener grants legacy válidos cuyo par
+            // Modulo/Accion aún no fue materializado en Permisos porque el seeder
+            // moderno corre después de Database.MigrateAsync(). Preserva esos grants:
+            // crea únicamente pares dentro de los enums históricos conocidos.
+            migrationBuilder.Sql(@"
+INSERT INTO Permisos
+    (Codigo, Nombre, Descripcion, Modulo, Accion, EsSistema, Activo, Eliminado, FechaCreacion)
+SELECT
+    CONCAT('LEGACY.N04.', rp.Modulo, '.', rp.Accion),
+    CONCAT('Permiso legacy ', rp.Modulo, ' - ', rp.Accion),
+    'Permiso preservado desde RolPermisos legacy durante ERP-N0.4.',
+    rp.Modulo,
+    rp.Accion,
+    1,
+    1,
+    0,
+    UTC_TIMESTAMP(6)
+FROM RolPermisos rp
+LEFT JOIN Permisos p
+  ON p.Modulo = rp.Modulo
+ AND p.Accion = rp.Accion
+WHERE rp.Permitido = 1
+  AND p.Id IS NULL
+  AND rp.Modulo BETWEEN 1 AND 31
+  AND rp.Accion BETWEEN 1 AND 29
+GROUP BY rp.Modulo, rp.Accion;
+");
+
+            // Normaliza PermisoId por el par legacy autoritativo. Esto también
+            // repara un PermisoId parcial/obsoleto si el par sí es representable.
             migrationBuilder.Sql(@"
 UPDATE RolPermisos rp
 JOIN Permisos p ON p.Modulo = rp.Modulo AND p.Accion = rp.Accion
 SET rp.PermisoId = p.Id
-WHERE rp.Permitido = 1 AND rp.PermisoId IS NULL;
+WHERE rp.Permitido = 1
+  AND (rp.PermisoId IS NULL OR rp.PermisoId <> p.Id);
 ");
 
             // En el modelo N0.4 una denegación es ausencia de grant, no una fila Permitido=false.
@@ -117,37 +148,49 @@ WHERE rp.Permitido = 1 AND rp.PermisoId IS NULL;
 
             // Fail closed: si queda información que no puede representarse en el RBAC
             // normalizado se aborta la migración antes de retirar columnas legacy.
+            // Guard fail-closed y diagnóstico compatible con Aiven: si queda
+            // un usuario inválido, la colisión de PK incluye su Id/RolId en el error.
             migrationBuilder.Sql(@"
-SET @n04_bad_users := (
-    SELECT COUNT(*)
+SET @n04_bad_user_detail := (
+    SELECT CONCAT('BAD_USER:id=', u.Id, ':rolId=', COALESCE(CAST(u.RolId AS CHAR), 'NULL'))
     FROM Usuarios u
     WHERE u.RolId IS NULL
        OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = u.RolId)
+    ORDER BY u.Id
+    LIMIT 1
 );
 ");
             migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_users;");
-            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_users (Id INT NOT NULL PRIMARY KEY);");
-            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Id) VALUES (1);");
-            // Fail closed sin PREPARE/SIGNAL: si hay usuarios inválidos, este segundo
-            // INSERT duplica la PK y aborta la migración de forma compatible con Aiven/MySQL.
-            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Id) SELECT 1 WHERE @n04_bad_users <> 0;");
+            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_users (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Detalle) SELECT @n04_bad_user_detail WHERE @n04_bad_user_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Detalle) SELECT @n04_bad_user_detail WHERE @n04_bad_user_detail IS NOT NULL;");
             migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_users;");
 
+            // Si queda un grant no representable, falla antes de retirar columnas
+            // legacy y deja en el propio error los valores necesarios para diagnosticarlo.
             migrationBuilder.Sql(@"
-SET @n04_bad_grants := (
-    SELECT COUNT(*)
+SET @n04_bad_grant_detail := (
+    SELECT CONCAT(
+        'BAD_GRANT:id=', rp.Id,
+        ':rol=', COALESCE(CAST(rp.Rol AS CHAR), 'NULL'),
+        ':mod=', COALESCE(CAST(rp.Modulo AS CHAR), 'NULL'),
+        ':acc=', COALESCE(CAST(rp.Accion AS CHAR), 'NULL'),
+        ':rolId=', COALESCE(CAST(rp.RolId AS CHAR), 'NULL'),
+        ':permisoId=', COALESCE(CAST(rp.PermisoId AS CHAR), 'NULL')
+    )
     FROM RolPermisos rp
     WHERE rp.RolId IS NULL
        OR rp.PermisoId IS NULL
        OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = rp.RolId)
        OR NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId)
+    ORDER BY rp.Id
+    LIMIT 1
 );
 ");
             migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_grants;");
-            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_grants (Id INT NOT NULL PRIMARY KEY);");
-            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Id) VALUES (1);");
-            // Mismo guard compatible con Aiven para grants no representables.
-            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Id) SELECT 1 WHERE @n04_bad_grants <> 0;");
+            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_grants (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Detalle) SELECT @n04_bad_grant_detail WHERE @n04_bad_grant_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Detalle) SELECT @n04_bad_grant_detail WHERE @n04_bad_grant_detail IS NOT NULL;");
             migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_grants;");
 
             migrationBuilder.DropForeignKey(
@@ -236,15 +279,20 @@ SET @n04_down_unsupported := (
 );
 ");
             migrationBuilder.Sql(@"
-SET @n04_guard := IF(
-    @n04_down_unsupported = 0,
-    'SELECT 1',
-    'SIGNAL SQLSTATE ''45000'' SET MESSAGE_TEXT = ''ERP-N0.4 downgrade bloqueado: existen grants de roles dinámicos no representables en RolUsuario legacy'''
+SET @n04_bad_down_detail := (
+    SELECT CONCAT('BAD_DOWNGRADE:rolId=', r.Id, ':rol=', r.NombreNormalizado)
+    FROM RolPermisos rp
+    JOIN Roles r ON r.Id = rp.RolId
+    WHERE r.NombreNormalizado NOT IN ('ADMINISTRADOR', 'VENDEDOR')
+    ORDER BY r.Id
+    LIMIT 1
 );
 ");
-            migrationBuilder.Sql("PREPARE n04_stmt FROM @n04_guard;");
-            migrationBuilder.Sql("EXECUTE n04_stmt;");
-            migrationBuilder.Sql("DEALLOCATE PREPARE n04_stmt;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_down;");
+            migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_down (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_down (Detalle) SELECT @n04_bad_down_detail WHERE @n04_bad_down_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_down (Detalle) SELECT @n04_bad_down_detail WHERE @n04_bad_down_detail IS NOT NULL;");
+            migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_down;");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_RolPermisos_Roles_RolId",
