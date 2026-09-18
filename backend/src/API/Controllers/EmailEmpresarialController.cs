@@ -20,7 +20,7 @@ namespace InventoryApp.API.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/email-empresarial/tenants/{empresaId:int}")]
+[Route("email-empresarial/tenants/{empresaId:int}")]
 public sealed class EmailEmpresarialController : ControllerBase
 {
     private const string IndiceIdempotencia = "UX_EmailsEmpresariales_Empresa_Idempotencia";
