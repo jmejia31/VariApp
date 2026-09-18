@@ -150,43 +150,47 @@ WHERE rp.Permitido = 1
             // normalizado se aborta la migración antes de retirar columnas legacy.
             // Guard fail-closed y diagnóstico compatible con Aiven: si queda
             // un usuario inválido, la colisión de PK incluye su Id/RolId en el error.
+            migrationBuilder.Sql(@"
+SET @n04_bad_user_detail := (
+    SELECT CONCAT('BAD_USER:id=', u.Id, ':rolId=', COALESCE(CAST(u.RolId AS CHAR), 'NULL'))
+    FROM Usuarios u
+    WHERE u.RolId IS NULL
+       OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = u.RolId)
+    ORDER BY u.Id
+    LIMIT 1
+);
+");
             migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_users;");
             migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_users (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
-            migrationBuilder.Sql(@"
-INSERT INTO __n04_guard_users (Detalle)
-SELECT CONCAT('BAD_USER:id=', u.Id, ':rolId=', COALESCE(CAST(u.RolId AS CHAR), 'NULL'))
-FROM Usuarios u
-WHERE u.RolId IS NULL
-   OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = u.RolId)
-ORDER BY u.Id
-LIMIT 1;
-");
-            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Detalle) SELECT Detalle FROM __n04_guard_users LIMIT 1;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Detalle) SELECT @n04_bad_user_detail WHERE @n04_bad_user_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_users (Detalle) SELECT @n04_bad_user_detail WHERE @n04_bad_user_detail IS NOT NULL;");
             migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_users;");
 
             // Si queda un grant no representable, falla antes de retirar columnas
             // legacy y deja en el propio error los valores necesarios para diagnosticarlo.
+            migrationBuilder.Sql(@"
+SET @n04_bad_grant_detail := (
+    SELECT CONCAT(
+        'BAD_GRANT:id=', rp.Id,
+        ':rol=', COALESCE(CAST(rp.Rol AS CHAR), 'NULL'),
+        ':mod=', COALESCE(CAST(rp.Modulo AS CHAR), 'NULL'),
+        ':acc=', COALESCE(CAST(rp.Accion AS CHAR), 'NULL'),
+        ':rolId=', COALESCE(CAST(rp.RolId AS CHAR), 'NULL'),
+        ':permisoId=', COALESCE(CAST(rp.PermisoId AS CHAR), 'NULL')
+    )
+    FROM RolPermisos rp
+    WHERE rp.RolId IS NULL
+       OR rp.PermisoId IS NULL
+       OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = rp.RolId)
+       OR NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId)
+    ORDER BY rp.Id
+    LIMIT 1
+);
+");
             migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_grants;");
             migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_grants (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
-            migrationBuilder.Sql(@"
-INSERT INTO __n04_guard_grants (Detalle)
-SELECT CONCAT(
-    'BAD_GRANT:id=', rp.Id,
-    ':rol=', COALESCE(CAST(rp.Rol AS CHAR), 'NULL'),
-    ':mod=', COALESCE(CAST(rp.Modulo AS CHAR), 'NULL'),
-    ':acc=', COALESCE(CAST(rp.Accion AS CHAR), 'NULL'),
-    ':rolId=', COALESCE(CAST(rp.RolId AS CHAR), 'NULL'),
-    ':permisoId=', COALESCE(CAST(rp.PermisoId AS CHAR), 'NULL')
-)
-FROM RolPermisos rp
-WHERE rp.RolId IS NULL
-   OR rp.PermisoId IS NULL
-   OR NOT EXISTS (SELECT 1 FROM Roles r WHERE r.Id = rp.RolId)
-   OR NOT EXISTS (SELECT 1 FROM Permisos p WHERE p.Id = rp.PermisoId)
-ORDER BY rp.Id
-LIMIT 1;
-");
-            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Detalle) SELECT Detalle FROM __n04_guard_grants LIMIT 1;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Detalle) SELECT @n04_bad_grant_detail WHERE @n04_bad_grant_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_grants (Detalle) SELECT @n04_bad_grant_detail WHERE @n04_bad_grant_detail IS NOT NULL;");
             migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_grants;");
 
             migrationBuilder.DropForeignKey(
@@ -274,18 +278,20 @@ SET @n04_down_unsupported := (
     WHERE r.NombreNormalizado NOT IN ('ADMINISTRADOR', 'VENDEDOR')
 );
 ");
+            migrationBuilder.Sql(@"
+SET @n04_bad_down_detail := (
+    SELECT CONCAT('BAD_DOWNGRADE:rolId=', r.Id, ':rol=', r.NombreNormalizado)
+    FROM RolPermisos rp
+    JOIN Roles r ON r.Id = rp.RolId
+    WHERE r.NombreNormalizado NOT IN ('ADMINISTRADOR', 'VENDEDOR')
+    ORDER BY r.Id
+    LIMIT 1
+);
+");
             migrationBuilder.Sql("DROP TEMPORARY TABLE IF EXISTS __n04_guard_down;");
             migrationBuilder.Sql("CREATE TEMPORARY TABLE __n04_guard_down (Detalle VARCHAR(191) NOT NULL PRIMARY KEY);");
-            migrationBuilder.Sql(@"
-INSERT INTO __n04_guard_down (Detalle)
-SELECT CONCAT('BAD_DOWNGRADE:rolId=', r.Id, ':rol=', r.NombreNormalizado)
-FROM RolPermisos rp
-JOIN Roles r ON r.Id = rp.RolId
-WHERE r.NombreNormalizado NOT IN ('ADMINISTRADOR', 'VENDEDOR')
-ORDER BY r.Id
-LIMIT 1;
-");
-            migrationBuilder.Sql("INSERT INTO __n04_guard_down (Detalle) SELECT Detalle FROM __n04_guard_down LIMIT 1;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_down (Detalle) SELECT @n04_bad_down_detail WHERE @n04_bad_down_detail IS NOT NULL;");
+            migrationBuilder.Sql("INSERT INTO __n04_guard_down (Detalle) SELECT @n04_bad_down_detail WHERE @n04_bad_down_detail IS NOT NULL;");
             migrationBuilder.Sql("DROP TEMPORARY TABLE __n04_guard_down;");
 
             migrationBuilder.DropForeignKey(
