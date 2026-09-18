@@ -94,6 +94,19 @@ public sealed class ProductionDataRepairTenantIntegrationTests
             Assert.Equal(0, await db.Set<Empresa>().CountAsync());
             Assert.Equal(0, await db.UsuarioEmpresas.CountAsync());
 
+            var candidatosEsperados = await db.Usuarios
+                .AsNoTracking()
+                .Where(u =>
+                    !u.Eliminado &&
+                    u.Activo &&
+                    !u.Bloqueado &&
+                    u.RolId > 0 &&
+                    u.RolEntidad.Activo &&
+                    !u.RolEntidad.Eliminado &&
+                    !db.UsuarioEmpresas.Any(m => m.UsuarioId == u.Id))
+                .CountAsync();
+            Assert.True(candidatosEsperados >= 1);
+
             var repair = new ProductionDataRepairService(db);
             var primera = await repair.RepairAsync();
 
@@ -107,7 +120,9 @@ public sealed class ProductionDataRepairTenantIntegrationTests
             Assert.Equal("HNL", config.Moneda);
             Assert.Equal("America/Tegucigalpa", config.ZonaHoraria);
 
-            var membresia = await db.UsuarioEmpresas.AsNoTracking().SingleAsync();
+            var membresia = await db.UsuarioEmpresas
+                .AsNoTracking()
+                .SingleAsync(x => x.UsuarioId == usuario.Id && x.EmpresaId == empresa.Id);
             Assert.Equal(usuario.Id, membresia.UsuarioId);
             Assert.Equal(empresa.Id, membresia.EmpresaId);
             Assert.Equal(rol.Id, membresia.RolId);
@@ -116,13 +131,15 @@ public sealed class ProductionDataRepairTenantIntegrationTests
             Assert.Equal(1, primera.EmpresasTotales);
             Assert.Equal(1, primera.EmpresaConfiguracionesActivas);
             Assert.Equal(empresa.Id, primera.EmpresaMaterializadaId);
-            Assert.Equal(1, primera.MembresiasLegacyCreadas);
+            Assert.Equal(candidatosEsperados, primera.MembresiasLegacyCreadas);
 
             var segunda = await repair.RepairAsync();
 
             Assert.Equal(1, await db.Set<Empresa>().CountAsync());
             Assert.Equal(1, await db.Set<ConfigEmpresa>().CountAsync());
-            Assert.Equal(1, await db.UsuarioEmpresas.CountAsync());
+            Assert.Equal(
+                candidatosEsperados,
+                await db.UsuarioEmpresas.CountAsync(x => x.EmpresaId == empresa.Id));
             Assert.Equal(1, segunda.EmpresasTotales);
             Assert.Equal(1, segunda.EmpresaConfiguracionesActivas);
             Assert.Null(segunda.EmpresaMaterializadaId);
