@@ -60,9 +60,28 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
         }
 
         var usuarioId = _currentUser.UsuarioId.Value;
+        return await ContextosTenantValidos(usuarioId)
+            .SingleOrDefaultAsync(x => x.EmpresaId == empresaId, cancellationToken);
+    }
+
+    public async Task<UsuarioTenantScopeActual?> ObtenerUnicoActualAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (!_currentUser.EstaAutenticado || !_currentUser.UsuarioId.HasValue)
+            return null;
+
+        var candidatos = await ContextosTenantValidos(_currentUser.UsuarioId.Value)
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        return candidatos.Count == 1 ? candidatos[0] : null;
+    }
+
+    private IQueryable<UsuarioTenantScopeActual> ContextosTenantValidos(int usuarioId)
+    {
         var empresas = _context.Set<Empresa>().AsNoTracking();
 
-        return await (
+        return
             from membresia in _context.UsuarioEmpresas.AsNoTracking()
             join usuario in _context.Usuarios.AsNoTracking()
                 on membresia.UsuarioId equals usuario.Id
@@ -71,7 +90,6 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
             join rol in _context.Roles.AsNoTracking()
                 on membresia.RolId equals rol.Id
             where membresia.UsuarioId == usuarioId &&
-                  membresia.EmpresaId == empresaId &&
                   membresia.Activa &&
                   usuario.Activo &&
                   !usuario.Bloqueado &&
@@ -84,7 +102,6 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
                 empresa.Id,
                 rol.Id,
                 rol.Nombre,
-                rol.EsAdministrador))
-            .SingleOrDefaultAsync(cancellationToken);
+                rol.EsAdministrador);
     }
 }
