@@ -60,8 +60,8 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
         }
 
         var usuarioId = _currentUser.UsuarioId.Value;
-        return await ContextosTenantValidos(usuarioId)
-            .SingleOrDefaultAsync(x => x.EmpresaId == empresaId, cancellationToken);
+        return await ContextosTenantValidos(usuarioId, empresaId)
+            .SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<UsuarioTenantScopeActual?> ObtenerUnicoActualAsync(
@@ -77,7 +77,9 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
         return candidatos.Count == 1 ? candidatos[0] : null;
     }
 
-    private IQueryable<UsuarioTenantScopeActual> ContextosTenantValidos(int usuarioId)
+    private IQueryable<UsuarioTenantScopeActual> ContextosTenantValidos(
+        int usuarioId,
+        int? empresaId = null)
     {
         var empresas = _context.Set<Empresa>().AsNoTracking();
 
@@ -96,7 +98,8 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
                   !usuario.Eliminado &&
                   empresa.Activa &&
                   rol.Activo &&
-                  !rol.Eliminado
+                  !rol.Eliminado &&
+                  (!empresaId.HasValue || membresia.EmpresaId == empresaId.Value)
             select new UsuarioTenantScopeActual(
                 usuario.Id,
                 empresa.Id,
