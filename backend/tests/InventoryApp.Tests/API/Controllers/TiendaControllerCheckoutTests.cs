@@ -301,6 +301,9 @@ public sealed class TiendaControllerCheckoutTests
         promociones.Setup(service => service.ResolverAsync(
                 It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<decimal>(), It.IsAny<DateTime>()))
             .ReturnsAsync((OfertaPublicaDto?)null);
-        return new TiendaController(productos.Object, categorias.Object, promociones.Object);
+        var inventario = new Mock<IInventarioPublicoService>();
+        inventario.Setup(service => service.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+        return new TiendaController(productos.Object, categorias.Object, promociones.Object, inventario.Object);
     }
 }

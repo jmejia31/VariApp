@@ -263,10 +263,47 @@ public class TiendaPublicaTests
         Assert.IsType<NotFoundObjectResult>(await controller.GetCategoria("interna-8"));
     }
 
+    [Fact]
+    public async Task StockAutoritativo_CeroBloqueaAunqueCantidadLegacySeaPositiva()
+    {
+        var productos = new Mock<IProductoService>();
+        productos.Setup(x => x.GetPagedAsync(It.IsAny<PagedRequest>())).ReturnsAsync(new PagedResult<ProductoDto>
+        {
+            Items = new List<ProductoDto>
+            {
+                new()
+                {
+                    Id = 55, Nombre = "Legacy con stock fantasma", Activo = true,
+                    Variantes = new List<ProductoVarianteDto>
+                    {
+                        new() { Id = 550, ProductoId = 55, Activo = true, Precio = 100m, Cantidad = 9 }
+                    }
+                }
+            },
+            Page = 1, PageSize = 48, TotalCount = 1
+        });
+        var inventario = new Mock<IInventarioPublicoService>();
+        inventario.Setup(x => x.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>
+            {
+                [550] = new() { ProductoVarianteId = 550, CantidadDisponible = 0, EstaAgotada = true, TieneFuenteAutoritativa = false }
+            });
+
+        var controller = CrearController(productos: productos, inventario: inventario);
+        var ok = Assert.IsType<OkObjectResult>(await controller.GetProductos(new ProductoPagedRequest { PageSize = 48 }));
+        var response = Assert.IsType<ApiResponse<PagedResult<ProductoCatalogoPublicoDto>>>(ok.Value);
+        var variante = Assert.Single(Assert.Single(response.Data!.Items).Modelos);
+
+        Assert.Equal(0, variante.CantidadDisponible);
+        Assert.True(variante.EstaAgotado);
+        Assert.Equal("Agotado", variante.EstadoDisponibilidad);
+    }
+
     private static TiendaController CrearController(
         Mock<IProductoService>? productos = null,
         Mock<ICategoriaService>? categorias = null,
-        Mock<IPromocionPublicaService>? promociones = null)
+        Mock<IPromocionPublicaService>? promociones = null,
+        Mock<IInventarioPublicoService>? inventario = null)
     {
         if (promociones is null)
         {
@@ -276,10 +313,15 @@ public class TiendaPublicaTests
                 .ReturnsAsync((OfertaPublicaDto?)null);
         }
 
+        inventario ??= new Mock<IInventarioPublicoService>();
+        inventario.Setup(x => x.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+
         return new TiendaController(
             (productos ?? new Mock<IProductoService>()).Object,
             (categorias ?? new Mock<ICategoriaService>()).Object,
-            promociones.Object);
+            promociones.Object,
+            inventario.Object);
     }
 
     private static void AssertEndpoint(string metodo, string plantilla)

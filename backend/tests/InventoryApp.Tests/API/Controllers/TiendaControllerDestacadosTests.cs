@@ -53,7 +53,10 @@ public sealed class TiendaControllerDestacadosTests
         promociones.Setup(service => service.ResolverAsync(
                 It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<decimal>(), It.IsAny<DateTime>()))
             .ReturnsAsync((OfertaPublicaDto?)null);
-        var controller = new TiendaController(productos.Object, categorias.Object, promociones.Object);
+        var inventario = new Mock<IInventarioPublicoService>();
+        inventario.Setup(service => service.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+        var controller = new TiendaController(productos.Object, categorias.Object, promociones.Object, inventario.Object);
 
         var result = await controller.GetProductosDestacados(99);
 
