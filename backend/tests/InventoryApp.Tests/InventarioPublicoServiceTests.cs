@@ -9,14 +9,14 @@ namespace InventoryApp.Tests;
 public sealed class InventarioPublicoServiceTests
 {
     [Fact]
-    public async Task ObtenerPorVariantesAsync_AgregaDisponibleYMinimoDeRaicesAutoritativas()
+    public async Task ObtenerPorVariantesAsync_AgregaDisponibleYMinimoDeExistenciasAutoritativas()
     {
         var repo = new Mock<IExistenciaVarianteRepository>();
         var a = new ExistenciaVariante { ProductoVarianteId = 10 };
         a.EstablecerStocks(10, 2, 0, 3, null);
         var b = new ExistenciaVariante { ProductoVarianteId = 10 };
         b.EstablecerStocks(5, 1, 0, 2, null);
-        repo.Setup(x => x.GetRaizOperativaPorVariantesAsync(
+        repo.Setup(x => x.GetOperativasPublicasPorVariantesAsync(
                 It.Is<IReadOnlyCollection<int>>(ids => ids.SequenceEqual(new[] { 10 }))))
             .ReturnsAsync(new List<ExistenciaVariante> { a, b });
 
@@ -32,7 +32,7 @@ public sealed class InventarioPublicoServiceTests
     }
 
     [Fact]
-    public async Task ObtenerPorVariantesAsync_SinRaizAutoritativa_FallaCerradoEnCero()
+    public async Task ObtenerPorVariantesAsync_SinExistenciaAutoritativa_FallaCerradoEnCero()
     {
         var repo = new Mock<IExistenciaVarianteRepository>();
         repo.Setup(x => x.GetRaizOperativaPorVariantesAsync(It.IsAny<IReadOnlyCollection<int>>()))

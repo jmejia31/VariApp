@@ -48,9 +48,9 @@ expect(promoService.includes('TipoDescuento.Porcentaje'), 'Solo reglas reproduci
 expect(controller.includes('precioVigente = oferta?.PrecioOferta ?? precio'), 'Checkout debe recalcular el mismo precio promocional.');
 expect(controller.includes('stock <= 0 || stock < solicitud.Unidades'), 'Checkout debe bloquear explícitamente stock 0.');
 expect(controller.includes('_inventarioPublicoService.ObtenerPorVariantesAsync'), 'Catálogo y checkout deben consultar la autoridad pública de ExistenciaVariante.');
-expect(inventoryService.includes('GetRaizOperativaPorVariantesAsync') && inventoryService.includes('CantidadDisponible = 0'),
+expect(inventoryService.includes('GetOperativasPublicasPorVariantesAsync') && inventoryService.includes('CantidadDisponible = 0'),
   'Una variante sin existencia autoritativa debe fallar cerrada en stock 0.');
-expect(inventoryRepository.includes('e.UbicacionAlmacenId == null'), 'El stock público debe usar la existencia raíz del almacén.');
+expect(!inventoryRepository.includes('e.UbicacionAlmacenId == null'), 'El total público no debe ignorar stock físico ubicado dentro de un almacén operativo.');
 expect(inventoryRepository.includes('TipoAlmacen.Tienda') && inventoryRepository.includes('TipoAlmacen.Bodega'),
   'El stock público solo debe agregar almacenes operativos Tienda/Bodega.');
 expect(inventoryRepository.includes('e.Almacen.Sucursal.Activa') && inventoryRepository.includes('!e.Almacen.Sucursal.Eliminado'),

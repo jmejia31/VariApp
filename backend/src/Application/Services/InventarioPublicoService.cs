@@ -17,7 +17,7 @@ public sealed class InventarioPublicoService : IInventarioPublicoService
         if (ids.Length == 0)
             return new Dictionary<int, InventarioPublicoVarianteDto>();
 
-        var existencias = await _repository.GetRaizOperativaPorVariantesAsync(ids);
+        var existencias = await _repository.GetOperativasPublicasPorVariantesAsync(ids);
         var porVariante = existencias
             .GroupBy(e => e.ProductoVarianteId)
             .ToDictionary(g => g.Key, g =>

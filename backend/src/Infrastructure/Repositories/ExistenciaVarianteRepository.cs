@@ -86,7 +86,7 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<List<ExistenciaVariante>> GetRaizOperativaPorVariantesAsync(
+    public async Task<List<ExistenciaVariante>> GetOperativasPublicasPorVariantesAsync(
         IReadOnlyCollection<int> productoVarianteIds)
     {
         var ids = productoVarianteIds.Where(id => id > 0).Distinct().ToArray();
@@ -97,7 +97,6 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
             .AsNoTracking()
             .Where(e =>
                 ids.Contains(e.ProductoVarianteId)
-                && e.UbicacionAlmacenId == null
                 && e.ProductoVariante.Activo
                 && !e.ProductoVariante.Eliminado
                 && e.ProductoVariante.Producto.Activo

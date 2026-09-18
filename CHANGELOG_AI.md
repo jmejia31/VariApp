@@ -1483,8 +1483,8 @@ No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni dat
 
 ## 2026-09-18 — Auditoría quirúrgica post-cierre VariStoreHN Fase 9
 - Hallazgo material corregido: Fase 9 seguía proyectando y validando stock desde `ProductoVariante.Cantidad`, aunque ERP-N1.4 define `ExistenciaVariante` como autoridad de stock vivo.
-- Se añadió `InventarioPublicoService`: agrega `StockDisponible = StockFisico - StockReservado` de existencias raíz en almacenes operativos `Tienda/Bodega`, excluyendo tránsito, devolución, cuarentena, almacenes/sucursales inactivas y ubicaciones internas para no duplicar stock.
-- Una variante sin existencia raíz autoritativa falla cerrada con stock 0; no hereda silenciosamente el contador legacy en runtime real.
+- Se añadió `InventarioPublicoService`: agrega `StockDisponible = StockFisico - StockReservado` de existencias operativas `Tienda/Bodega`, incluyendo raíz y ubicaciones internas como buckets físicos distintos, y excluyendo tránsito, devolución, cuarentena y almacenes/sucursales inactivas.
+- Una variante sin existencia operativa autoritativa falla cerrada con stock 0; no hereda silenciosamente el contador legacy en runtime real.
 - Catálogo, detalle y checkout consumen la misma autoridad pública de inventario. El stock reservado deja de exponerse como vendible.
 - Se añadieron regresiones dirigidas del servicio/controlador y el workflow Fase 9 observa las nuevas superficies.
 - Inventario por sucursal sigue NO_APLICA: sin selección pública de sucursal, VariStoreHN agrega stock vendible de raíces operativas.

@@ -14,7 +14,7 @@ public interface IExistenciaVarianteRepository
         int productoVarianteId,
         int almacenId,
         int? ubicacionAlmacenId);
-    Task<List<ExistenciaVariante>> GetRaizOperativaPorVariantesAsync(
+    Task<List<ExistenciaVariante>> GetOperativasPublicasPorVariantesAsync(
         IReadOnlyCollection<int> productoVarianteIds);
     Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync(
         int? productoId,
