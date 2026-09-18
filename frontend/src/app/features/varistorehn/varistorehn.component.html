@@ -67,7 +67,7 @@
             }
           </button>
           <div class="hero-card">
-            <small>Destacado en demostración</small>
+            <small>{{ utilizarDatosBaseDatos() ? 'Destacado de la tienda' : 'Destacado en demostración' }}</small>
             <strong>{{ destacado.nombre }}</strong>
             <span>Desde {{ moneda(destacado.precio) }}</span>
           </div>

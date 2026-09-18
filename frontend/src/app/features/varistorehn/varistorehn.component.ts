@@ -14,6 +14,7 @@ import {
   ModeloTienda,
   ProductoTienda,
   crearCatalogoEjemplo,
+  mapearProducto,
   telefonoWhatsapp
 } from './varistorehn.catalog';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
@@ -87,6 +88,7 @@ export class VaristorehnComponent implements OnInit {
   } as const;
 
   private cargaCategoriasActual?: Subscription;
+  private cargaDestacadosActual?: Subscription;
 
   ngOnInit(): void {
     const query = this.route.snapshot.queryParamMap;
@@ -137,24 +139,29 @@ export class VaristorehnComponent implements OnInit {
   }
 
   cargarDestacados(): void {
+    this.cargaDestacadosActual?.unsubscribe();
     this.cargandoDestacados.set(true);
     this.errorDestacados.set('');
     this.destacados.set([]);
 
-    // El backend público reserva `esDestacado`, pero hoy no existe una fuente administrativa persistida
-    // que pueda marcar productos reales. Fase 7 no inventa destacados ni descarga el catálogo completo
-    // para escoger productos arbitrarios. El modo demo sí ilustra la sección explícitamente.
-    if (this.utilizarDatosBaseDatos()) {
-      this.cargandoDestacados.set(false);
-      return;
-    }
+    const fuente: Observable<ProductoTienda[]> = this.utilizarDatosBaseDatos()
+      ? this.servicio.obtenerDestacados(4).pipe(map(productos => productos.map(mapearProducto)))
+      : of(
+          crearCatalogoEjemplo()
+            .filter(producto => producto.activo && producto.destacado && Boolean(producto.slug))
+            .slice(0, 4)
+        );
 
-    this.destacados.set(
-      crearCatalogoEjemplo()
-        .filter(producto => producto.activo && producto.destacado && Boolean(producto.slug))
-        .slice(0, 4)
-    );
-    this.cargandoDestacados.set(false);
+    this.cargaDestacadosActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: productos => {
+        this.destacados.set(productos.filter(producto => producto.activo && producto.destacado && Boolean(producto.slug)).slice(0, 4));
+        this.cargandoDestacados.set(false);
+      },
+      error: () => {
+        this.errorDestacados.set('No pudimos cargar los productos destacados. Revisa la conexión e intenta de nuevo; no se sustituyeron datos reales por ejemplos.');
+        this.cargandoDestacados.set(false);
+      }
+    });
   }
 
   cambiarFuente(baseDatos: boolean): void {
