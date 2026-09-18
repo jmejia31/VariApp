@@ -86,10 +86,10 @@ jobs:
           docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -e "
             DELETE FROM Permisos WHERE Modulo=23 AND Accion=27;
 
-            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido,RolId,PermisoId)
+            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido)
             VALUES
-              (9410,1,23,27,1,NULL,NULL),
-              (9411,2,23,27,0,NULL,NULL);
+              (9410,1,23,27,1),
+              (9411,2,23,27,0);
           "
 
       - name: Preflight N0.4
@@ -136,6 +136,41 @@ jobs:
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Permisos WHERE Modulo=23 AND Accion=27 AND Codigo='LEGACY.N04.23.27';")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos rp JOIN Roles r ON r.Id=rp.RolId JOIN Permisos p ON p.Id=rp.PermisoId WHERE r.NombreNormalizado='ADMINISTRADOR' AND p.Modulo=23 AND p.Accion=27;")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9411;")" = '0'
+
+      - name: Guard fail-closed N0.4 ante grant legacy inválido
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot -e "
+            DROP DATABASE IF EXISTS inventoryapp_n04_negative;
+            CREATE DATABASE inventoryapp_n04_negative CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+          "
+
+          export ConnectionStrings__DefaultConnection='Server=127.0.0.1;Port=3306;Database=inventoryapp_n04_negative;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+          dotnet ef database update 20260811032000_N0_3_ConsolidarProductoVariante \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n04_negative -e "
+            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido)
+            VALUES (9499,1,999,999,1);
+          "
+
+          set +e
+          salida="$(dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext 2>&1)"
+          status=$?
+          set -e
+
+          printf '%s\n' "$salida"
+          test "$status" -ne 0
+          printf '%s\n' "$salida" | grep -Fq 'BAD_GRANT:id=9499'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_negative -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260811174745_N0_4_ConsolidarRbacRelacional';")" = '0'
 
       - name: Snapshot EF consistente
         working-directory: backend
