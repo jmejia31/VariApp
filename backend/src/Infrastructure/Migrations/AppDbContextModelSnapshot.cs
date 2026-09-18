@@ -247,6 +247,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -3445,6 +3448,11 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Ambito")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<int?>("ActualizadoPorUsuarioId")
                         .HasColumnType("int");
@@ -7031,6 +7039,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<int>("Accion")
                         .HasColumnType("int");
 
+                    b.Property<int>("Ambito")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
@@ -7083,7 +7096,13 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasIndex("Modulo", "Accion")
                         .IsUnique();
 
-                    b.ToTable("Permisos", (string)null);
+                    b.HasIndex("Ambito", "Activo")
+                        .HasDatabaseName("IX_Permisos_Ambito_Activo");
+
+                    b.ToTable("Permisos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Permisos_Ambito", "`Ambito` IN (1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Plan", b =>
@@ -8191,6 +8210,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
 
+                    b.Property<int?>("AmbitoAutoridad")
+                        .HasColumnType("int");
+
                     b.Property<string>("CorrelationId")
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)");
@@ -8203,6 +8225,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<string>("Entidad")
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)");
+
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Error")
                         .HasMaxLength(1000)
@@ -8229,6 +8254,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
+                    b.Property<int?>("OrigenAutorizacion")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ReferenciaId")
                         .HasColumnType("int");
 
@@ -8254,15 +8282,26 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasIndex("CorrelationId");
 
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("IX_RegistrosAuditoria_EmpresaId");
+
                     b.HasIndex("Fecha");
 
                     b.HasIndex("Resultado");
 
                     b.HasIndex("UsuarioId");
 
+                    b.HasIndex("AmbitoAutoridad", "Fecha")
+                        .HasDatabaseName("IX_RegistrosAuditoria_Ambito_Fecha");
+
                     b.HasIndex("Modulo", "ReferenciaId");
 
-                    b.ToTable("RegistrosAuditoria", (string)null);
+                    b.ToTable("RegistrosAuditoria", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_AmbitoAutoridad", "`AmbitoAutoridad` IS NULL OR `AmbitoAutoridad` IN (1, 2)");
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_EmpresaId_Positivo", "`EmpresaId` IS NULL OR `EmpresaId` > 0");
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_OrigenAutorizacion", "`OrigenAutorizacion` IS NULL OR `OrigenAutorizacion` IN (1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
@@ -8550,10 +8589,21 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("IX_Roles_EmpresaId");
+
                     b.HasIndex("NombreNormalizado")
                         .IsUnique();
 
-                    b.ToTable("Roles", (string)null);
+                    b.HasIndex("Ambito", "Activo")
+                        .HasDatabaseName("IX_Roles_Ambito_Activo");
+
+                    b.ToTable("Roles", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Roles_Ambito", "`Ambito` IN (1, 2)");
+                            t.HasCheckConstraint("CK_Roles_Ambito_Empresa", "(`Ambito` = 2 AND `EmpresaId` IS NULL) OR (`Ambito` = 1)");
+                            t.HasCheckConstraint("CK_Roles_EmpresaId_Positivo", "`EmpresaId` IS NULL OR `EmpresaId` > 0");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.RolPermiso", b =>
@@ -9750,6 +9800,64 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasIndex("RolId");
 
                     b.ToTable("Usuarios", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioRolPlataforma", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RolId")
+                        .HasDatabaseName("IX_UsuarioRolesPlataforma_RolId");
+
+                    b.HasIndex("UsuarioId", "Activa")
+                        .HasDatabaseName("IX_UsuarioRolesPlataforma_UsuarioId_Activa");
+
+                    b.HasIndex("UsuarioId", "RolId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UsuarioRolesPlataforma_UsuarioId_RolId");
+
+                    b.ToTable("UsuarioRolesPlataforma", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_UsuarioRolesPlataforma_RolId", "`RolId` > 0");
+                            t.HasCheckConstraint("CK_UsuarioRolesPlataforma_UsuarioId", "`UsuarioId` > 0");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
@@ -12322,6 +12430,29 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("RolEntidad");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.RegistroAuditoria", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioRolPlataforma", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Rol", null)
+                        .WithMany()
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
@@ -12643,6 +12774,11 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Rol", b =>
                 {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Permisos");
 
                     b.Navigation("Usuarios");
