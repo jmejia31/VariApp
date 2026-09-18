@@ -2,6 +2,7 @@ export const VARISTOREHN_BASE_PATH = 'varistorehn' as const;
 
 /**
  * URLs públicas canónicas definidas por el Plan Maestro v1.1.
+ * Fase 9 incorpora /varistorehn/ofertas como destino público de promociones vigentes.
  * Este módulo construye rutas; no genera slugs. Los slugs deben venir del contrato público.
  */
 export const VARISTOREHN_PATHS = {
