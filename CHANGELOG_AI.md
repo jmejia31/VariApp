@@ -1399,3 +1399,12 @@ Feature freeze: no se aceptan nuevas features sobre este candidato. Un cambio de
 - `CHANGELOG_AI.md` se actualiza mediante append-only desde blob completo, preservando byte por byte todo el historial previo.
 - REVIEW_FIRST final requerido: `P0=0 / P1=0`; después receipt/readback y promoción de `N9.3.A`.
 - Seguridad: solo `Desarrollo`; sin `main`, Producción, merge de PR #2, secretos, DNS/certificados ni writes productivos.
+
+
+## 2026-09-18 — ERP-N9.3 — Backup pre-release current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+Se revalidó N9.3 de extremo a extremo. El gate material fue M11 run `35288756204`: validación de definición/protecciones, certificación segura del proveedor y backup cifrado real de Desarrollo + restore drill del mismo artifact concluyeron `success`. El artifact `10525951057` quedó con digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; el restore aislado verificó checksums y row-counts para 132 tablas base y 104 migraciones EF, con `productionTouched=false`.
+
+N9.3.B/D/E se mantuvieron como N/A grounded donde el backup no exige cambios de dominio, API o UI; N9.3.C/F/G certificaron backup/restore, seguridad y gates causales. P0=0/P1=0 antes del cierre final. Este append es estrictamente aditivo y forma parte de N9.3.H; `LISTO` sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar este writer temporal y persistir receipt/readback. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.

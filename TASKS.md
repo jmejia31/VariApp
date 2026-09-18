@@ -769,3 +769,14 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [ ] `N9.2.H` sólo pasa a `LISTO` después de completar también `CHANGELOG_AI_ADDITIVE_RECONCILIATION`, hard verify de ambos prefijos, REVIEW_FIRST fresco P0=0/P1=0, receipt y write/readback del control-plane.
 
 **CURRENT_PARENT=N9.2.H. NEXT_PARENT_PREARMED=N9.3.A. No se promueve N9.3.A antes del cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
+
+
+## ERP-N9.3 — Backup pre-release — cierre current-standard 2026-09-18
+
+- [x] N9.3.A-G revalidados/certificados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Backup real de Desarrollo ejecutado por M11 run `35288756204`: definición/protecciones, proveedor y backup+restore concluyeron `success`.
+- [x] Artifact cifrado `10525951057`, digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; retención 14 días.
+- [x] Restore drill del mismo artifact en MySQL descartable: 132 tablas base, 104 migraciones EF, checksums y row-counts verificados, `status=SUCCESS`, `productionTouched=false`.
+- [x] N9.3.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; la certificación `LISTO` sólo se emite después del readback y REVIEW_FIRST final.
+
+**N9.3 no se promueve por este texto aislado: el cierre autoritativo requiere receipt/readback current-standard en COLA/CONFIG. No se tocó main, Producción, PR #2, secretos, DNS ni certificados.**
