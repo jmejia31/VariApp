@@ -1466,3 +1466,16 @@ No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni dat
 - Hardening adicional: el alias histórico `orden=destacados` se normaliza a `relevancia` y se limpia de la URL para que el `select` no quede con un valor sin opción visible.
 - Playwright Fase 8 cubre ambos casos y el validador estático impide retirar estas protecciones accidentalmente.
 - MAPA_ARQUITECTURA: NO_APLICA — corrección local de estado/URL en el catálogo público; no cambia capas, datos, tenancy, seguridad ni contratos HTTP.
+
+
+## 2026-09-18 — VariStoreHN Fase 9: ofertas e inventario
+- Promociones públicas reutilizan la autoridad administrable de `Descuento` (vigencia, prioridad y alcance); no se crearon columnas/tablas promocionales paralelas.
+- `IPromocionPublicaService` proyecta únicamente descuentos automáticos reproducibles como precio unitario público: porcentuales, vigentes, sin código/cliente/rol/aprobación y sin condiciones que cambien por cantidad o comprador.
+- Catálogo público y variantes exponen precio normal, precio oferta vigente, ahorro, porcentaje, nombre/vigencia y estado de disponibilidad.
+- Checkout recalcula el mismo precio promocional y bloquea explícitamente stock 0.
+- Frontend usa la promoción por variante, habilita `/varistorehn/ofertas`, navegación global y filtro compartible `oferta=1`.
+- Estados canónicos: `Disponible`, `Últimas unidades`, `Agotado`; se elimina el umbral visual hardcodeado.
+- Carrito rehidrata precio/stock desde catálogo vivo y muestra precio normal, promocional y ahorro sin persistir importes confiables en localStorage.
+- Inventario por sucursal: NO_APLICA. El ERP posee sucursales/almacenes/existencias, pero la tienda pública no tiene selección de sucursal ni requisito comercial que autorice inventarla.
+- Skills aplicadas: gobierno, arquitectura-impacto, calidad UI y QA.
+- MAPA_ARQUITECTURA: NO_APLICA — se mantiene el patrón existente API -> servicio Application -> repositorio; sin nueva capa, esquema, tenancy o deployment.

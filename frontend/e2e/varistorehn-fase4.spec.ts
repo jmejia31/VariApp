@@ -31,6 +31,8 @@ function productoReal(
 ) {
   const precio = opciones.precio ?? 1499;
   const stock = opciones.stock ?? 4;
+  const oferta = opciones.oferta ?? null;
+  const ofertaActiva = oferta !== null && oferta >= 0 && oferta < precio;
   const imagenes = opciones.imagenes ?? [];
   const imagenesDto = imagenes.map((url, index) => ({ url, orden: index + 1, esPrincipal: index === 0 }));
   return {
@@ -42,9 +44,14 @@ function productoReal(
     categoriaNombre: opciones.categoria ?? 'Computadoras',
     marcaNombre: 'Marca real',
     precio,
-    precioOferta: opciones.oferta ?? null,
+    precioOferta: ofertaActiva ? oferta : null,
+    ofertaActiva,
+    ofertaNombre: ofertaActiva ? 'Oferta de auditoría' : null,
+    ahorro: ofertaActiva ? precio - oferta! : 0,
+    porcentajeAhorro: ofertaActiva ? Math.round((precio - oferta!) * 100 / precio) : 0,
     cantidadDisponible: stock,
     estaAgotado: stock <= 0,
+    estadoDisponibilidad: stock <= 0 ? 'Agotado' : stock <= 3 ? 'Últimas unidades' : 'Disponible',
     sku: `SKU-${id}`,
     activo: true,
     esDestacado: false,
@@ -55,8 +62,14 @@ function productoReal(
       marcaNombre: 'Marca real',
       sku: `SKU-${id}-A`,
       precio,
+      precioOferta: ofertaActiva ? oferta : null,
+      ofertaActiva,
+      ofertaNombre: ofertaActiva ? 'Oferta de auditoría' : null,
+      ahorro: ofertaActiva ? precio - oferta! : 0,
+      porcentajeAhorro: ofertaActiva ? Math.round((precio - oferta!) * 100 / precio) : 0,
       cantidadDisponible: stock,
       estaAgotado: stock <= 0,
+      estadoDisponibilidad: stock <= 0 ? 'Agotado' : stock <= 3 ? 'Últimas unidades' : 'Disponible',
       imagenes: imagenesDto
     }]
   };
