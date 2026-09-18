@@ -17,6 +17,8 @@ namespace InventoryApp.API.Controllers;
 /// N7.7.D/N7.7.F: contrato HTTP tenant-safe para cola de correo empresarial durable.
 /// El tenant autorizado por el filtro debe coincidir con la ruta y la capa de
 /// aplicación vuelve a comprobar membresía server-side antes de persistir.
+/// La ruta del backend no incluye el prefijo /api: el proxy Vercel usa /api en
+/// navegador y lo elimina antes de reenviar la solicitud al servicio Render.
 /// </summary>
 [ApiController]
 [Authorize]
