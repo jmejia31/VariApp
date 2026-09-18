@@ -1,0 +1,106 @@
+name: VAEP N9.3.H byte-safe closure append
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/vaep-n93h-byte-append.yml
+
+permissions:
+  contents: write
+
+jobs:
+  append-closure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact trigger commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Append N9.3 closure byte-safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          expected = {
+              "TASKS.md": "09d2ab1d1fa7eff8a0db55b997f0478301b74199",
+              "CHANGELOG_AI.md": "98c1ef97025d0a393c82fdd3c0d19f2ebf1ad5e5",
+          }
+          blocks = {
+              "TASKS.md": """
+
+## ERP-N9.3 — Backup pre-release — cierre current-standard 2026-09-18
+
+- [x] N9.3.A-G revalidados/certificados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Backup real de Desarrollo ejecutado por M11 run `35288756204`: definición/protecciones, proveedor y backup+restore concluyeron `success`.
+- [x] Artifact cifrado `10525951057`, digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; retención 14 días.
+- [x] Restore drill del mismo artifact en MySQL descartable: 132 tablas base, 104 migraciones EF, checksums y row-counts verificados, `status=SUCCESS`, `productionTouched=false`.
+- [x] N9.3.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; la certificación `LISTO` sólo se emite después del readback y REVIEW_FIRST final.
+
+**N9.3 no se promueve por este texto aislado: el cierre autoritativo requiere receipt/readback current-standard en COLA/CONFIG. No se tocó main, Producción, PR #2, secretos, DNS ni certificados.**
+""".encode("utf-8"),
+              "CHANGELOG_AI.md": """
+
+## 2026-09-18 — ERP-N9.3 — Backup pre-release current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+Se revalidó N9.3 de extremo a extremo. El gate material fue M11 run `35288756204`: validación de definición/protecciones, certificación segura del proveedor y backup cifrado real de Desarrollo + restore drill del mismo artifact concluyeron `success`. El artifact `10525951057` quedó con digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; el restore aislado verificó checksums y row-counts para 132 tablas base y 104 migraciones EF, con `productionTouched=false`.
+
+N9.3.B/D/E se mantuvieron como N/A grounded donde el backup no exige cambios de dominio, API o UI; N9.3.C/F/G certificaron backup/restore, seguridad y gates causales. P0=0/P1=0 antes del cierre final. Este append es estrictamente aditivo y forma parte de N9.3.H; `LISTO` sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar este writer temporal y persistir receipt/readback. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
+""".encode("utf-8"),
+          }
+
+          old_bytes = {}
+          for name, expected_blob in expected.items():
+              path = Path(name)
+              actual_blob = subprocess.check_output(["git", "hash-object", str(path)], text=True).strip()
+              if actual_blob != expected_blob:
+                  raise SystemExit(f"{name} blob drift: expected {expected_blob}, got {actual_blob}")
+              old = path.read_bytes()
+              old_bytes[name] = old
+              marker = b"ERP-N9.3"
+              if marker in old:
+                  raise SystemExit(f"{name} already contains N9.3 closure marker; refusing duplicate append")
+              new = old + blocks[name]
+              if not new.startswith(old) or len(new) <= len(old):
+                  raise SystemExit(f"{name} prefix/addition invariant failed before write")
+              path.write_bytes(new)
+              if path.read_bytes()[:len(old)] != old:
+                  raise SystemExit(f"{name} prefix invariant failed after write")
+          PY
+
+          changed="$(git diff --name-only | sort)"
+          expected_changed="$(printf '%s\n' CHANGELOG_AI.md TASKS.md | sort)"
+          test "$changed" = "$expected_changed"
+
+          for file in TASKS.md CHANGELOG_AI.md; do
+            numstat="$(git diff --numstat -- "$file")"
+            echo "$numstat"
+            adds="$(printf '%s\n' "$numstat" | awk '{print $1}')"
+            dels="$(printf '%s\n' "$numstat" | awk '{print $2}')"
+            test "$adds" != "-"
+            test "$dels" != "-"
+            test "$adds" -gt 0
+            test "$dels" -eq 0
+          done
+          git diff --check
+
+      - name: Commit and push append only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "vaep-supervisor-24"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add -- TASKS.md CHANGELOG_AI.md
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git diff --cached --name-only | grep -Fx 'TASKS.md'
+          git diff --cached --name-only | grep -Fx 'CHANGELOG_AI.md'
+          git commit -m "[N9.3.H] append closure records byte-safely"
+          git push origin HEAD:Desarrollo
