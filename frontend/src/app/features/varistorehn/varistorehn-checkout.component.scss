@@ -1,6 +1,6 @@
 :host { display: block; }
 
-.storefront { min-height: 100vh; background: var(--color-bg); color: var(--color-text); }
+.storefront { min-height: 100vh; overflow-x: clip; background: var(--color-bg); color: var(--color-text); }
 .container { width: min(1180px, calc(100% - 32px)); margin-inline: auto; }
 .checkout-page { padding-block: 24px 64px; }
 .breadcrumbs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 28px; color: var(--color-text-muted); font-size: .9rem; }
@@ -29,9 +29,10 @@
 .field-wide { grid-column: 1 / -1; }
 .field > span { color: var(--color-heading); font-weight: 700; }
 .field b { color: var(--color-danger); }
-.field input, .field textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--color-border); border-radius: calc(var(--radius) * .7); background: var(--color-bg); color: var(--color-text); padding: 12px 13px; font: inherit; }
+.field input, .field textarea { width: 100%; min-height: 44px; box-sizing: border-box; scroll-margin-top: 112px; border: 1px solid var(--color-border); border-radius: calc(var(--radius) * .7); background: var(--color-bg); color: var(--color-text); padding: 12px 13px; font: inherit; }
 .field input:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-color: var(--color-primary); }
 .field small { color: var(--color-text-muted); line-height: 1.4; }
+.field [aria-invalid="true"] { border-color: var(--color-danger); }
 .field em { color: var(--color-danger); font-size: .82rem; font-style: normal; font-weight: 650; }
 .privacy-note, .validation-note, .secure-copy { display: flex; gap: 9px; align-items: flex-start; color: var(--color-text-muted); line-height: 1.5; }
 .privacy-note { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--color-border); }
