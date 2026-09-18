@@ -162,9 +162,9 @@ public sealed class TiendaController : ControllerBase
             {
                 item.ProductoId,
                 item.ProductoVarianteId,
-                item.ModeloId,
-                ModeloNombre = string.IsNullOrEmpty(item.ModeloNombre) ? null : item.ModeloNombre,
-                MarcaNombre = string.IsNullOrEmpty(item.MarcaNombre) ? null : item.MarcaNombre
+                ModeloId = item.ProductoVarianteId.HasValue ? null : item.ModeloId,
+                ModeloNombre = item.ProductoVarianteId.HasValue || string.IsNullOrEmpty(item.ModeloNombre) ? null : item.ModeloNombre,
+                MarcaNombre = item.ProductoVarianteId.HasValue || string.IsNullOrEmpty(item.MarcaNombre) ? null : item.MarcaNombre
             })
             .Select(grupo => new CheckoutTiendaItemRequestDto
             {
