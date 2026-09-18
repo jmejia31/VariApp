@@ -51,6 +51,49 @@ SET u.RolId = r.Id
 WHERE u.RolId IS NULL;
 ");
 
+            // En N0.4 una denegación legacy se representa por ausencia de grant.
+            // Retirarla antes del backfill evita que una fila Permitido=false ya
+            // relacionada colisione con el grant efectivo que vamos a normalizar.
+            migrationBuilder.Sql("DELETE FROM RolPermisos WHERE Permitido = 0;");
+
+            // Retry-safe para bases reales con mezcla de filas legacy y relacionales:
+            // si ya existe un grant relacional equivalente, conserva ese registro y
+            // elimina sólo la copia legacy aún no mapeada.
+            migrationBuilder.Sql(@"
+DELETE legacy
+FROM RolPermisos legacy
+JOIN Roles targetRole ON (
+    (legacy.Rol = 1 AND targetRole.NombreNormalizado = 'ADMINISTRADOR') OR
+    (legacy.Rol = 2 AND targetRole.NombreNormalizado = 'VENDEDOR')
+)
+JOIN RolPermisos mapped
+  ON mapped.RolId = targetRole.Id
+ AND mapped.Modulo = legacy.Modulo
+ AND mapped.Accion = legacy.Accion
+ AND mapped.Permitido = 1
+ AND mapped.Id <> legacy.Id
+WHERE legacy.Permitido = 1
+  AND legacy.RolId IS NULL;
+");
+
+            // También consolida duplicados puramente legacy antes de asignar RolId.
+            // Se conserva determinísticamente la fila de menor Id para no perder el
+            // grant efectivo y para respetar el índice único relacional existente.
+            migrationBuilder.Sql(@"
+DELETE newer
+FROM RolPermisos newer
+JOIN RolPermisos older
+  ON older.Id < newer.Id
+ AND older.Rol = newer.Rol
+ AND older.Modulo = newer.Modulo
+ AND older.Accion = newer.Accion
+ AND older.Permitido = 1
+ AND newer.Permitido = 1
+ AND older.RolId IS NULL
+ AND newer.RolId IS NULL
+WHERE newer.RolId IS NULL;
+");
+
             // RolUsuario histórico: Administrador=1, Vendedor=2.
             migrationBuilder.Sql(@"
 UPDATE RolPermisos rp
