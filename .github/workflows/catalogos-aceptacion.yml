@@ -180,11 +180,43 @@ jobs:
               FROM `UsuarioEmpresas` ue
               WHERE ue.`UsuarioId`=u.`Id` AND ue.`EmpresaId`=1
             );
+
+          INSERT INTO `Planes` (`Codigo`,`Nombre`,`Activo`,`FechaCreacion`,`FechaActualizacion`)
+          VALUES ('E2E_ACCEPTANCE','Plan E2E Acceptance',TRUE,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6))
+          ON DUPLICATE KEY UPDATE
+            `Nombre`=VALUES(`Nombre`),
+            `Activo`=TRUE,
+            `FechaActualizacion`=UTC_TIMESTAMP(6);
+
+          SET @e2e_plan_id := (
+            SELECT `Id`
+            FROM `Planes`
+            WHERE `Codigo`='E2E_ACCEPTANCE'
+            LIMIT 1
+          );
+
+          INSERT INTO `Suscripciones` (`EmpresaId`,`PlanId`,`Estado`,`InicioUtc`,`FinUtc`,`FechaCreacion`,`FechaActualizacion`)
+          SELECT 1,@e2e_plan_id,1,UTC_TIMESTAMP(6) - INTERVAL 1 DAY,NULL,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)
+          WHERE @e2e_plan_id IS NOT NULL
+            AND NOT EXISTS (
+              SELECT 1
+              FROM `Suscripciones`
+              WHERE `EmpresaId`=1
+                AND `Estado`=1
+                AND `InicioUtc` <= UTC_TIMESTAMP(6)
+                AND (`FinUtc` IS NULL OR `FinUtc` > UTC_TIMESTAMP(6))
+            );
           SQL
 
           membership_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_catalogos_e2e -Nse "SELECT COUNT(*) FROM UsuarioEmpresas ue INNER JOIN Usuarios u ON u.Id=ue.UsuarioId INNER JOIN Empresas e ON e.Id=ue.EmpresaId WHERE u.NombreUsuario='e2e_admin' AND e.Id=1 AND e.Activa=TRUE AND ue.Activa=TRUE;")"
           if [[ "$membership_count" != '1' ]]; then
             echo "La membresía tenant E2E del SeedAdmin no quedó materializada: count=$membership_count" >&2
+            exit 1
+          fi
+
+          subscription_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_catalogos_e2e -Nse "SELECT COUNT(*) FROM Suscripciones WHERE EmpresaId=1 AND Estado=1 AND InicioUtc <= UTC_TIMESTAMP(6) AND (FinUtc IS NULL OR FinUtc > UTC_TIMESTAMP(6));")"
+          if [[ "$subscription_count" != '1' ]]; then
+            echo "La suscripción SaaS activa del tenant E2E no quedó materializada: count=$subscription_count" >&2
             exit 1
           fi
 
