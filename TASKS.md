@@ -780,3 +780,15 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] N9.3.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; la certificación `LISTO` sólo se emite después del readback y REVIEW_FIRST final.
 
 **N9.3 no se promueve por este texto aislado: el cierre autoritativo requiere receipt/readback current-standard en COLA/CONFIG. No se tocó main, Producción, PR #2, secretos, DNS ni certificados.**
+
+
+## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18
+
+- [x] N9.4.C: APPLY/postcheck productivo completado con respaldo confirmado previamente por el propietario; Producción quedó LIVE, DB al día y maintenance OFF.
+- [x] Incidente N0.4 de duplicados RBAC legacy recuperado de forma retry-safe sin abrir tráfico durante la migración.
+- [x] Certificación exact-head N0.4 run 35304697573 / job 105474385670 SUCCESS: backend 2328/2328, preflight, APPLY, aislamiento, deduplicación, guards fail-closed y snapshot EF PASS.
+- [x] N9.4.D/E: N/A grounded sin fabricar backend/API ni frontend/UX; no había delta material requerido por el procedimiento.
+- [x] N9.4.F/G: seguridad/observabilidad y CI current-standard PASS, P0=0/P1=0.
+- [x] Commit productivo estabilizado 7f140442d598aaea36b39952bad5ebd9ab4f2613; deploy final dep-damb4lqjnfac73efl1pg LIVE.
+- [x] Última migración observada 20260914232400_N7_10_C_DocumentoFiscalPersistencia; reinicio final indicó database already up to date.
+- [ ] N9.4.H se declara LISTO únicamente tras hard verify de este append y CHANGELOG_AI, retiro del writer temporal, REVIEW_FIRST final, receipt y readback del control-plane.
