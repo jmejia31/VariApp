@@ -23,6 +23,7 @@ on:
       - 'backend/tests/InventoryApp.Tests/TiendaPublicaTests.cs'
       - 'backend/tests/InventoryApp.Tests/PromocionPublicaServiceTests.cs'
       - 'backend/tests/InventoryApp.Tests/API/Controllers/TiendaController*.cs'
+      - 'scripts/quality/priority4_quality_audit.py'
       - '.github/workflows/varistorehn-fase9-regression.yml'
   workflow_dispatch:
 
