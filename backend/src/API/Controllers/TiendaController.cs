@@ -20,11 +20,16 @@ public sealed class TiendaController : ControllerBase
 
     private readonly IProductoService _productoService;
     private readonly ICategoriaService _categoriaService;
+    private readonly IPromocionPublicaService _promocionPublicaService;
 
-    public TiendaController(IProductoService productoService, ICategoriaService categoriaService)
+    public TiendaController(
+        IProductoService productoService,
+        ICategoriaService categoriaService,
+        IPromocionPublicaService promocionPublicaService)
     {
         _productoService = productoService;
         _categoriaService = categoriaService;
+        _promocionPublicaService = promocionPublicaService;
     }
 
     [HttpGet("productos")]
@@ -34,12 +39,13 @@ public sealed class TiendaController : ControllerBase
         request.UsuarioIdScope = null;
 
         var resultado = await _productoService.GetPagedAsync(request);
+        var ahoraUtc = DateTime.UtcNow;
+        var items = await Task.WhenAll(resultado.Items
+            .Where(producto => producto.Activo)
+            .Select(producto => MapearProductoAsync(producto, ahoraUtc)));
         var catalogo = new PagedResult<ProductoCatalogoPublicoDto>
         {
-            Items = resultado.Items
-                .Where(producto => producto.Activo)
-                .Select(MapearProducto)
-                .ToList(),
+            Items = items.ToList(),
             Page = resultado.Page,
             PageSize = resultado.PageSize,
             TotalCount = resultado.TotalCount
@@ -63,12 +69,12 @@ public sealed class TiendaController : ControllerBase
         };
 
         var resultado = await _productoService.GetPagedAsync(request);
-        var destacados = resultado.Items
+        var ahoraUtc = DateTime.UtcNow;
+        var destacados = await Task.WhenAll(resultado.Items
             .Where(producto => producto.Activo && producto.EsDestacado)
-            .Select(MapearProducto)
-            .ToList();
+            .Select(producto => MapearProductoAsync(producto, ahoraUtc)));
 
-        return Ok(ApiResponse<List<ProductoCatalogoPublicoDto>>.Ok(destacados));
+        return Ok(ApiResponse<List<ProductoCatalogoPublicoDto>>.Ok(destacados.ToList()));
     }
 
     [HttpGet("productos/{slug}")]
@@ -81,7 +87,8 @@ public sealed class TiendaController : ControllerBase
         if (producto is null || !producto.Activo)
             return NotFound(ApiResponse<ProductoCatalogoPublicoDto>.Fail("Producto no encontrado."));
 
-        return Ok(ApiResponse<ProductoCatalogoPublicoDto>.Ok(MapearProducto(producto)));
+        return Ok(ApiResponse<ProductoCatalogoPublicoDto>.Ok(
+            await MapearProductoAsync(producto, DateTime.UtcNow)));
     }
 
     [HttpGet("categorias")]
@@ -158,6 +165,7 @@ public sealed class TiendaController : ControllerBase
             return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La cantidad acumulada de un producto supera el máximo permitido."));
 
         var lineas = new List<CheckoutTiendaLineaDto>(agrupadas.Count);
+        var ahoraUtc = DateTime.UtcNow;
 
         foreach (var solicitud in agrupadas)
         {
@@ -231,8 +239,15 @@ public sealed class TiendaController : ControllerBase
             if (precio <= 0)
                 return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Uno de los productos no tiene un precio público válido. Intenta nuevamente más tarde."));
 
-            if (stock < solicitud.Unidades)
+            if (stock <= 0 || stock < solicitud.Unidades)
                 return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("Cambió la existencia disponible de uno de los productos. Actualiza el carrito antes de continuar."));
+
+            var oferta = await _promocionPublicaService.ResolverAsync(
+                producto.Id,
+                producto.CategoriaId,
+                precio,
+                ahoraUtc);
+            var precioVigente = oferta?.PrecioOferta ?? precio;
 
             lineas.Add(new CheckoutTiendaLineaDto
             {
@@ -244,8 +259,8 @@ public sealed class TiendaController : ControllerBase
                 Sku = sku,
                 Unidades = solicitud.Unidades,
                 StockDisponible = stock,
-                PrecioUnitario = precio,
-                Total = precio * solicitud.Unidades
+                PrecioUnitario = precioVigente,
+                Total = precioVigente * solicitud.Unidades
             });
         }
 
@@ -253,7 +268,7 @@ public sealed class TiendaController : ControllerBase
         var validado = new CheckoutTiendaValidadoDto
         {
             ValidacionId = Guid.NewGuid().ToString("N"),
-            ExpiraUtc = DateTime.UtcNow.Add(VigenciaValidacionCheckout),
+            ExpiraUtc = ahoraUtc.Add(VigenciaValidacionCheckout),
             Subtotal = subtotal,
             Total = subtotal,
             Lineas = lineas
@@ -271,7 +286,7 @@ public sealed class TiendaController : ControllerBase
         TotalProductos = null
     };
 
-    private static ProductoCatalogoPublicoDto MapearProducto(ProductoDto producto)
+    private async Task<ProductoCatalogoPublicoDto> MapearProductoAsync(ProductoDto producto, DateTime ahoraUtc)
     {
         var variantesActivas = producto.Variantes.Where(v => v.Activo).ToList();
         var skusProducto = variantesActivas.Select(v => v.Sku).Where(sku => !string.IsNullOrWhiteSpace(sku)).Distinct().ToList();
@@ -282,6 +297,53 @@ public sealed class TiendaController : ControllerBase
         var precioPublico = preciosVariantes.Count > 0
             ? preciosVariantes.Min()
             : producto.PrecioMinimo > 0 ? producto.PrecioMinimo : producto.Precio;
+        precioPublico = Math.Max(0, precioPublico);
+
+        var ofertaProducto = precioPublico > 0
+            ? await _promocionPublicaService.ResolverAsync(producto.Id, producto.CategoriaId, precioPublico, ahoraUtc)
+            : null;
+
+        var modelos = new List<ModeloCatalogoPublicoDto>();
+        foreach (var v in variantesActivas.OrderBy(v => v.ModeloNombre).ThenBy(v => v.Id))
+        {
+            var imagenesEspecificas = v.Imagenes
+                .Where(i => !string.IsNullOrWhiteSpace(i.Url))
+                .OrderBy(i => i.Orden)
+                .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal })
+                .ToList();
+            var imagenes = (imagenesEspecificas.Count > 0 ? imagenesEspecificas : producto.Imagenes
+                    .OrderBy(i => i.Orden)
+                    .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal }))
+                .GroupBy(i => i.Url)
+                .Select(grupo => grupo.First())
+                .ToList();
+            var cantidad = Math.Max(0, v.Cantidad);
+            var precioNormal = Math.Max(0, v.Precio);
+            var oferta = precioNormal > 0
+                ? await _promocionPublicaService.ResolverAsync(producto.Id, producto.CategoriaId, precioNormal, ahoraUtc)
+                : null;
+
+            modelos.Add(new ModeloCatalogoPublicoDto
+            {
+                ProductoVarianteId = v.Id,
+                ModeloId = v.ModeloId,
+                ModeloNombre = v.ModeloNombre,
+                MarcaNombre = v.MarcaNombre,
+                Sku = v.Sku,
+                Precio = precioNormal,
+                PrecioOferta = oferta?.PrecioOferta,
+                OfertaActiva = oferta is not null,
+                OfertaNombre = oferta?.Nombre,
+                OfertaInicioUtc = oferta?.VigenteDesdeUtc,
+                OfertaFinUtc = oferta?.VigenteHastaUtc,
+                Ahorro = oferta?.Ahorro ?? 0,
+                PorcentajeAhorro = oferta?.PorcentajeAhorro ?? 0,
+                CantidadDisponible = cantidad,
+                EstaAgotado = cantidad <= 0,
+                EstadoDisponibilidad = EstadoDisponibilidad(cantidad, v.TieneStockBajo),
+                Imagenes = imagenes
+            });
+        }
 
         return new ProductoCatalogoPublicoDto
         {
@@ -293,10 +355,17 @@ public sealed class TiendaController : ControllerBase
             CategoriaNombre = producto.CategoriaNombre,
             MarcaNombre = producto.MarcaNombre ?? producto.Marca,
             ModeloNombre = producto.ModeloNombre ?? producto.Modelo,
-            Precio = Math.Max(0, precioPublico),
-            PrecioOferta = null,
+            Precio = precioPublico,
+            PrecioOferta = ofertaProducto?.PrecioOferta,
+            OfertaActiva = ofertaProducto is not null,
+            OfertaNombre = ofertaProducto?.Nombre,
+            OfertaInicioUtc = ofertaProducto?.VigenteDesdeUtc,
+            OfertaFinUtc = ofertaProducto?.VigenteHastaUtc,
+            Ahorro = ofertaProducto?.Ahorro ?? 0,
+            PorcentajeAhorro = ofertaProducto?.PorcentajeAhorro ?? 0,
             CantidadDisponible = cantidadPublica,
             EstaAgotado = cantidadPublica <= 0,
+            EstadoDisponibilidad = EstadoDisponibilidad(cantidadPublica, producto.TieneStockBajo),
             Sku = skusProducto.Count == 1 ? skusProducto[0] : null,
             Activo = producto.Activo,
             EsDestacado = producto.EsDestacado,
@@ -311,38 +380,11 @@ public sealed class TiendaController : ControllerBase
                     EsPrincipal = imagen.EsPrincipal
                 })
                 .ToList(),
-            Modelos = variantesActivas
-                .OrderBy(v => v.ModeloNombre)
-                .ThenBy(v => v.Id)
-                .Select(v =>
-                {
-                    var imagenesEspecificas = v.Imagenes
-                        .Where(i => !string.IsNullOrWhiteSpace(i.Url))
-                        .OrderBy(i => i.Orden)
-                        .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal })
-                        .ToList();
-                    var imagenes = (imagenesEspecificas.Count > 0 ? imagenesEspecificas : producto.Imagenes
-                            .OrderBy(i => i.Orden)
-                            .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal }))
-                        .GroupBy(i => i.Url)
-                        .Select(grupo => grupo.First())
-                        .ToList();
-                    var cantidad = Math.Max(0, v.Cantidad);
-
-                    return new ModeloCatalogoPublicoDto
-                    {
-                        ProductoVarianteId = v.Id,
-                        ModeloId = v.ModeloId,
-                        ModeloNombre = v.ModeloNombre,
-                        MarcaNombre = v.MarcaNombre,
-                        Sku = v.Sku,
-                        Precio = Math.Max(0, v.Precio),
-                        CantidadDisponible = cantidad,
-                        EstaAgotado = cantidad <= 0,
-                        Imagenes = imagenes
-                    };
-                })
-                .ToList()
+            Modelos = modelos
         };
     }
+
+    private static string EstadoDisponibilidad(int cantidad, bool stockBajo) =>
+        cantidad <= 0 ? "Agotado" : stockBajo ? "Últimas unidades" : "Disponible";
+
 }

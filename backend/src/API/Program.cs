@@ -79,6 +79,7 @@ builder.Services.AddScoped<IPermisoRepository, PermisoRepository>();
 builder.Services.AddScoped<IPermisoCatalogoService, PermisoCatalogoService>();
 builder.Services.AddScoped<IDescuentoRepository, DescuentoRepository>();
 builder.Services.AddScoped<IDescuentoService, DescuentoService>();
+builder.Services.AddScoped<IPromocionPublicaService, PromocionPublicaService>();
 builder.Services.AddScoped<IImpuestoRepository, ImpuestoRepository>();
 builder.Services.AddScoped<IImpuestoService, ImpuestoService>();
 builder.Services.AddScoped<ICostoEnvioRepository, CostoEnvioRepository>();
