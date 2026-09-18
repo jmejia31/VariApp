@@ -108,7 +108,7 @@ expect(productHtml.indexOf('class="product-layout"') < productHtml.indexOf('<dia
 expect(!productHtml.includes('class="detail-dialog"'), 'El detalle independiente no puede reutilizar el modal legado del home.');
 expect(productsHtml.includes('Ver producto'), 'Las tarjetas del catálogo deben ofrecer Ver producto.');
 expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver producto debe navegar por slug a la página independiente.');
-expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
+expect(productsHtml.includes('tieneOferta(modelo)') && productsHtml.includes('precioActual(producto, modelo)'), 'El catálogo debe mostrar la misma oferta vigente por variante que el detalle.');
 expect(
   homeTs.includes('abrirDetalle(producto: ProductoTienda)')
     && homeTs.includes('VARISTOREHN_PATHS.producto(producto.slug)'),
