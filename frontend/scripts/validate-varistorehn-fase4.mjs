@@ -109,7 +109,11 @@ expect(!productHtml.includes('class="detail-dialog"'), 'El detalle independiente
 expect(productsHtml.includes('Ver producto'), 'Las tarjetas del catálogo deben ofrecer Ver producto.');
 expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver producto debe navegar por slug a la página independiente.');
 expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
-expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'Los accesos de producto del home deben navegar al detalle canónico por slug.');
+expect(
+  homeTs.includes('abrirDetalle(producto: ProductoTienda)')
+    && homeTs.includes('VARISTOREHN_PATHS.producto(producto.slug)'),
+  'Si el home expone un producto destacado, debe navegar al detalle canónico por slug.'
+);
 expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como experiencia principal de detalle de producto.');
 expect(!homeTs.includes("@ViewChild('detalleDialog')"), 'El home no debe conservar el ViewChild del modal legado de detalle.');
 expect(!homeTs.includes('productoDetalle = signal'), 'El home no debe conservar estado muerto del modal legado de detalle.');

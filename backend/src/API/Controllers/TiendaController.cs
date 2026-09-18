@@ -48,6 +48,29 @@ public sealed class TiendaController : ControllerBase
         return Ok(ApiResponse<PagedResult<ProductoCatalogoPublicoDto>>.Ok(catalogo));
     }
 
+    [HttpGet("productos/destacados")]
+    public async Task<IActionResult> GetProductosDestacados([FromQuery] int limite = 4)
+    {
+        var request = new ProductoPagedRequest
+        {
+            Page = 1,
+            PageSize = Math.Clamp(limite, 1, 4),
+            Activo = true,
+            EsDestacado = true,
+            UsuarioIdScope = null,
+            SortBy = "FechaCreacion",
+            SortDirection = "desc"
+        };
+
+        var resultado = await _productoService.GetPagedAsync(request);
+        var destacados = resultado.Items
+            .Where(producto => producto.Activo && producto.EsDestacado)
+            .Select(MapearProducto)
+            .ToList();
+
+        return Ok(ApiResponse<List<ProductoCatalogoPublicoDto>>.Ok(destacados));
+    }
+
     [HttpGet("productos/{slug}")]
     public async Task<IActionResult> GetProducto(string slug)
     {
@@ -276,7 +299,7 @@ public sealed class TiendaController : ControllerBase
             EstaAgotado = cantidadPublica <= 0,
             Sku = skusProducto.Count == 1 ? skusProducto[0] : null,
             Activo = producto.Activo,
-            EsDestacado = false,
+            EsDestacado = producto.EsDestacado,
             FechaCreacion = producto.FechaCreacion,
             ImagenPrincipalUrl = producto.ImagenPrincipalUrl,
             Imagenes = producto.Imagenes
