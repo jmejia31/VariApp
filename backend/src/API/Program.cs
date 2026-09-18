@@ -99,6 +99,7 @@ builder.Services.AddScoped<ICentroCostoService, CentroCostoService>();
 builder.Services.AddScoped<IAlmacenService, AlmacenService>();
 builder.Services.AddScoped<IUbicacionAlmacenService, UbicacionAlmacenService>();
 builder.Services.AddScoped<IExistenciaVarianteService, ExistenciaVarianteService>();
+builder.Services.AddScoped<IInventarioPublicoService, InventarioPublicoService>();
 builder.Services.AddScoped<IConteoInventarioService, ConteoInventarioService>();
 builder.Services.AddScoped<IExistenciaVarianteConcurrencyService, ExistenciaVarianteConcurrencyService>();
 builder.Services.AddScoped<AjusteInventarioExistenciaCutoverService>();
