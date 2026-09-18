@@ -105,6 +105,10 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
                 && !e.Almacen.Eliminado
                 && e.Almacen.Sucursal.Activa
                 && !e.Almacen.Sucursal.Eliminado
+                && (e.UbicacionAlmacenId == null
+                    || (e.UbicacionAlmacen != null
+                        && e.UbicacionAlmacen.Activa
+                        && !e.UbicacionAlmacen.Eliminado))
                 && (e.Almacen.Tipo == TipoAlmacen.Tienda || e.Almacen.Tipo == TipoAlmacen.Bodega))
             .ToListAsync();
     }
