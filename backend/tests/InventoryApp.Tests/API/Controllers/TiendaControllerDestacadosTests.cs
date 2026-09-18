@@ -2,6 +2,9 @@ using InventoryApp.API.Controllers;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -60,5 +63,24 @@ public sealed class TiendaControllerDestacadosTests
         productos.VerifyAll();
         productos.VerifyNoOtherCalls();
         categorias.VerifyNoOtherCalls();
+    }
+    [Fact]
+    public void SnapshotEf_ConstruyeProductoConEsDestacadoSinModeloPendiente()
+    {
+        var snapshotType = typeof(AppDbContext).Assembly.GetType(
+            "InventoryApp.Infrastructure.Migrations.AppDbContextModelSnapshot",
+            throwOnError: true)!;
+        var snapshot = Activator.CreateInstance(snapshotType, nonPublic: true)!;
+        var modelProperty = snapshotType.GetProperty(
+            "Model",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+
+        var model = Assert.IsAssignableFrom<IModel>(modelProperty.GetValue(snapshot));
+        var producto = model.FindEntityType("InventoryApp.Domain.Entities.Producto");
+        Assert.NotNull(producto);
+        Assert.NotNull(producto!.FindProperty("EsDestacado"));
+        Assert.NotNull(producto.FindProperty("Activo"));
+        Assert.Contains(producto.GetIndexes(), index =>
+            index.Properties.Select(property => property.Name).SequenceEqual(new[] { "EsDestacado", "Activo" }));
     }
 }
