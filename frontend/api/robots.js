@@ -13,6 +13,7 @@ module.exports = async function handler(req, res) {
         'Allow: /varistorehn/',
         'Disallow: /varistorehn/carrito',
         'Disallow: /varistorehn/checkout',
+        'Disallow: /varistorehn/cuenta',
         'Disallow: /varistorehn/pedido/',
         `Sitemap: ${origin}/sitemap.xml`,
         ''
