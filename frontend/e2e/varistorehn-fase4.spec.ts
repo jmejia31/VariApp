@@ -218,6 +218,8 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await expect(modeloCatalogo).toHaveValue(modeloAntes);
     await expect.poll(async () => Math.abs((await page.evaluate(() => Math.round(window.scrollY))) - scrollAntes))
       .toBeLessThanOrEqual(4);
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('varistorehn:retorno-catalogo:v1')))
+      .toBeNull();
   });
 
   test('fuente real muestra galería, SKU, promoción y relacionados sin inventar datos', async ({ page }) => {
