@@ -58,6 +58,10 @@ for (const token of ['Title', 'Meta', 'link[rel="canonical"]', 'og:title', 'og:i
 expect(seoService.includes('noindex,nofollow,noarchive'), 'SEO dinámico debe poder bloquear rutas privadas y entornos no publicados.');
 expect(seoService.includes("return host === 'varistorehn.vercel.app'"), 'El cliente solo debe habilitar indexación en el host productivo autorizado.');
 expect(seoUtilsSource.includes("return hostFromRequest(req) === PRODUCTION_HOST"), 'El SEO server-side debe fallar cerrado para cualquier host no autorizado.');
+expect(!seoUtilsSource.includes('nombreComercial || data?.nombreVisibleSistema'), 'El SEO server-side nunca debe caer al nombre interno si falta la marca comercial.');
+expect(!appComponent.includes('nombreComercial || this.identidad.nombreSistema()'), 'El SEO cliente nunca debe caer al nombre interno si falta la marca comercial.');
+expect(!productoTs.includes('nombreComercial || this.identidad.nombreSistema()'), 'Producto público nunca debe caer al nombre interno.');
+expect(!categoriaTs.includes('nombreComercial || this.identidad.nombreSistema()'), 'Categoría pública nunca debe caer al nombre interno.');
 expect(sitemapSource.includes("res.statusCode = 503"), 'El sitemap debe responder 503 si no puede construir el catálogo completo.');
 expect(sitemapSource.includes("Retry-After"), 'El sitemap incompleto debe pedir reintento y evitar cachear un 200 parcial.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.productos"), 'Catálogo debe tener metadata propia.');
@@ -123,6 +127,7 @@ function responseMock() {
 
 const originalFetch = globalThis.fetch;
 let forceSitemapFailure = false;
+let forceMissingCommercial = false;
 globalThis.fetch = async input => {
   const url = String(input);
   if (forceSitemapFailure && url.includes('/tienda/')) {
@@ -130,7 +135,9 @@ globalThis.fetch = async input => {
   }
   let payload;
   if (url.includes('/empresa-configuracion/publica')) {
-    payload = { success: true, data: { nombreComercial: 'VariStoreHN', nombreVisibleSistema: 'Sistema Interno', eslogan: 'Compra en línea', logoUrl: '/assets/varistorehn-logo.png', moneda: 'USD' } };
+    payload = forceMissingCommercial
+      ? { success: true, data: { nombreComercial: '', nombreVisibleSistema: 'Sistema Interno', eslogan: 'Compra en línea', logoUrl: '/assets/varistorehn-logo.png', moneda: 'USD' } }
+      : { success: true, data: { nombreComercial: 'VariStoreHN', nombreVisibleSistema: 'Sistema Interno', eslogan: 'Compra en línea', logoUrl: '/assets/varistorehn-logo.png', moneda: 'USD' } };
   } else if (url.includes('/tienda/productos/producto-seo-11')) {
     payload = {
       success: true,
@@ -172,6 +179,13 @@ try {
   expect(seoRes.body.includes('"@type":"Product"'), 'HTML SEO de producto debe incluir Product JSON-LD.');
   expect(seoRes.body.includes('"priceCurrency":"USD"'), 'JSON-LD server-side debe respetar la moneda pública configurada.');
   expect(seoRes.header('x-robots-tag').startsWith('index,follow'), 'Producción debe permitir indexación del producto.');
+
+  forceMissingCommercial = true;
+  const noCommercialRes = responseMock();
+  await seoHandler(prodReq, noCommercialRes);
+  expect(noCommercialRes.body.includes('Producto SEO 11 | VariStoreHN'), 'Sin nombre comercial, el SEO debe usar VariStoreHN y nunca el nombre interno.');
+  expect(!noCommercialRes.body.includes('Sistema Interno'), 'El nombre interno no debe filtrarse al HTML SEO.');
+  forceMissingCommercial = false;
 
   const customHostRes = responseMock();
   await seoHandler({ headers: { host: 'staging.example.com' }, query: { kind: 'product', slug: 'producto-seo-11' } }, customHostRes);
