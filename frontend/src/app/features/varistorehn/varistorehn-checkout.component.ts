@@ -46,6 +46,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
   readonly validado = signal<CheckoutValidado | null>(null);
   readonly enlaceWhatsapp = signal('');
   readonly aviso = signal('');
+  private readonly slugsProducto = new Map<number, string>();
 
   readonly permiteWhatsapp = computed(() => this.config.modoCarrito !== 'tarjeta');
   readonly permiteTarjeta = computed(() => this.config.modoCarrito !== 'whatsapp');
@@ -119,7 +120,13 @@ export class VaristorehnCheckoutComponent implements OnInit {
     const comprador = this.datosComprador();
     const moneda = this.identidad.config().moneda || 'HNL';
     const mensaje = mensajeWhatsappCheckout(
-      this.identidad.config().nombreComercial || 'VariStoreHN', comprador, validado.validacionId, moneda, validado.lineas, validado.total
+      this.identidad.config().nombreComercial || 'VariStoreHN',
+      comprador,
+      validado.validacionId,
+      moneda,
+      validado.lineas,
+      validado.total,
+      this.enlacesProductos(validado)
     );
     const enlace = construirEnlaceWhatsApp(destino, mensaje);
     if (!enlace) {
@@ -224,12 +231,33 @@ export class VaristorehnCheckoutComponent implements OnInit {
       : of(crearCatalogoEjemplo());
 
     return catalogo$.pipe(switchMap(productos => {
+      this.slugsProducto.clear();
+      for (const producto of productos) {
+        const slug = producto.slug?.trim();
+        if (slug) this.slugsProducto.set(producto.id, slug);
+      }
       this.carrito.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
       if (this.carrito.vacio()) return of(null);
       return this.utilizarDatosBaseDatos()
         ? this.servicio.validarCheckout(this.referenciasCheckout())
         : of(this.validacionDemo());
     }));
+  }
+
+  private enlacesProductos(validado: CheckoutValidado): Readonly<Record<number, string>> {
+    const origen = this.document.defaultView?.location.origin;
+    if (!origen) return {};
+    const enlaces: Record<number, string> = {};
+    for (const linea of validado.lineas) {
+      const slug = this.slugsProducto.get(linea.productoId);
+      if (!slug || enlaces[linea.productoId]) continue;
+      try {
+        enlaces[linea.productoId] = new URL(VARISTOREHN_PATHS.producto(slug), origen).toString();
+      } catch {
+        // Si el navegador no puede construir una URL absoluta, omitimos el enlace sin bloquear la compra.
+      }
+    }
+    return enlaces;
   }
 
   private aplicarValidacion(validado: CheckoutValidado | null): void {
