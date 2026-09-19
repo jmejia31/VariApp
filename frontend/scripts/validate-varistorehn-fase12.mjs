@@ -50,8 +50,8 @@ const [
 const failures = [];
 const expect = (condition, message) => { if (!condition) failures.push(message); };
 
-const checkoutRoute = routes.match(/{s*path:s*'varistorehn/checkout'[^\n]+/g)?.[0] || '';
-const accountRoute = routes.match(/{s*path:s*'varistorehn/cuenta'[^\n]+/g)?.[0] || '';
+const checkoutRoute = routes.split('\n').find(line => line.includes("path: 'varistorehn/checkout'")) || '';
+const accountRoute = routes.split('\n').find(line => line.includes("path: 'varistorehn/cuenta'")) || '';
 expect(Boolean(checkoutRoute), 'Checkout público debe conservar su ruta.');
 expect(Boolean(accountRoute), 'Cuenta de cliente debe tener ruta propia.');
 expect(!checkoutRoute.includes('authGuard') && !checkoutRoute.includes('permisoGuard'), 'Checkout invitado no debe depender del login administrativo.');
