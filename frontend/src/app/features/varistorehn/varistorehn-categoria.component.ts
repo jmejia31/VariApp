@@ -6,11 +6,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
-import { CategoriaTienda, ProductoTienda, crearCatalogoEjemplo, mapearProducto } from './varistorehn.catalog';
+import { CategoriaTienda, ModeloTienda, ProductoTienda, crearCatalogoEjemplo, etiquetaDisponibilidad, mapearProducto, precioVenta } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
-import { EstadoRecursoPublico } from './varistorehn.models';
+import { EstadoConsultaPublica, EstadoRecursoPublico } from './varistorehn.models';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnSeoService } from './varistorehn-seo.service';
@@ -46,6 +46,25 @@ export class VaristorehnCategoriaComponent implements OnInit {
   readonly totalUnidadesCarrito = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
   readonly subtotalCarrito = computed<number | null>(() => this.carrito.listo() ? this.carrito.subtotal() : null);
   readonly aviso = signal('');
+  readonly catalogo = signal<ProductoTienda[]>([]);
+  readonly cargandoProductos = signal(true);
+  readonly errorProductos = signal('');
+  readonly imagenesConError = signal(new Set<string>());
+
+  readonly productosCategoria = computed(() => {
+    const categoria = this.categoria();
+    if (!categoria) return [];
+    return this.catalogo()
+      .filter(producto => producto.activo
+        && (producto.categoriaId === categoria.id || producto.categoria === categoria.nombre))
+      .slice(0, 8);
+  });
+
+  readonly estadoProductos = computed<EstadoConsultaPublica>(() => {
+    if (this.cargandoProductos() || this.estado() === 'loading') return 'loading';
+    if (this.errorProductos()) return 'error';
+    return this.productosCategoria().length ? 'success' : 'empty';
+  });
 
   readonly rutaCatalogoCategoria = computed(() => {
     const slug = this.categoria()?.slug;
@@ -100,6 +119,55 @@ export class VaristorehnCategoriaComponent implements OnInit {
     const cantidad = this.categoria()?.cantidadProductos;
     if (cantidad === null || cantidad === undefined) return 'Cantidad no disponible';
     return `${cantidad} ${cantidad === 1 ? 'producto' : 'productos'}`;
+  }
+
+  modeloVisible(producto: ProductoTienda): ModeloTienda {
+    return producto.modelos.find(modelo => modelo.disponible) ?? producto.modelos[0];
+  }
+
+  precioProducto(producto: ProductoTienda): number {
+    const modelo = this.modeloVisible(producto);
+    return modelo ? precioVenta(producto, modelo) : producto.precio;
+  }
+
+  disponibilidadProducto(producto: ProductoTienda): string {
+    const modelo = this.modeloVisible(producto);
+    return modelo ? etiquetaDisponibilidad(modelo) : 'Agotado';
+  }
+
+  imagenProducto(producto: ProductoTienda): string {
+    const modelo = this.modeloVisible(producto);
+    return modelo?.imagenes[0] || producto.imagenes[0] || '';
+  }
+
+  imagenValida(url: string): boolean {
+    return Boolean(url) && !this.imagenesConError().has(url);
+  }
+
+  errorImagen(url: string): void {
+    if (!url || this.imagenesConError().has(url)) return;
+    const errores = new Set(this.imagenesConError());
+    errores.add(url);
+    this.imagenesConError.set(errores);
+  }
+
+  rutaProducto(producto: ProductoTienda): string {
+    return producto.slug ? VARISTOREHN_PATHS.producto(producto.slug) : VARISTOREHN_PATHS.productos;
+  }
+
+  moneda(valor: number): string {
+    try {
+      return new Intl.NumberFormat('es-HN', {
+        style: 'currency',
+        currency: this.identidad.config().moneda || 'HNL'
+      }).format(valor);
+    } catch {
+      return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor);
+    }
+  }
+
+  recargarProductos(): void {
+    this.cargarContextoCarrito();
   }
 
   private cargarCategoria(): void {
@@ -158,16 +226,25 @@ export class VaristorehnCategoriaComponent implements OnInit {
   private cargarContextoCarrito(): void {
     this.cargaCarrito?.unsubscribe();
     this.carrito.reiniciarContexto();
+    this.catalogo.set([]);
+    this.cargandoProductos.set(true);
+    this.errorProductos.set('');
     const fuente: Observable<ProductoTienda[]> = this.utilizarDatosBaseDatos()
       ? this.servicio.obtenerCatalogo().pipe(map(productos => productos.map(mapearProducto)))
       : of(crearCatalogoEjemplo());
 
     this.cargaCarrito = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: productos => {
+        this.catalogo.set(productos);
+        this.cargandoProductos.set(false);
         const resultado = this.carrito.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
         if (resultado.ajustado) this.aviso.set(this.carrito.aviso());
       },
-      error: () => this.aviso.set('No pudimos actualizar el resumen del carrito en esta página. Tu selección sigue guardada.')
+      error: () => {
+        this.cargandoProductos.set(false);
+        this.errorProductos.set('No pudimos cargar los productos de esta categoría. Intenta nuevamente.');
+        this.aviso.set('No pudimos actualizar el resumen del carrito en esta página. Tu selección sigue guardada.');
+      }
     });
   }
 }
