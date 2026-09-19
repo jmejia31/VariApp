@@ -398,10 +398,17 @@ export class VaristorehnProductosComponent implements OnInit {
   private modelosRetornoInicial(): Record<number, string> {
     const view = this.document.defaultView;
     if (!view) return {};
+
+    const urlActual = `${view.location.pathname}${view.location.search}${view.location.hash}`;
+    const estadoNavegacion = view.history.state && typeof view.history.state === 'object'
+      ? view.history.state as Record<string, unknown>
+      : null;
+    const desdeHistory = this.leerContextoRetorno(estadoNavegacion?.['varistorehnCatalogState']);
+    if (desdeHistory?.url === urlActual) return desdeHistory.modelosActivos;
+
     try {
       const persistido = view.sessionStorage.getItem(RETORNO_CATALOGO_STORAGE);
       const contexto = persistido ? this.leerContextoRetorno(JSON.parse(persistido) as unknown) : null;
-      const urlActual = `${view.location.pathname}${view.location.search}${view.location.hash}`;
       return contexto?.url === urlActual ? contexto.modelosActivos : {};
     } catch {
       return {};
