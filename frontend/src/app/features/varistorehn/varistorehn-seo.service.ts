@@ -9,6 +9,7 @@ interface SeoPage {
   title: string;
   description: string;
   path: string;
+  siteName: string;
   indexable: boolean;
   type?: 'website' | 'product';
   image?: string;
@@ -32,6 +33,7 @@ export class VaristorehnSeoService {
         title: `${marca} | Tecnología y compras en línea`,
         description: `Compra tecnología, accesorios y productos seleccionados en ${marca}. Explora categorías, ofertas y disponibilidad en línea.`,
         path: VARISTOREHN_PATHS.inicio,
+        siteName: marca,
         indexable: true
       });
       return;
@@ -42,6 +44,7 @@ export class VaristorehnSeoService {
         title: `Productos | ${marca}`,
         description: `Explora el catálogo público de ${marca}, consulta precios, disponibilidad, categorías y modelos.`,
         path,
+        siteName: marca,
         indexable: true
       });
       return;
@@ -52,6 +55,7 @@ export class VaristorehnSeoService {
         title: `Ofertas vigentes | ${marca}`,
         description: `Descubre promociones vigentes de ${marca} con precios y disponibilidad actualizados.`,
         path,
+        siteName: marca,
         indexable: true
       });
       return;
@@ -62,6 +66,7 @@ export class VaristorehnSeoService {
         title: `Categorías | ${marca}`,
         description: `Explora las categorías públicas de ${marca} y encuentra productos por tipo de compra.`,
         path,
+        siteName: marca,
         indexable: true
       });
       return;
@@ -72,6 +77,7 @@ export class VaristorehnSeoService {
         title: `Producto | ${marca}`,
         description: `Consulta información, precio y disponibilidad de este producto en ${marca}.`,
         path,
+        siteName: marca,
         indexable: true,
         type: 'product'
       });
@@ -83,6 +89,7 @@ export class VaristorehnSeoService {
         title: `Categoría | ${marca}`,
         description: `Explora productos de esta categoría en ${marca}.`,
         path,
+        siteName: marca,
         indexable: true
       });
       return;
@@ -112,6 +119,7 @@ export class VaristorehnSeoService {
       title: `${producto.nombre} | ${marca}`,
       description: descripcion,
       path: VARISTOREHN_PATHS.producto(producto.slug),
+      siteName: marca,
       indexable: true,
       type: 'product',
       image,
@@ -146,6 +154,7 @@ export class VaristorehnSeoService {
         `Explora productos de ${categoria.nombre} en ${marca}. Consulta disponibilidad y opciones del catálogo público.`
       ),
       path: VARISTOREHN_PATHS.categoria(categoria.slug),
+      siteName: marca,
       indexable: true
     });
   }
@@ -155,6 +164,7 @@ export class VaristorehnSeoService {
     this.title.setTitle(`${marca} | Acceso privado`);
     this.meta.updateTag({ name: 'robots', content: 'noindex,nofollow,noarchive' });
     this.meta.updateTag({ name: 'googlebot', content: 'noindex,nofollow,noarchive' });
+    this.quitarMeta("name='description'");
     this.limpiarSocial();
     this.establecerCanonica('');
     this.establecerJsonLd(undefined);
@@ -182,7 +192,7 @@ export class VaristorehnSeoService {
     this.meta.updateTag({ property: 'og:title', content: title }, "property='og:title'");
     this.meta.updateTag({ property: 'og:description', content: description }, "property='og:description'");
     this.meta.updateTag({ property: 'og:url', content: canonical }, "property='og:url'");
-    this.meta.updateTag({ property: 'og:site_name', content: this.nombreMarcaDesdeTitulo(title) }, "property='og:site_name'");
+    this.meta.updateTag({ property: 'og:site_name', content: page.siteName }, "property='og:site_name'");
 
     this.meta.updateTag({ name: 'twitter:card', content: page.image ? 'summary_large_image' : 'summary' });
     this.meta.updateTag({ name: 'twitter:title', content: title });
@@ -207,22 +217,11 @@ export class VaristorehnSeoService {
   private entornoIndexable(): boolean {
     if (!environment.production) return false;
     const host = this.document.defaultView?.location.hostname.toLowerCase() || '';
-    if (!host || host === 'localhost' || host === '127.0.0.1') return false;
-    if (host.endsWith('.vercel.app') && host !== 'varistorehn.vercel.app') return false;
-    return true;
+    return host === 'varistorehn.vercel.app';
   }
 
   private urlCanonica(path: string): string {
-    const host = this.document.defaultView?.location.hostname.toLowerCase() || '';
-    const currentOrigin = this.document.defaultView?.location.origin || this.productionOrigin;
-    const origin = environment.production
-      && host
-      && !host.endsWith('.vercel.app')
-      && host !== 'localhost'
-      && host !== '127.0.0.1'
-      ? currentOrigin
-      : this.productionOrigin;
-    return path ? `${origin}${path.startsWith('/') ? path : `/${path}`}` : '';
+    return path ? `${this.productionOrigin}${path.startsWith('/') ? path : `/${path}`}` : '';
   }
 
   private urlAbsoluta(value: string): string {
@@ -255,7 +254,8 @@ export class VaristorehnSeoService {
   private limpiarSocial(): void {
     [
       "property='og:title'", "property='og:description'", "property='og:url'", "property='og:type'",
-      "property='og:image'", "property='og:image:alt'", "name='twitter:card'", "name='twitter:title'",
+      "property='og:site_name'", "property='og:locale'", "property='og:image'", "property='og:image:alt'",
+      "name='twitter:card'", "name='twitter:title'",
       "name='twitter:description'", "name='twitter:image'", "name='twitter:image:alt'"
     ].forEach(selector => this.quitarMeta(selector));
   }
@@ -273,11 +273,6 @@ export class VaristorehnSeoService {
     const limpio = nombre.trim();
     if (!limpio || /administrativ[oa]/i.test(limpio)) return 'VariStoreHN';
     return this.limitar(limpio, 50);
-  }
-
-  private nombreMarcaDesdeTitulo(title: string): string {
-    const partes = title.split('|');
-    return this.nombreMarca(partes[partes.length - 1] || 'VariStoreHN');
   }
 
   private descripcion(valor: string | undefined | null, fallback: string): string {
