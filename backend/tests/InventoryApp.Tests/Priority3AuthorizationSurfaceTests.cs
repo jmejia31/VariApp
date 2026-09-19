@@ -16,7 +16,8 @@ public sealed class Priority3AuthorizationSurfaceTests
         "InventoryApp.API.Controllers.FacturasController.DescargarPdfPublico",
         "InventoryApp.API.Controllers.TemaVisualController.Get",
         "InventoryApp.Api.Controllers.InboundWebhooksController.ReceiveAsync",
-        "InventoryApp.API.Controllers.WhatsAppController.Webhook"
+        "InventoryApp.API.Controllers.WhatsAppController.Webhook",
+        "InventoryApp.API.Controllers.WhatsAppController.GetPublicoAsync"
     };
 
     [Fact]
