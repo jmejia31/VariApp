@@ -164,7 +164,9 @@ fieldset > button small { color: var(--color-text-muted); font-size: .62rem; }
   .catalog-toolbar > div { width: 100%; margin-right: 0; }
   .mobile-filters { display: inline-flex; }
   .sort-field { margin-left: auto; }
-  .product-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 14px; }
+  .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .footer-grid > div:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 760px) {
@@ -185,6 +187,7 @@ fieldset > button small { color: var(--color-text-muted); font-size: .62rem; }
   .product-actions .button { min-height: 46px; }
   .pagination { flex-wrap: wrap; }
   .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+  .footer-grid > div:first-child { grid-column: auto; }
 }
 
 @media (max-width: 600px) {
