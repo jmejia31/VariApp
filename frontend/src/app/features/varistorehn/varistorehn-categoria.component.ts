@@ -56,7 +56,9 @@ export class VaristorehnCategoriaComponent implements OnInit {
     if (!categoria) return [];
     return this.catalogo()
       .filter(producto => producto.activo
-        && (producto.categoriaId === categoria.id || producto.categoria === categoria.nombre))
+        && (producto.categoriaId !== null
+          ? producto.categoriaId === categoria.id
+          : producto.categoria === categoria.nombre))
       .slice(0, 8);
   });
 
