@@ -46,6 +46,33 @@ const producto = {
     estaAgotado: false,
     estadoDisponibilidad: 'Disponible',
     imagenes: []
+  }, {
+    productoVarianteId: 112,
+    modeloId: 52,
+    modeloNombre: 'Modelo historico seguro',
+    marcaNombre: 'Marca Cuenta',
+    sku: 'CTA-112',
+    precio: 175,
+    cantidadDisponible: 2,
+    estaAgotado: false,
+    estadoDisponibilidad: 'Disponible',
+    imagenes: []
+  }]
+};
+
+const pedidoSinVariante = {
+  id: 7002,
+  estado: 'Confirmado',
+  total: 175,
+  fechaUtc: '2026-09-17T16:00:00Z',
+  lineas: [{
+    productoId: 11,
+    productoVarianteId: null,
+    nombre: 'Producto Cuenta 11',
+    modelo: 'Modelo historico seguro',
+    cantidad: 1,
+    precioUnitario: 175,
+    total: 175
   }]
 };
 
@@ -98,7 +125,11 @@ async function prepararBase(page: Page): Promise<void> {
   }));
 }
 
-async function prepararCuentaAutenticada(page: Page, registrarCabeceras?: (ok: boolean) => void): Promise<void> {
+async function prepararCuentaAutenticada(
+  page: Page,
+  registrarCabeceras?: (ok: boolean) => void,
+  pedidosMock: typeof pedido[] = [pedido]
+): Promise<void> {
   await page.addInitScript(token => {
     sessionStorage.setItem('varistorehn:cuenta:session:v1', token);
   }, TOKEN);
@@ -137,7 +168,7 @@ async function prepararCuentaAutenticada(page: Page, registrarCabeceras?: (ok: b
 
   await page.route('**/tienda/cuenta/pedidos', route => {
     if (!autorizado(route.request())) return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ success: false }) });
-    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: [pedido] }) });
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data: pedidosMock }) });
   });
 
   await page.route('**/tienda/cuenta/notificaciones', route => {
@@ -223,6 +254,22 @@ test.describe('VariStoreHN Fase 12 — cuenta de cliente y evolución', () => {
     await expect(page.getByText('Pedido #7001', { exact: true })).toBeVisible();
     expect(cabeceras.length).toBeGreaterThanOrEqual(5);
     expect(cabeceras.every(Boolean)).toBe(true);
+  });
+
+  test('recompra histórica sin variante usa snapshot de modelo y no el primer modelo actual', async ({ page }) => {
+    await prepararBase(page);
+    await prepararCuentaAutenticada(page, undefined, [pedidoSinVariante]);
+
+    await page.goto('/varistorehn/cuenta');
+    await page.locator('details summary').filter({ hasText: 'Pedido #7002' }).click();
+    await page.getByRole('button', { name: 'Recomprar con stock y precio actuales' }).click();
+    await expect(page).toHaveURL(/\/varistorehn\/carrito/);
+
+    const carrito = await page.evaluate(() => {
+      const key = Object.keys(localStorage).find(item => item.startsWith('varistorehn:carrito:v2:') && item.endsWith(':bd')) || '';
+      return key ? JSON.parse(localStorage.getItem(key) || '[]') : [];
+    });
+    expect(carrito).toEqual([{ productoId: 11, modeloClave: 'variante:112', unidades: 1 }]);
   });
 
   test('recompra guarda solo referencias y vuelve a validar catálogo vigente', async ({ page }) => {
