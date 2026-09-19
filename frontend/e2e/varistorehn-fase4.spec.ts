@@ -203,6 +203,8 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await verProducto.click();
     await esperarDetalleDemo(page);
     await expect(page).toHaveURL(/\/varistorehn\/producto\/demo-producto-1$/);
+    const retornoGuardado = await page.evaluate(() => sessionStorage.getItem('varistorehn:retorno-catalogo:v1'));
+    expect(retornoGuardado).toContain(modeloAntes);
 
     const volver = page.getByRole('button', { name: 'Volver a la pantalla anterior' });
     await expect(volver).toBeVisible();
