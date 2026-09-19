@@ -182,7 +182,11 @@ export class VaristorehnCuentaComponent implements OnInit {
       }
       const modelo = linea.productoVarianteId
         ? producto.modelos.find(item => item.productoVarianteId === linea.productoVarianteId)
-        : producto.modelos[0];
+        : linea.modelo?.trim()
+          ? producto.modelos.find(item => item.nombre.trim() === linea.modelo!.trim())
+          : producto.modelos.length === 1
+            ? producto.modelos[0]
+            : undefined;
       const unidades = Math.max(1, Math.floor(Number(linea.cantidad) || 1));
       if (!modelo || !modelo.disponible) {
         omitidas += 1;
