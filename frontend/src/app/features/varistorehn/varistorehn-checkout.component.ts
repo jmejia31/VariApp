@@ -120,7 +120,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
     const comprador = this.datosComprador();
     const moneda = this.identidad.config().moneda || 'HNL';
     const mensaje = mensajeWhatsappCheckout(
-      this.identidad.nombreSistema(), comprador, validado.validacionId, moneda, validado.lineas, validado.total
+      this.identidad.config().nombreComercial || 'VariStoreHN', comprador, validado.validacionId, moneda, validado.lineas, validado.total
     );
     const enlace = construirEnlaceWhatsApp(destino, mensaje);
     if (!enlace) {
