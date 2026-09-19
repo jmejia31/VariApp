@@ -246,6 +246,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(mensaje).toContain('📦 *Producto 1*');
     expect(mensaje).toContain('*UAT Modelo General*');
     expect(mensaje).toContain('SKU: UAT-GENERAL');
+    expect(mensaje).toContain('🔗 Ver producto: http://localhost:4200/varistorehn/producto/uat-modelo-general-509');
     expect(mensaje).toContain('Cantidad: 1');
     expect(mensaje).toContain('Precio unitario:');
     expect(mensaje).toContain('💰 *TOTAL:');
@@ -327,6 +328,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(mensaje).toContain('📱 *Teléfono:* 50499991111');
     expect(mensaje).toContain('✉️ *Correo:* cliente@example.com');
     expect(mensaje).toContain('SKU: SKU-501-A');
+    expect(mensaje).toContain('🔗 Ver producto: http://localhost:4200/varistorehn/producto/producto-checkout-real-501');
     expect(mensaje).toContain('Cantidad: 2');
     expect(mensaje).toContain('Precio unitario:');
     expect(mensaje).toContain('Subtotal:');
