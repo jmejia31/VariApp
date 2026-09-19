@@ -68,6 +68,33 @@ public sealed class WhatsAppController : ControllerBase
         return Ok(new WhatsAppWebhookResponse("accepted"));
     }
 
+    [HttpGet("publico")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublicoAsync(CancellationToken cancellationToken)
+    {
+        var configuraciones = await _db.Set<ConfiguracionWhatsAppEmpresa>()
+            .AsNoTracking()
+            .Where(x => x.Activa)
+            .Select(x => x.NumeroTelefonoE164)
+            .Distinct()
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        if (configuraciones.Count != 1)
+        {
+            if (configuraciones.Count > 1)
+            {
+                _logger.LogWarning(
+                    "WhatsApp público no expuesto: existen varias configuraciones activas y no hay un tenant público inequívoco. Correlación {CorrelationId}",
+                    HttpContext.TraceIdentifier);
+            }
+
+            return Ok(new WhatsAppPublicoResponse(null, false));
+        }
+
+        return Ok(new WhatsAppPublicoResponse(configuraciones[0], true));
+    }
+
     [HttpPost("iniciar-whatsapp")]
     [Authorize]
     [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
@@ -129,6 +156,7 @@ public sealed class WhatsAppController : ControllerBase
     }
 }
 
+public sealed record WhatsAppPublicoResponse(string? NumeroTelefonoE164, bool Disponible);
 public sealed record IniciarWhatsAppRequest(int EmpresaId);
 public sealed record IniciarWhatsAppResponse(
     string Status,
