@@ -81,7 +81,7 @@
       "coverage": "repository hygiene; backend Release and non-integration tests; frontend production; EF/MySQL; Docker isolation"
     },
     {
-      "run_id": 35461907049,
+      "run_id": 35461907034,
       "name": "VariStoreHn Fase 6 - checkout y pedido",
       "head": "99ef56d6e18e5a5b136e4ed0f0a5ff107172a259",
       "status": "completed",
@@ -123,5 +123,9 @@
     "production_touched": false,
     "pr2_merged": false,
     "secrets_dns_certificates_touched": false
+  },
+  "evidence_correction": {
+    "reason": "Corrected Fase 6 workflow run identifier before receipt; original review commit had duplicated the Priority 4 run id.",
+    "corrected_at_utc": "2026-09-19T18:58:08Z"
   }
 }
