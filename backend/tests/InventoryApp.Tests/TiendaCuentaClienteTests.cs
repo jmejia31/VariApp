@@ -50,6 +50,28 @@ public sealed class TiendaCuentaClienteTests
     }
 
     [Fact]
+    public async Task Registrar_CorreoMayorAlLimiteErp_RetornaBadRequestSinCrearCliente()
+    {
+        await using var db = CrearDb();
+        var resolver = new Mock<ITipoClientePredeterminadoResolver>();
+        resolver.Setup(x => x.ResolverIdPredeterminadoAsync()).ReturnsAsync(1);
+        var controller = CrearController(db, resolver.Object);
+        var correoLargo = $"{new string('a', 64)}@{new string('b', 63)}.{new string('c', 30)}";
+        Assert.True(correoLargo.Length > 150);
+
+        var result = await controller.Registrar(new TiendaCuentaRegistroDto
+        {
+            Nombre = "Cliente Correo Largo",
+            Correo = correoLargo,
+            Clave = "ClaveSegura123!"
+        });
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Empty(await db.Clientes.ToListAsync());
+        Assert.Empty(await db.TiendaCuentasCliente.ToListAsync());
+    }
+
+    [Fact]
     public async Task Pedido_DeOtroCliente_NoSePuedeConsultarPorId()
     {
         await using var db = CrearDb();
