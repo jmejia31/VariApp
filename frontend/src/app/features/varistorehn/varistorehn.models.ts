@@ -240,3 +240,50 @@ export interface FiltrosCatalogo {
 export type EstadoConsultaPublica = 'loading' | 'empty' | 'error' | 'success';
 export type EstadoDisponibilidad = 'available' | 'lowStock' | 'outOfStock';
 export type EstadoPromocion = 'none' | 'active' | 'expired';
+
+
+export interface TiendaCuentaPerfil {
+  id: number;
+  nombre: string;
+  correo: string;
+}
+
+export interface TiendaCuentaSesion {
+  token: string;
+  expiraUtc: string;
+  perfil: TiendaCuentaPerfil;
+}
+
+export interface TiendaDireccionCliente {
+  id: number;
+  alias: string;
+  recibe: string;
+  telefono: string;
+  direccion: string;
+  predeterminada: boolean;
+}
+
+export interface TiendaPedidoCuentaLinea {
+  productoId: number;
+  productoVarianteId?: number | null;
+  nombre: string;
+  modelo?: string | null;
+  cantidad: number;
+  precioUnitario: number;
+  total: number;
+}
+
+export interface TiendaPedidoCuenta {
+  id: number;
+  estado: string;
+  total: number;
+  fechaUtc: string;
+  lineas: TiendaPedidoCuentaLinea[];
+}
+
+export interface TiendaNotificacionPedido {
+  pedidoId: number;
+  estado: string;
+  mensaje: string;
+  fechaUtc: string;
+}
