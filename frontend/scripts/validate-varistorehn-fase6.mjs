@@ -77,7 +77,14 @@ expect(empresaConfigService.includes('/whatsapp/publico'), 'El fallback público
 expect(empresaIdentity.includes('this.empresaService.getWhatsAppPublico()'), 'La identidad debe resolver WhatsApp Business cuando el contacto legacy esté vacío.');
 expect(empresaIdentity.includes('if (config.whatsApp?.trim()) return of(config);'), 'Un WhatsApp público explícito debe conservar prioridad sin consultas innecesarias.');
 expect(whatsappController.includes('[HttpGet("publico")]') && whatsappController.includes('[AllowAnonymous]'), 'WhatsApp debe exponer únicamente un contacto público explícito para el storefront.');
-expect(whatsappController.includes('.Select(x => x.NumeroTelefonoE164)') && whatsappController.includes('.Take(2)'), 'El endpoint público debe exponer solo el número y fallar cerrado ante múltiples tenants activos.');
+expect(
+  whatsappController.includes('WhatsAppPublicoResponse')
+    && whatsappController.includes('numeros.Count == 1')
+    && whatsappController.includes('numeros.Count > 1')
+    && whatsappController.includes('coincidencias.Count == 1')
+    && whatsappController.includes('WhatsApp público no expuesto'),
+  'El endpoint público debe resolver un único número inequívoco y fallar cerrado ante múltiples tenants activos.'
+);
 expect(!/TokenSecretoReferencia|WebhookSecretoReferencia/.test((whatsappController.match(/GetPublicoAsync[\s\S]*?\n    }/m)?.[0] || '')), 'El endpoint público de WhatsApp no debe leer ni exponer referencias secretas.');
 
 for (const required of [
