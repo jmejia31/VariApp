@@ -8,7 +8,7 @@
         {{ identidad.config().encabezadoTexto || identidad.config().eslogan }}
       </span>
       <div class="utility-actions">
-        <a [href]="enlaces.contacto">Atención y contacto</a>
+        <a [routerLink]="'/varistorehn/cuenta'">Mi cuenta</a>\n        <a [href]="enlaces.contacto">Atención y contacto</a>
       </div>
     </div>
   </div>
@@ -105,7 +105,7 @@
       <a #primerEnlaceMovil [routerLink]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
       <a [routerLink]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
       <a [routerLink]="enlaces.ofertas" (click)="cerrarMenuMovil(false)">Ofertas</a>
-      <a [routerLink]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
+      <a [routerLink]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>\n      <a [routerLink]="'/varistorehn/cuenta'" (click)="cerrarMenuMovil(false)">Mi cuenta</a>
       <a [href]="enlaces.contacto" (click)="cerrarMenuMovil(false)">Contacto</a>
     </nav>
 
