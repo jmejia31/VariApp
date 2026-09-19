@@ -1,4 +1,4 @@
-/* Fase 3: catálogo público independiente. Tema global + cascade mobile-first obligatorio. */
+/* Fase 3: catálogo público independiente. Tema global + cascade mobile-first obligatorio; guard transversal exact-head. */
 :host {
   display: block;
   color: var(--color-text);
