@@ -308,26 +308,20 @@ export class VaristorehnProductoComponent implements OnInit {
     const sku = this.skuVisible();
     const enlaceProducto = this.enlaceProductoActual();
     const mensaje = [
-      `🛍️ *Solicitud de compra directa — ${marca}*`,
+      `🛍️ *Quiero comprar en ${marca}*`,
       '',
-      '────────────',
-      '*Detalle del producto*',
-      '',
-      '📦 *Producto 1*',
-      `*${producto.nombre}*`,
+      `📦 *${producto.nombre}*`,
       modelo.nombre ? `Modelo: ${modelo.nombre}` : '',
       sku ? `SKU: ${sku}` : '',
-      enlaceProducto ? `🔗 Ver producto: ${enlaceProducto}` : '',
-      `Cantidad: ${unidades}`,
-      `Precio unitario: ${this.moneda(this.precioActual())}`,
-      `Subtotal: *${this.moneda(subtotal)}*`,
       '',
-      '────────────',
-      `💰 *TOTAL: ${this.moneda(subtotal)}*`,
+      `Cantidad: *${unidades}*`,
+      `Precio: ${this.moneda(this.precioActual())}`,
+      `💰 *Total: ${this.moneda(subtotal)}*`,
       '',
-      `✅ Solicitud generada desde *${marca}*.`,
-      'La tienda confirmará disponibilidad, entrega y condiciones antes de finalizar la compra.'
-    ].filter(linea => linea !== '').join('\\n');
+      enlaceProducto ? `🔗 *Ver producto*\n${enlaceProducto}` : '',
+      '',
+      '✅ Quedo atento a la confirmación de disponibilidad y entrega.'
+    ].filter((linea, indice, lineas) => linea !== '' || (indice > 0 && lineas[indice - 1] !== '')).join('\n').trim();
     if (!this.utilizarDatosBaseDatos()) { this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`); return; }
     const url = construirEnlaceWhatsApp(telefono, mensaje);
     if (!url) { this.aviso.set('El mensaje es demasiado largo o el número no es válido para abrir WhatsApp.'); return; }
