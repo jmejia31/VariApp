@@ -304,8 +304,30 @@ export class VaristorehnProductoComponent implements OnInit {
     if (!producto || !modelo || !telefono || !this.permiteWhatsapp() || !modelo.disponible || modelo.stock <= 0) return;
     const unidades = Math.max(1, Math.min(this.cantidad() || 1, modelo.stock));
     const subtotal = this.precioActual() * unidades;
-    const sku = this.skuVisible() ? `\nSKU: ${this.skuVisible()}` : '';
-    const mensaje = `Hola ${this.identidad.config().nombreComercial}, deseo consultar este producto:\n\n${producto.nombre}\nModelo: ${modelo.nombre}${sku}\nCantidad: ${unidades}\nPrecio unitario: ${this.moneda(this.precioActual())}\nSubtotal: ${this.moneda(subtotal)}\n\nPor favor confirmar disponibilidad y total final.`;
+    const marca = this.identidad.config().nombreComercial || 'VariStoreHN';
+    const sku = this.skuVisible();
+    const enlaceProducto = this.enlaceProductoActual();
+    const mensaje = [
+      `🛍️ *Solicitud de compra directa — ${marca}*`,
+      '',
+      '────────────',
+      '*Detalle del producto*',
+      '',
+      '📦 *Producto 1*',
+      `*${producto.nombre}*`,
+      modelo.nombre ? `Modelo: ${modelo.nombre}` : '',
+      sku ? `SKU: ${sku}` : '',
+      enlaceProducto ? `🔗 Ver producto: ${enlaceProducto}` : '',
+      `Cantidad: ${unidades}`,
+      `Precio unitario: ${this.moneda(this.precioActual())}`,
+      `Subtotal: *${this.moneda(subtotal)}*`,
+      '',
+      '────────────',
+      `💰 *TOTAL: ${this.moneda(subtotal)}*`,
+      '',
+      `✅ Solicitud generada desde *${marca}*.`,
+      'La tienda confirmará disponibilidad, entrega y condiciones antes de finalizar la compra.'
+    ].filter(linea => linea !== '').join('\\n');
     if (!this.utilizarDatosBaseDatos()) { this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`); return; }
     const url = construirEnlaceWhatsApp(telefono, mensaje);
     if (!url) { this.aviso.set('El mensaje es demasiado largo o el número no es válido para abrir WhatsApp.'); return; }
@@ -388,6 +410,14 @@ export class VaristorehnProductoComponent implements OnInit {
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
     return modelo ? precioVenta(producto, modelo) : producto.precio;
   }
+  private enlaceProductoActual(): string {
+    const view = this.document.defaultView;
+    const producto = this.producto();
+    if (!view || !producto?.slug) return '';
+    try { return new URL(VARISTOREHN_PATHS.producto(producto.slug), view.location.origin).toString(); }
+    catch { return ''; }
+  }
+
   moneda(valor: number): string {
     try { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: this.identidad.config().moneda || 'HNL' }).format(valor); }
     catch { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor); }
