@@ -48,6 +48,8 @@ interface ContextoRetornoCatalogo {
   filtrosAbiertos: boolean;
 }
 
+const RETORNO_CATALOGO_STORAGE = 'varistorehn:retorno-catalogo:v1';
+
 @Component({
   selector: 'app-varistorehn-producto',
   standalone: true,
@@ -494,7 +496,15 @@ export class VaristorehnProductoComponent implements OnInit {
     const estadoNavegacion = view?.history.state && typeof view.history.state === 'object'
       ? view.history.state as Record<string, unknown>
       : null;
-    const valor = estadoNavegacion?.['varistorehnReturn'];
+    let valor = estadoNavegacion?.['varistorehnReturn'];
+    if (!valor || typeof valor !== 'object') {
+      try {
+        const persistido = view?.sessionStorage.getItem(RETORNO_CATALOGO_STORAGE);
+        valor = persistido ? JSON.parse(persistido) as unknown : null;
+      } catch {
+        valor = null;
+      }
+    }
     if (!valor || typeof valor !== 'object') return null;
     const estado = valor as Record<string, unknown>;
     const url = typeof estado['url'] === 'string' ? estado['url'] : '';
