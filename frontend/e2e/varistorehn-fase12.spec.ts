@@ -217,7 +217,7 @@ test.describe('VariStoreHN Fase 12 — cuenta de cliente y evolución', () => {
     await page.goto('/varistorehn/cuenta');
 
     await expect(page.getByRole('heading', { level: 2, name: 'Cliente Fase 12' })).toBeVisible();
-    await expect(page.getByText('Casa', { exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Direcciones guardadas' }).getByText('Casa', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('Producto Cuenta 11', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Pedido #7001 confirmado.', { exact: true })).toBeVisible();
     await expect(page.getByText('Pedido #7001', { exact: true })).toBeVisible();
@@ -230,6 +230,7 @@ test.describe('VariStoreHN Fase 12 — cuenta de cliente y evolución', () => {
     await prepararCuentaAutenticada(page);
 
     await page.goto('/varistorehn/cuenta');
+    await page.locator('details summary').filter({ hasText: 'Pedido #7001' }).click();
     await page.getByRole('button', { name: 'Recomprar con stock y precio actuales' }).click();
     await expect(page).toHaveURL(/\/varistorehn\/carrito/);
 
