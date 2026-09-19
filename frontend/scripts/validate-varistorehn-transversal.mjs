@@ -25,6 +25,9 @@ const [
   config,
   routes,
   responsiveSpec,
+  productsCss,
+  productCss,
+  headerCss,
   controller,
   accountController,
   publicDto,
@@ -47,6 +50,9 @@ const [
   readFrontend('src/app/features/varistorehn/varistorehn.config.ts'),
   readFrontend('src/app/app.routes.ts'),
   readFrontend('e2e/varistorehn-fase10.spec.ts'),
+  readFrontend('src/app/features/varistorehn/varistorehn-productos.component.scss'),
+  readFrontend('src/app/features/varistorehn/varistorehn-producto.component.scss'),
+  readFrontend('src/app/features/varistorehn/varistorehn-header.component.scss'),
   readRepo('backend/src/API/Controllers/TiendaController.cs'),
   readRepo('backend/src/API/Controllers/TiendaCuentaController.cs'),
   readRepo('backend/src/Application/DTOs/ProductoCatalogoPublicoDto.cs'),
@@ -108,7 +114,14 @@ const mobilePurchase = responsiveSpec.indexOf('rutas públicas de compra no desb
 const desktopZoom = responsiveSpec.indexOf('zoom de escritorio 80 a 200 por ciento');
 expect(mobileExploration >= 0 && mobilePurchase > mobileExploration, 'Mobile-first: deben existir pruebas moviles de exploracion y compra.');
 expect(desktopZoom > mobilePurchase, 'Mobile-first: la matriz movil debe ejecutarse antes que la expansion de escritorio/zoom.');
+
 expect(responsiveSpec.includes('320') && responsiveSpec.includes('390') && responsiveSpec.includes('hasTouch: true'), 'Mobile-first: deben cubrirse 320/390 px y contexto tactil.');
+for (const [name, css] of [['catalogo', productsCss], ['detalle', productCss], ['header', headerCss]]) {
+  expect(!/@media\s*\(\s*max-width/i.test(css), `Mobile-first: ${name} no debe reducir un layout de escritorio con max-width.`);
+  expect(/@media\s*\(\s*min-width/i.test(css), `Mobile-first: ${name} debe expandirse desde un baseline movil mediante min-width.`);
+}
+expect(productsCss.includes('grid-template-columns: 1fr') && productCss.includes('grid-template-columns:1fr'), 'Mobile-first: catalogo y detalle deben declarar una columna como baseline movil.');
+expect(headerCss.includes('.mobile-menu-trigger') && headerCss.includes('display: grid'), 'Mobile-first: el header debe exponer el control movil en el baseline.');
 
 // Seguridad: frontera publica separada de administracion.
 expect(controller.includes('[AllowAnonymous]') && controller.includes('[Route("tienda")]'), 'Seguridad: la tienda debe exponer una frontera publica explicita.');
