@@ -17,6 +17,17 @@
         <span class="spinner" aria-hidden="true"></span>
         <h1>Recuperando tu referencia</h1>
       </section>
+    } @else if (estado() === 'error') {
+      <section class="state-card missing" role="alert">
+        <app-store-icon nombre="escudo" />
+        <p class="eyebrow">CONFIRMACIÓN NO DISPONIBLE</p>
+        <h1>No pudimos cargar tu referencia</h1>
+        <p>{{ error() }}</p>
+        <div class="actions">
+          <a class="button primary" [href]="enlaces.carrito">Volver al carrito</a>
+          <a class="button ghost" [href]="enlaces.productos">Ver productos</a>
+        </div>
+      </section>
     } @else if (recibo(); as pedido) {
       <section class="confirmation-card">
         <span class="success-icon"><app-store-icon nombre="check" /></span>
