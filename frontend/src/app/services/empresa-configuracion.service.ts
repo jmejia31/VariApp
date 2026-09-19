@@ -5,6 +5,11 @@ import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
 import { ActualizarEmpresaConfiguracionValue, EmpresaConfiguracion } from '../core/models/empresa-configuracion.model';
 
+export interface WhatsAppPublico {
+  numeroTelefonoE164: string | null;
+  disponible: boolean;
+}
+
 export interface PlantillaCorreoEmpresa {
   tipoPlantilla: string;
   asunto: string;
@@ -61,6 +66,10 @@ export class EmpresaConfiguracionService {
 
   getPublica(): Observable<ApiResponse<EmpresaConfiguracion>> {
     return this.http.get<ApiResponse<EmpresaConfiguracion>>(`${this.apiUrl}/publica`);
+  }
+
+  getWhatsAppPublico(): Observable<WhatsAppPublico> {
+    return this.http.get<WhatsAppPublico>(`${environment.apiUrl}/whatsapp/publico`);
   }
 
   update(valor: ActualizarEmpresaConfiguracionValue): Observable<ApiResponse<EmpresaConfiguracion>> {
