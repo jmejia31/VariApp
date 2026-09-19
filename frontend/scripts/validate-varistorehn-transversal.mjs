@@ -124,6 +124,8 @@ const responsiveScss = await Promise.all(
 );
 for (const [name, css] of responsiveScss) {
   expect(!/@media\s*\(\s*max-width/i.test(css), `Mobile-first: ${name} no debe reducir un layout de escritorio con max-width.`);
+  expect(!/#[0-9a-f]{3,8}\b/i.test(css), `Diseno: ${name} no debe fijar colores hexadecimales propios fuera del tema.`);
+  expect(!/\b(?:rgb|hsl)a?\s*\(/i.test(css), `Diseno: ${name} no debe fijar colores RGB/HSL propios fuera del tema.`);
 }
 for (const [name, css] of [['catalogo', productsCss], ['detalle', productCss], ['header', headerCss]]) {
   expect(/@media\s*\(\s*min-width/i.test(css), `Mobile-first: ${name} debe expandirse desde un baseline movil mediante min-width.`);
