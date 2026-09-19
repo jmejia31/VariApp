@@ -22,6 +22,45 @@ export function normalizarDatosComprador(datos: DatosCompradorCheckout): DatosCo
   };
 }
 
+export interface ProductoMensajeWhatsApp {
+  nombre: string;
+  modelo?: string;
+  sku?: string;
+  unidades: number;
+  precioUnitario: number;
+  subtotal: number;
+  enlace?: string;
+}
+
+export function mensajeWhatsappCompraDirecta(
+  comercio: string,
+  moneda: string,
+  producto: ProductoMensajeWhatsApp
+): string {
+  const formato = new Intl.NumberFormat('es-HN', { style: 'currency', currency: moneda || 'HNL' });
+  const marca = limpiarTextoWhatsapp(comercio || 'VariStoreHN');
+  const nombre = limpiarTextoWhatsapp(producto.nombre);
+  const modelo = producto.modelo ? limpiarTextoWhatsapp(producto.modelo) : '';
+  const sku = producto.sku ? limpiarTextoWhatsapp(producto.sku) : '';
+  const enlace = enlaceProductoSeguro(producto.enlace);
+
+  return [
+    `🛍️ *Solicitud de compra — ${marca}*`,
+    '',
+    `📦 *${nombre}*`,
+    modelo ? `Modelo: ${modelo}` : '',
+    sku ? `SKU: ${sku}` : '',
+    enlace ? `🔗 *Ver producto:* ${enlace}` : '',
+    '',
+    `Cantidad: *${producto.unidades}*`,
+    `Precio unitario: ${formato.format(producto.precioUnitario)}`,
+    `💰 *TOTAL: ${formato.format(producto.subtotal)}*`,
+    '',
+    `✅ Solicitud generada desde *${marca}*.`,
+    'La tienda confirmará disponibilidad, entrega y condiciones.'
+  ].filter((linea, indice, lineas) => linea !== '' || (indice > 0 && lineas[indice - 1] !== '')).join('\n').trim();
+}
+
 export function mensajeWhatsappCheckout(
   comercio: string,
   comprador: DatosCompradorCheckout,
