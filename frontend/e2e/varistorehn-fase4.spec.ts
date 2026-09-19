@@ -425,7 +425,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     const preview = page.getByRole('region', { name: 'Vista previa de WhatsApp' });
     await expect(preview).toContainText('VISTA PREVIA — NO ENVIADO');
     await expect(preview).toContainText('Laptop Pro 14');
-    await expect(preview).toContainText('Cantidad: 2');
+    await expect(preview).toContainText('Cantidad: *2*');
     await expect(preview).toContainText('36,980');
   });
 });
