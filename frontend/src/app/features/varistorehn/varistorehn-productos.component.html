@@ -209,12 +209,14 @@
                         <strong>{{ moneda(precioActual(producto, modelo)) }}</strong>
                       }
                     </div>
-                    @if (producto.slug) {
-                      <a class="button ghost" [href]="'/varistorehn/producto/' + producto.slug">Ver producto</a>
-                    }
-                    <button type="button" class="button primary add-button" [disabled]="!disponibleParaAgregar(producto)" (click)="agregar(producto)" [attr.aria-label]="'Agregar ' + producto.nombre">
-                      <app-store-icon nombre="mas" /> {{ disponibleParaAgregar(producto) ? 'Agregar' : 'Sin unidades' }}
-                    </button>
+                    <div class="product-actions">
+                      @if (producto.slug) {
+                        <a class="button ghost" [href]="'/varistorehn/producto/' + producto.slug">Ver producto</a>
+                      }
+                      <button type="button" class="button primary add-button" [disabled]="!disponibleParaAgregar(producto)" (click)="agregar(producto)" [attr.aria-label]="'Agregar ' + producto.nombre">
+                        <app-store-icon nombre="mas" /> {{ disponibleParaAgregar(producto) ? 'Agregar' : 'Sin unidades' }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
