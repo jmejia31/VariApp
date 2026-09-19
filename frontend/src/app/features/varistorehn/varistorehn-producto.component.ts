@@ -29,6 +29,7 @@ import {
   telefonoWhatsapp
 } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
+import { VaristorehnCuentaService } from './varistorehn-cuenta.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
@@ -59,6 +60,7 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carritoStore = inject(VaristorehnCarritoService);
+  readonly cuentaCliente = inject(VaristorehnCuentaService);
 
   @ViewChild('lightbox') private lightbox?: ElementRef<HTMLDialogElement>;
   @ViewChild('botonImagenPrincipal') private botonImagenPrincipal?: ElementRef<HTMLButtonElement>;
@@ -81,6 +83,8 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly imagenActiva = signal(0);
   readonly imagenesFallidas = signal<Set<string>>(new Set());
   readonly lightboxAbierto = signal(false);
+  readonly favorito = signal(false);
+  readonly favoritoProcesando = signal(false);
 
   readonly telefono = computed(() => telefonoWhatsapp(this.identidad.config().whatsApp));
   readonly permiteWhatsapp = computed(() => this.config.modoCarrito !== 'tarjeta' && Boolean(this.telefono()));
@@ -185,6 +189,7 @@ export class VaristorehnProductoComponent implements OnInit {
       this.cargarContextoCatalogo();
       this.cargarCategorias();
     });
+    this.cuentaCliente.restaurar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.sincronizarFavorito());
   }
 
   cambiarFuente(baseDatos: boolean): void {
@@ -206,6 +211,35 @@ export class VaristorehnProductoComponent implements OnInit {
     void this.router.navigate(['/varistorehn/productos'], { queryParams: categoria ? { categoria: categoria.slug } : {} });
   }
   abrirCarrito(): void { void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito); }
+  alternarFavorito(): void {
+    const producto = this.producto();
+    if (!producto || this.favoritoProcesando()) return;
+    if (!this.utilizarDatosBaseDatos()) {
+      this.aviso.set('Los favoritos de cuenta usan el catálogo real.');
+      return;
+    }
+    if (!this.cuentaCliente.autenticado()) {
+      this.aviso.set('Inicia sesión en Mi cuenta para guardar favoritos.');
+      void this.router.navigateByUrl(VARISTOREHN_PATHS.cuenta);
+      return;
+    }
+
+    this.favoritoProcesando.set(true);
+    const accion = this.favorito()
+      ? this.cuentaCliente.quitarFavorito(producto.id)
+      : this.cuentaCliente.agregarFavorito(producto.id);
+    accion.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.favorito.update(valor => !valor);
+        this.favoritoProcesando.set(false);
+        this.aviso.set(this.favorito() ? 'Producto guardado en favoritos.' : 'Producto retirado de favoritos.');
+      },
+      error: () => {
+        this.favoritoProcesando.set(false);
+        this.aviso.set('No pudimos actualizar tus favoritos.');
+      }
+    });
+  }
 
   seleccionarModelo(clave: string): void {
     const producto = this.producto();
@@ -367,6 +401,7 @@ export class VaristorehnProductoComponent implements OnInit {
       return;
     }
     this.producto.set(producto);
+    this.sincronizarFavorito();
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
     this.modeloClave.set(modelo?.clave || '');
     this.estado.set('success');
@@ -381,6 +416,18 @@ export class VaristorehnProductoComponent implements OnInit {
     );
     if (producto.slug && producto.slug !== slugSolicitado) void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
   }
+  private sincronizarFavorito(): void {
+    const producto = this.producto();
+    if (!producto || !this.cuentaCliente.autenticado() || !this.utilizarDatosBaseDatos()) {
+      this.favorito.set(false);
+      return;
+    }
+    this.cuentaCliente.favoritos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ids => this.favorito.set(ids.includes(producto.id)),
+      error: () => this.favorito.set(false)
+    });
+  }
+
   private cargarContextoCatalogo(): void {
     this.cargaCatalogo?.unsubscribe();
     this.catalogoContexto.set([]);
