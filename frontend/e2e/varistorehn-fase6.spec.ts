@@ -25,13 +25,13 @@ const productoVarianteReal = 95010;
 const modeloClaveReal = JSON.stringify([5010, 'Modelo auditoría', 'Marca real']);
 const modeloClaveDemo = JSON.stringify([101, '8 GB / 256 GB', 'Demo']);
 
-async function prepararEmpresa(page: Page): Promise<void> {
+async function prepararEmpresa(page: Page, whatsApp: string | null = empresaBase.whatsApp): Promise<void> {
   await page.route('http://localhost:5005/empresa-configuracion/publica', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ success: true, data: empresaBase })
+      body: JSON.stringify({ success: true, data: { ...empresaBase, whatsApp } })
     });
   });
 }
@@ -139,7 +139,13 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
   });
 
   test('variante física con modelo general llega exacta al checkout y habilita WhatsApp', async ({ page }) => {
-    await prepararEmpresa(page);
+    await prepararEmpresa(page, null);
+    await page.route('**/whatsapp/publico', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ numeroTelefonoE164: '+50498765432', disponible: true })
+    }));
     const varianteId = 95011;
     const productoId = 509;
     const producto = {
