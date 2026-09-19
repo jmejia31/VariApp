@@ -29,6 +29,7 @@ import {
   telefonoWhatsapp
 } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
+import { EstadoRecursoPublico } from './varistorehn.models';
 import { VaristorehnCuentaService } from './varistorehn-cuenta.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
@@ -38,7 +39,6 @@ import { VaristorehnSeoService } from './varistorehn-seo.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
-type EstadoProductoPublico = 'loading' | 'error' | 'not-found' | 'success';
 interface CaracteristicaPublica { etiqueta: string; valor: string; }
 interface ContextoRetornoCatalogo {
   url: string;
@@ -79,7 +79,7 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly busqueda = signal('');
   readonly slugSolicitado = signal('');
   readonly producto = signal<ProductoTienda | null>(null);
-  readonly estado = signal<EstadoProductoPublico>('loading');
+  readonly estado = signal<EstadoRecursoPublico>('loading');
   readonly error = signal('');
   readonly aviso = signal('');
   readonly vistaWhatsapp = signal('');
