@@ -183,7 +183,7 @@
                     <label class="model-field">Modelo
                       <select #modeloSelect [value]="modelo.clave" (change)="seleccionarModelo(producto, modeloSelect.value)" [attr.aria-label]="'Modelo de ' + producto.nombre">
                         @for (opcion of producto.modelos; track opcion.clave) {
-                          <option [value]="opcion.clave" [disabled]="!opcion.disponible">{{ opcion.nombre }}{{ opcion.disponible ? '' : ' — agotado' }}</option>
+                          <option [value]="opcion.clave" [selected]="opcion.clave === modelo.clave" [disabled]="!opcion.disponible">{{ opcion.nombre }}{{ opcion.disponible ? '' : ' — agotado' }}</option>
                         }
                       </select>
                     </label>
