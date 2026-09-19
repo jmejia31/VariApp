@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -116,8 +116,16 @@ expect(mobileExploration >= 0 && mobilePurchase > mobileExploration, 'Mobile-fir
 expect(desktopZoom > mobilePurchase, 'Mobile-first: la matriz movil debe ejecutarse antes que la expansion de escritorio/zoom.');
 
 expect(responsiveSpec.includes('320') && responsiveSpec.includes('390') && responsiveSpec.includes('hasTouch: true'), 'Mobile-first: deben cubrirse 320/390 px y contexto tactil.');
-for (const [name, css] of [['catalogo', productsCss], ['detalle', productCss], ['header', headerCss]]) {
+const featureDir = path.join(frontendDir, 'src/app/features/varistorehn');
+const responsiveScss = await Promise.all(
+  (await readdir(featureDir))
+    .filter(name => name.endsWith('.scss'))
+    .map(async name => [name, await readFile(path.join(featureDir, name), 'utf8')])
+);
+for (const [name, css] of responsiveScss) {
   expect(!/@media\s*\(\s*max-width/i.test(css), `Mobile-first: ${name} no debe reducir un layout de escritorio con max-width.`);
+}
+for (const [name, css] of [['catalogo', productsCss], ['detalle', productCss], ['header', headerCss]]) {
   expect(/@media\s*\(\s*min-width/i.test(css), `Mobile-first: ${name} debe expandirse desde un baseline movil mediante min-width.`);
 }
 expect(productsCss.includes('grid-template-columns: 1fr') && productCss.includes('grid-template-columns:1fr'), 'Mobile-first: catalogo y detalle deben declarar una columna como baseline movil.');
