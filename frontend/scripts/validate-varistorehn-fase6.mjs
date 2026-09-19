@@ -88,6 +88,8 @@ for (const required of [
   expect(checkoutTs.includes(required), `Checkout debe contener la salvaguarda: ${required}.`);
 }
 expect(!checkoutTs.includes('localStorage'), 'Checkout no debe guardar datos del comprador en localStorage.');
+expect(checkoutTs.includes("this.identidad.config().nombreComercial || 'VariStoreHN'"), 'El cierre por WhatsApp debe usar la marca comercial pública.');
+expect(!checkoutTs.includes('mensajeWhatsappCheckout(\n      this.identidad.nombreSistema()'), 'Checkout no debe filtrar el nombre interno del sistema al mensaje de WhatsApp.');
 expect(!checkoutTs.includes('numeroTarjeta') && !checkoutTs.includes('cvv') && !checkoutTs.includes('pinTarjeta'), 'Checkout no debe capturar credenciales de tarjeta.');
 expect(checkoutTs.includes("if (!endpoint || !this.tarjetaConfigurada())"), 'Tarjeta debe bloquearse si falta endpoint/origen seguro.');
 expect(checkoutHtml.includes('confirmarSalidaWhatsapp($event)'), 'El enlace WhatsApp debe poder cancelar la navegación si la validación venció.');
