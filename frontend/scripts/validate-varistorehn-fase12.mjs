@@ -69,6 +69,7 @@ expect(!accountComponent.includes('AuthService'), 'La UI de cuenta no debe depen
 expect(headerHtml.includes('/varistorehn/cuenta'), 'El header debe exponer acceso opcional a Mi cuenta.');
 
 expect(backendAccount.includes('[AllowAnonymous]'), 'El controlador de cuenta pública debe permanecer separado de [Authorize] administrativo.');
+expect(backendAccount.includes('[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]'), 'Perfil, direcciones e historial de cuenta deben responder no-store para proteger datos personales.');
 expect(backendAccount.includes('[EnableRateLimiting("AuthLogin")]'), 'Registro/login de cliente deben tener rate limit.');
 expect(backendAccount.includes('BCrypt.Net.BCrypt.HashPassword'), 'La contraseña de cliente debe almacenarse con BCrypt.');
 expect(backendAccount.includes('SHA256.HashData'), 'El token de sesión debe persistirse únicamente como hash SHA-256.');
