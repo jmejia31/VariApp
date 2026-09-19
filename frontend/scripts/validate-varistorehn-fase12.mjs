@@ -72,6 +72,9 @@ expect(backendAccount.includes('[AllowAnonymous]'), 'El controlador de cuenta p�
 expect(backendAccount.includes('[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]'), 'Perfil, direcciones e historial de cuenta deben responder no-store para proteger datos personales.');
 expect(backendAccount.includes('[EnableRateLimiting("AuthLogin")]'), 'Registro/login de cliente deben tener rate limit.');
 expect(backendAccount.includes('BCrypt.Net.BCrypt.HashPassword'), 'La contraseña de cliente debe almacenarse con BCrypt.');
+expect(backendAccount.includes('limpio.Length > 150'), 'El correo de cuenta debe respetar el máximo de 150 del Cliente ERP.');
+expect(accountComponent.includes('Validators.maxLength(150)'), 'El formulario de cuenta debe validar el mismo máximo de correo que el ERP.');
+expect(backendAccount.includes('x.Activo && !x.Eliminado'), 'Favoritos no deben aceptar productos eliminados aunque conserven Activo=true.');
 expect(backendAccount.includes('SHA256.HashData'), 'El token de sesión debe persistirse únicamente como hash SHA-256.');
 expect(backendAccount.includes('RandomNumberGenerator.GetBytes(32)'), 'La sesión debe usar entropía criptográfica.');
 expect(backendAccount.includes('x.ClienteId == cuenta.ClienteId'), 'Historial/detalle deben filtrar por el ClienteId resuelto desde la sesión.');
