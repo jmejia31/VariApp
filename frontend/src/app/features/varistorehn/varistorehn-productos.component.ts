@@ -84,7 +84,7 @@ export class VaristorehnProductosComponent implements OnInit {
   readonly pagina = signal(1);
   readonly tamanoPagina = 12;
   readonly filtrosAbiertos = signal(false);
-  readonly modelosActivos = signal<Record<number, string>>({});
+  readonly modelosActivos = signal<Record<number, string>>(this.modelosRetornoInicial());
   readonly imagenesFallidas = signal<Set<string>>(new Set());
 
   readonly carrito = this.carritoStore.items;
@@ -393,6 +393,19 @@ export class VaristorehnProductosComponent implements OnInit {
     if (paginaValida === this.pagina()) return;
     this.pagina.set(paginaValida);
     this.sincronizarUrl();
+  }
+
+  private modelosRetornoInicial(): Record<number, string> {
+    const view = this.document.defaultView;
+    if (!view) return {};
+    try {
+      const persistido = view.sessionStorage.getItem(RETORNO_CATALOGO_STORAGE);
+      const contexto = persistido ? this.leerContextoRetorno(JSON.parse(persistido) as unknown) : null;
+      const urlActual = `${view.location.pathname}${view.location.search}${view.location.hash}`;
+      return contexto?.url === urlActual ? contexto.modelosActivos : {};
+    } catch {
+      return {};
+    }
   }
 
   private hidratarEstadoRetorno(): void {
