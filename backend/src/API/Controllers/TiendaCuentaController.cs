@@ -178,7 +178,7 @@ public sealed class TiendaCuentaController : ControllerBase
         if (cantidad >= 12)
             return Conflict(ApiResponse<object>.Fail("Alcanzaste el máximo de 12 direcciones guardadas."));
 
-        var predeterminada = dto.Predeterminada || cantidad == 0;
+        var predeterminada = dto?.Predeterminada == true || cantidad == 0;
         if (predeterminada)
         {
             var anteriores = await _db.TiendaDireccionesCliente.Where(x => x.CuentaClienteId == cuenta.Id && x.Predeterminada).ToListAsync();
