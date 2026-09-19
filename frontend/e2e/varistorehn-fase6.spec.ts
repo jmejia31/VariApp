@@ -241,7 +241,16 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     const destino = new URL(href!);
     expect(destino.origin).toBe('https://wa.me');
     expect(destino.pathname).toBe('/50498765432');
-    expect(destino.searchParams.get('text') || '').toContain('UAT Modelo General');
+    const mensaje = destino.searchParams.get('text') || '';
+    expect(mensaje).toContain('🛍️ *Nueva solicitud de compra — VariStore Checkout Audit*');
+    expect(mensaje).toContain('📦 *Producto 1*');
+    expect(mensaje).toContain('*UAT Modelo General*');
+    expect(mensaje).toContain('SKU: UAT-GENERAL');
+    expect(mensaje).toContain('Cantidad: 1');
+    expect(mensaje).toContain('Precio unitario:');
+    expect(mensaje).toContain('💰 *TOTAL:');
+    expect(mensaje).toContain('📝 *Nota del cliente*');
+    expect(mensaje).toContain('✅ Solicitud generada desde *VariStore Checkout Audit*.');
   });
 
   test('fuente real revalida en servidor sin enviar precio/stock y WhatsApp usa el total autoritativo', async ({ page }) => {
@@ -312,8 +321,20 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     const mensaje = destino.searchParams.get('text') || '';
     expect(mensaje).toContain(`Referencia: ${referenciaValidada}`);
     expect(mensaje).toContain('Producto Checkout Real');
-    expect(mensaje).toContain('Total validado');
+    expect(mensaje).toContain('🛍️ *Nueva solicitud de compra — VariStore Checkout Audit*');
+    expect(mensaje).toContain('👤 *Cliente*');
+    expect(mensaje).toContain('Cliente Auditoría');
+    expect(mensaje).toContain('📱 *Teléfono:* 50499991111');
+    expect(mensaje).toContain('✉️ *Correo:* cliente@example.com');
+    expect(mensaje).toContain('SKU: SKU-501-A');
+    expect(mensaje).toContain('Cantidad: 2');
+    expect(mensaje).toContain('Precio unitario:');
+    expect(mensaje).toContain('Subtotal:');
+    expect(mensaje).toContain('💰 *TOTAL:');
     expect(mensaje).toContain('4,200');
+    expect(mensaje).toContain('📝 *Nota del cliente*');
+    expect(mensaje).toContain('Entregar por la tarde.');
+    expect(mensaje).toContain('La tienda confirmará disponibilidad, entrega y condiciones antes de finalizar la compra.');
 
     const piiAntes = await page.evaluate(() => ({
       local: Object.entries(localStorage).filter(([key]) => key.startsWith('varistorehn:')).map(([, value]) => value).join('\n'),
