@@ -333,14 +333,14 @@ export class VaristorehnProductoComponent implements OnInit {
     this.modeloClave.set(''); this.cantidad.set(0); this.imagenActiva.set(0); this.cerrarLightbox(false);
     const slug = this.slugSolicitado();
     if (!slug) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
       this.estado.set('not-found');
       return;
     }
     if (!this.utilizarDatosBaseDatos()) {
       const producto = crearCatalogoEjemplo().find(item => item.slug === slug && item.activo) || null;
       if (!producto) {
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
         this.estado.set('not-found');
         return;
       }
@@ -350,11 +350,11 @@ export class VaristorehnProductoComponent implements OnInit {
       next: producto => this.establecerProducto(producto, slug),
       error: error => {
         if (this.esNoEncontrado(error)) {
-          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
           this.estado.set('not-found');
           return;
         }
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
         this.error.set('No pudimos cargar este producto. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
@@ -362,7 +362,7 @@ export class VaristorehnProductoComponent implements OnInit {
   }
   private establecerProducto(producto: ProductoTienda, slugSolicitado: string): void {
     if (!producto.activo) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
       this.estado.set('not-found');
       return;
     }
@@ -373,7 +373,7 @@ export class VaristorehnProductoComponent implements OnInit {
     this.reiniciarCantidad();
     this.seo.aplicarProducto(
       producto,
-      this.identidad.config().nombreComercial || this.identidad.nombreSistema(),
+      this.identidad.config().nombreComercial || 'VariStoreHN',
       this.imagenes()[0],
       this.precioActual(),
       this.modeloSeleccionado()?.disponible,
