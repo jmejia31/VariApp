@@ -262,7 +262,7 @@ public sealed class TiendaCuentaController : ControllerBase
     {
         var cuenta = await RequerirCuentaAsync();
         if (cuenta is null) return NoAutorizado();
-        if (productoId <= 0 || !await _db.Productos.AsNoTracking().AnyAsync(x => x.Id == productoId && x.Activo))
+        if (productoId <= 0 || !await _db.Productos.AsNoTracking().AnyAsync(x => x.Id == productoId && x.Activo && !x.Eliminado))
             return NotFound(ApiResponse<object>.Fail("Producto no disponible."));
 
         var existe = await _db.TiendaFavoritosCliente.AnyAsync(x => x.CuentaClienteId == cuenta.Id && x.ProductoId == productoId);
@@ -432,7 +432,7 @@ public sealed class TiendaCuentaController : ControllerBase
     private static string? NormalizarCorreo(string? value)
     {
         var limpio = Limpiar(value)?.ToLowerInvariant();
-        if (limpio is null || limpio.Length > 160) return null;
+        if (limpio is null || limpio.Length > 150) return null;
         try
         {
             var mail = new MailAddress(limpio);
