@@ -33,6 +33,7 @@ import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistore
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
+import { VaristorehnSeoService } from './varistorehn-seo.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
@@ -53,6 +54,7 @@ export class VaristorehnProductoComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private readonly seo = inject(VaristorehnSeoService);
 
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
@@ -330,26 +332,53 @@ export class VaristorehnProductoComponent implements OnInit {
     this.producto.set(null); this.error.set(''); this.vistaWhatsapp.set(''); this.estado.set('loading');
     this.modeloClave.set(''); this.cantidad.set(0); this.imagenActiva.set(0); this.cerrarLightbox(false);
     const slug = this.slugSolicitado();
-    if (!slug) { this.estado.set('not-found'); return; }
+    if (!slug) {
+      this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+      this.estado.set('not-found');
+      return;
+    }
     if (!this.utilizarDatosBaseDatos()) {
       const producto = crearCatalogoEjemplo().find(item => item.slug === slug && item.activo) || null;
-      if (!producto) { this.estado.set('not-found'); return; }
+      if (!producto) {
+        this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+        this.estado.set('not-found');
+        return;
+      }
       this.establecerProducto(producto, slug); return;
     }
     this.cargaProducto = this.servicio.obtenerProductoPorSlug(slug).pipe(map(mapearProducto), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: producto => this.establecerProducto(producto, slug),
       error: error => {
-        if (this.esNoEncontrado(error)) { this.estado.set('not-found'); return; }
+        if (this.esNoEncontrado(error)) {
+          this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+          this.estado.set('not-found');
+          return;
+        }
+        this.seo.aplicarNoIndex(this.identidad.nombreSistema());
         this.error.set('No pudimos cargar este producto. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
     });
   }
   private establecerProducto(producto: ProductoTienda, slugSolicitado: string): void {
-    if (!producto.activo) { this.estado.set('not-found'); return; }
+    if (!producto.activo) {
+      this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+      this.estado.set('not-found');
+      return;
+    }
     this.producto.set(producto);
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
-    this.modeloClave.set(modelo?.clave || ''); this.estado.set('success'); this.reiniciarCantidad();
+    this.modeloClave.set(modelo?.clave || '');
+    this.estado.set('success');
+    this.reiniciarCantidad();
+    this.seo.aplicarProducto(
+      producto,
+      this.identidad.nombreSistema(),
+      this.imagenes()[0],
+      this.precioActual(),
+      this.modeloSeleccionado()?.disponible,
+      this.identidad.config().moneda || 'HNL'
+    );
     if (producto.slug && producto.slug !== slugSolicitado) void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
   }
   private cargarContextoCatalogo(): void {
