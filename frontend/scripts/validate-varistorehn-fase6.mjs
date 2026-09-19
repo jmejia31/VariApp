@@ -24,7 +24,10 @@ const [
   pedidoService,
   storefrontService,
   models,
+  empresaIdentity,
+  empresaConfigService,
   backendController,
+  whatsappController,
   backendDto
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
@@ -42,7 +45,10 @@ const [
   readFeature('varistorehn-pedido.service.ts'),
   readFeature('varistorehn.service.ts'),
   readFeature('varistorehn.models.ts'),
+  readFile(path.join(frontendDir, 'src/app/services/empresa-identidad.service.ts'), 'utf8'),
+  readFile(path.join(frontendDir, 'src/app/services/empresa-configuracion.service.ts'), 'utf8'),
   readFile(path.join(repoDir, 'backend/src/API/Controllers/TiendaController.cs'), 'utf8'),
+  readFile(path.join(repoDir, 'backend/src/API/Controllers/WhatsAppController.cs'), 'utf8'),
   readFile(path.join(repoDir, 'backend/src/Application/DTOs/TiendaCheckoutDto.cs'), 'utf8')
 ]);
 
@@ -66,6 +72,13 @@ expect(checkoutTs.includes('!environment.production && this.config.mostrarContro
 expect(config.includes("export type ModoCarrito = 'whatsapp' | 'tarjeta' | 'ambos'"), 'La configuración debe conservar los tres modos comerciales.');
 expect(config.includes('endpointCheckoutTarjeta: null'), 'Tarjeta debe permanecer fail-closed por defecto.');
 expect(config.includes('origenesCheckoutPermitidos: []'), 'La allowlist de pago debe estar vacía por defecto.');
+expect(empresaConfigService.includes('getWhatsAppPublico()'), 'La identidad pública debe poder consultar el número operativo de WhatsApp sin secretos.');
+expect(empresaConfigService.includes('/whatsapp/publico'), 'El fallback público de WhatsApp debe usar un endpoint dedicado no administrativo.');
+expect(empresaIdentity.includes('this.empresaService.getWhatsAppPublico()'), 'La identidad debe resolver WhatsApp Business cuando el contacto legacy esté vacío.');
+expect(empresaIdentity.includes('if (config.whatsApp?.trim()) return of(config);'), 'Un WhatsApp público explícito debe conservar prioridad sin consultas innecesarias.');
+expect(whatsappController.includes('[HttpGet("publico")]') && whatsappController.includes('[AllowAnonymous]'), 'WhatsApp debe exponer únicamente un contacto público explícito para el storefront.');
+expect(whatsappController.includes('.Select(x => x.NumeroTelefonoE164)') && whatsappController.includes('.Take(2)'), 'El endpoint público debe exponer solo el número y fallar cerrado ante múltiples tenants activos.');
+expect(!/TokenSecretoReferencia|WebhookSecretoReferencia/.test((whatsappController.match(/GetPublicoAsync[\s\S]*?\n    }/m)?.[0] || '')), 'El endpoint público de WhatsApp no debe leer ni exponer referencias secretas.');
 
 for (const required of [
   'this.servicio.validarCheckout(this.referenciasCheckout())',
