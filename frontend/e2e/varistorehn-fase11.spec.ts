@@ -125,6 +125,8 @@ test.describe('VariStoreHN Fase 11 — SEO, URLs y rendimiento', () => {
 
     await page.goto('/varistorehn');
     await expect(page).toHaveTitle('VariStore Fase 11 | Tecnología y compras en línea');
+    await expect(page.getByText('Sistema Interno', { exact: true })).toHaveCount(0);
+    await expect(page.locator('app-varistorehn-header .brand strong')).toHaveText('VariStore Fase 11');
     await expect(meta(page, 'name="description"')).not.toHaveAttribute('content', /administrativ/i);
     await expect(page.locator('head link[rel="canonical"]')).toHaveAttribute(
       'href',
