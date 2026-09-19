@@ -118,6 +118,7 @@ expect(publicRoutes.length > 0 && publicRoutes.every(line => !line.includes('aut
 expect(accountController.includes('X-VaristoreHN-Session') && accountController.includes('HashToken'), 'Seguridad: cuenta cliente debe usar sesion publica aislada y token hasheado.');
 expect(!account.includes('AuthService'), 'Seguridad: cuenta publica no debe consumir AuthService administrativo.');
 expect(config.includes('endpointCheckoutTarjeta: null') && config.includes('origenesCheckoutPermitidos: []'), 'Seguridad: pago externo debe permanecer cerrado hasta configuracion explicita.');
+expect(service.includes("!ruta.startsWith('tienda/')"), 'Seguridad: un checkout configurable nunca debe poder apuntar fuera de la frontera publica /tienda.');
 
 // Calidad: regresion acumulativa antes de cerrar fases.
 expect(phase10Workflow.includes('for fase in 1 2 3 4 5 6 7 8 9 10'), 'Calidad: Fase 10 debe reejecutar Fases 1-10.');
