@@ -393,7 +393,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByRole('button', { name: 'Ir al pago seguro' })).toHaveCount(0);
 
     const carrito = await page.evaluate(() => JSON.parse(localStorage.getItem('varistorehn:carrito:v2:905:bd') || '[]'));
-    expect(carrito).toEqual([{ productoId: 501, modeloClave: modeloClaveReal, unidades: 2 }]);
+    expect(carrito).toEqual([{ productoId: 501, modeloClave: `variante:${productoVarianteReal}`, unidades: 2 }]);
   });
 
   test('demo valida formulario y finaliza en recibo efímero sin datos personales', async ({ page }) => {
