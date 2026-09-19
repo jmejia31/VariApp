@@ -97,6 +97,9 @@ for (const entidad of ['TiendaCuentaCliente', 'TiendaSesionCliente', 'TiendaDire
 }
 
 expect(accountHtml.includes('La cuenta es opcional'), 'La UI debe explicar que la cuenta es opcional.');
+expect(accountHtml.includes('maxlength="150"'), 'Los inputs de correo deben reflejar el límite ERP de 150 caracteres.');
+expect(accountComponent.includes("item.nombre.trim() === linea.modelo!.trim()"), 'La recompra histórica sin variante debe resolver por snapshot de modelo.');
+expect(accountComponent.includes('producto.modelos.length === 1'), 'La recompra sin snapshot solo puede asumir modelo cuando existe una única opción segura.');
 expect(accountHtml.includes('Recomprar con stock y precio actuales'), 'La recompra debe declarar que usa stock/precio vigentes.');
 expect(productHtml.includes('alternarFavorito()'), 'El detalle de producto debe permitir guardar favoritos.');
 expect(productTs.includes('this.cuentaCliente.agregarFavorito'), 'Favoritos deben persistirse en la cuenta, no solo localmente.');
