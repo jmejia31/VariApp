@@ -12,13 +12,12 @@ import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { mensajeWhatsappCheckout, normalizarDatosComprador, urlCheckoutPermitida } from './varistorehn-checkout.rules';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
-import { CheckoutItemRequest, CheckoutValidado, DatosCompradorCheckout, ReciboPedidoPublico } from './varistorehn.models';
+import { CheckoutItemRequest, CheckoutValidado, DatosCompradorCheckout, EstadoConsultaPublica, ReciboPedidoPublico } from './varistorehn.models';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnPedidoService } from './varistorehn-pedido.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent } from './varistorehn.visual';
 
-type EstadoCheckout = 'loading' | 'ready' | 'empty' | 'error';
 type IdentidadAgrupacion = { modeloNombre: string | null; marcaNombre: string | null };
 
 @Component({
@@ -41,7 +40,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
   readonly carrito = inject(VaristorehnCarritoService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
-  readonly estado = signal<EstadoCheckout>('loading');
+  readonly estado = signal<EstadoConsultaPublica>('loading');
   readonly error = signal('');
   readonly procesando = signal(false);
   readonly validado = signal<CheckoutValidado | null>(null);
@@ -239,7 +238,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
       return;
     }
     this.validado.set(validado);
-    this.estado.set('ready');
+    this.estado.set('success');
   }
 
   private fallar(error: unknown): void {
