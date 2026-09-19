@@ -302,6 +302,35 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     }
   });
 
+  test('teléfono o tablet táctil con viewport ancho no recibe layout de escritorio', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 900 },
+      hasTouch: true,
+      isMobile: true
+    });
+    const page = await context.newPage();
+
+    try {
+      await preparar(page);
+      await page.goto('/varistorehn/productos');
+      await expect(page.locator('.product-card').first()).toBeVisible();
+      await expect(page.locator('.mobile-menu-trigger')).toBeVisible();
+      await expect(page.locator('.header-whatsapp')).toBeHidden();
+      await expect(page.locator('.mobile-filters')).toBeVisible();
+      await expect(page.locator('.filters')).not.toBeVisible();
+
+      const columnas = await page.locator('.product-grid').evaluate(element =>
+        getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length
+      );
+      expect(columnas, 'un dispositivo táctil ancho no debe recibir un grid de escritorio denso').toBeLessThanOrEqual(2);
+
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, 'un dispositivo táctil ancho no debe generar overflow horizontal').toBeLessThanOrEqual(0);
+    } finally {
+      await context.close();
+    }
+  });
+
   test('checkout móvil asocia errores a campos y conserva navegación por teclado', async ({ page }) => {
     await preparar(page);
     await page.setViewportSize({ width: 390, height: 844 });
