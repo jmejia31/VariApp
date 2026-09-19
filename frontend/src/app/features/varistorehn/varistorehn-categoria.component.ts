@@ -110,7 +110,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
     this.estado.set('loading');
     const slug = this.slugSolicitado();
     if (!slug) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
       this.estado.set('not-found');
       return;
     }
@@ -119,10 +119,10 @@ export class VaristorehnCategoriaComponent implements OnInit {
       const categoria = crearCategoriasTiendaEjemplo().find(item => item.slug === slug) || null;
       this.categoria.set(categoria);
       if (categoria) {
-        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'VariStoreHN');
         this.estado.set('success');
       } else {
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
         this.estado.set('not-found');
       }
       return;
@@ -134,17 +134,17 @@ export class VaristorehnCategoriaComponent implements OnInit {
     ).subscribe({
       next: categoria => {
         this.categoria.set(categoria);
-        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'VariStoreHN');
         this.estado.set('success');
         if (categoria.slug !== slug) void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug), { replaceUrl: true });
       },
       error: error => {
         if (this.esNoEncontrada(error)) {
-          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
           this.estado.set('not-found');
           return;
         }
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || this.identidad.nombreSistema());
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
         this.error.set('No pudimos cargar esta categoría. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
