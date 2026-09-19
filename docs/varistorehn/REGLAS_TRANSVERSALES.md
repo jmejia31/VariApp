@@ -1,0 +1,16 @@
+# VariStoreHN - reglas transversales de implementacion
+
+Estas reglas son obligatorias para cualquier cambio dentro de VariStoreHN en VariApp.
+
+| Regla | Criterio verificable |
+| --- | --- |
+| Datos | Nombre, precio, stock, promociones e imagenes parten del contrato publico de `/tienda`; frontend normaliza con `mapearProducto` y calcula el precio visible con `precioVenta`. Checkout revalida precio y stock en servidor. |
+| Diseno | La tienda usa exclusivamente tokens del tema/identidad de VariStoreHN. Referencias externas solo pueden orientar flujo o funcionalidad; no se copian identidad, paleta ni marca. |
+| Estado | Toda consulta publica representa loading, error, empty y success. Recursos individuales pueden usar not-found como estado adicional. |
+| Carrito | `VaristorehnCarritoService` es la unica autoridad de carrito en frontend. Persistencia local solo guarda identificadores y unidades; nunca precio, stock o imagen como autoridad. |
+| URLs | Producto y categoria usan slugs publicos. Busqueda, filtros, orden y paginacion del catalogo se conservan en query params. |
+| Mobile-first | La Definition of Done ejecuta primero escenarios moviles/tactiles y despues expande a tablet/escritorio/zoom. Los controles tactiles mantienen al menos 44 px y no se admite overflow horizontal. |
+| Seguridad | La tienda publica consume DTOs/endpoints publicos. No reutiliza rutas, guards, JWT ni secretos administrativos. Checkout externo solo se habilita con endpoint relativo y origen HTTPS permitido. |
+| Calidad | Ninguna fase se considera cerrada si lint, build o su regresion acumulativa estan rojos. Las fases posteriores vuelven a ejecutar las anteriores. |
+
+El guard `scripts/validate-varistorehn-transversal.mjs` bloquea regresiones estructurales de estas reglas dentro del pipeline de VariApp.
