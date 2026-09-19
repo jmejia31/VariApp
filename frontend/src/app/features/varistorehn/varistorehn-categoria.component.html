@@ -91,6 +91,65 @@
           </div>
         </section>
 
+        <section class="category-products" aria-labelledby="productos-categoria-title" [attr.aria-busy]="estadoProductos() === 'loading'">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">PRODUCTOS DE LA CATEGORÍA</p>
+              <h2 id="productos-categoria-title">Compra directamente en {{ categoria()!.nombre }}</h2>
+              <p>Productos publicados actualmente en esta categoría, con precio y disponibilidad vigentes.</p>
+            </div>
+            <a class="text-link" [href]="rutaCatalogoCategoria()">Ver todos en el catálogo →</a>
+          </div>
+
+          @if (estadoProductos() === 'loading') {
+            <div class="products-state" role="status" aria-live="polite">
+              <app-store-icon nombre="rejilla" />
+              <strong>Cargando productos…</strong>
+            </div>
+          } @else if (estadoProductos() === 'error') {
+            <div class="products-state" role="alert">
+              <app-store-icon nombre="escudo" />
+              <strong>No pudimos cargar los productos</strong>
+              <p>{{ errorProductos() }}</p>
+              <button type="button" class="button ghost" (click)="recargarProductos()">Intentar de nuevo</button>
+            </div>
+          } @else if (estadoProductos() === 'empty') {
+            <div class="products-state">
+              <app-store-icon nombre="rejilla" />
+              <strong>Aún no hay productos publicados en esta categoría</strong>
+              <p>Cuando existan productos activos aparecerán aquí automáticamente.</p>
+            </div>
+          } @else {
+            <div class="category-products-grid">
+              @for (producto of productosCategoria(); track producto.id) {
+                @let modelo = modeloVisible(producto);
+                @let imagen = imagenProducto(producto);
+                <article class="category-product-card">
+                  <a class="category-product-media" [href]="rutaProducto(producto)" [attr.aria-label]="'Ver ' + producto.nombre">
+                    @if (imagenValida(imagen)) {
+                      <img [src]="imagen" [alt]="producto.nombre" width="640" height="480" loading="lazy" decoding="async" (error)="errorImagen(imagen)">
+                    } @else {
+                      <app-store-art [tipo]="producto.ilustracion || 'paquete'" />
+                    }
+                    <span class="availability" [class.off]="!modelo.disponible" [class.low]="modelo.estadoDisponibilidad === 'lowStock'">
+                      {{ disponibilidadProducto(producto) }}
+                    </span>
+                  </a>
+                  <div class="category-product-body">
+                    <small>{{ producto.marca || producto.categoria }}</small>
+                    <h3>{{ producto.nombre }}</h3>
+                    <p>{{ producto.descripcion || 'Información comercial disponible en la tienda.' }}</p>
+                    <div class="category-product-footer">
+                      <strong>{{ moneda(precioProducto(producto)) }}</strong>
+                      <a class="button ghost" [href]="rutaProducto(producto)">Ver producto</a>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
         <section class="continuity-card" aria-labelledby="continuidad-title">
           <div>
             <p class="eyebrow">CONTINÚA TU COMPRA</p>
