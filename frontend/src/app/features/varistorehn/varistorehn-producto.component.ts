@@ -17,6 +17,7 @@ import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
+import { mensajeWhatsappCompraDirecta } from './varistorehn-checkout.rules';
 import {
   CategoriaTienda,
   ModeloTienda,
@@ -307,21 +308,15 @@ export class VaristorehnProductoComponent implements OnInit {
     const marca = this.identidad.config().nombreComercial || 'VariStoreHN';
     const sku = this.skuVisible();
     const enlaceProducto = this.enlaceProductoActual();
-    const mensaje = [
-      `🛍️ *Quiero comprar en ${marca}*`,
-      '',
-      `📦 *${producto.nombre}*`,
-      modelo.nombre ? `Modelo: ${modelo.nombre}` : '',
-      sku ? `SKU: ${sku}` : '',
-      '',
-      `Cantidad: *${unidades}*`,
-      `Precio: ${this.moneda(this.precioActual())}`,
-      `💰 *Total: ${this.moneda(subtotal)}*`,
-      '',
-      enlaceProducto ? `🔗 *Ver producto*\n${enlaceProducto}` : '',
-      '',
-      '✅ Quedo atento a la confirmación de disponibilidad y entrega.'
-    ].filter((linea, indice, lineas) => linea !== '' || (indice > 0 && lineas[indice - 1] !== '')).join('\n').trim();
+    const mensaje = mensajeWhatsappCompraDirecta(marca, 'HNL', {
+      nombre: producto.nombre,
+      modelo: modelo.nombre || undefined,
+      sku: sku || undefined,
+      unidades,
+      precioUnitario: this.precioActual(),
+      subtotal,
+      enlace: enlaceProducto || undefined
+    });
     if (!this.utilizarDatosBaseDatos()) { this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`); return; }
     const url = construirEnlaceWhatsApp(telefono, mensaje);
     if (!url) { this.aviso.set('El mensaje es demasiado largo o el número no es válido para abrir WhatsApp.'); return; }
