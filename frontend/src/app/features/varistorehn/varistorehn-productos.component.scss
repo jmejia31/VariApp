@@ -154,7 +154,7 @@ fieldset > button small { color: var(--color-text-muted); font-size: .62rem; }
   .catalog-layout { grid-template-columns: 220px minmax(0, 1fr); gap: 20px; }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1180px), (hover: none) and (pointer: coarse) and (max-width: 1366px) {
   .container { width: min(100% - 40px, 1320px); }
   .page-heading { align-items: flex-start; flex-direction: column; gap: 13px; }
   .catalog-layout { display: block; }
