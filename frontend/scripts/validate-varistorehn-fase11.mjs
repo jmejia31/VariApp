@@ -20,6 +20,8 @@ const [
   categoriasHtml,
   productoHtml,
   carritoHtml,
+  headerHtml,
+  categoriaHtml,
   vercelRaw,
   seoUtilsSource,
   sitemapSource
@@ -34,6 +36,8 @@ const [
   read('src/app/features/varistorehn/varistorehn-categorias.component.html'),
   read('src/app/features/varistorehn/varistorehn-producto.component.html'),
   read('src/app/features/varistorehn/varistorehn-carrito.component.html'),
+  read('src/app/features/varistorehn/varistorehn-header.component.html'),
+  read('src/app/features/varistorehn/varistorehn-categoria.component.html'),
   read('vercel.json'),
   read('server/seo-utils.js'),
   read('api/sitemap.js')
@@ -60,6 +64,16 @@ expect(seoService.includes("path === VARISTOREHN_PATHS.productos"), 'Catálogo d
 expect(seoService.includes("path === VARISTOREHN_PATHS.ofertas"), 'Ofertas debe tener metadata propia.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.categorias"), 'Categorías debe tener metadata propia.');
 expect(appComponent.includes('this.seo.aplicarRuta(event.urlAfterRedirects'), 'El router debe aplicar robots/metadatos en cada navegación.');
+for (const [name, html] of [
+  ['header público', headerHtml],
+  ['home público', homeHtml],
+  ['catálogo público', productosHtml],
+  ['categorías públicas', categoriasHtml],
+  ['categoría pública', categoriaHtml],
+  ['producto público', productoHtml]
+]) {
+  expect(!html.includes('identidad.nombreSistema()'), `${name} no debe renderizar el nombre interno del sistema.`);
+}
 expect(productoTs.includes('this.seo.aplicarProducto('), 'Producto debe publicar title/description/canonical/OG propios.');
 expect(categoriaTs.includes('this.seo.aplicarCategoria('), 'Categoría debe publicar metadata propia.');
 expect(productoTs.includes('this.seo.aplicarNoIndex('), 'Producto no encontrado/error debe quedar noindex.');
