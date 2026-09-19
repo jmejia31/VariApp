@@ -182,7 +182,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
       body: JSON.stringify({ success: true, data: { items: [producto], page: 1, pageSize: 96, totalCount: 1 } })
     }));
 
-    let requestCheckout: any = null;
+    let requestCheckout: unknown = null;
     await page.route('**/tienda/checkout/validar', route => {
       requestCheckout = route.request().postDataJSON();
       return route.fulfill({
