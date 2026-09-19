@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { EmpresaConfiguracion } from '../core/models/empresa-configuracion.model';
 import { EmpresaConfiguracionService } from './empresa-configuracion.service';
 
@@ -42,8 +42,22 @@ export class EmpresaIdentidadService {
   cargar(force = false) {
     if (this.cargada && !force) return of(this._config());
     return this.empresaService.getPublica().pipe(
-      tap((res) => {
-        this._config.set({ ...DEFAULT_CONFIG, ...res.data });
+      switchMap((res) => {
+        const config = { ...DEFAULT_CONFIG, ...res.data };
+        if (config.whatsApp?.trim()) return of(config);
+
+        return this.empresaService.getWhatsAppPublico().pipe(
+          map(contacto => ({
+            ...config,
+            whatsApp: contacto.disponible && contacto.numeroTelefonoE164
+              ? contacto.numeroTelefonoE164
+              : undefined
+          })),
+          catchError(() => of(config))
+        );
+      }),
+      tap((config) => {
+        this._config.set(config);
         this.cargada = true;
       }),
       catchError(() => {
