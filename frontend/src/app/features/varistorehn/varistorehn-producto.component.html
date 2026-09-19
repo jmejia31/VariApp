@@ -31,7 +31,11 @@
   }
 
   <main id="detalle-producto" class="container product-page" tabindex="-1" [attr.aria-busy]="estado() === 'loading'">
-    <nav class="breadcrumbs" aria-label="Migas de pan">
+    <div class="detail-trail">
+      <button type="button" class="back-button" aria-label="Volver a la pantalla anterior" (click)="volverAlOrigen()">
+        <app-store-icon nombre="volver" />
+      </button>
+      <nav class="breadcrumbs" aria-label="Migas de pan">
       <a [href]="enlaces.inicio">Inicio</a>
       <span aria-hidden="true">/</span>
       <a [href]="enlaces.categorias">Categorías</a>
@@ -45,7 +49,8 @@
         <span aria-hidden="true">/</span>
         <span aria-current="page">{{ producto()!.nombre }}</span>
       }
-    </nav>
+      </nav>
+    </div>
 
     @if (estado() === 'loading') {
       <section class="loading-layout" role="status" aria-live="polite" aria-label="Cargando detalle de producto">

@@ -211,7 +211,7 @@
                     </div>
                     <div class="product-actions">
                       @if (producto.slug) {
-                        <a class="button ghost" [href]="'/varistorehn/producto/' + producto.slug">Ver producto</a>
+                        <a class="button ghost" [href]="'/varistorehn/producto/' + producto.slug" (click)="abrirProducto($event, producto)">Ver producto</a>
                       }
                       <button type="button" class="button primary add-button" [disabled]="!disponibleParaAgregar(producto)" (click)="agregar(producto)" [attr.aria-label]="'Agregar ' + producto.nombre">
                         <app-store-icon nombre="mas" /> {{ disponibleParaAgregar(producto) ? 'Agregar' : 'Sin unidades' }}

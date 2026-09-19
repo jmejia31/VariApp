@@ -26,6 +26,14 @@ import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
+interface ContextoRetornoCatalogo {
+  url: string;
+  scrollY: number;
+  productoId: number;
+  modelosActivos: Record<number, string>;
+  filtrosAbiertos: boolean;
+}
+
 @Component({
   selector: 'app-varistorehn-productos',
   standalone: true,
@@ -114,8 +122,11 @@ export class VaristorehnProductosComponent implements OnInit {
 
   private cargaCatalogo?: Subscription;
   private cargaCategorias?: Subscription;
+  private scrollRetorno: number | null = null;
+  private scrollRetornoRestaurado = false;
 
   ngOnInit(): void {
+    this.hidratarEstadoRetorno();
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.soloOfertasPagina.set(data['soloOfertas'] === true);
     });
@@ -213,6 +224,31 @@ export class VaristorehnProductosComponent implements OnInit {
 
   abrirCarrito(): void { void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito); }
 
+  abrirProducto(evento: MouseEvent, producto: ProductoTienda): void {
+    if (!producto.slug || evento.defaultPrevented || evento.button !== 0
+      || evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey) return;
+    const view = this.document.defaultView;
+    if (!view) return;
+
+    const url = `${view.location.pathname}${view.location.search}${view.location.hash}`;
+    const contexto: ContextoRetornoCatalogo = {
+      url,
+      scrollY: Math.max(0, Math.round(view.scrollY)),
+      productoId: producto.id,
+      modelosActivos: { ...this.modelosActivos() },
+      filtrosAbiertos: this.filtrosAbiertos()
+    };
+    const estadoActual = view.history.state && typeof view.history.state === 'object'
+      ? view.history.state as Record<string, unknown>
+      : {};
+    view.history.replaceState({ ...estadoActual, varistorehnCatalogState: contexto }, '', url);
+
+    evento.preventDefault();
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), {
+      state: { varistorehnReturn: contexto }
+    });
+  }
+
   modeloSeleccionado(producto: ProductoTienda): ModeloTienda {
     return producto.modelos.find(modelo => modelo.clave === this.modelosActivos()[producto.id])
       || producto.modelos.find(modelo => modelo.disponible) || producto.modelos[0];
@@ -268,6 +304,7 @@ export class VaristorehnProductosComponent implements OnInit {
         if (resultado.ajustado) this.aviso.set(this.carritoStore.aviso());
         this.cargando.set(false);
         this.normalizarPagina();
+        this.intentarRestaurarScroll();
       },
       error: () => {
         this.errorCatalogo.set('No pudimos cargar el catálogo. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
@@ -291,11 +328,13 @@ export class VaristorehnProductosComponent implements OnInit {
         this.cargandoCategorias.set(false);
         this.aplicarCategoriaDesdeSlug();
         this.normalizarPagina();
+        this.intentarRestaurarScroll();
       },
       error: () => {
         this.errorCategorias.set('No pudimos cargar las categorías públicas. Los demás filtros siguen disponibles.');
         this.cargandoCategorias.set(false);
         this.normalizarPagina();
+        this.intentarRestaurarScroll();
       }
     });
   }
@@ -350,6 +389,61 @@ export class VaristorehnProductosComponent implements OnInit {
     if (paginaValida === this.pagina()) return;
     this.pagina.set(paginaValida);
     this.sincronizarUrl();
+  }
+
+  private hidratarEstadoRetorno(): void {
+    const view = this.document.defaultView;
+    if (!view) return;
+    const estadoNavegacion = view.history.state && typeof view.history.state === 'object'
+      ? view.history.state as Record<string, unknown>
+      : null;
+    const contexto = this.leerContextoRetorno(estadoNavegacion?.['varistorehnCatalogState']);
+    if (!contexto) return;
+
+    const urlActual = `${view.location.pathname}${view.location.search}${view.location.hash}`;
+    if (contexto.url !== urlActual) return;
+
+    this.modelosActivos.set(contexto.modelosActivos);
+    this.filtrosAbiertos.set(contexto.filtrosAbiertos);
+    this.scrollRetorno = contexto.scrollY;
+  }
+
+  private leerContextoRetorno(valor: unknown): ContextoRetornoCatalogo | null {
+    if (!valor || typeof valor !== 'object') return null;
+    const estado = valor as Record<string, unknown>;
+    const url = typeof estado['url'] === 'string' ? estado['url'] : '';
+    const scrollY = typeof estado['scrollY'] === 'number' && Number.isFinite(estado['scrollY']) ? estado['scrollY'] : 0;
+    const productoId = typeof estado['productoId'] === 'number' && Number.isSafeInteger(estado['productoId'])
+      ? estado['productoId'] : 0;
+    if (!url.startsWith('/varistorehn') || url.startsWith('//') || productoId <= 0) return null;
+
+    const modelosActivos: Record<number, string> = {};
+    const modelos = estado['modelosActivos'];
+    if (modelos && typeof modelos === 'object') {
+      for (const [id, clave] of Object.entries(modelos as Record<string, unknown>)) {
+        const producto = Number(id);
+        if (Number.isSafeInteger(producto) && producto > 0 && typeof clave === 'string' && clave.length <= 180) {
+          modelosActivos[producto] = clave;
+        }
+      }
+    }
+
+    return {
+      url,
+      scrollY: Math.max(0, Math.round(scrollY)),
+      productoId,
+      modelosActivos,
+      filtrosAbiertos: estado['filtrosAbiertos'] === true
+    };
+  }
+
+  private intentarRestaurarScroll(): void {
+    if (this.scrollRetornoRestaurado || this.scrollRetorno === null || this.cargando() || this.cargandoCategorias()) return;
+    const view = this.document.defaultView;
+    if (!view) return;
+    const destino = this.scrollRetorno;
+    this.scrollRetornoRestaurado = true;
+    view.requestAnimationFrame(() => view.requestAnimationFrame(() => view.scrollTo({ top: destino, left: 0, behavior: 'auto' })));
   }
 
   private irInicioCatalogo(): void {

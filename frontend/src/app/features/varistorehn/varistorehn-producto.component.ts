@@ -40,6 +40,13 @@ import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.
 
 type EstadoProductoPublico = 'loading' | 'error' | 'not-found' | 'success';
 interface CaracteristicaPublica { etiqueta: string; valor: string; }
+interface ContextoRetornoCatalogo {
+  url: string;
+  scrollY: number;
+  productoId: number;
+  modelosActivos: Record<number, string>;
+  filtrosAbiertos: boolean;
+}
 
 @Component({
   selector: 'app-varistorehn-producto',
@@ -174,6 +181,7 @@ export class VaristorehnProductoComponent implements OnInit {
   private cargaCatalogo?: Subscription;
   private cargaCategorias?: Subscription;
   private identidadLista = false;
+  private readonly retornoCatalogo = this.leerContextoRetorno();
   private inicioSwipe: { x: number; y: number } | null = null;
   private suprimirClickImagen = false;
   private restaurarFocoLightbox = true;
@@ -211,6 +219,24 @@ export class VaristorehnProductoComponent implements OnInit {
     void this.router.navigate(['/varistorehn/productos'], { queryParams: categoria ? { categoria: categoria.slug } : {} });
   }
   abrirCarrito(): void { void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito); }
+  volverAlOrigen(): void {
+    const view = this.document.defaultView;
+    const retorno = this.retornoCatalogo;
+
+    if (view && retorno && view.history.length > 1) {
+      view.history.back();
+      return;
+    }
+    if (retorno) {
+      void this.router.navigateByUrl(retorno.url, { state: { varistorehnCatalogState: retorno } });
+      return;
+    }
+    if (view && view.history.length > 1 && this.referenciaVariStore(view)) {
+      view.history.back();
+      return;
+    }
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.productos);
+  }
   alternarFavorito(): void {
     const producto = this.producto();
     if (!producto || this.favoritoProcesando()) return;
@@ -414,7 +440,12 @@ export class VaristorehnProductoComponent implements OnInit {
       this.modeloSeleccionado()?.disponible,
       this.identidad.config().moneda || 'HNL'
     );
-    if (producto.slug && producto.slug !== slugSolicitado) void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
+    if (producto.slug && producto.slug !== slugSolicitado) {
+      const extras = this.retornoCatalogo
+        ? { replaceUrl: true, state: { varistorehnReturn: this.retornoCatalogo } }
+        : { replaceUrl: true };
+      void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), extras);
+    }
   }
   private sincronizarFavorito(): void {
     const producto = this.producto();
@@ -458,6 +489,50 @@ export class VaristorehnProductoComponent implements OnInit {
   private reiniciarCantidad(): void {
     this.cantidad.set(this.stockRestante() > 0 && this.modeloSeleccionado()?.disponible ? 1 : 0);
   }
+  private leerContextoRetorno(): ContextoRetornoCatalogo | null {
+    const view = this.document.defaultView;
+    const estadoNavegacion = view?.history.state && typeof view.history.state === 'object'
+      ? view.history.state as Record<string, unknown>
+      : null;
+    const valor = estadoNavegacion?.['varistorehnReturn'];
+    if (!valor || typeof valor !== 'object') return null;
+    const estado = valor as Record<string, unknown>;
+    const url = typeof estado['url'] === 'string' ? estado['url'] : '';
+    const scrollY = typeof estado['scrollY'] === 'number' && Number.isFinite(estado['scrollY']) ? estado['scrollY'] : 0;
+    const productoId = typeof estado['productoId'] === 'number' && Number.isSafeInteger(estado['productoId'])
+      ? estado['productoId'] : 0;
+    if (!url.startsWith('/varistorehn') || url.startsWith('//') || productoId <= 0) return null;
+
+    const modelosActivos: Record<number, string> = {};
+    const modelos = estado['modelosActivos'];
+    if (modelos && typeof modelos === 'object') {
+      for (const [id, clave] of Object.entries(modelos as Record<string, unknown>)) {
+        const producto = Number(id);
+        if (Number.isSafeInteger(producto) && producto > 0 && typeof clave === 'string' && clave.length <= 180) {
+          modelosActivos[producto] = clave;
+        }
+      }
+    }
+
+    return {
+      url,
+      scrollY: Math.max(0, Math.round(scrollY)),
+      productoId,
+      modelosActivos,
+      filtrosAbiertos: estado['filtrosAbiertos'] === true
+    };
+  }
+
+  private referenciaVariStore(view: Window): boolean {
+    if (!this.document.referrer) return false;
+    try {
+      const referente = new URL(this.document.referrer);
+      return referente.origin === view.location.origin && referente.pathname.startsWith('/varistorehn');
+    } catch {
+      return false;
+    }
+  }
+
   private esNoEncontrado(error: unknown): boolean {
     if (error instanceof HttpErrorResponse) return error.status === 404;
     return error instanceof Error && ['Producto no encontrado.', 'Slug de producto no válido.'].includes(error.message);

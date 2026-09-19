@@ -183,21 +183,39 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     expect(persistido[0].unidades).toBe(5);
   });
 
-  test('Ver producto navega desde catálogo por slug y Atrás devuelve al catálogo', async ({ page }) => {
+  test('botón icono volver restaura exactamente búsqueda, variante y posición del catálogo', async ({ page }) => {
     await prepararEmpresa(page);
-    await page.goto('/varistorehn/productos?q=Laptop');
-    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
-
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/varistorehn/productos?q=Laptop&orden=precio-desc');
     const tarjeta = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
+    await expect(tarjeta).toBeVisible();
+
+    const modeloCatalogo = tarjeta.getByLabel('Modelo de Laptop Pro 14');
+    await modeloCatalogo.selectOption({ label: '16 GB / 512 GB' });
+    const modeloAntes = await modeloCatalogo.inputValue();
+
+    await tarjeta.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, 90));
+    const scrollAntes = await page.evaluate(() => Math.round(window.scrollY));
+
     const verProducto = tarjeta.getByRole('link', { name: 'Ver producto' });
     await expect(verProducto).toHaveAttribute('href', '/varistorehn/producto/demo-producto-1');
     await verProducto.click();
     await esperarDetalleDemo(page);
     await expect(page).toHaveURL(/\/varistorehn\/producto\/demo-producto-1$/);
 
-    await page.goBack();
-    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Laptop$/);
-    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
+    const volver = page.getByRole('button', { name: 'Volver a la pantalla anterior' });
+    await expect(volver).toBeVisible();
+    await expect(volver.locator('app-store-icon')).toHaveCount(1);
+    await expect(volver).toHaveText('');
+    await volver.click();
+
+    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Laptop&orden=precio-desc$/);
+    await expect(page.locator('app-varistorehn-header').getByRole('searchbox')).toHaveValue('Laptop');
+    await expect(tarjeta).toBeVisible();
+    await expect(modeloCatalogo).toHaveValue(modeloAntes);
+    await expect.poll(async () => Math.abs((await page.evaluate(() => Math.round(window.scrollY))) - scrollAntes))
+      .toBeLessThanOrEqual(4);
   });
 
   test('fuente real muestra galería, SKU, promoción y relacionados sin inventar datos', async ({ page }) => {
