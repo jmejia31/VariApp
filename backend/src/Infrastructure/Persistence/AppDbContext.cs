@@ -20,6 +20,10 @@ public class AppDbContext : DbContext
     public DbSet<Talla> Tallas => Set<Talla>();
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
     public DbSet<Cliente> Clientes => Set<Cliente>();
+    public DbSet<TiendaCuentaCliente> TiendaCuentasCliente => Set<TiendaCuentaCliente>();
+    public DbSet<TiendaSesionCliente> TiendaSesionesCliente => Set<TiendaSesionCliente>();
+    public DbSet<TiendaDireccionCliente> TiendaDireccionesCliente => Set<TiendaDireccionCliente>();
+    public DbSet<TiendaFavoritoCliente> TiendaFavoritosCliente => Set<TiendaFavoritoCliente>();
     public DbSet<CreditoCliente> CreditosCliente => Set<CreditoCliente>();
     public DbSet<TipoCliente> TipoClientes => Set<TipoCliente>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
