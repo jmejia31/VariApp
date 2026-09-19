@@ -12,6 +12,7 @@ on:
       - 'backend/src/Infrastructure/Persistence/Configurations/TiendaCuentaClienteConfiguration.cs'
       - 'backend/src/Infrastructure/Migrations/20260919011500_VaristorehnFase12CuentaCliente.cs'
       - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'
+      - 'backend/tests/InventoryApp.Tests/TiendaCuentaClienteTests.cs'
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
       - 'frontend/api/robots.js'
