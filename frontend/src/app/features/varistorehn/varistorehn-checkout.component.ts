@@ -248,10 +248,14 @@ export class VaristorehnCheckoutComponent implements OnInit {
 
   private referenciasCheckout(): CheckoutItemRequest[] {
     return this.carrito.items().map(item => {
-      const agrupacion = this.identidadAgrupacion(item.modeloClave);
+      const productoVarianteId = item.productoVarianteId ?? null;
+      const agrupacion = productoVarianteId === null
+        ? this.identidadAgrupacion(item.modeloClave)
+        : { modeloNombre: null, marcaNombre: null };
       return {
         productoId: item.productoId,
-        modeloId: item.modeloId,
+        productoVarianteId,
+        modeloId: productoVarianteId === null ? item.modeloId : null,
         modeloNombre: agrupacion.modeloNombre,
         marcaNombre: agrupacion.marcaNombre,
         unidades: item.unidades
