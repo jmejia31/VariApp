@@ -15,6 +15,7 @@ namespace InventoryApp.API.Controllers;
 
 [ApiController]
 [AllowAnonymous]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [Route("tienda/cuenta")]
 public sealed class TiendaCuentaController : ControllerBase
 {
