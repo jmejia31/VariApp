@@ -10,13 +10,12 @@ import { CategoriaTienda, ProductoTienda, crearCatalogoEjemplo, mapearProducto }
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
+import { EstadoRecursoPublico } from './varistorehn.models';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnSeoService } from './varistorehn-seo.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
-
-type EstadoCategoriaPublica = 'loading' | 'error' | 'not-found' | 'success';
 
 @Component({
   selector: 'app-varistorehn-categoria',
@@ -41,7 +40,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
   readonly permiteWhatsapp = this.config.modoCarrito !== 'tarjeta';
   readonly busqueda = signal('');
   readonly categoria = signal<CategoriaTienda | null>(null);
-  readonly estado = signal<EstadoCategoriaPublica>('loading');
+  readonly estado = signal<EstadoRecursoPublico>('loading');
   readonly error = signal('');
   readonly slugSolicitado = signal('');
   readonly totalUnidadesCarrito = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
