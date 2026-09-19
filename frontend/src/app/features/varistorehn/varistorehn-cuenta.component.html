@@ -31,7 +31,7 @@
           <form class="panel auth-form" [formGroup]="loginForm" (ngSubmit)="login()">
             <h2>Bienvenido de nuevo</h2>
             <label>Correo
-              <input type="email" autocomplete="email" formControlName="correo" inputmode="email">
+              <input type="email" autocomplete="email" formControlName="correo" inputmode="email" maxlength="150">
             </label>
             <label>Contraseña
               <input type="password" autocomplete="current-password" formControlName="clave">
