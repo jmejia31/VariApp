@@ -100,7 +100,7 @@ async function productPage(req, slug, brand) {
       url: canonical,
       offers: price > 0 ? {
         '@type': 'Offer',
-        priceCurrency: 'HNL',
+        priceCurrency: brand.currency || 'HNL',
         price: price.toFixed(2),
         availability: available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
         url: canonical
