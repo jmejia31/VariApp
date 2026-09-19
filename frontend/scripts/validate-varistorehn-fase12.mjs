@@ -26,7 +26,8 @@ const [
   backendDtos,
   backendEntities,
   backendConfig,
-  migration
+  migration,
+  modelSnapshot
 ] = await Promise.all([
   readFrontend('src/app/app.routes.ts'),
   readFrontend('src/app/features/varistorehn/varistorehn.paths.ts'),
@@ -44,7 +45,8 @@ const [
   readRepo('backend/src/Application/DTOs/TiendaCuentaDto.cs'),
   readRepo('backend/src/Domain/Entities/TiendaCuentaCliente.cs'),
   readRepo('backend/src/Infrastructure/Persistence/Configurations/TiendaCuentaClienteConfiguration.cs'),
-  readRepo('backend/src/Infrastructure/Migrations/20260919011500_VaristorehnFase12CuentaCliente.cs')
+  readRepo('backend/src/Infrastructure/Migrations/20260919011500_VaristorehnFase12CuentaCliente.cs'),
+  readRepo('backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs')
 ]);
 
 const failures = [];
@@ -85,6 +87,10 @@ expect(backendConfig.includes('UX_TiendaFavoritosCliente_Cuenta_Producto'), 'Fav
 expect(migration.includes('TiendaCuentasCliente') && migration.includes('TiendaSesionesCliente')
   && migration.includes('TiendaDireccionesCliente') && migration.includes('TiendaFavoritosCliente'),
   'La migración debe materializar las cuatro tablas de cuenta.');
+for (const entidad of ['TiendaCuentaCliente', 'TiendaSesionCliente', 'TiendaDireccionCliente', 'TiendaFavoritoCliente']) {
+  expect(modelSnapshot.includes(`modelBuilder.Entity("InventoryApp.Domain.Entities.${entidad}"`),
+    `El ModelSnapshot de EF debe incluir ${entidad} para no recrear tablas en migraciones futuras.`);
+}
 
 expect(accountHtml.includes('La cuenta es opcional'), 'La UI debe explicar que la cuenta es opcional.');
 expect(accountHtml.includes('Recomprar con stock y precio actuales'), 'La recompra debe declarar que usa stock/precio vigentes.');
