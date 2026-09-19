@@ -12,6 +12,7 @@ export const VARISTOREHN_PATHS = {
   ofertas: '/varistorehn/ofertas',
   carrito: '/varistorehn/carrito',
   checkout: '/varistorehn/checkout',
+  cuenta: '/varistorehn/cuenta',
   categoria: (slug: string) => `/varistorehn/categoria/${encodeURIComponent(slug)}`,
   producto: (slug: string) => `/varistorehn/producto/${encodeURIComponent(slug)}`,
   pedido: (id: string | number) => `/varistorehn/pedido/${encodeURIComponent(String(id))}`
