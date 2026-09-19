@@ -147,6 +147,37 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     await expect(page.getByText('Datos de la tienda', { exact: true }).last()).toBeVisible();
   });
 
+  test('entrar a una categoría muestra sus productos relacionados directamente', async ({ page }) => {
+    await prepararEmpresa(page);
+    await mockCatalogoCategoria(page);
+    await page.route('**/tienda/categorias/audio-y-video-21', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: { id: 21, slug: 'audio-y-video-21', nombre: 'Audio y Vídeo', descripcion: 'Sonido e imagen para tu espacio.', totalProductos: 1 }
+        })
+      });
+    });
+
+    await page.goto('/varistorehn/categoria/audio-y-video-21');
+    await activarBaseDatos(page);
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Audio y Vídeo', exact: true })).toBeVisible();
+    const productos = page.locator('.category-products .category-product-card');
+    await expect(productos).toHaveCount(1);
+    await expect(productos).toContainText('Audífonos de categoría');
+    await expect(productos).toContainText(/L\.?\s*1,951|1,951/);
+    await expect(productos).toContainText('Disponible');
+    await expect(productos).not.toContainText('Laptop de otra categoría');
+    await expect(productos.getByRole('link', { name: 'Ver producto', exact: true })).toHaveAttribute(
+      'href',
+      '/varistorehn/producto/aud-fonos-de-categor-a-701'
+    );
+  });
+
   test('fuente real vacía representa empty sin fabricar categorías', async ({ page }) => {
     await prepararEmpresa(page);
     await mockCatalogoVacio(page);
