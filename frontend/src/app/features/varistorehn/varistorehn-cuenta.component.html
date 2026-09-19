@@ -1,7 +1,7 @@
 <div class="storefront account-page">
   <app-varistorehn-header></app-varistorehn-header>
 
-  <main class="container account-main">
+  <main class="container account-main" [attr.aria-busy]="estado() === 'loading'">
     <header class="account-hero">
       <div>
         <p class="eyebrow">TU CUENTA, SI LA QUIERES</p>
