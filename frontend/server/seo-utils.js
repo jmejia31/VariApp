@@ -42,7 +42,7 @@ async function loadBrand(req) {
   try {
     const payload = await fetchJson(`${apiBase(req)}/empresa-configuracion/publica`, 3500);
     const data = payload && payload.success ? payload.data : null;
-    const rawName = String(data?.nombreComercial || data?.nombreVisibleSistema || '').trim();
+    const rawName = String(data?.nombreComercial || '').trim();
     const name = rawName && !/administrativ[oa]/i.test(rawName) ? rawName : 'VariStoreHN';
     return {
       name,
