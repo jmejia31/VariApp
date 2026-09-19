@@ -96,7 +96,8 @@ function enlaceProductoSeguro(valor: string | undefined): string {
   if (!valor) return '';
   try {
     const url = new URL(valor);
-    return url.protocol === 'https:' || url.hostname === 'localhost' ? url.toString() : '';
+    const loopbackHttp = url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+    return url.protocol === 'https:' || loopbackHttp ? url.toString() : '';
   } catch {
     return '';
   }
