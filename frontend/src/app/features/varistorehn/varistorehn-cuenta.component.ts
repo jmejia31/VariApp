@@ -9,7 +9,7 @@ import { mapearProducto } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnCuentaService } from './varistorehn-cuenta.service';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
-import { TiendaDireccionCliente, TiendaNotificacionPedido, TiendaPedidoCuenta, ProductoTienda } from './varistorehn.models';
+import { EstadoConsultaPublica, TiendaDireccionCliente, TiendaNotificacionPedido, TiendaPedidoCuenta, ProductoTienda } from './varistorehn.models';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnService } from './varistorehn.service';
 
@@ -40,6 +40,11 @@ export class VaristorehnCuentaComponent implements OnInit {
   readonly pedidos = signal<TiendaPedidoCuenta[]>([]);
   readonly notificaciones = signal<TiendaNotificacionPedido[]>([]);
   readonly catalogo = signal<ProductoTienda[]>([]);
+  readonly estado = computed<EstadoConsultaPublica>(() => {
+    if (this.cargando()) return 'loading';
+    if (this.error()) return 'error';
+    return this.cuenta.autenticado() ? 'success' : 'empty';
+  });
 
   readonly productosFavoritos = computed(() => {
     const ids = new Set(this.favoritos());
