@@ -86,6 +86,35 @@ public sealed class WhatsAppControllerTests
     }
 
     [Fact]
+    public async Task Whatsapp_publico_uses_the_tenant_matching_the_public_store_identity()
+    {
+        await using var db = CreateDb();
+        var empresaTienda = new Empresa("VariStorehn");
+        var empresaOtra = new Empresa("Otra empresa");
+        db.Set<Empresa>().AddRange(empresaTienda, empresaOtra);
+        db.Set<EmpresaConfiguracion>().Add(new EmpresaConfiguracion
+        {
+            NombreComercial = "VariStorehn",
+            NombreVisibleSistema = "VariStorehn",
+            Activa = true
+        });
+        await db.SaveChangesAsync();
+
+        db.Set<ConfiguracionWhatsAppEmpresa>().AddRange(
+            new ConfiguracionWhatsAppEmpresa(empresaTienda.Id, "+50498765432", "vault://store/token", "vault://store/webhook"),
+            new ConfiguracionWhatsAppEmpresa(empresaOtra.Id, "+50499999992", "vault://other/token", "vault://other/webhook"));
+        await db.SaveChangesAsync();
+
+        var controller = CreateController(db, ConfigurationWithToken(), ScopeFor(null));
+        var action = await controller.GetPublicoAsync(CancellationToken.None);
+
+        var ok = Assert.IsType<OkObjectResult>(action);
+        var payload = Assert.IsType<WhatsAppPublicoResponse>(ok.Value);
+        Assert.True(payload.Disponible);
+        Assert.Equal("+50498765432", payload.NumeroTelefonoE164);
+    }
+
+    [Fact]
     public async Task Whatsapp_publico_fails_closed_when_multiple_tenants_are_active()
     {
         await using var db = CreateDb();
