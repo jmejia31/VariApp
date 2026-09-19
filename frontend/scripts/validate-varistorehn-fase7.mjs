@@ -77,7 +77,7 @@ for (const [name, scss] of [['home', homeScss], ['responsive', responsiveScss]])
 }
 expect(homeScss.includes('var(--color-bg)') && homeScss.includes('var(--color-surface)') && homeScss.includes('var(--color-primary)'), 'El home debe usar los tokens del tema empresarial.');
 expect(homeScss.includes('var(--color-button)') && homeScss.includes('var(--shadow-card)'), 'Botones y elevación deben seguir el tema configurado.');
-expect(responsiveScss.includes('@media (max-width: 380px)'), 'La portada debe tratar explícitamente móviles estrechos.');
+expect(responsiveScss.includes('@media (min-width: 381px)') && !/@media\s*\(\s*max-width/i.test(responsiveScss), 'La portada debe usar móvil estrecho como baseline y expandirse con min-width.');
 expect(homeScss.includes('min-height: 44px'), 'Los CTA deben conservar objetivos táctiles de al menos 44px.');
 
 for (const forbidden of ['authGuard', 'permisoGuard', 'ProductosListComponent', 'CategoriasListComponent']) {
