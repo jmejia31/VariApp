@@ -9,6 +9,7 @@ import { ThemeApplierService } from './services/theme-applier.service';
 import { EmpresaIdentidadService } from './services/empresa-identidad.service';
 import { SessionActivityService } from './core/auth/session-activity.service';
 import { AppNavigationMenuComponent } from './shared/navigation/app-navigation-menu.component';
+import { VaristorehnSeoService } from './features/varistorehn/varistorehn-seo.service';
 
 @Component({
   selector: 'app-root',
@@ -100,16 +101,20 @@ export class AppComponent implements OnDestroy {
     private sessionActivity: SessionActivityService,
     private router: Router,
     private themeApplier: ThemeApplierService,
+    private seo: VaristorehnSeoService,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.themeApplier.aplicarTemaGuardado();
-    this.identidad.cargar().subscribe();
+    this.identidad.cargar().subscribe(() => {
+      this.seo.aplicarRuta(this.router.url, this.identidad.nombreSistema());
+    });
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
       this.sessionActivity.iniciar();
     }
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
+        this.seo.aplicarRuta(event.urlAfterRedirects, this.identidad.nombreSistema());
         this.cerrarSidebar();
         this.gestionarFocoTrasNavegacion();
       }
