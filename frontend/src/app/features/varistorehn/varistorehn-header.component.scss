@@ -124,7 +124,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .store-nav { gap: 18px; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1180px) {
   .container { width: calc(100% - 28px); }
   .utility-inner { min-height: 30px; font-size: .63rem; }
   .utility-message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
