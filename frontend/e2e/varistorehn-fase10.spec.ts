@@ -164,13 +164,13 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test('modo escritorio móvil a 980px usa header y filtros compactos', async ({ page }) => {
+  test('modo escritorio móvil a 980px compacta catálogo sin romper header tablet', async ({ page }) => {
     await preparar(page);
     await page.setViewportSize({ width: 980, height: 900 });
     await page.goto('/varistorehn/productos');
 
-    await expect(page.locator('.mobile-menu-trigger')).toBeVisible();
-    await expect(page.locator('.store-nav')).not.toBeVisible();
+    await expect(page.locator('.header-whatsapp')).toBeVisible();
+    await expect(page.locator('.mobile-menu-trigger')).toBeHidden();
     await expect(page.locator('.mobile-filters')).toBeVisible();
     await expect(page.locator('.filters')).not.toBeVisible();
 
