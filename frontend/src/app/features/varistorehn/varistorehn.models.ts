@@ -238,6 +238,8 @@ export interface FiltrosCatalogo {
 }
 
 export type EstadoConsultaPublica = 'loading' | 'empty' | 'error' | 'success';
+/** Recurso individual: "not-found" es distinto de una colección pública vacía. */
+export type EstadoRecursoPublico = EstadoConsultaPublica | 'not-found';
 export type EstadoDisponibilidad = 'available' | 'lowStock' | 'outOfStock';
 export type EstadoPromocion = 'none' | 'active' | 'expired';
 
