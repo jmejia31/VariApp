@@ -34,6 +34,8 @@ interface ContextoRetornoCatalogo {
   filtrosAbiertos: boolean;
 }
 
+const RETORNO_CATALOGO_STORAGE = 'varistorehn:retorno-catalogo:v1';
+
 @Component({
   selector: 'app-varistorehn-productos',
   standalone: true,
@@ -242,6 +244,11 @@ export class VaristorehnProductosComponent implements OnInit {
       ? view.history.state as Record<string, unknown>
       : {};
     view.history.replaceState({ ...estadoActual, varistorehnCatalogState: contexto }, '', url);
+    try {
+      view.sessionStorage.setItem(RETORNO_CATALOGO_STORAGE, JSON.stringify(contexto));
+    } catch {
+      // History state remains the primary mechanism when storage is unavailable.
+    }
 
     evento.preventDefault();
     void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), {
@@ -397,7 +404,15 @@ export class VaristorehnProductosComponent implements OnInit {
     const estadoNavegacion = view.history.state && typeof view.history.state === 'object'
       ? view.history.state as Record<string, unknown>
       : null;
-    const contexto = this.leerContextoRetorno(estadoNavegacion?.['varistorehnCatalogState']);
+    let contexto = this.leerContextoRetorno(estadoNavegacion?.['varistorehnCatalogState']);
+    if (!contexto) {
+      try {
+        const persistido = view.sessionStorage.getItem(RETORNO_CATALOGO_STORAGE);
+        contexto = persistido ? this.leerContextoRetorno(JSON.parse(persistido) as unknown) : null;
+      } catch {
+        contexto = null;
+      }
+    }
     if (!contexto) return;
 
     const urlActual = `${view.location.pathname}${view.location.search}${view.location.hash}`;
@@ -406,6 +421,7 @@ export class VaristorehnProductosComponent implements OnInit {
     this.modelosActivos.set(contexto.modelosActivos);
     this.filtrosAbiertos.set(contexto.filtrosAbiertos);
     this.scrollRetorno = contexto.scrollY;
+    try { view.sessionStorage.removeItem(RETORNO_CATALOGO_STORAGE); } catch { /* no-op */ }
   }
 
   private leerContextoRetorno(valor: unknown): ContextoRetornoCatalogo | null {
