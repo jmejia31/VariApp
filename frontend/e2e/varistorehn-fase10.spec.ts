@@ -164,6 +164,60 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
+  test('catálogo mantiene precio y CTAs separados con zoom equivalente y móvil', async ({ page }) => {
+    await preparar(page);
+
+    const widths = [320, 390, 600, 760, 900, 1024, 1100, 1280, 1440];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto('/varistorehn/productos');
+      await expect(page.locator('.product-card').first()).toBeVisible();
+
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, `overflow horizontal del catálogo a ${width}px`).toBeLessThanOrEqual(0);
+
+      const geometria = await page.locator('.product-card').evaluateAll(cards => cards.map(card => {
+        const cardRect = card.getBoundingClientRect();
+        const price = card.querySelector('.price-copy')?.getBoundingClientRect();
+        const actions = card.querySelector('.product-actions')?.getBoundingClientRect();
+        const controls = [...card.querySelectorAll('.product-actions .button')].map(el => el.getBoundingClientRect());
+        return {
+          card: { left: cardRect.left, right: cardRect.right, top: cardRect.top, bottom: cardRect.bottom, width: cardRect.width },
+          price: price ? { left: price.left, right: price.right, top: price.top, bottom: price.bottom } : null,
+          actions: actions ? { left: actions.left, right: actions.right, top: actions.top, bottom: actions.bottom } : null,
+          controls: controls.map(rect => ({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height }))
+        };
+      }));
+
+      expect(geometria.length).toBeGreaterThan(0);
+      for (const item of geometria) {
+        expect(item.card.width, `card demasiado estrecha a ${width}px`).toBeGreaterThan(0);
+        expect(item.price, `sin bloque de precio a ${width}px`).not.toBeNull();
+        expect(item.actions, `sin bloque de acciones a ${width}px`).not.toBeNull();
+        expect(item.price!.bottom, `precio invade acciones a ${width}px`).toBeLessThanOrEqual(item.actions!.top + 1);
+        expect(item.price!.left, `precio sale por la izquierda a ${width}px`).toBeGreaterThanOrEqual(item.card.left - 1);
+        expect(item.price!.right, `precio sale por la derecha a ${width}px`).toBeLessThanOrEqual(item.card.right + 1);
+
+        for (const control of item.controls) {
+          expect(control.left, `CTA sale por la izquierda a ${width}px`).toBeGreaterThanOrEqual(item.card.left - 1);
+          expect(control.right, `CTA sale por la derecha a ${width}px`).toBeLessThanOrEqual(item.card.right + 1);
+          expect(control.width, `CTA sin ancho útil a ${width}px`).toBeGreaterThan(0);
+          expect(control.height, `CTA táctil demasiado bajo a ${width}px`).toBeGreaterThanOrEqual(44);
+        }
+
+        for (let i = 0; i < item.controls.length; i++) {
+          for (let j = i + 1; j < item.controls.length; j++) {
+            const a = item.controls[i];
+            const b = item.controls[j];
+            const overlapX = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+            const overlapY = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+            expect(overlapX > 1 && overlapY > 1, `CTAs superpuestos a ${width}px`).toBe(false);
+          }
+        }
+      }
+    }
+  });
+
   test('checkout móvil asocia errores a campos y conserva navegación por teclado', async ({ page }) => {
     await preparar(page);
     await page.setViewportSize({ width: 390, height: 844 });
