@@ -12,6 +12,7 @@ import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistore
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
+import { VaristorehnSeoService } from './varistorehn-seo.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
@@ -30,6 +31,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly seo = inject(VaristorehnSeoService);
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carrito = inject(VaristorehnCarritoService);
@@ -107,12 +109,22 @@ export class VaristorehnCategoriaComponent implements OnInit {
     this.error.set('');
     this.estado.set('loading');
     const slug = this.slugSolicitado();
-    if (!slug) { this.estado.set('not-found'); return; }
+    if (!slug) {
+      this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+      this.estado.set('not-found');
+      return;
+    }
 
     if (!this.utilizarDatosBaseDatos()) {
       const categoria = crearCategoriasTiendaEjemplo().find(item => item.slug === slug) || null;
       this.categoria.set(categoria);
-      this.estado.set(categoria ? 'success' : 'not-found');
+      if (categoria) {
+        this.seo.aplicarCategoria(categoria, this.identidad.nombreSistema());
+        this.estado.set('success');
+      } else {
+        this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+        this.estado.set('not-found');
+      }
       return;
     }
 
@@ -122,11 +134,17 @@ export class VaristorehnCategoriaComponent implements OnInit {
     ).subscribe({
       next: categoria => {
         this.categoria.set(categoria);
+        this.seo.aplicarCategoria(categoria, this.identidad.nombreSistema());
         this.estado.set('success');
         if (categoria.slug !== slug) void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug), { replaceUrl: true });
       },
       error: error => {
-        if (this.esNoEncontrada(error)) { this.estado.set('not-found'); return; }
+        if (this.esNoEncontrada(error)) {
+          this.seo.aplicarNoIndex(this.identidad.nombreSistema());
+          this.estado.set('not-found');
+          return;
+        }
+        this.seo.aplicarNoIndex(this.identidad.nombreSistema());
         this.error.set('No pudimos cargar esta categoría. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
