@@ -114,7 +114,7 @@ export class VaristorehnService {
 
   crearCheckoutTarjeta(endpoint: string, request: CheckoutTarjetaRequest): Observable<CheckoutTarjetaResponse> {
     const ruta = endpoint.trim().replace(/^\/+/, '');
-    if (!ruta || /^https?:/i.test(ruta) || ruta.includes('..')) {
+    if (!ruta || !ruta.startsWith('tienda/') || /^https?:/i.test(ruta) || ruta.includes('..')) {
       return throwError(() => new Error('El endpoint de pago seguro no es válido.'));
     }
     return this.http.post<ApiResponse<CheckoutTarjetaResponse>>(`${environment.apiUrl}/${ruta}`, request).pipe(
