@@ -250,10 +250,7 @@ export class VaristorehnProductosComponent implements OnInit {
       // History state remains the primary mechanism when storage is unavailable.
     }
 
-    evento.preventDefault();
-    void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), {
-      state: { varistorehnReturn: contexto }
-    });
+    // Keep native anchor navigation so browser history/BFCache can restore the exact visual state.
   }
 
   modeloSeleccionado(producto: ProductoTienda): ModeloTienda {
