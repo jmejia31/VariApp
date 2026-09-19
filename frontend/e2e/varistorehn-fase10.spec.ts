@@ -164,13 +164,13 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test('modo escritorio móvil a 980px compacta catálogo sin romper header tablet', async ({ page }) => {
+  test('tablet y zoom alto compactan catálogo y header antes de comprimirse', async ({ page }) => {
     await preparar(page);
     await page.setViewportSize({ width: 980, height: 900 });
     await page.goto('/varistorehn/productos');
 
-    await expect(page.locator('.header-whatsapp')).toBeVisible();
-    await expect(page.locator('.mobile-menu-trigger')).toBeHidden();
+    await expect(page.locator('.header-whatsapp')).toBeHidden();
+    await expect(page.locator('.mobile-menu-trigger')).toBeVisible();
     await expect(page.locator('.mobile-filters')).toBeVisible();
     await expect(page.locator('.filters')).not.toBeVisible();
 
@@ -184,7 +184,7 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
   test('catálogo mantiene precio y CTAs separados con zoom equivalente y móvil', async ({ page }) => {
     await preparar(page);
 
-    const widths = [320, 390, 600, 760, 900, 980, 1024, 1100, 1280, 1440];
+    const widths = [320, 360, 390, 430, 600, 720, 768, 820, 900, 960, 980, 1024, 1100, 1152, 1180, 1280, 1440, 1800];
     for (const width of widths) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto('/varistorehn/productos');
@@ -239,7 +239,7 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     await preparar(page);
 
     const desktopFisico = 1440;
-    const niveles = [0.8, 1, 1.25, 1.5, 2];
+    const niveles = [0.8, 0.9, 1, 1.25, 1.5, 2];
 
     for (const zoom of niveles) {
       const width = Math.round(desktopFisico / zoom);
@@ -292,6 +292,13 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
 
       const headerOverflow = await page.locator('.header-main').evaluate(element => element.scrollWidth - element.clientWidth);
       expect(headerOverflow, `header desborda con zoom ${Math.round(zoom * 100)}%`).toBeLessThanOrEqual(1);
+
+      if (zoom >= 1.25) {
+        await expect(page.locator('.mobile-menu-trigger'), `header no compacta con zoom ${Math.round(zoom * 100)}%`).toBeVisible();
+        await expect(page.locator('.header-whatsapp')).toBeHidden();
+        await expect(page.locator('.mobile-filters')).toBeVisible();
+        await expect(page.locator('.filters')).not.toBeVisible();
+      }
     }
   });
 
