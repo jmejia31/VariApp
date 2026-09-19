@@ -40,6 +40,7 @@ expect(headerHtml.includes('[attr.aria-expanded]="menuAbierto()"'), 'El disparad
 expect(headerHtml.includes('[totalUnidades]') === false, 'El header no debe intentar enlazar inputs a sí mismo.');
 expect(headerHtml.includes('{{ totalUnidades }}'), 'El contador visual del carrito debe usar el total real recibido.');
 expect(headerHtml.includes('enlaceWhatsapp()'), 'Debe existir una acción secundaria de WhatsApp cuando esté configurada.');
+expect(!headerHtml.includes('\\n'), 'El header público no debe renderizar escapes literales \\n en navegación o utilidades.');
 expect(headerScss.includes('min-height: 44px'), 'Los controles móviles deben conservar objetivos táctiles de al menos 44px.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(headerScss), 'El header no debe introducir colores hexadecimales fuera del tema.');
 
