@@ -21,6 +21,7 @@ const empresaBase = {
 };
 
 const referenciaValidada = '0123456789abcdef0123456789abcdef';
+const productoVarianteReal = 95010;
 const modeloClaveReal = JSON.stringify([5010, 'Modelo auditoría', 'Marca real']);
 const modeloClaveDemo = JSON.stringify([101, '8 GB / 256 GB', 'Demo']);
 
@@ -53,6 +54,7 @@ function productoReal(precio = 1750, stock = 3) {
     esDestacado: false,
     imagenes: [],
     modelos: [{
+      productoVarianteId: productoVarianteReal,
       modeloId: 5010,
       modeloNombre: 'Modelo auditoría',
       marcaNombre: 'Marca real',
@@ -92,6 +94,7 @@ async function mockCheckoutValido(page: Page, total = 4200): Promise<void> {
           total,
           lineas: [{
             productoId: 501,
+            productoVarianteId: productoVarianteReal,
             modeloId: 5010,
             nombre: 'Producto Checkout Real',
             modelo: 'Modelo auditoría',
@@ -175,9 +178,10 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(requestCheckout).toEqual({
       items: [{
         productoId: 501,
-        modeloId: 5010,
-        modeloNombre: 'Modelo auditoría',
-        marcaNombre: 'Marca real',
+        productoVarianteId: productoVarianteReal,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: null,
         unidades: 2
       }]
     });
