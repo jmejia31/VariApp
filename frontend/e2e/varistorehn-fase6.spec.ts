@@ -138,6 +138,106 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByText(/Fase 6/)).toHaveCount(0);
   });
 
+  test('variante física con modelo general llega exacta al checkout y habilita WhatsApp', async ({ page }) => {
+    await prepararEmpresa(page);
+    const varianteId = 95011;
+    const productoId = 509;
+    const producto = {
+      id: productoId,
+      slug: 'uat-modelo-general-509',
+      nombre: 'UAT Modelo General',
+      descripcion: '',
+      categoriaId: null,
+      categoriaNombre: null,
+      marcaNombre: 'Samsung',
+      modeloNombre: '',
+      precio: 150,
+      precioOferta: null,
+      cantidadDisponible: 10,
+      estaAgotado: false,
+      estadoDisponibilidad: 'Disponible',
+      sku: 'UAT-GENERAL',
+      activo: true,
+      esDestacado: false,
+      imagenes: [],
+      modelos: [{
+        productoVarianteId: varianteId,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: 'Samsung',
+        sku: 'UAT-GENERAL',
+        precio: 150,
+        cantidadDisponible: 10,
+        estaAgotado: false,
+        estadoDisponibilidad: 'Disponible',
+        imagenes: []
+      }]
+    };
+
+    await sembrarCarrito(page, 'bd', `variante:${varianteId}`, productoId, 1);
+    await page.route('**/tienda/productos?*', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ success: true, data: { items: [producto], page: 1, pageSize: 96, totalCount: 1 } })
+    }));
+
+    let requestCheckout: any = null;
+    await page.route('**/tienda/checkout/validar', route => {
+      requestCheckout = route.request().postDataJSON();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: {
+            validacionId: referenciaValidada,
+            expiraUtc: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+            subtotal: 150,
+            total: 150,
+            lineas: [{
+              productoId,
+              productoVarianteId: varianteId,
+              modeloId: null,
+              nombre: 'UAT Modelo General',
+              modelo: null,
+              sku: 'UAT-GENERAL',
+              unidades: 1,
+              stockDisponible: 10,
+              precioUnitario: 150,
+              total: 150
+            }]
+          }
+        })
+      });
+    });
+
+    await page.goto('/varistorehn/checkout?fuente=bd');
+    await expect(page.getByRole('heading', { name: 'Tu compra' })).toBeVisible();
+    expect(requestCheckout).toEqual({
+      items: [{
+        productoId,
+        productoVarianteId: varianteId,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: null,
+        unidades: 1
+      }]
+    });
+
+    await llenarComprador(page);
+    await page.getByRole('button', { name: 'Preparar pedido por WhatsApp' }).click();
+    const enlace = page.getByRole('link', { name: 'Abrir WhatsApp y continuar' });
+    await expect(enlace).toBeVisible();
+    const href = await enlace.getAttribute('href');
+    expect(href).toBeTruthy();
+    const destino = new URL(href!);
+    expect(destino.origin).toBe('https://wa.me');
+    expect(destino.pathname).toBe('/50498765432');
+    expect(destino.searchParams.get('text') || '').toContain('UAT Modelo General');
+  });
+
   test('fuente real revalida en servidor sin enviar precio/stock y WhatsApp usa el total autoritativo', async ({ page }) => {
     await prepararEmpresa(page);
     await sembrarCarrito(page, 'bd', modeloClaveReal, 501, 2);
