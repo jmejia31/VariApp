@@ -3,7 +3,7 @@ import { expect, Page, test } from '@playwright/test';
 const empresa = {
   id: 911,
   nombreComercial: 'VariStore Fase 11',
-  nombreVisibleSistema: 'VariStore Fase 11',
+  nombreVisibleSistema: 'Sistema Interno',
   eslogan: 'Tecnología y compras en línea',
   descripcionSistema: 'Administrativo',
   mensajeLogin: 'Administración',
@@ -135,7 +135,9 @@ test.describe('VariStoreHN Fase 11 — SEO, URLs y rendimiento', () => {
     await page.goto('/login');
     await expect(meta(page, 'name="robots"')).toHaveAttribute('content', /noindex,nofollow/);
     await expect(page.locator('head link[rel="canonical"]')).toHaveCount(0);
-    await expect(page).not.toHaveTitle(/administrativ/i);
+    await expect(meta(page, 'name="description"')).toHaveCount(0);
+    await expect(meta(page, 'property="og:site_name"')).toHaveCount(0);
+    await expect(page).not.toHaveTitle(/administrativ|sistema interno/i);
   });
 
   test('producto real publica title description canonical Open Graph e imagen propios', async ({ page }) => {
@@ -154,6 +156,7 @@ test.describe('VariStoreHN Fase 11 — SEO, URLs y rendimiento', () => {
     );
     await expect(meta(page, 'property="og:type"')).toHaveAttribute('content', 'product');
     await expect(meta(page, 'property="og:title"')).toHaveAttribute('content', 'Laptop SEO 11 | VariStore Fase 11');
+    await expect(meta(page, 'property="og:site_name"')).toHaveAttribute('content', 'VariStore Fase 11');
     await expect(meta(page, 'property="og:image"')).toHaveAttribute('content', imagenUrl);
     await expect(meta(page, 'name="twitter:card"')).toHaveAttribute('content', 'summary_large_image');
 
