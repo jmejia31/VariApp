@@ -14,6 +14,7 @@ on:
       - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'
       - 'backend/tests/InventoryApp.Tests/TiendaCuentaClienteTests.cs'
       - 'backend/tests/InventoryApp.Tests/Priority3AuthorizationSurfaceTests.cs'
+      - 'scripts/quality/priority4_quality_audit.py'
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
       - 'frontend/api/robots.js'
