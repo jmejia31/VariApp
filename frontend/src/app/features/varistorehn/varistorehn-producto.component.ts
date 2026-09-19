@@ -225,12 +225,16 @@ export class VaristorehnProductoComponent implements OnInit {
     const view = this.document.defaultView;
     const retorno = this.retornoCatalogo;
 
-    if (view && retorno && view.history.length > 1) {
-      view.history.back();
-      return;
-    }
     if (retorno) {
-      void this.router.navigateByUrl(retorno.url, { state: { varistorehnCatalogState: retorno } });
+      try {
+        view?.sessionStorage.setItem(RETORNO_CATALOGO_STORAGE, JSON.stringify(retorno));
+      } catch {
+        // El state del Router conserva el contexto si sessionStorage no esta disponible.
+      }
+      void this.router.navigateByUrl(retorno.url, {
+        replaceUrl: true,
+        state: { varistorehnCatalogState: retorno }
+      });
       return;
     }
     if (view && view.history.length > 1 && this.referenciaVariStore(view)) {
