@@ -210,7 +210,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(header.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
     await expect(header.locator('.cart-copy small')).toContainText('1,250');
   });
-  test('tablet: WhatsApp permanece accesible y sin overflow en toda la franja previa al menú móvil', async ({ page }) => {
+  test('tablet: header compacto conserva WhatsApp y evita overflow', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 900 });
     await prepararTienda(page);
     await esperarCatalogo(page);
@@ -218,10 +218,16 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     const header = page.locator('app-varistorehn-header');
     for (const width of [1120, 900, 761]) {
       await page.setViewportSize({ width, height: 900 });
-      await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeVisible();
-      await expect(header.getByRole('button', { name: 'Abrir navegación' })).toBeHidden();
+      const toggle = header.getByRole('button', { name: 'Abrir navegación' });
+      await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeHidden();
+      await expect(toggle).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `overflow horizontal a ${width}px`).toBeLessThanOrEqual(0);
+
+      await toggle.click();
+      await expect(header.locator('.mobile-whatsapp')).toBeVisible();
+      await header.getByRole('button', { name: 'Cerrar navegación' }).click();
+      await expect(header.locator('#varistorehn-menu-movil')).not.toBeVisible();
     }
   });
 
