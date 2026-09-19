@@ -28,7 +28,7 @@ expect(productoHtml.includes('<dialog #lightbox'), 'El fullscreen debe usar dial
 expect(productoHtml.includes('(close)="alCerrarLightbox()"'), 'El fullscreen debe restaurar el foco al cerrar.');
 expect(productoTs.includes('this.botonImagenPrincipal?.nativeElement.focus()'), 'El cierre del fullscreen debe devolver foco al disparador.');
 expect(productoScss.includes('env(safe-area-inset-bottom)'), 'El CTA móvil debe respetar safe areas.');
-expect(productoScss.includes('.store-footer{padding-bottom:calc(82px + env(safe-area-inset-bottom))}'),
+expect(/\.store-footer\{[^}]*padding-bottom:calc\(82px \+ env\(safe-area-inset-bottom\)\)/.test(productoScss),
   'El CTA fijo no debe tapar el pie de página.');
 expect(productoHtml.includes('class="feedback-toast"') && productoHtml.includes('aria-live="polite"'),
   'Agregar al carrito debe producir feedback visible y anunciado.');
