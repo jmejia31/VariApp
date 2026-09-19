@@ -117,7 +117,7 @@ expect(checkoutRules.includes('encodeURIComponent') === false, 'Las reglas puras
 
 expect(storefrontService.includes("private readonly urlValidarCheckout = `${this.urlTienda}/checkout/validar`"), 'El cliente HTTP debe apuntar a /tienda/checkout/validar.');
 expect(storefrontService.includes('this.http.post<ApiResponse<CheckoutValidado>>'), 'La revalidación debe usar POST tipado.');
-expect(storefrontService.includes("if (!ruta || /^https?:/i.test(ruta) || ruta.includes('..'))"), 'El endpoint configurable de tarjeta debe aceptar solo rutas backend relativas seguras.');
+expect(storefrontService.includes("!ruta.startsWith('tienda/')") && storefrontService.includes("ruta.includes('..')"), 'El endpoint configurable de tarjeta debe permanecer dentro de la frontera publica /tienda y aceptar solo rutas relativas seguras.');
 expect(storefrontService.includes('checkoutValidado(data)'), 'El cliente debe validar estructuralmente la respuesta de checkout.');
 
 const checkoutItemBlock = models.match(/export interface CheckoutItemRequest \{([\s\S]*?)\n\}/)?.[1] || '';
