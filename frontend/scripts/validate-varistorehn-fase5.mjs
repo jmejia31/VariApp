@@ -147,7 +147,7 @@ expect(!/#[0-9a-f]{3,8}\b/i.test(cartScss), 'Fase 5 no debe introducir colores h
 expect(!/\brgb(?:a)?\s*\(/i.test(cartScss), 'Fase 5 no debe introducir colores RGB propios.');
 expect(!/\bhsl(?:a)?\s*\(/i.test(cartScss), 'Fase 5 no debe introducir colores HSL propios.');
 expect(/min-height\s*:\s*44px/.test(cartScss), 'Los controles del carrito deben conservar touch targets de al menos 44 px.');
-expect(cartScss.includes('@media(max-width:390px)'), 'El carrito debe incluir validación responsive para teléfonos estrechos.');
+expect(cartScss.includes('@media(min-width:391px)') && !/@media\s*\(\s*max-width/i.test(cartScss), 'El carrito debe usar teléfono estrecho como baseline y expandirse con min-width.');
 
 expect(productTs.includes('stockRestante'), 'El detalle debe descontar lo ya agregado al validar una nueva cantidad.');
 expect(productTs.includes('this.carritoStore.unidadesDe'), 'El stock restante del detalle debe salir del carrito global.');
