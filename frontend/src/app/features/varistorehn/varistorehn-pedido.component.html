@@ -6,7 +6,7 @@
     etiquetaSaltar="Saltar a la confirmación"
     (carritoSolicitado)="abrirCarrito()" />
 
-  <main id="pedido-principal" class="container order-page" tabindex="-1">
+  <main id="pedido-principal" class="container order-page" tabindex="-1" [attr.aria-busy]="estado() === 'loading'">
     <nav class="breadcrumbs" aria-label="Migas de pan">
       <a [href]="enlaces.inicio">Inicio</a><span aria-hidden="true">/</span>
       <span aria-current="page">Confirmación</span>
