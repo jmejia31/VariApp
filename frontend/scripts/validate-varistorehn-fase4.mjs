@@ -66,7 +66,7 @@ for (const required of [
   expect(productTs.includes(required), `El detalle público debe integrar ${required}.`);
 }
 
-expect(productTs.includes("type EstadoProductoPublico = 'loading' | 'error' | 'not-found' | 'success'"), 'El detalle debe modelar loading/error/not-found/success.');
+expect(productTs.includes('EstadoRecursoPublico') && models.includes("EstadoRecursoPublico = EstadoConsultaPublica | 'not-found'"), 'El detalle debe usar el contrato compartido loading/error/empty/success + not-found.');
 expect(productTs.includes("this.error.set('No pudimos cargar este producto"), 'Una falla real debe quedar visible y no sustituirse por demo.');
 expect(productTs.includes("if (!this.utilizarDatosBaseDatos())"), 'Demo y fuente real deben estar separados de forma explícita.');
 expect(productTs.includes('this.stockSeleccionado()'), 'La cantidad debe depender del stock de la variante seleccionada.');
