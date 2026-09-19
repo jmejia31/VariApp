@@ -304,6 +304,7 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
 
   test('teléfono o tablet táctil con viewport ancho no recibe layout de escritorio', async ({ browser }) => {
     const context = await browser.newContext({
+      baseURL: process.env['PLAYWRIGHT_TEST_BASE_URL'] ?? 'http://127.0.0.1:4200',
       viewport: { width: 1280, height: 900 },
       hasTouch: true,
       isMobile: true
