@@ -124,6 +124,57 @@ public sealed class TiendaCuentaClienteTests
     }
 
     [Fact]
+    public async Task AgregarFavorito_ProductoEliminado_RetornaNotFound()
+    {
+        await using var db = CrearDb();
+
+        var cliente = new Cliente { Nombre = "Cliente A", Correo = "a@example.com", Activo = true, TipoClienteId = 1 };
+        db.Clientes.Add(cliente);
+        await db.SaveChangesAsync();
+
+        var cuenta = new TiendaCuentaCliente
+        {
+            ClienteId = cliente.Id,
+            Cliente = cliente,
+            Nombre = "Cliente A",
+            Correo = "a@example.com",
+            CorreoNormalizado = "a@example.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("ClaveSegura123!"),
+            Activa = true
+        };
+        db.TiendaCuentasCliente.Add(cuenta);
+        await db.SaveChangesAsync();
+
+        const string token = "token_favorito_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        db.TiendaSesionesCliente.Add(new TiendaSesionCliente
+        {
+            CuentaClienteId = cuenta.Id,
+            CuentaCliente = cuenta,
+            TokenHash = HashToken(token),
+            ExpiraUtc = DateTime.UtcNow.AddHours(1)
+        });
+
+        var producto = new Producto
+        {
+            Nombre = "Producto eliminado",
+            Marca = "Marca",
+            Modelo = "Modelo",
+            Activo = true,
+            Eliminado = true
+        };
+        db.Productos.Add(producto);
+        await db.SaveChangesAsync();
+
+        var resolver = new Mock<ITipoClientePredeterminadoResolver>();
+        var controller = CrearController(db, resolver.Object, token);
+
+        var result = await controller.AgregarFavorito(producto.Id);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Empty(await db.TiendaFavoritosCliente.ToListAsync());
+    }
+
+    [Fact]
     public async Task EndpointsPrivados_SinSesionCliente_Retornan401()
     {
         await using var db = CrearDb();
