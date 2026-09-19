@@ -167,7 +167,7 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
   test('catálogo mantiene precio y CTAs separados con zoom equivalente y móvil', async ({ page }) => {
     await preparar(page);
 
-    const widths = [320, 390, 600, 760, 900, 1024, 1100, 1280, 1440];
+    const widths = [320, 390, 600, 760, 900, 980, 1024, 1100, 1280, 1440];
     for (const width of widths) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto('/varistorehn/productos');
