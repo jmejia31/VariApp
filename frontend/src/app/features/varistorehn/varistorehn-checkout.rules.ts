@@ -28,7 +28,8 @@ export function mensajeWhatsappCheckout(
   referencia: string,
   moneda: string,
   lineas: readonly CheckoutLineaValidada[],
-  total: number
+  total: number,
+  enlacesProducto: Readonly<Record<number, string>> = {}
 ): string {
   const formato = new Intl.NumberFormat('es-HN', { style: 'currency', currency: moneda || 'HNL' });
   const marca = limpiarTextoWhatsapp(comercio || 'VariStoreHN');
@@ -38,13 +39,15 @@ export function mensajeWhatsappCheckout(
     const nombre = limpiarTextoWhatsapp(linea.nombre);
     const modelo = linea.modelo ? `\nModelo: ${limpiarTextoWhatsapp(linea.modelo)}` : '';
     const sku = linea.sku ? `\nSKU: ${limpiarTextoWhatsapp(linea.sku)}` : '';
+    const enlace = enlaceProductoSeguro(enlacesProducto[linea.productoId]);
     return [
       `📦 *Producto ${indice + 1}*`,
       `*${nombre}*${modelo}${sku}`,
+      enlace ? `🔗 Ver producto: ${enlace}` : '',
       `Cantidad: ${linea.unidades}`,
       `Precio unitario: ${formato.format(linea.precioUnitario)}`,
       `Subtotal: *${formato.format(linea.total)}*`
-    ].join('\n');
+    ].filter(Boolean).join('\n');
   }).join('\n\n');
 
   const contacto = comprador.telefono
@@ -87,4 +90,14 @@ function limpiarTextoWhatsapp(valor: string): string {
     .replace(/[*_~`]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function enlaceProductoSeguro(valor: string | undefined): string {
+  if (!valor) return '';
+  try {
+    const url = new URL(valor);
+    return url.protocol === 'https:' || url.hostname === 'localhost' ? url.toString() : '';
+  } catch {
+    return '';
+  }
 }
