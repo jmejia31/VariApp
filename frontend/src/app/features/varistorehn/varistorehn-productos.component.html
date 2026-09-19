@@ -236,7 +236,7 @@
   @if (identidad.config().piePaginaActivo) {
     <footer class="store-footer">
       <div class="container footer-grid">
-        <div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
+        <div><strong>{{ (identidad.config().nombreComercial || 'VariStorehn') }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
         <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.ofertas">Ofertas</a><a [href]="enlaces.categorias">Categorías</a></div>
         <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a>@if (permiteWhatsapp) { <span>Pedidos por WhatsApp</span> }</div>
       </div>
