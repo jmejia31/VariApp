@@ -8,15 +8,10 @@ function hostFromRequest(req) {
 }
 
 function isIndexableHost(req) {
-  const host = hostFromRequest(req);
-  if (!host || host === 'localhost' || host === '127.0.0.1') return false;
-  if (host === PRODUCTION_HOST) return true;
-  return !host.endsWith('.vercel.app');
+  return hostFromRequest(req) === PRODUCTION_HOST;
 }
 
-function publicOrigin(req) {
-  const host = hostFromRequest(req);
-  if (host && isIndexableHost(req) && host !== PRODUCTION_HOST) return `https://${host}`;
+function publicOrigin(_req) {
   return PRODUCTION_ORIGIN;
 }
 
@@ -52,13 +47,17 @@ async function loadBrand(req) {
     return {
       name,
       slogan: String(data?.eslogan || '').trim(),
-      logo: absoluteUrl(String(data?.logoUrl || 'assets/varistorehn-logo.png'), publicOrigin(req))
+      logo: absoluteUrl(String(data?.logoUrl || 'assets/varistorehn-logo.png'), publicOrigin(req)),
+      currency: /^[A-Z]{3}$/.test(String(data?.moneda || '').trim().toUpperCase())
+        ? String(data.moneda).trim().toUpperCase()
+        : 'HNL'
     };
   } catch {
     return {
       name: 'VariStoreHN',
       slogan: 'Tecnología y compras en línea',
-      logo: `${publicOrigin(req)}/assets/varistorehn-logo.png`
+      logo: `${publicOrigin(req)}/assets/varistorehn-logo.png`,
+      currency: 'HNL'
     };
   }
 }
