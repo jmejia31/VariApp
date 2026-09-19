@@ -116,12 +116,12 @@ for (const [name, scss] of [
 ]) {
   expect(scss.includes('@media'), `Responsive básico MVP debe cubrir ${name}.`);
 }
-expect(homeResponsive.includes('max-width: 600px') || homeResponsive.includes('max-width:600px'),
-  'Home MVP debe incluir un breakpoint móvil común.');
-expect(cartScss.includes('max-width:680px') || cartScss.includes('max-width: 680px'),
-  'Carrito MVP debe reflowar en móvil.');
-expect(checkoutScss.includes('max-width: 600px') || checkoutScss.includes('max-width:600px'),
-  'Checkout MVP debe reflowar en móvil.');
+expect(homeResponsive.includes('min-width: 601px') && !/@media\s*\(\s*max-width/i.test(homeResponsive),
+  'Home MVP debe usar móvil como baseline y expandirse desde 601px.');
+expect(cartScss.includes('min-width:681px') && !/@media\s*\(\s*max-width/i.test(cartScss),
+  'Carrito MVP debe usar móvil como baseline y expandirse desde 681px.');
+expect(checkoutScss.includes('min-width: 601px') && !/@media\s*\(\s*max-width/i.test(checkoutScss),
+  'Checkout MVP debe usar móvil como baseline y expandirse desde 601px.');
 
 if (failures.length) {
   console.error('MVP Fases 0–6 — auditoría de alcance FALLÓ:');
