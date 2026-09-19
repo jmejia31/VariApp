@@ -44,13 +44,30 @@ async function sinOverflowHorizontal(page: Page, ruta: string, width: number): P
 test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
   test.describe.configure({ retries: 0 });
 
-  test('flujo público no desborda en anchos móviles comunes', async ({ page }) => {
+  test('rutas públicas de exploración no desbordan en anchos móviles comunes', async ({ page }) => {
     await preparar(page);
+    const rutas = [
+      '/varistorehn',
+      '/varistorehn/productos',
+      '/varistorehn/ofertas',
+      '/varistorehn/categorias',
+      '/varistorehn/categoria/demo-categoria-1',
+      '/varistorehn/producto/demo-producto-1'
+    ];
     for (const width of [320, 360, 390, 430]) {
-      await sinOverflowHorizontal(page, '/varistorehn', width);
-      await sinOverflowHorizontal(page, '/varistorehn/productos', width);
-      await sinOverflowHorizontal(page, '/varistorehn/producto/demo-producto-1', width);
-      await sinOverflowHorizontal(page, '/varistorehn/carrito', width);
+      for (const ruta of rutas) await sinOverflowHorizontal(page, ruta, width);
+    }
+  });
+
+  test('rutas públicas de compra no desbordan en anchos móviles comunes', async ({ page }) => {
+    await preparar(page);
+    const rutas = [
+      '/varistorehn/carrito',
+      '/varistorehn/checkout',
+      '/varistorehn/pedido/auditoria-fase10'
+    ];
+    for (const width of [320, 360, 390, 430]) {
+      for (const ruta of rutas) await sinOverflowHorizontal(page, ruta, width);
     }
   });
 
@@ -74,7 +91,7 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
       }).map(element => Math.round(element.getBoundingClientRect().height))
     );
     expect(alturas.length).toBeGreaterThan(0);
-    expect(Math.min(...alturas)).toBeGreaterThanOrEqual(38);
+    expect(Math.min(...alturas)).toBeGreaterThanOrEqual(44);
 
     const bar = await page.locator('.mobile-buy-bar').boundingBox();
     expect(bar).not.toBeNull();
