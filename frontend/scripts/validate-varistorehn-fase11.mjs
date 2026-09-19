@@ -20,7 +20,9 @@ const [
   categoriasHtml,
   productoHtml,
   carritoHtml,
-  vercelRaw
+  vercelRaw,
+  seoUtilsSource,
+  sitemapSource
 ] = await Promise.all([
   read('src/index.html'),
   read('src/app/app.component.ts'),
@@ -32,7 +34,9 @@ const [
   read('src/app/features/varistorehn/varistorehn-categorias.component.html'),
   read('src/app/features/varistorehn/varistorehn-producto.component.html'),
   read('src/app/features/varistorehn/varistorehn-carrito.component.html'),
-  read('vercel.json')
+  read('vercel.json'),
+  read('server/seo-utils.js'),
+  read('api/sitemap.js')
 ]);
 
 const failures = [];
@@ -48,6 +52,10 @@ for (const token of ['Title', 'Meta', 'link[rel="canonical"]', 'og:title', 'og:i
   expect(seoService.includes(token), `SEO dinámico debe conservar ${token}.`);
 }
 expect(seoService.includes('noindex,nofollow,noarchive'), 'SEO dinámico debe poder bloquear rutas privadas y entornos no publicados.');
+expect(seoService.includes("return host === 'varistorehn.vercel.app'"), 'El cliente solo debe habilitar indexación en el host productivo autorizado.');
+expect(seoUtilsSource.includes("return hostFromRequest(req) === PRODUCTION_HOST"), 'El SEO server-side debe fallar cerrado para cualquier host no autorizado.');
+expect(sitemapSource.includes("res.statusCode = 503"), 'El sitemap debe responder 503 si no puede construir el catálogo completo.');
+expect(sitemapSource.includes("Retry-After"), 'El sitemap incompleto debe pedir reintento y evitar cachear un 200 parcial.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.productos"), 'Catálogo debe tener metadata propia.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.ofertas"), 'Ofertas debe tener metadata propia.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.categorias"), 'Categorías debe tener metadata propia.');
@@ -100,11 +108,15 @@ function responseMock() {
 }
 
 const originalFetch = globalThis.fetch;
+let forceSitemapFailure = false;
 globalThis.fetch = async input => {
   const url = String(input);
+  if (forceSitemapFailure && url.includes('/tienda/')) {
+    return new Response('{}', { status: 503, headers: { 'content-type': 'application/json' } });
+  }
   let payload;
   if (url.includes('/empresa-configuracion/publica')) {
-    payload = { success: true, data: { nombreComercial: 'VariStoreHN', eslogan: 'Compra en línea', logoUrl: '/assets/varistorehn-logo.png' } };
+    payload = { success: true, data: { nombreComercial: 'VariStoreHN', nombreVisibleSistema: 'Sistema Interno', eslogan: 'Compra en línea', logoUrl: '/assets/varistorehn-logo.png', moneda: 'USD' } };
   } else if (url.includes('/tienda/productos/producto-seo-11')) {
     payload = {
       success: true,
@@ -144,7 +156,13 @@ try {
   expect(seoRes.body.includes('property="og:image" content="https://cdn.example.com/producto-seo-11.jpg"'), 'Open Graph debe exponer la imagen real del producto.');
   expect(seoRes.body.includes('rel="canonical" href="https://varistorehn.vercel.app/varistorehn/producto/producto-seo-11"'), 'HTML SEO debe usar canonical por slug.');
   expect(seoRes.body.includes('"@type":"Product"'), 'HTML SEO de producto debe incluir Product JSON-LD.');
+  expect(seoRes.body.includes('"priceCurrency":"USD"'), 'JSON-LD server-side debe respetar la moneda pública configurada.');
   expect(seoRes.header('x-robots-tag').startsWith('index,follow'), 'Producción debe permitir indexación del producto.');
+
+  const customHostRes = responseMock();
+  await seoHandler({ headers: { host: 'staging.example.com' }, query: { kind: 'product', slug: 'producto-seo-11' } }, customHostRes);
+  expect(customHostRes.header('x-robots-tag').startsWith('noindex'), 'Un dominio custom no autorizado debe permanecer noindex.');
+  expect(customHostRes.body.includes('https://varistorehn.vercel.app/varistorehn/producto/producto-seo-11'), 'Un host no autorizado nunca debe convertirse en canonical productivo.');
 
   const robotsProd = responseMock();
   await robotsHandler({ headers: { host: 'varistorehn.vercel.app' }, query: {} }, robotsProd);
@@ -156,11 +174,23 @@ try {
   await robotsHandler({ headers: { host: 'variapp-desarrollo-preview.vercel.app' }, query: {} }, robotsPreview);
   expect(robotsPreview.body.trim() === 'User-agent: *\nDisallow: /', 'Preview/desarrollo debe bloquear toda indexación.');
 
+  const robotsCustom = responseMock();
+  await robotsHandler({ headers: { host: 'staging.example.com' }, query: {} }, robotsCustom);
+  expect(robotsCustom.body.trim() === 'User-agent: *\nDisallow: /', 'Hosts custom no autorizados también deben bloquear toda indexación.');
+
   const sitemapRes = responseMock();
   await sitemapHandler({ headers: { host: 'varistorehn.vercel.app' }, query: {} }, sitemapRes);
   expect(sitemapRes.body.includes('/varistorehn/producto/producto-seo-11'), 'Sitemap debe descubrir productos por slug.');
   expect(sitemapRes.body.includes('/varistorehn/categoria/tecnologia-11'), 'Sitemap debe descubrir categorías por slug.');
   expect(!sitemapRes.body.includes('/dashboard') && !sitemapRes.body.includes('/checkout'), 'Sitemap no debe incluir rutas privadas/transaccionales.');
+
+  forceSitemapFailure = true;
+  const sitemapFailure = responseMock();
+  await sitemapHandler({ headers: { host: 'varistorehn.vercel.app' }, query: {} }, sitemapFailure);
+  expect(sitemapFailure.statusCode === 503, 'Un catálogo incompleto debe producir sitemap 503, no un 200 parcial cacheable.');
+  expect(sitemapFailure.header('cache-control') === 'no-store', 'El sitemap fallido no debe cachearse.');
+  expect(sitemapFailure.header('retry-after') === '300', 'El sitemap fallido debe indicar reintento.');
+  forceSitemapFailure = false;
 } finally {
   globalThis.fetch = originalFetch;
 }
