@@ -16,14 +16,14 @@
 
 <header class="store-header">
   <div class="container header-main">
-    <a class="brand" [routerLink]="enlaces.inicio" [attr.aria-label]="identidad.nombreSistema() + ', inicio'">
+    <a class="brand" [routerLink]="enlaces.inicio" [attr.aria-label]="(identidad.config().nombreComercial || 'VariStorehn') + ', inicio'">
       @if (mostrarLogo()) {
         <img [src]="identidad.logoUrl()" alt="" width="46" height="46" (error)="reportarErrorLogo(identidad.logoUrl())">
       } @else {
-        <span class="brand-mark" aria-hidden="true">{{ identidad.nombreSistema().charAt(0) }}</span>
+        <span class="brand-mark" aria-hidden="true">{{ (identidad.config().nombreComercial || 'VariStorehn').charAt(0) }}</span>
       }
       <span class="brand-copy">
-        <strong>{{ identidad.nombreSistema() }}</strong>
+        <strong>{{ (identidad.config().nombreComercial || 'VariStorehn') }}</strong>
         <small>{{ identidad.config().eslogan || 'Tu tienda en línea' }}</small>
       </span>
     </a>
@@ -94,7 +94,7 @@
     <header>
       <div>
         <small>NAVEGACIÓN</small>
-        <h2 id="menu-movil-title">{{ identidad.nombreSistema() }}</h2>
+        <h2 id="menu-movil-title">{{ (identidad.config().nombreComercial || 'VariStorehn') }}</h2>
       </div>
       <button type="button" class="mobile-close" aria-label="Cerrar navegación" (click)="cerrarMenuMovil(true)">
         <app-store-icon nombre="cerrar" />
