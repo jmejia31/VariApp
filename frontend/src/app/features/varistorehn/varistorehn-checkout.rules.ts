@@ -31,14 +31,60 @@ export function mensajeWhatsappCheckout(
   total: number
 ): string {
   const formato = new Intl.NumberFormat('es-HN', { style: 'currency', currency: moneda || 'HNL' });
-  const detalle = lineas.map(linea => {
-    const variante = linea.modelo ? ` — ${linea.modelo}` : '';
-    const sku = linea.sku ? ` [${linea.sku}]` : '';
-    return `• ${linea.unidades} × ${linea.nombre}${variante}${sku}: ${formato.format(linea.total)}`;
-  }).join('\n');
-  const contacto = comprador.telefono ? `\nTeléfono: ${comprador.telefono}` : '';
-  const correo = comprador.correo ? `\nCorreo: ${comprador.correo}` : '';
-  const notas = comprador.notas ? `\nNotas: ${comprador.notas}` : '';
+  const marca = limpiarTextoWhatsapp(comercio || 'VariStoreHN');
+  const nombreCliente = limpiarTextoWhatsapp(comprador.nombre);
+  const referenciaLimpia = limpiarTextoWhatsapp(referencia);
+  const bloquesProductos = lineas.map((linea, indice) => {
+    const nombre = limpiarTextoWhatsapp(linea.nombre);
+    const modelo = linea.modelo ? `\nModelo: ${limpiarTextoWhatsapp(linea.modelo)}` : '';
+    const sku = linea.sku ? `\nSKU: ${limpiarTextoWhatsapp(linea.sku)}` : '';
+    return [
+      `📦 *Producto ${indice + 1}*`,
+      `*${nombre}*${modelo}${sku}`,
+      `Cantidad: ${linea.unidades}`,
+      `Precio unitario: ${formato.format(linea.precioUnitario)}`,
+      `Subtotal: *${formato.format(linea.total)}*`
+    ].join('\n');
+  }).join('\n\n');
 
-  return `Hola ${comercio || 'VariStoreHN'}, quiero solicitar esta compra.\nReferencia: ${referencia}\nCliente: ${comprador.nombre}${contacto}${correo}\n\n${detalle}\n\nTotal validado: ${formato.format(total)}${notas}`;
+  const contacto = comprador.telefono
+    ? `📱 *Teléfono:* ${limpiarTextoWhatsapp(comprador.telefono)}`
+    : '';
+  const correo = comprador.correo
+    ? `✉️ *Correo:* ${limpiarTextoWhatsapp(comprador.correo)}`
+    : '';
+  const notas = comprador.notas
+    ? `\n\n📝 *Nota del cliente*\n${limpiarTextoWhatsapp(comprador.notas)}`
+    : '';
+
+  return [
+    `🛍️ *Nueva solicitud de compra — ${marca}*`,
+    '',
+    `🔖 *Referencia:* ${referenciaLimpia}`,
+    '',
+    '👤 *Cliente*',
+    nombreCliente,
+    contacto,
+    correo,
+    '',
+    '────────────',
+    '*Detalle del pedido*',
+    '',
+    bloquesProductos,
+    '',
+    '────────────',
+    `💰 *TOTAL: ${formato.format(total)}*`,
+    notas,
+    '',
+    `✅ Solicitud generada desde *${marca}*.`,
+    'La tienda confirmará disponibilidad, entrega y condiciones antes de finalizar la compra.'
+  ].filter(linea => linea !== '').join('\n');
+}
+
+function limpiarTextoWhatsapp(valor: string): string {
+  return valor
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/[*_~`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
