@@ -246,7 +246,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(mensaje).toContain('📦 *Producto 1*');
     expect(mensaje).toContain('*UAT Modelo General*');
     expect(mensaje).toContain('SKU: UAT-GENERAL');
-    expect(mensaje).toContain('🔗 Ver producto: http://localhost:4200/varistorehn/producto/uat-modelo-general-509');
+    expect(mensaje).toMatch(/🔗 Ver producto: http:\/\/(?:localhost|127\.0\.0\.1):4200\/varistorehn\/producto\/uat-modelo-general-509/);
     expect(mensaje).toContain('Cantidad: 1');
     expect(mensaje).toContain('Precio unitario:');
     expect(mensaje).toContain('💰 *TOTAL:');
@@ -320,7 +320,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(destino.origin).toBe('https://wa.me');
     expect(destino.pathname).toBe('/50498765432');
     const mensaje = destino.searchParams.get('text') || '';
-    expect(mensaje).toContain(`Referencia: ${referenciaValidada}`);
+    expect(mensaje).toContain(`🔖 *Referencia:* ${referenciaValidada}`);
     expect(mensaje).toContain('Producto Checkout Real');
     expect(mensaje).toContain('🛍️ *Nueva solicitud de compra — VariStore Checkout Audit*');
     expect(mensaje).toContain('👤 *Cliente*');
@@ -328,7 +328,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(mensaje).toContain('📱 *Teléfono:* 50499991111');
     expect(mensaje).toContain('✉️ *Correo:* cliente@example.com');
     expect(mensaje).toContain('SKU: SKU-501-A');
-    expect(mensaje).toContain('🔗 Ver producto: http://localhost:4200/varistorehn/producto/producto-checkout-real-501');
+    expect(mensaje).toMatch(/🔗 Ver producto: http:\/\/(?:localhost|127\.0\.0\.1):4200\/varistorehn\/producto\/producto-checkout-real-501/);
     expect(mensaje).toContain('Cantidad: 2');
     expect(mensaje).toContain('Precio unitario:');
     expect(mensaje).toContain('Subtotal:');
