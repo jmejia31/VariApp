@@ -3,6 +3,91 @@
   "ignoreCommand": "node scripts/vercel-ignore-build.mjs",
   "rewrites": [
     {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=home"
+    },
+    {
+      "source": "/varistorehn",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=home"
+    },
+    {
+      "source": "/varistorehn/productos",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=products"
+    },
+    {
+      "source": "/varistorehn/ofertas",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=offers"
+    },
+    {
+      "source": "/varistorehn/categorias",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=categories"
+    },
+    {
+      "source": "/varistorehn/categoria/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=category&slug=:slug"
+    },
+    {
+      "source": "/varistorehn/producto/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
+        }
+      ],
+      "destination": "/api/seo?kind=product&slug=:slug"
+    },
+    {
       "source": "/api/:path*",
       "has": [
         {
