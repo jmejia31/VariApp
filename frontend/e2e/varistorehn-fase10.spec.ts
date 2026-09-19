@@ -164,6 +164,23 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
+  test('modo escritorio móvil a 980px usa header y filtros compactos', async ({ page }) => {
+    await preparar(page);
+    await page.setViewportSize({ width: 980, height: 900 });
+    await page.goto('/varistorehn/productos');
+
+    await expect(page.locator('.mobile-menu-trigger')).toBeVisible();
+    await expect(page.locator('.store-nav')).not.toBeVisible();
+    await expect(page.locator('.mobile-filters')).toBeVisible();
+    await expect(page.locator('.filters')).not.toBeVisible();
+
+    await page.locator('.mobile-filters').click();
+    await expect(page.locator('.filters')).toBeVisible();
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+
   test('catálogo mantiene precio y CTAs separados con zoom equivalente y móvil', async ({ page }) => {
     await preparar(page);
 
