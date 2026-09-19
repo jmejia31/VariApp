@@ -235,6 +235,66 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     }
   });
 
+  test('zoom de escritorio 80 a 200 por ciento no superpone header precio ni CTAs', async ({ page }) => {
+    await preparar(page);
+
+    const desktopFisico = 1440;
+    const niveles = [0.8, 1, 1.25, 1.5, 2];
+
+    for (const zoom of niveles) {
+      const width = Math.round(desktopFisico / zoom);
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto('/varistorehn/productos');
+      await expect(page.locator('.product-card').first()).toBeVisible();
+
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, `overflow con zoom ${Math.round(zoom * 100)}% (${width}px CSS)`).toBeLessThanOrEqual(0);
+
+      const card = page.locator('.product-card').first();
+      const price = card.locator('.price-copy');
+      const actions = card.locator('.product-actions');
+      await expect(price).toBeVisible();
+      await expect(actions).toBeVisible();
+
+      const geometry = await card.evaluate(element => {
+        const cardRect = element.getBoundingClientRect();
+        const priceRect = element.querySelector('.price-copy')?.getBoundingClientRect();
+        const actionsRect = element.querySelector('.product-actions')?.getBoundingClientRect();
+        const controls = [...element.querySelectorAll('.product-actions .button')].map(node => node.getBoundingClientRect());
+        return {
+          card: { left: cardRect.left, right: cardRect.right, top: cardRect.top, bottom: cardRect.bottom },
+          price: priceRect ? { left: priceRect.left, right: priceRect.right, top: priceRect.top, bottom: priceRect.bottom } : null,
+          actions: actionsRect ? { left: actionsRect.left, right: actionsRect.right, top: actionsRect.top, bottom: actionsRect.bottom } : null,
+          controls: controls.map(rect => ({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }))
+        };
+      });
+
+      expect(geometry.price).not.toBeNull();
+      expect(geometry.actions).not.toBeNull();
+      expect(geometry.price!.bottom, `precio invade CTAs con zoom ${Math.round(zoom * 100)}%`).toBeLessThanOrEqual(geometry.actions!.top + 1);
+      expect(geometry.price!.left).toBeGreaterThanOrEqual(geometry.card.left - 1);
+      expect(geometry.price!.right).toBeLessThanOrEqual(geometry.card.right + 1);
+
+      for (const control of geometry.controls) {
+        expect(control.left, `CTA sale por izquierda con zoom ${Math.round(zoom * 100)}%`).toBeGreaterThanOrEqual(geometry.card.left - 1);
+        expect(control.right, `CTA sale por derecha con zoom ${Math.round(zoom * 100)}%`).toBeLessThanOrEqual(geometry.card.right + 1);
+      }
+
+      for (let i = 0; i < geometry.controls.length; i++) {
+        for (let j = i + 1; j < geometry.controls.length; j++) {
+          const a = geometry.controls[i];
+          const b = geometry.controls[j];
+          const overlapX = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+          const overlapY = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+          expect(overlapX > 1 && overlapY > 1, `CTAs superpuestos con zoom ${Math.round(zoom * 100)}%`).toBe(false);
+        }
+      }
+
+      const headerOverflow = await page.locator('.header-main').evaluate(element => element.scrollWidth - element.clientWidth);
+      expect(headerOverflow, `header desborda con zoom ${Math.round(zoom * 100)}%`).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('checkout móvil asocia errores a campos y conserva navegación por teclado', async ({ page }) => {
     await preparar(page);
     await page.setViewportSize({ width: 390, height: 844 });
