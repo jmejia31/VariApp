@@ -106,7 +106,7 @@ export class AppComponent implements OnDestroy {
   ) {
     this.themeApplier.aplicarTemaGuardado();
     this.identidad.cargar().subscribe(() => {
-      this.seo.aplicarRuta(this.router.url, this.identidad.nombreSistema());
+      this.seo.aplicarRuta(this.router.url, this.identidad.config().nombreComercial || this.identidad.nombreSistema());
     });
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
@@ -114,7 +114,7 @@ export class AppComponent implements OnDestroy {
     }
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        this.seo.aplicarRuta(event.urlAfterRedirects, this.identidad.nombreSistema());
+        this.seo.aplicarRuta(event.urlAfterRedirects, this.identidad.config().nombreComercial || this.identidad.nombreSistema());
         this.cerrarSidebar();
         this.gestionarFocoTrasNavegacion();
       }
