@@ -64,6 +64,8 @@ ok("responses arrive out of order" in empresa_spec and "Respuesta Obsoleta" in e
 
 # 30/31 - every lazy route must declare an authentication/permission intent,
 # except the intentionally public storefront/login allowlist. For permisoGuard,
+# Customer account shell is public for optional login/registration; customer PII and
+# order data remain server-protected by the separate X-VaristoreHN-Session boundary.
 # modulo+accion are mandatory. The small balanced-brace extractor handles
 # multiline route objects without trying to execute Angular source.
 public_paths = {"", "login", "varistorehn", "varistorehn/productos", "varistorehn/ofertas", "varistorehn/producto/:slug", "varistorehn/categorias", "varistorehn/categoria/:slug", "varistorehn/carrito", "varistorehn/checkout", "varistorehn/cuenta", "varistorehn/pedido/:id"}
