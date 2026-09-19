@@ -146,6 +146,16 @@ test.describe('VariStoreHN Fase 10 — responsive, UX y accesibilidad', () => {
     await stage.dispatchEvent('pointerup', { pointerId: 1, pointerType: 'touch', clientX: 170, clientY: 224, isPrimary: true });
     await expect(contador).toHaveText('2 / 2');
 
+    for (const [width, height] of [[320, 700], [430, 932]] as const) {
+      await page.setViewportSize({ width, height });
+      const rect = await dialogo.boundingBox();
+      expect(rect, `lightbox sin geometría a ${width}px`).not.toBeNull();
+      expect(rect!.x).toBeGreaterThanOrEqual(0);
+      expect(rect!.y).toBeGreaterThanOrEqual(0);
+      expect(rect!.x + rect!.width).toBeLessThanOrEqual(width + 1);
+      expect(rect!.y + rect!.height).toBeLessThanOrEqual(height + 1);
+    }
+
     await dialogo.getByRole('button', { name: 'Cerrar imagen ampliada' }).click();
     await expect(dialogo).not.toBeVisible();
     await expect(principal).toBeFocused();
