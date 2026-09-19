@@ -150,6 +150,15 @@
             <strong>{{ textoDisponibilidad() }}</strong>
           </div>
 
+          <button
+            type="button"
+            class="text-button favorite-toggle"
+            [disabled]="favoritoProcesando()"
+            [attr.aria-pressed]="favorito()"
+            (click)="alternarFavorito()">
+            {{ favoritoProcesando() ? 'Actualizando…' : favorito() ? 'Quitar de favoritos' : cuentaCliente.autenticado() ? 'Guardar en favoritos' : 'Inicia sesión para guardar' }}
+          </button>
+
           <div class="price-block" aria-label="Precio del producto">
             @if (tienePromocion()) {
               <span class="previous-price">{{ moneda(precioNormal()) }}</span>
