@@ -18,6 +18,9 @@
 `REPOSITORY=solqaryn/VariApp`  
 `PROJECT_SCOPE_LOCK=STRICT`
 
+- El validador fue endurecido para rechazar cualquier `PROJECT_ID` distinto de `VARIAPP`, cualquier `REPOSITORY` distinto de `solqaryn/VariApp`, URIs `skills://` en gobierno del proyecto y referencias GitHub a repositorios ajenos en la superficie canónica.
+- La política declara explícitamente que cada chat/sesión nueva nace con el scope lock activo y no debe descubrir skills específicas de otros proyectos.
+
 MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno, aislamiento de contexto y controles de repositorio; no modifica arquitectura funcional, datos, tenancy ni deployment de la aplicación.
 
 ## 2026-09-23 — Migración operativa GitHub a organización solqaryn
