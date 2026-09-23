@@ -1,0 +1,22 @@
+name: Project Scope Lock
+
+on:
+  push:
+    branches:
+      - Desarrollo
+      - main
+  pull_request:
+    branches:
+      - Desarrollo
+      - main
+
+jobs:
+  verify-project-scope:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify strict VariApp project scope
+        run: node scripts/verify-project-scope.mjs
