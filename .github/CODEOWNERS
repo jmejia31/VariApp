@@ -1,3 +1,9 @@
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+# Ningun CODEOWNER ni regla puede importar gobierno o contexto de otro proyecto.
+
 # Ownership operativo migrado a la organización solqaryn.
 # No se declara una cuenta personal como CODEOWNER.
 # Las aprobaciones y permisos deben gestionarse mediante roles/equipos de la organización
