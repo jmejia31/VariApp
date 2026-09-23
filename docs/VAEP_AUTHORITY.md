@@ -4,7 +4,7 @@ Este archivo es la única autoridad operativa de VAEP para VariApp.
 
 ```text
 PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
+REPOSITORY=solqaryn/VariApp
 BRANCH=Desarrollo
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
