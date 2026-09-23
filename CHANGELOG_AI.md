@@ -1,3 +1,17 @@
+## 2026-09-23 — Migración operativa GitHub a organización solqaryn
+
+**Objetivo:** cerrar la dependencia operativa del repositorio respecto a la cuenta personal `jmejia31`.
+
+- Propietario canónico del repositorio: `solqaryn/VariApp`.
+- Rama de trabajo: `Desarrollo`.
+- Se actualizaron gates, hooks, scripts de sesión, documentación canónica, autoridad VAEP y runbooks activos para usar `solqaryn/VariApp`.
+- `.github/CODEOWNERS` dejó de exigir a `@jmejia31` como aprobador obligatorio.
+- La evidencia histórica conserva referencias antiguas cuando corresponden a hechos pasados; no constituye autoridad operativa.
+- La instalación GitHub de la organización `solqaryn` existe para este repositorio.
+- La cuenta autenticada actual `jmejia31` todavía conserva permiso `admin`; esto es acceso personal residual y debe retirarse desde la configuración de la organización cuando exista al menos otro owner/admin organizacional confirmado.
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de ownership/gobernanza GitHub, sin modificación de arquitectura de aplicación.
+
 ## 2026-09-15 — Cierre visual SMTP — materialización de capturas
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
