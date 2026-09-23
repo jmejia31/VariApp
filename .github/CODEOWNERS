@@ -1,8 +1,4 @@
-# Javier Mejía conserva la aprobación final de todo el repositorio.
-* @jmejia31
-
-# Áreas críticas
-/.github/ @jmejia31
-/backend/src/Infrastructure/Migrations/ @jmejia31
-/backend/src/API/appsettings.json @jmejia31
-/frontend/src/environments/ @jmejia31
+# Ownership operativo migrado a la organización solqaryn.
+# No se declara una cuenta personal como CODEOWNER.
+# Las aprobaciones y permisos deben gestionarse mediante roles/equipos de la organización
+# y reglas de rama/rulesets, evitando dependencia de @jmejia31.
