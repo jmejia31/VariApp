@@ -14,7 +14,7 @@ Resultado esperado:
 
 ```text
 PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
+REPOSITORY=solqaryn/VariApp
 BRANCH=Desarrollo
 ```
 
