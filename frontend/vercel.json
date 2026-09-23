@@ -99,7 +99,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://solqaryn-api-dev.onrender.com/:path*"
+      "destination": "https://solqaryn-api-desarrollo.onrender.com/:path*"
     },
     {
       "source": "/(.*)",
