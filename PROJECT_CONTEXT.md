@@ -5,7 +5,7 @@
 ## 1. Estado canónico
 
 - PROJECT_ID: VARIAPP
-- Repositorio: `jmejia31/VariApp`
+- Repositorio: `solqaryn/VariApp`
 - Rama de trabajo: `Desarrollo`
 - `main`: congelada; no tocar sin autorización expresa.
 - PR oficial `Desarrollo -> main`: #2, abierto y Draft; no merge automático.
