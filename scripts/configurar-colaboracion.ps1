@@ -1,3 +1,9 @@
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+# Prohibido usar skills/documentacion/contexto de otros proyectos sin autorizacion explicita o allowlist ACTIVE.
+
 $ErrorActionPreference = "Stop"
 
 $ExpectedRepo = "solqaryn/VariApp"
