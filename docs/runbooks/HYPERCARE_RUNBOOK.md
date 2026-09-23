@@ -117,3 +117,16 @@ Recovery de servicios DEV se rige por `docs/ROLLBACK_RUNBOOK.md`. Después de re
 ## Evidencia mínima
 
 HEAD o equivalencia, deployment ids/SHA, archivo TSV de 15 muestras sanitizado, resultado de readiness final, revisión de logs autorizada, tiempos de recovery si aplica, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Los archivos temporales `.vaep-hypercare/` son evidencia local de ejecución y no deben versionarse si contienen respuestas operativas sin revisar.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+```
+
+Este runbook solo puede ejecutarse con contexto de VariApp. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed.
+
