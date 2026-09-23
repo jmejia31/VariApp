@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Repository = "jmejia31/VariApp",
+    [string]$Repository = "solqaryn/VariApp",
     [string]$Branch = "Desarrollo",
     [ValidateSet("ALL", "J1", "J2", "J3", "J4", "J5", "J6")]
     [string]$Worker = "ALL"
@@ -23,7 +23,7 @@ function Test-JulesCredential([string]$WorkerId, [string]$PlainKey) {
     $headers = @{ "x-goog-api-key" = $PlainKey }
     $sources = Invoke-RestMethod -Uri "https://jules.googleapis.com/v1alpha/sources?pageSize=100" -Headers $headers -Method Get
     $source = @($sources.sources) | Where-Object {
-        $_.githubRepo.owner -eq "jmejia31" -and $_.githubRepo.repo -eq "VariApp"
+        $_.githubRepo.owner -eq "solqaryn" -and $_.githubRepo.repo -eq "VariApp"
     } | Select-Object -First 1
     if (-not $source) {
         throw "$WorkerId: la credencial es valida para la API, pero VariApp no aparece como source de Jules."
@@ -36,7 +36,7 @@ function Test-JulesCredential([string]$WorkerId, [string]$PlainKey) {
 }
 
 Write-Step "Validando identidad VariApp"
-if ($Repository -ne "jmejia31/VariApp") {
+if ($Repository -ne "solqaryn/VariApp") {
     throw "Repositorio no autorizado para este script: $Repository"
 }
 if ($Branch -ne "Desarrollo") {
