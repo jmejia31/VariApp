@@ -22,11 +22,11 @@ Ejecutar desde la raíz del repositorio:
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/VariApp(\.git)?$'
 git status --short
 ```
 
-STOP inmediato si la rama no es `Desarrollo`, el remoto no es `jmejia31/VariApp`, existe un proceso de migración concurrente sobre el mismo scope o la cadena de conexión apunta a Producción.
+STOP inmediato si la rama no es `Desarrollo`, el remoto no es `solqaryn/VariApp`, existe un proceso de migración concurrente sobre el mismo scope o la cadena de conexión apunta a Producción.
 
 ## Gate 1 — compilación y pruebas antes de datos
 
