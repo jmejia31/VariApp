@@ -147,3 +147,18 @@ Detener y no promover si ocurre cualquiera de estos eventos:
 ## Evidencia mínima para LISTO
 
 Registrar: HEAD exacto o equivalencia demostrada; versión MySQL; lista de migraciones; tiempo de primera y segunda pasada; conteo de `__EFMigrationsHistory`; pruebas backend; decisión REVIEW_FIRST; P0=0/P1=0; receipt y readback. Ninguna salida debe contener contraseñas, tokens o connection strings completas.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de VariApp. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas pertenecientes a otro proyecto salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`.
+
+Las capacidades genéricas de plataforma pueden utilizarse únicamente como herramienta transversal cuando sean necesarias; no aportan autoridad de proyecto ni habilitan contexto cruzado.
+
