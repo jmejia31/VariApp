@@ -1,11 +1,11 @@
 # PLAN DE EJECUCIÓN AUTÓNOMA — CONSUMIDOR DEL MAESTRO
 
-> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `jmejia31/VariApp`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
+> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `solqaryn/VariApp`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
 
 ## Identidad
 
 - PROJECT_ID: `VARIAPP`
-- Repositorio: `jmejia31/VariApp`
+- Repositorio: `solqaryn/VariApp`
 - Rama: `Desarrollo`
 - PR #2: OPEN + DRAFT
 - AUTOMATION_AUTHORITY: `MASTER`
