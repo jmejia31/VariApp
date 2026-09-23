@@ -76,6 +76,29 @@ for (const { rel, content } of governanceFiles) {
   for (const pattern of knownForeignProjectPatterns) {
     if (pattern.test(content)) errors.push(`${rel} contains forbidden foreign-project reference: ${pattern}`);
   }
+
+  for (const match of content.matchAll(/PROJECT_ID\s*[:=]\s*([A-Za-z0-9_-]+)/g)) {
+    if (match[1].toUpperCase() !== 'VARIAPP') {
+      errors.push(`${rel} declares foreign PROJECT_ID=${match[1]}`);
+    }
+  }
+
+  for (const match of content.matchAll(/REPOSITORY\s*[:=]\s*[`"']?([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)/g)) {
+    if (match[1] !== expectedRepo) {
+      errors.push(`${rel} declares foreign REPOSITORY=${match[1]}`);
+    }
+  }
+
+  if (/skills:\/\//i.test(content)) {
+    errors.push(`${rel} contains a skills:// URI; project governance must not depend on external skills`);
+  }
+
+  for (const match of content.matchAll(/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)/gi)) {
+    const referencedRepo = `${match[1]}/${match[2].replace(/\.git$/, '')}`;
+    if (referencedRepo !== expectedRepo) {
+      errors.push(`${rel} references foreign GitHub repository ${referencedRepo}`);
+    }
+  }
 }
 
 if (errors.length) {
