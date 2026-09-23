@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+
 EXPECTED_REPO="solqaryn/VariApp"
 EXPECTED_BRANCH="Desarrollo"
 
@@ -7,6 +12,9 @@ fail() {
   echo "[VariApp][pre-commit] $1" >&2
   exit 1
 }
+
+command -v node >/dev/null 2>&1 || fail "Node.js es obligatorio para ejecutar el PROJECT_SCOPE_LOCK."
+node scripts/verify-project-scope.mjs >/dev/null 2>&1 || fail "PROJECT_SCOPE_LOCK invalido. No se permite continuar."
 
 branch="$(git branch --show-current 2>/dev/null)"
 [ "$branch" = "$EXPECTED_BRANCH" ] || fail "Rama '$branch' no autorizada. Debes trabajar en '$EXPECTED_BRANCH'."
