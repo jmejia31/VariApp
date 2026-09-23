@@ -18,7 +18,17 @@ Está prohibido consultar, listar, leer, invocar, importar, resumir o utilizar c
 
 La mera disponibilidad técnica de una fuente no constituye autorización.
 
-## 2. Fuentes permitidas
+## 2. Chats, sesiones y descubrimiento de skills
+
+En cada chat o sesión nueva dentro de este proyecto, el aislamiento se considera activo desde el primer turno relacionado con VariApp.
+
+Antes de consultar catálogos o seleccionar una skill específica de proyecto, se debe usar la skill propia de VariApp cuando esté disponible y limitar el descubrimiento al alcance de este proyecto. No se debe listar, buscar ni abrir una skill específica de otro proyecto para decidir cómo trabajar VariApp.
+
+Si el entorno presenta o carga automáticamente una skill de otro proyecto, su contenido no puede utilizarse como autoridad ni contexto de VariApp. Se debe mantener el scope local y continuar con las reglas de este repositorio.
+
+Las skills genéricas de plataforma exigidas por el entorno o necesarias para una capacidad transversal no se consideran skills de otro proyecto, pero tampoco pueden importar contexto de otro proyecto.
+
+## 3. Fuentes permitidas
 
 Sin autorización adicional pueden utilizarse únicamente:
 
@@ -30,7 +40,7 @@ Sin autorización adicional pueden utilizarse únicamente:
 
 Una capacidad genérica de plataforma no se convierte en autoridad de VariApp y no autoriza contexto cruzado.
 
-## 3. Fuentes prohibidas por defecto
+## 4. Fuentes prohibidas por defecto
 
 `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`.
 
@@ -45,7 +55,7 @@ No se puede salir del alcance de VariApp para consultar:
 
 Si una fuente parece relacionada pero no está inequívocamente identificada como VariApp, se considera externa y queda bloqueada.
 
-## 4. Excepciones autorizadas
+## 5. Excepciones autorizadas
 
 Solo existen dos vías válidas:
 
@@ -58,7 +68,7 @@ Para que un permiso anterior sea reutilizable debe estar registrado en la allowl
 
 Una excepción nunca habilita automáticamente fuentes relacionadas.
 
-## 5. Fail-closed
+## 6. Fail-closed
 
 Ante duda:
 
@@ -69,7 +79,7 @@ Ante duda:
 
 Si contexto de otro proyecto aparece accidentalmente en la sesión, no puede usarse para decidir, editar, recomendar, validar ni certificar VariApp.
 
-## 6. Skills
+## 7. Skills
 
 La skill de gobierno de este proyecto es:
 
@@ -83,7 +93,7 @@ Toda skill versionada bajo `.agents/skills/` debe declarar:
 
 No se permite que una skill de VariApp encadene, importe o delegue gobierno a una skill específica de otro proyecto.
 
-## 7. Gate obligatorio
+## 8. Gate obligatorio
 
 Antes de editar o publicar:
 
@@ -93,7 +103,7 @@ node scripts/verify-project-scope.mjs
 
 El gate debe fallar si los archivos canónicos pierden el marcador de aislamiento, si una skill del repositorio no declara el scope correcto o si se introduce una referencia explícita prohibida en la superficie de gobierno.
 
-## 8. Precedencia interna
+## 9. Precedencia interna
 
 Dentro del proyecto, esta política debe estar referenciada por `AGENTS.md`, `PROJECT_CONTEXT.md`, `docs/VAEP_AUTHORITY.md` y los demás archivos operativos.
 
