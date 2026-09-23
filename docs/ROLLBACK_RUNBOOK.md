@@ -109,3 +109,18 @@ Para cada transición registrar `start_utc`, `healthy_utc` y duración en segund
 ## Condición de cierre
 
 Solo `LISTO` cuando la secuencia completa fue materialmente ejecutada en un scope autorizado, REVIEW_FIRST termina P0=0/P1=0, gates causales pasan, CURRENT queda restaurado y healthy, existe exact-head o equivalencia demostrada, receipt persistido y write/readback del control-plane.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de VariApp. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas pertenecientes a otro proyecto salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`.
+
+Las capacidades genéricas de plataforma pueden utilizarse únicamente como herramienta transversal cuando sean necesarias; no aportan autoridad de proyecto ni habilitan contexto cruzado.
+
