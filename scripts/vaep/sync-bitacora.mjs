@@ -7,7 +7,7 @@ function parseArgs(argv) { const result = {}; for (let i = 0; i < argv.length; i
 function validate(payload) {
   const errors = REQUIRED.filter((field) => !(field in payload));
   if (payload.projectId !== 'VARIAPP') errors.push('projectId must be VARIAPP');
-  if (payload.repository !== 'jmejia31/VariApp') errors.push('repository mismatch');
+  if (payload.repository !== 'solqaryn/VariApp') errors.push('repository mismatch');
   if (payload.branch !== 'Desarrollo') errors.push('branch must be Desarrollo');
   if (!/^[0-9a-f]{40}$/.test(payload.commitSha ?? '')) errors.push('commitSha must be full SHA');
   if (!Number.isInteger(payload.p0) || !Number.isInteger(payload.p1) || payload.p0 < 0 || payload.p1 < 0) errors.push('p0/p1 must be non-negative integers');
