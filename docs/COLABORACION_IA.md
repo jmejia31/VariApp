@@ -8,7 +8,7 @@ Coordinar a Javier Mej√≠a, Codex, ChatGPT, Chat B (ChatGPT Business), Jules J1‚Ä
 
 ```text
 PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
+REPOSITORY=solqaryn/VariApp
 BRANCH=Desarrollo
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
