@@ -1,3 +1,25 @@
+## 2026-09-23 — Blindaje estricto de aislamiento de proyecto y skill propia de VariApp
+
+**Objetivo:** impedir que chats, agentes, automatizaciones o scripts de VariApp consulten o utilicen skills, documentación, repositorios, chats, memorias o gobierno de otros proyectos sin autorización explícita del propietario.
+
+- Se creó la política canónica `docs/PROJECT_SCOPE_LOCK.md`.
+- Se creó `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` con estado inicial sin excepciones activas.
+- Se creó la skill propia `.agents/skills/variapp-project-governance/SKILL.md`, exclusiva de `solqaryn/VariApp`.
+- Se agregó `scripts/verify-project-scope.mjs` como gate fail-closed.
+- Se agregó `.github/workflows/project-scope-lock.yml` para validar el aislamiento en push/PR.
+- Los 18 archivos operativos solicitados declaran `PROJECT_SCOPE_LOCK=STRICT` y `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`.
+- `.githooks/pre-commit` ejecuta el scope validator y bloquea el commit si falla.
+- `.githooks/post-commit` bloquea el auto-push cuando el scope validator falla.
+- Se verificó mediante lectura remota que los 18 archivos, la política, la allowlist y la skill contienen el lock y no contienen referencias conocidas al gobierno COHPUCP.
+- Las capacidades genéricas de plataforma no se consideran autoridad de proyecto y no habilitan contexto cruzado.
+- Un permiso externo persistente solo existe si queda versionado como `ACTIVE` en la allowlist; en caso contrario, el default es DENY.
+
+`PROJECT_ID=VARIAPP`  
+`REPOSITORY=solqaryn/VariApp`  
+`PROJECT_SCOPE_LOCK=STRICT`
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno, aislamiento de contexto y controles de repositorio; no modifica arquitectura funcional, datos, tenancy ni deployment de la aplicación.
+
 ## 2026-09-23 — Migración operativa GitHub a organización solqaryn
 
 **Objetivo:** cerrar la dependencia operativa del repositorio respecto a la cuenta personal `jmejia31`.
