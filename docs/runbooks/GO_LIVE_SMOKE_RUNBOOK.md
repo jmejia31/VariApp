@@ -154,3 +154,16 @@ Este runbook no hace rollback por sí solo. Ante fallo posterior a una mutación
 ## Evidencia mínima para LISTO
 
 HEAD/equivalencia, timestamps UTC, códigos HTTP, payload sanitizado de `/health/ready`, resultados build/test/lint, resultado del browser smoke público, deployment id/SHA, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Nunca guardar cookies, JWT, passwords, tokens ni valores de variables de entorno.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+```
+
+Este runbook solo puede ejecutarse con contexto de VariApp. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed.
+
