@@ -95,11 +95,11 @@
           "value": "varistorehn.vercel.app"
         }
       ],
-      "destination": "https://variapp-api.onrender.com/:path*"
+      "destination": "https://solqaryn-api-prod.onrender.com/:path*"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://variapp-api-desarrollo.onrender.com/:path*"
+      "destination": "https://solqaryn-api-dev.onrender.com/:path*"
     },
     {
       "source": "/(.*)",
