@@ -96,3 +96,18 @@ No repetir arquitectura completa; referenciar `PROJECT_CONTEXT.md`.
 ## 9. Mejora continua
 
 Las mejoras de bajo riesgo y directamente relacionadas pueden aplicarse. Las transversales se registran en `TASKS.md` para ejecución controlada. El objetivo es reducir latencia, tokens, trabajo repetido y errores sin sacrificar validación ni trazabilidad.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de VariApp. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas pertenecientes a otro proyecto salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`.
+
+Las capacidades genéricas de plataforma pueden utilizarse únicamente como herramienta transversal cuando sean necesarias; no aportan autoridad de proyecto ni habilitan contexto cruzado.
+
