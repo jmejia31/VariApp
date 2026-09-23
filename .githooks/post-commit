@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+
 EXPECTED_REPO="solqaryn/VariApp"
+if ! command -v node >/dev/null 2>&1 || ! node scripts/verify-project-scope.mjs >/dev/null 2>&1; then
+  echo "[VariApp] BLOQUEADO: PROJECT_SCOPE_LOCK invalido; no se realizara push automatico." >&2
+  exit 0
+fi
+
 branch="$(git branch --show-current 2>/dev/null)"
 
 if [ "$branch" != "Desarrollo" ]; then
