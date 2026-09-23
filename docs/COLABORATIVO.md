@@ -6,7 +6,7 @@ Este documento define el handoff entre Javier Mejía, Codex, AntiG/Antigravity y
 
 ```text
 PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
+REPOSITORY=solqaryn/VariApp
 BRANCH=Desarrollo
 ```
 
