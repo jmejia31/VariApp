@@ -31,7 +31,7 @@ Antes de mutar, leer HEAD, deployment/service actual, previous known good, lease
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/VariApp(\.git)?$'
 export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
 export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
 curl --fail-with-body --silent --show-error --max-time 30 "$BACKEND_URL/health/ready"
