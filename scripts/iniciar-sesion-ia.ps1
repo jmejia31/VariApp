@@ -4,13 +4,13 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ExpectedRepo = "jmejia31/VariApp"
+$ExpectedRepo = "solqaryn/VariApp"
 $ExpectedBranch = "Desarrollo"
 $ExpectedOrigins = @(
-    "https://github.com/jmejia31/VariApp",
-    "https://github.com/jmejia31/VariApp.git",
-    "git@github.com:jmejia31/VariApp.git",
-    "ssh://git@github.com/jmejia31/VariApp.git"
+    "https://github.com/solqaryn/VariApp",
+    "https://github.com/solqaryn/VariApp.git",
+    "git@github.com:solqaryn/VariApp.git",
+    "ssh://git@github.com/solqaryn/VariApp.git"
 )
 
 function Invoke-GitCapture {
