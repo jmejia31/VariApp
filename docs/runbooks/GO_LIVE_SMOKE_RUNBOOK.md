@@ -21,7 +21,7 @@ Este runbook no autoriza escribir datos productivos, usar el proyecto Vercel `va
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/VariApp(\.git)?$'
 export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
 export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
 test "$FRONTEND_URL" = "https://variapp-desarrollo.vercel.app"
