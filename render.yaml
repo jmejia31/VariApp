@@ -37,13 +37,13 @@ services:
       - key: Cloudinary__ApiSecret
         sync: false
       - key: Cloudinary__EnvironmentPrefix
-        value: varistorehn_dev
+        value: solqaryn_dev
       - key: Cors__AllowedOrigins__0
         value: https://solqaryn-dev.vercel.app
       - key: AppSettings__BackendPublicUrl
         value: https://solqaryn-api-dev.onrender.com
       - key: AppSettings__LogoPublicUrl
-        value: https://solqaryn-dev.vercel.app/assets/varistorehn-logo.png
+        value: ""
       - key: AppSettings__EnlacePublicoFacturaHorasValidez
         value: "24"
       - key: AppSettings__EnlacePublicoFacturaMaximoAccesos
@@ -69,7 +69,7 @@ services:
       - key: Smtp__CorreoRespuesta
         sync: false
       - key: Smtp__NombreRemitente
-        value: VariStorehn DEV
+        value: SOLQARYN DEV
       - key: Smtp__TimeoutSeconds
         value: "60"
       - key: Smtp__MaxAttempts
