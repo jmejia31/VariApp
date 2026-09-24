@@ -97,10 +97,9 @@ PROJECT_SCOPE_LOCK=STRICT
 EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
 PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
 EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
-PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de VariApp. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas pertenecientes a otro proyecto salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`.
 
-Las capacidades genéricas de plataforma pueden utilizarse únicamente como herramienta transversal cuando sean necesarias; no aportan autoridad de proyecto ni habilitan contexto cruzado.
 
