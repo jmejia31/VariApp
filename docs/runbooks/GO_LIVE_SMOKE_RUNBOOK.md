@@ -5,8 +5,8 @@
 Smoke operativo exclusivamente para `Desarrollo`. Los destinos canónicos permitidos son:
 
 - Frontend DEV: `https://solqaryn-desarrollo.vercel.app`
-- Backend DEV: `https://solqaryn-api-desarrollo.onrender.com`
-- Readiness backend: `https://solqaryn-api-desarrollo.onrender.com/health/ready`
+- Backend DEV: `https://solqaryn-api-dev.onrender.com`
+- Readiness backend: `https://solqaryn-api-dev.onrender.com/health/ready`
 
 Este runbook no autoriza escribir datos productivos, usar el proyecto Vercel `varistorehn`, usar el servicio Render `solqaryn-api`, tocar `main`, PR #2, DNS, certificados o secretos.
 
@@ -23,9 +23,9 @@ set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
 git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
 export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
-export BACKEND_URL="https://solqaryn-api-desarrollo.onrender.com"
+export BACKEND_URL="https://solqaryn-api-dev.onrender.com"
 test "$FRONTEND_URL" = "https://solqaryn-desarrollo.vercel.app"
-test "$BACKEND_URL" = "https://solqaryn-api-desarrollo.onrender.com"
+test "$BACKEND_URL" = "https://solqaryn-api-dev.onrender.com"
 ```
 
 STOP si cualquiera de los destinos corresponde a Producción o si la rama/remoto no coinciden. No sustituir estas constantes por un dominio recibido sin validación explícita.
