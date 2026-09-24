@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$EVENT_NAME" = workflow_dispatch
-          test "$REPOSITORY" = jmejia31/Solqaryn
+          test "$REPOSITORY" = solqaryn/Solqaryn
           test "$TARGET_REF" = refs/heads/Desarrollo
           test "$ACTOR" = "$OWNER"
           test "$TRIGGERING_ACTOR" = "$OWNER"
@@ -475,20 +475,20 @@ jobs:
           grep -q 'name: solqaryn-api-desarrollo' render.yaml
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
           docker build --file backend/Dockerfile --tag solqaryn-api:m13 .
-      - name: Exigir drill M11 exitoso y vigente
+      - name: Exigir drill de backup/restore exitoso y vigente
         shell: bash
         run: |
           set -euo pipefail
-          run_json="$(gh api 'repos/jmejia31/Solqaryn/actions/workflows/m11-backup-restore-desarrollo.yml/runs?branch=Desarrollo&status=success&per_page=1')"
+          run_json="$(gh api 'repos/solqaryn/Solqaryn/actions/workflows/m11-backup-restore-desarrollo.yml/runs?branch=Desarrollo&status=success&per_page=1')"
           backup_sha="$(jq -r '.workflow_runs[0].head_sha // empty' <<<"$run_json")"
           test -n "$backup_sha"
           git merge-base --is-ancestor "$backup_sha" HEAD
           git diff --quiet "$backup_sha"..HEAD -- \
-            scripts/m11_backup_desarrollo.sh \
-            scripts/m11_restore_desarrollo.sh \
-            .github/workflows/m11-backup-restore-desarrollo.yml \
+            scripts/backup_desarrollo.sh \
+            scripts/restore_desarrollo.sh \
+            .github/workflows/backup-restore-desarrollo.yml \
             backend/src/Infrastructure/Migrations
-          echo "M11 backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
+          echo "SOLQARYN backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
       - uses: actions/upload-artifact@v4
         with:
           name: m13-infra-backup
