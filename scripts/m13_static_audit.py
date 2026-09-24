@@ -107,13 +107,13 @@ for path in files:
     if count:
         warnings.append({"rule": f"technical-debt-markers:{count}", "path": rel})
 
-# Contratos de aislamiento de Desarrollo.
+# Contratos de aislamiento de DEV.
 render = read(ROOT / "render.yaml")
 required_render = [
-    "branch: Desarrollo",
+    "branch: dev",
     "name: solqaryn-api-dev",
-    "value: varistorehn_desarrollo",
-    "value: https://solqaryn-desarrollo.vercel.app",
+    "value: solqaryn_dev",
+    "value: https://solqaryn-dev.vercel.app",
     "value: https://solqaryn-api-dev.onrender.com",
 ]
 for token in required_render:
