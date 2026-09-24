@@ -5,7 +5,7 @@ name: N8.20.F - Trigger Aiven DEV Proof
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - '.github/workflows/n8-20-f-trigger.yml'
 
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Dispatch N8.20.F proof on Desarrollo
+      - name: Dispatch N8.20.F proof on DEV
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -27,7 +27,7 @@ jobs:
           set -euo pipefail
           gh workflow run n8-20-f-aiven-capabilities-proof.yml \
             --repo "$GITHUB_REPOSITORY" \
-            --ref Desarrollo \
+            --ref dev \
             -f aiven_project=solqaryn \
             -f aiven_service=solqaryn-mysql \
             -f persist_evidence=true
