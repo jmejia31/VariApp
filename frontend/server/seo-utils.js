@@ -1,7 +1,7 @@
 const PRODUCTION_HOST = 'varistorehn.vercel.app';
 const PRODUCTION_ORIGIN = 'https://varistorehn.vercel.app';
 const PROD_API = 'https://solqaryn-api-prod.onrender.com';
-const DEV_API = 'https://solqaryn-api-desarrollo.onrender.com';
+const DEV_API = 'https://solqaryn-api-dev.onrender.com';
 
 function hostFromRequest(req) {
   return String(req.headers['x-forwarded-host'] || req.headers.host || '').split(':')[0].toLowerCase();
