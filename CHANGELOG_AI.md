@@ -1668,3 +1668,13 @@ MAPA_ARQUITECTURA: ACTUALIZADO — normalización transversal de gobierno, CI y 
 - El control-plane Render conectado muestra actualmente `solqaryn-api-prod` como único servicio existente; la recreación de `solqaryn-api-dev` queda como paso de infraestructura DEV.
 
 MAPA_ARQUITECTURA: SIN_CAMBIO — normalización de configuración operativa y consumidores DEV.
+
+
+## 2026-09-24 — Retiro de referencias operativas Render Desarrollo
+
+- Runbooks operativos de rollback, smoke e hypercare ya apuntan a `solqaryn-api-dev` en lugar del servicio retirado `solqaryn-api-desarrollo`.
+- La guía de aislamiento Cloudinary fue alineada con el prefijo canónico `solqaryn_dev`.
+- Se preserva la evidencia histórica inmutable que documenta estados anteriores; solo se corrigieron superficies operativas vigentes.
+- PROD no fue modificado.
+
+MAPA_ARQUITECTURA: SIN_CAMBIO.
