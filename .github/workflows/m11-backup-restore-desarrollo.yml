@@ -62,8 +62,8 @@ jobs:
       SeedAdmin__Username: 'm11_restore_admin'
       SeedAdmin__Password: 'M11.Restore#2026!'
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
-      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
-      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
+      AppSettings__LogoPublicUrl: 'https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png'
       Cloudinary__CloudName: 'ci-not-used'
       Cloudinary__ApiKey: 'ci-not-used'
       Cloudinary__ApiSecret: 'ci-not-used'
@@ -142,19 +142,19 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/m11-backups"
-          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg"
-          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg.sha256"
-          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.meta.json"
+          touch "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.tar.gz.gpg"
+          touch "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.tar.gz.gpg.sha256"
+          touch "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.meta.json"
           touch "$RUNNER_TEMP/m11-backups/NO_ELIMINAR.txt"
-          touch -d '30 days ago' "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg" \
-            "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg.sha256" \
-            "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.meta.json"
+          touch -d '30 days ago' "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.tar.gz.gpg" \
+            "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.tar.gz.gpg.sha256" \
+            "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.meta.json"
 
       - name: Ejecutar backup M11 cifrado
         id: backup
         shell: bash
         env:
-          VARIAPP_ENVIRONMENT: ci
+          SOLQARYN_ENVIRONMENT: ci
           DB_HOST: 127.0.0.1
           DB_PORT: '3306'
           DB_NAME: inventoryapp_m11_source
@@ -174,7 +174,7 @@ jobs:
           test -s "$backup_file"
           test -s "$checksum_file"
           test -s "$metadata_file"
-          test ! -e "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg"
+          test ! -e "$RUNNER_TEMP/m11-backups/solqaryn-desarrollo-20000101T000000Z.tar.gz.gpg"
           test -e "$RUNNER_TEMP/m11-backups/NO_ELIMINAR.txt"
           test "$(stat -c '%a' "$backup_file")" = 600
           echo "backup_file=$backup_file" >> "$GITHUB_OUTPUT"
@@ -258,7 +258,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if VARIAPP_ENVIRONMENT=produccion \
+          if SOLQARYN_ENVIRONMENT=produccion \
              DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=varistorehn_produccion DB_USER=root DB_PASSWORD=root \
              BACKUP_PASSPHRASE="$M11_CI_PASSPHRASE" \
              scripts/m11_backup_desarrollo.sh > /dev/null 2>&1; then
