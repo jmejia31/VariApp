@@ -6,10 +6,10 @@
 
 - PROJECT_ID: SOLQARYN
 - Repositorio: `solqaryn/Solqaryn`
-- Rama de trabajo: `Desarrollo`
+- Rama de trabajo: `dev`
 - `main`: congelada; no tocar sin autorización expresa.
 - PR histórico `Desarrollo -> main`: #2 está `CLOSED + MERGED` por la liberación ERP-N9 ya ejecutada; no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario.
-- Environments GitHub canónicos: `Produccion` y `Desarrollo`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
+- Environments GitHub canónicos: `Produccion` y `dev`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
 - Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
 - Tracks obligatorios: T0–T12.
@@ -27,7 +27,7 @@ Ningún colaborador debe tomar este archivo, un prompt viejo, una conversación,
 Antes de actuar, releer en este orden:
 
 1. `docs/VAEP_AUTHORITY.md` — autoridad única de reglas.
-2. HEAD vivo de `Desarrollo`.
+2. HEAD vivo de `dev`.
 3. `vaep/control/jules-autorefill-catalog.json` — `currentParent`, `lastClosedParent`, `closureReceipts`, lanes y `throughputPlan`.
 4. `vaep/control/dispatch-admission.json` — contrato global **OPEN_ONLY**. `newDispatchAdmission` debe ser exactamente `OPEN`; cualquier otro valor es corrupción operativa que se repara a `OPEN` antes de decidir dispatch. Los bloqueos reales viven en tarea/lane (`dispatchEligible=false`, hold causal, cuarentena o REVIEW_FIRST/QA_TAKEOVER).
 5. Recibo `LISTO_REAL` del parent recién cerrado y sus `runId/headSha` causales.
@@ -48,7 +48,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 
 - MySQL mediante EF Core/Pomelo y migraciones forward-only cuando aplique.
 - Aiven canónico: proyecto `solqaryn`, servicio único `solqaryn-mysql`, bases `solqaryn_dev`/`solqaryn_prod` y usuarios aislados `solqaryn_dev_user`/`solqaryn_prod_user`; `avnadmin` queda solo para administración.
-- Los Environments GitHub canónicos son `Desarrollo` y `Produccion`; secretos y variables no se cruzan entre ambos.
+- Los Environments GitHub canónicos son `dev` y `Produccion`; secretos y variables no se cruzan entre ambos.
 - JWT y permisos relacionales; no reintroducir bypass de administrador legacy.
 - No tocar Producción ni `main` desde el flujo de Desarrollo.
 - No exponer secretos ni inventar validaciones externas.
