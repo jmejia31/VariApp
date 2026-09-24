@@ -2,111 +2,90 @@
 
 ## 1. Entornos oficiales
 
-Solo existen dos entornos lógicos autorizados:
+Los dos environments GitHub canónicos de SOLQARYN son:
 
 ```text
-varistorehn_producción
-varistorehn_desarrollo
+Desarrollo
+Produccion
 ```
 
-Los nombres técnicos de servicios, dominios, bases, usuarios o claves pueden diferir; deben mapearse a uno de esos dos entornos y no renombrarse/recrearse si existe riesgo de afectar operación.
-
-| Elemento | Producción | Desarrollo |
+| Elemento | Produccion | Desarrollo |
 |---|---|---|
-| Git | `main`, congelada | `Desarrollo`, única rama de trabajo |
-| Vercel | proyecto técnico `varistorehn` | proyecto técnico `solqaryn-desarrollo` |
-| Render | servicio técnico `solqaryn-api` | servicio técnico `solqaryn-api-desarrollo` |
-| Aiven | datos/variables/administración productiva | usuario/base/variables de aplicación de Desarrollo |
-| Cloudinary | claves/activos productivos | prefijo `varistorehn_desarrollo/` y credenciales de Desarrollo |
+| Git | `main`, congelada salvo autorización expresa | `Desarrollo`, rama ordinaria de trabajo |
+| GitHub Environment | `Produccion` | `Desarrollo` |
+| Vercel | proyecto técnico productivo vigente | proyecto técnico de Desarrollo vigente |
+| Render | servicio técnico productivo vigente | servicio técnico de Desarrollo vigente |
+| Aiven project | `solqaryn` | `solqaryn` |
+| Aiven service | `solqaryn-mysql` | `solqaryn-mysql` |
+| Base MySQL | `solqaryn_prod` | `solqaryn_dev` |
+| Usuario MySQL app | `solqaryn_prod_user` | `solqaryn_dev_user` |
 
-## 2. Producción congelada
+VariStoreHN es un cliente de SOLQARYN; sus nombres de proyecto, dominio o activos no redefinen los environments canónicos de la plataforma.
 
-Está prohibido modificar o eliminar desde el flujo de Desarrollo:
+## 2. Topología Aiven vigente
 
-- `main`;
-- variables, secretos y credenciales productivos;
-- dominios, certificados, servicios y despliegues productivos;
-- bases, usuarios, datos, respaldos o migraciones productivos;
-- usuario administrativo `avnadmin` de Aiven;
-- claves internas/productivas y activos productivos de Cloudinary;
-- recursos externos basándose únicamente en su nombre.
+Aiven usa un único servicio MySQL Free, `solqaryn-mysql`, dentro del proyecto `solqaryn`.
 
-No desplegar ni migrar Producción sin autorización expresa de Javier Mejía.
+Separación lógica obligatoria:
 
-## 3. Regla de eliminación
+- `solqaryn_dev_user` tiene privilegios únicamente sobre `solqaryn_dev.*`;
+- `solqaryn_prod_user` tiene privilegios únicamente sobre `solqaryn_prod.*`;
+- `avnadmin` se conserva solo para administración y no se usa como credencial normal de aplicación;
+- Desarrollo y Produccion comparten host, puerto, nodo y recursos físicos del mismo servicio Free; la frontera entre ambos es lógica por base, usuario, secretos y environment;
+- no se cruzan credenciales, bases ni cadenas de conexión entre environments.
 
-Un recurso solo puede eliminarse si se demuestra que:
+El aislamiento cruzado DEV -> PROD y PROD -> DEV fue validado con denegación MySQL real antes de conectar GitHub.
 
-1. pertenece exclusivamente a Desarrollo;
-2. duplica una función ya cubierta;
-3. no tiene consumidores, dependencias, datos ni secretos necesarios;
-4. no afecta Producción;
-5. Javier autoriza expresamente su eliminación.
+## 3. GitHub Actions canónico
 
-## 4. GitHub
+Environment `Desarrollo`:
 
-- `Desarrollo` es la única rama de trabajo.
-- No crear ramas adicionales.
-- Cada cambio autorizado se publica en `origin/Desarrollo`.
-- PR `Desarrollo -> main` permanece en borrador.
-- No auto-merge.
+- variables: `SOLQARYN_DESARROLLO_DB_HOST`, `SOLQARYN_DESARROLLO_DB_PORT`, `SOLQARYN_DESARROLLO_DB_NAME`, `SOLQARYN_DESARROLLO_DB_USER`;
+- secrets: `SOLQARYN_DESARROLLO_DB_PASSWORD`, `SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE`, `SOLQARYN_AIVEN_TOKEN`.
 
-## 5. Acceso local y remoto
+Environment `Produccion`:
 
-Acceso reconocido al proyecto local de la PC:
+- variables: `SOLQARYN_PRODUCCION_DB_HOST`, `SOLQARYN_PRODUCCION_DB_PORT`, `SOLQARYN_PRODUCCION_DB_NAME`, `SOLQARYN_PRODUCCION_DB_USER`;
+- secrets: `SOLQARYN_PRODUCCION_DB_PASSWORD`, `SOLQARYN_PRODUCCION_BACKUP_PASSPHRASE`, `SOLQARYN_AIVEN_TOKEN`.
 
-- Javier Mejía;
-- Codex;
-- AntiG / Antigravity.
+Las connection strings completas no se almacenan como secretos duplicados; se construyen en memoria cuando un workflow autorizado las necesita.
 
-ChatGPT y otros agentes no tienen acceso local por defecto. Pueden operar GitHub solo mediante un conector autorizado. Una operación remota en GitHub no equivale a sincronizar la copia local.
+## 4. Protección de environments
 
-Después de un cambio remoto, Javier/Codex/AntiG sincronizan localmente:
+- `Desarrollo` debe aceptar únicamente la rama `Desarrollo`.
+- `Produccion` debe aceptar únicamente `main`.
+- No reutilizar un Environment para ambos ámbitos.
+- No exponer secretos en logs, artifacts ni documentación.
 
-```bash
-git fetch origin
-git switch Desarrollo
-git pull --rebase origin Desarrollo
-```
+## 5. Producción congelada
 
-## 6. Render
+Configurar secretos/variables de `Produccion` no autoriza despliegues, migraciones, escrituras de datos ni cambios en `main`.
 
-Producción conserva `solqaryn-api` sin cambios.
+Cualquier acción productiva posterior requiere autorización expresa del propietario y validaciones causales aplicables.
 
-Desarrollo utiliza el servicio técnico `solqaryn-api-desarrollo`, rama `Desarrollo` y configuración/secretos exclusivos de Desarrollo.
+## 6. Eliminación de legado
 
-No copiar valores reales al repositorio.
+Un Environment, secret o variable antigua solo se retira después de demostrar que:
 
-## 7. Aiven
+1. no existe consumidor vivo en workflows/código;
+2. el reemplazo canónico está configurado;
+3. las pruebas causales del reemplazo pasan;
+4. no se elimina un dato o infraestructura productiva externa por confundirla con metadata de GitHub.
 
-- conservar el servicio existente y `avnadmin` como administrador;
-- aplicación de Desarrollo debe usar su usuario/base designados, no `avnadmin`;
-- no crear/eliminar servicio, base o usuario por iniciativa de un agente;
-- no cruzar cadenas de conexión entre Producción y Desarrollo.
+Los Environments GitHub antiguos con nombres de proveedor, preview, deployment o identidad retirada no son autoridad de configuración una vez que `Desarrollo` y `Produccion` están certificados.
 
-## 8. Cloudinary
+## 7. Validación operativa
 
-- conservar claves y activos productivos;
-- Desarrollo usa el prefijo obligatorio `varistorehn_desarrollo/`;
-- Desarrollo no elimina `PublicId` fuera de ese prefijo;
-- secretos Cloudinary nunca se versionan.
+La configuración canónica de Desarrollo se valida con:
 
-## 9. Vercel
+- prueba de token/alcance Aiven sin exponer secretos;
+- certificado de proveedor;
+- backup cifrado real;
+- restore del mismo artifact en MySQL descartable;
+- scope lock de SOLQARYN.
 
-- Producción conserva el proyecto `varistorehn` y su dominio/configuración sin cambios.
-- Desarrollo utiliza `solqaryn-desarrollo`, con `frontend` como raíz técnica cuando corresponda y backend de Desarrollo.
-- Un preview de Desarrollo nunca debe apuntar a API/base productiva.
+## 8. Acceso y operación
 
-## 10. Rendimiento de los agentes
+El trabajo ordinario continúa en `Desarrollo`. No crear ramas adicionales, no force-push y no auto-merge de `Desarrollo -> main`.
 
-Esta separación de entornos ya está documentada. Por tanto:
-
-- no volver a auditar todos los proveedores externos en cada tarea;
-- no releer este documento si no cambió y la tarea no afecta infraestructura;
-- consultar únicamente la sección/recurso directamente afectado;
-- una reconexión no justifica repetir la auditoría de entornos;
-- cualquier cambio estructural de infraestructura sí debe actualizar `PROJECT_CONTEXT.md` y este documento.
-
-## 11. Fuente de reglas
-
-Las reglas colaborativas completas están en `AGENTS.md`. La memoria técnica está en `PROJECT_CONTEXT.md`. Los pendientes viven en `TASKS.md`.
+Las reglas colaborativas completas están en `AGENTS.md`; la memoria técnica está en `PROJECT_CONTEXT.md`.
