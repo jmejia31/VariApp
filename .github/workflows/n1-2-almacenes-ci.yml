@@ -3,7 +3,7 @@ name: ERP-N1.2 - Certificación Almacenes
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/n1-2-almacenes-ci.yml
       - backend/src/API/Controllers/AlmacenesController.cs
@@ -98,7 +98,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4201'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
