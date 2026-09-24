@@ -7,14 +7,14 @@ namespace InventoryApp.Tests;
 
 public class CloudinaryEnvironmentIsolationTests
 {
-    private static IConfiguration CrearConfiguracionDesarrollo()
+    private static IConfiguration CrearConfiguracionDev()
     {
         var valores = new Dictionary<string, string?>
         {
             ["Cloudinary:CloudName"] = "solqaryn-test",
             ["Cloudinary:ApiKey"] = "test-key",
             ["Cloudinary:ApiSecret"] = "test-secret",
-            ["Cloudinary:EnvironmentPrefix"] = "varistorehn_desarrollo"
+            ["Cloudinary:EnvironmentPrefix"] = "solqaryn_dev"
         };
 
         return new ConfigurationBuilder()
@@ -23,9 +23,9 @@ public class CloudinaryEnvironmentIsolationTests
     }
 
     [Fact]
-    public async Task Productos_DesarrolloNoPuedeEliminarImagenProductiva()
+    public async Task Productos_DevNoPuedeEliminarImagenProductiva()
     {
-        var service = new CloudinaryImageStorageService(CrearConfiguracionDesarrollo());
+        var service = new CloudinaryImageStorageService(CrearConfiguracionDev());
 
         var excepcion = await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.DeleteAsync("inventoryapp/productos/producto-productivo"));
@@ -34,9 +34,9 @@ public class CloudinaryEnvironmentIsolationTests
     }
 
     [Fact]
-    public async Task Compras_DesarrolloNoPuedeEliminarComprobanteProductivo()
+    public async Task Compras_DevNoPuedeEliminarComprobanteProductivo()
     {
-        var service = new CloudinaryCompraDocumentoStorageService(CrearConfiguracionDesarrollo());
+        var service = new CloudinaryCompraDocumentoStorageService(CrearConfiguracionDev());
 
         var excepcion = await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.DeleteAsync("inventoryapp/compras/comprobante-productivo", "raw"));
