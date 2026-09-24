@@ -59,12 +59,12 @@ jobs:
     if: >-
       ${{
         github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
+        (github.event_name == 'schedule' && vars.SOLQARYN_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
         (github.event_name == 'push' && (contains(github.event.head_commit.message, '[M11-PROVIDER-PROBE]') || contains(github.event.head_commit.message, '[M11-BACKUP-REAL]')))
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: "Desarrollo - solqaryn-api-desarrollo"
+    environment: Desarrollo
 
     steps:
       - name: Checkout Desarrollo
@@ -75,21 +75,21 @@ jobs:
       - name: Verificar configuración externa requerida
         shell: bash
         env:
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
-          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
-          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
           declare -A source_names=(
-            [DB_HOST]='M11_DESARROLLO_DB_HOST (secret o variable)'
-            [DB_PORT]='M11_DESARROLLO_DB_PORT (secret o variable)'
-            [DB_NAME]='M11_DESARROLLO_DB_NAME (secret o variable)'
-            [DB_USER]='M11_DESARROLLO_DB_USER (secret o variable)'
-            [DB_PASSWORD]='M11_DESARROLLO_DB_PASSWORD (secret)'
-            [BACKUP_PASSPHRASE]='M11_BACKUP_PASSPHRASE (secret)'
+            [DB_HOST]='SOLQARYN_DESARROLLO_DB_HOST (secret o variable)'
+            [DB_PORT]='SOLQARYN_DESARROLLO_DB_PORT (secret o variable)'
+            [DB_NAME]='SOLQARYN_DESARROLLO_DB_NAME (secret o variable)'
+            [DB_USER]='SOLQARYN_DESARROLLO_DB_USER (secret o variable)'
+            [DB_PASSWORD]='SOLQARYN_DESARROLLO_DB_PASSWORD (secret)'
+            [BACKUP_PASSPHRASE]='SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE (secret)'
           )
           for name in DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD BACKUP_PASSPHRASE; do
             if [ -z "${!name:-}" ]; then
@@ -101,11 +101,11 @@ jobs:
       - name: Consultar motor y proveedor sin secretos
         shell: bash
         env:
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
-          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
         run: |
           set -euo pipefail
           export MYSQL_PWD="$DB_PASSWORD"
@@ -165,13 +165,13 @@ jobs:
         needs.certificar-proveedor.result == 'success' &&
         (
           github.event_name == 'workflow_dispatch' ||
-          (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
+          (github.event_name == 'schedule' && vars.SOLQARYN_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
           (github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-BACKUP-REAL]'))
         )
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: "Desarrollo - solqaryn-api-desarrollo"
+    environment: Desarrollo
 
     services:
       mysql-m11-restore:
@@ -197,13 +197,13 @@ jobs:
         shell: bash
         env:
           SOLQARYN_ENVIRONMENT: desarrollo
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
-          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
           DB_SSL_MODE: REQUIRED
-          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
           OUTPUT_DIR: ${{ runner.temp }}/m11-backups
           RETENTION_DAYS: ${{ env.RETENTION_DAYS }}
           BACKUP_LABEL: desarrollo
@@ -235,7 +235,7 @@ jobs:
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: m11-ci-root-only
           TARGET_DB_SSL_MODE: DISABLED
-          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
           BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
           BACKUP_CHECKSUM_FILE: ${{ steps.backup.outputs.checksum_file }}
           ALLOW_DESTRUCTIVE_RESTORE: YES_M11
