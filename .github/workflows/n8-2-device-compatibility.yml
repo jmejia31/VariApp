@@ -3,7 +3,7 @@ name: N8.2 - Compatibilidad de dispositivos
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/n8-2-device-compatibility.yml
       - frontend/e2e/n82-device-compatibility.spec.ts
@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
