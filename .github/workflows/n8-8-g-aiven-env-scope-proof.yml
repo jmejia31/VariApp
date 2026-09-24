@@ -1,4 +1,5 @@
 name: N8.8.G - Aiven DEV Environment Token Scope Proof
+# Canonical SOLQARYN Aiven environment proof.
 
 on:
   workflow_dispatch:
