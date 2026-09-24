@@ -44,11 +44,11 @@ jobs:
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "Desarrollo"
           if [ -z "${SOLQARYN_DESARROLLO_DB_CONNECTION:-}" ]; then
-            echo "::error::Missing repository secret SOLQARYN_DESARROLLO_DB_CONNECTION"
+            echo "::error::Missing Desarrollo environment secret SOLQARYN_DESARROLLO_DB_CONNECTION"
             exit 21
           fi
           echo "Branch guard PASS: Desarrollo"
-          echo "Required DEV DB secret is present. Value is not printed."
+          echo "Required Desarrollo DB secret is present. Value is not printed."
 
       - name: Restore probe dependencies
         shell: bash
