@@ -27,6 +27,7 @@ jobs:
   prove-aiven-dev-capabilities:
     name: Prove Aiven DEV plan/backups/PITR/restore without secrets
     runs-on: ubuntu-latest
+    environment: Desarrollo
     timeout-minutes: 10
     steps:
       - name: Checkout exact Desarrollo head
