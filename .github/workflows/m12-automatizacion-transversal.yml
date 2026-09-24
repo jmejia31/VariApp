@@ -2,7 +2,7 @@ name: M12 - Automatización transversal
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - .github/workflows/m12-automatizacion-transversal.yml
       - backend/src/API/Controllers/AutomatizacionesController.cs
