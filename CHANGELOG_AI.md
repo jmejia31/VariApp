@@ -1657,3 +1657,14 @@ MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/configuración de infraestruct
 - Antes de eliminar los environments antiguos, GitHub debe quedar con default branch `dev` y ruleset activo apuntando a `dev`.
 
 MAPA_ARQUITECTURA: ACTUALIZADO — normalización transversal de gobierno, CI y topología GitHub; no modifica datos de PROD.
+
+
+## 2026-09-24 — Normalización operativa del endpoint Render DEV
+
+- Se reemplazó el endpoint operativo retirado `https://solqaryn-api-desarrollo.onrender.com` por `https://solqaryn-api-dev.onrender.com` en los consumidores frontend activos.
+- Se alineó la auditoría M13 con la topología canónica `dev` / `DEV`, el prefijo `solqaryn_dev` y el endpoint Render DEV canónico.
+- Se retiró del gate M13 la expectativa del nombre de servicio `solqaryn-api-desarrollo`.
+- No se modificó `main`, el servicio Render PROD, secretos ni datos productivos.
+- El control-plane Render conectado muestra actualmente `solqaryn-api-prod` como único servicio existente; la recreación de `solqaryn-api-dev` queda como paso de infraestructura DEV.
+
+MAPA_ARQUITECTURA: SIN_CAMBIO — normalización de configuración operativa y consumidores DEV.
