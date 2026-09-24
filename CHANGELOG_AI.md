@@ -1604,3 +1604,7 @@ Como barrido administrativo one-shot se incorpora temporalmente `.github/workflo
 
 No se toca `main`, no se despliega Producción, no se leen/modifican secretos y no se reescribe historial Git.
 
+
+## 2026-09-24 — Recovery del barrido administrativo GitHub
+
+El primer intento one-shot del barrido post-transferencia falló por un HTTP 502 de GitHub GraphQL antes de alcanzar la fase de ramas. Se aplicó recovery same-run: el workflow temporal reduce los lotes de mutación, incorpora reintentos con backoff, elimina primero referencias de ramas históricas y revalida fail-closed antes de cerrar Issues históricos. El Issue funcional vigente #3410 continúa preservado. No se toca `main`, Producción, secretos ni historial Git.

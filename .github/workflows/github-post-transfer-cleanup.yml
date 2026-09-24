@@ -15,14 +15,14 @@ jobs:
       github.actor == 'jmejia31' &&
       github.event.issue.title == '[ADMIN] SOLQARYN GitHub cleanup'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       GH_TOKEN: ${{ github.token }}
       KEEP_ISSUE: "3410"
       TRIGGER_ISSUE: ${{ github.event.issue.number }}
       TRIGGER_NODE_ID: ${{ github.event.issue.node_id }}
     steps:
-      - name: Close historical open issues and delete historical branches
+      - name: Delete historical branches and close historical open issues
         shell: bash
         run: |
           set -euo pipefail
@@ -31,6 +31,7 @@ jobs:
           import json
           import os
           import subprocess
+          import time
 
           repo = os.environ["GITHUB_REPOSITORY"]
           owner, name = repo.split("/", 1)
@@ -38,44 +39,16 @@ jobs:
           trigger_issue = int(os.environ["TRIGGER_ISSUE"])
           trigger_node_id = os.environ["TRIGGER_NODE_ID"]
 
-          def run(args):
-              return subprocess.check_output(args, text=True)
-
-          issue_query = r"""
-          query($owner:String!, $name:String!, $cursor:String) {
-            repository(owner:$owner, name:$name) {
-              issues(first:100, after:$cursor, states:OPEN, orderBy:{field:CREATED_AT,direction:ASC}) {
-                nodes { id number title }
-                pageInfo { hasNextPage endCursor }
-              }
-            }
-          }
-          """
-
-          issues = []
-          cursor = None
-          while True:
-              cmd = ["gh", "api", "graphql", "-f", f"query={issue_query}", "-F", f"owner={owner}", "-F", f"name={name}"]
-              if cursor:
-                  cmd += ["-F", f"cursor={cursor}"]
-              data = json.loads(run(cmd))
-              conn = data["data"]["repository"]["issues"]
-              issues.extend(conn["nodes"])
-              if not conn["pageInfo"]["hasNextPage"]:
-                  break
-              cursor = conn["pageInfo"]["endCursor"]
-
-          targets = [x for x in issues if x["number"] not in {keep_issue, trigger_issue}]
-          for offset in range(0, len(targets), 40):
-              batch = targets[offset:offset + 40]
-              fields = []
-              for i, issue in enumerate(batch):
-                  fields.append(
-                      f'i{i}:updateIssue(input:{{id:"{issue["id"]}",state:CLOSED}})'
-                      + "{issue{number state}}"
-                  )
-              mutation = "mutation{" + " ".join(fields) + "}"
-              subprocess.check_call(["gh", "api", "graphql", "-f", f"query={mutation}"])
+          def run(args, attempts=6):
+              last = None
+              for attempt in range(1, attempts + 1):
+                  p = subprocess.run(args, text=True, capture_output=True)
+                  if p.returncode == 0:
+                      return p.stdout
+                  last = (p.stdout or "") + "\n" + (p.stderr or "")
+                  if attempt < attempts:
+                      time.sleep(min(2 ** attempt, 20))
+              raise RuntimeError(f"command failed after {attempts} attempts: {args}\n{last}")
 
           refs_query = r"""
           query($owner:String!, $name:String!) {
@@ -90,37 +63,59 @@ jobs:
           refs = data["data"]["repository"]["refs"]["nodes"]
           stale = [x for x in refs if x["name"] not in {"Desarrollo", "main"}]
 
-          for offset in range(0, len(stale), 20):
-              batch = stale[offset:offset + 20]
+          for offset in range(0, len(stale), 10):
+              batch = stale[offset:offset + 10]
               fields = []
               for i, ref in enumerate(batch):
-                  fields.append(
-                      f'r{i}:deleteRef(input:{{refId:"{ref["id"]}"}})'
-                      + "{clientMutationId}"
-                  )
+                  fields.append(f'r{i}:deleteRef(input:{{refId:"{ref["id"]}"}})' + "{clientMutationId}")
               mutation = "mutation{" + " ".join(fields) + "}"
-              subprocess.check_call(["gh", "api", "graphql", "-f", f"query={mutation}"])
+              run(["gh", "api", "graphql", "-f", f"query={mutation}"])
+              time.sleep(0.25)
 
-          # Revalidate fail-closed.
           data = json.loads(run(["gh", "api", "graphql", "-f", f"query={refs_query}", "-F", f"owner={owner}", "-F", f"name={name}"]))
           remaining_refs = [x["name"] for x in data["data"]["repository"]["refs"]["nodes"]]
           unexpected_refs = [x for x in remaining_refs if x not in {"Desarrollo", "main"}]
           if unexpected_refs:
               raise SystemExit(f"Historical branches remain: {unexpected_refs}")
 
-          # Re-read open issues and require only the active functional issue plus this trigger.
-          issues_after = []
-          cursor = None
-          while True:
-              cmd = ["gh", "api", "graphql", "-f", f"query={issue_query}", "-F", f"owner={owner}", "-F", f"name={name}"]
-              if cursor:
-                  cmd += ["-F", f"cursor={cursor}"]
-              data = json.loads(run(cmd))
-              conn = data["data"]["repository"]["issues"]
-              issues_after.extend(conn["nodes"])
-              if not conn["pageInfo"]["hasNextPage"]:
-                  break
-              cursor = conn["pageInfo"]["endCursor"]
+          issue_query = r"""
+          query($owner:String!, $name:String!, $cursor:String) {
+            repository(owner:$owner, name:$name) {
+              issues(first:100, after:$cursor, states:OPEN, orderBy:{field:CREATED_AT,direction:ASC}) {
+                nodes { id number title }
+                pageInfo { hasNextPage endCursor }
+              }
+            }
+          }
+          """
+
+          def read_open_issues():
+              out = []
+              cursor = None
+              while True:
+                  cmd = ["gh", "api", "graphql", "-f", f"query={issue_query}", "-F", f"owner={owner}", "-F", f"name={name}"]
+                  if cursor:
+                      cmd += ["-F", f"cursor={cursor}"]
+                  data = json.loads(run(cmd))
+                  conn = data["data"]["repository"]["issues"]
+                  out.extend(conn["nodes"])
+                  if not conn["pageInfo"]["hasNextPage"]:
+                      return out
+                  cursor = conn["pageInfo"]["endCursor"]
+
+          issues = read_open_issues()
+          targets = [x for x in issues if x["number"] not in {keep_issue, trigger_issue}]
+
+          for offset in range(0, len(targets), 10):
+              batch = targets[offset:offset + 10]
+              fields = []
+              for i, issue in enumerate(batch):
+                  fields.append(f'i{i}:updateIssue(input:{{id:"{issue["id"]}",state:CLOSED}})' + "{issue{number state}}")
+              mutation = "mutation{" + " ".join(fields) + "}"
+              run(["gh", "api", "graphql", "-f", f"query={mutation}"])
+              time.sleep(0.4)
+
+          issues_after = read_open_issues()
           unexpected_issues = [x["number"] for x in issues_after if x["number"] not in {keep_issue, trigger_issue}]
           if unexpected_issues:
               raise SystemExit(f"Historical open issues remain: {unexpected_issues[:20]}")
@@ -129,7 +124,7 @@ jobs:
               'mutation{close:updateIssue(input:{id:"' + trigger_node_id + '",state:CLOSED})'
               + '{issue{number state}}}'
           )
-          subprocess.check_call(["gh", "api", "graphql", "-f", f"query={close_trigger}"])
+          run(["gh", "api", "graphql", "-f", f"query={close_trigger}"])
 
           print(f"CLOSED_HISTORICAL_ISSUES={len(targets)}")
           print(f"DELETED_HISTORICAL_BRANCHES={len(stale)}")
