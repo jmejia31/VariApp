@@ -3,7 +3,7 @@ name: VariStoreHN Fase 10 - responsive UX accesibilidad
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/e2e/varistorehn-fase*.spec.ts'
