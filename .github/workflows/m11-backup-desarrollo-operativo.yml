@@ -64,7 +64,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: "Desarrollo - variapp-api-desarrollo"
+    environment: "Desarrollo - solqaryn-api-desarrollo"
 
     steps:
       - name: Checkout Desarrollo
@@ -171,7 +171,7 @@ jobs:
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: "Desarrollo - variapp-api-desarrollo"
+    environment: "Desarrollo - solqaryn-api-desarrollo"
 
     services:
       mysql-m11-restore:
@@ -196,7 +196,7 @@ jobs:
         id: backup
         shell: bash
         env:
-          VARIAPP_ENVIRONMENT: desarrollo
+          SOLQARYN_ENVIRONMENT: desarrollo
           DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
           DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
           DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
@@ -231,7 +231,7 @@ jobs:
           RESTORE_ENVIRONMENT: ci
           TARGET_DB_HOST: 127.0.0.1
           TARGET_DB_PORT: '3306'
-          TARGET_DB_NAME: variapp_m11_restore_drill
+          TARGET_DB_NAME: solqaryn_m11_restore_drill
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: m11-ci-root-only
           TARGET_DB_SSL_MODE: DISABLED
