@@ -8,7 +8,7 @@
 # LOCAL_SKILL_COUNT=1
 
 EXPECTED_REPO="solqaryn/Solqaryn"
-EXPECTED_BRANCH="Desarrollo"
+EXPECTED_BRANCH="dev"
 
 fail() {
   echo "[Solqaryn][pre-commit] $1" >&2
