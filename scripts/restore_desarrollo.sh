@@ -100,7 +100,7 @@ PAYLOAD="$(find "$WORKDIR" -mindepth 1 -maxdepth 1 -type d -name 'solqaryn-*' | 
 [[ -f "$PAYLOAD/MANIFEST.sha256" ]] || fail "El backup no contiene MANIFEST.sha256."
 [[ -f "$PAYLOAD/metadata.json" ]] || fail "El backup no contiene metadata.json."
 [[ -s "$PAYLOAD/database/mysql.sql" ]] || fail "El backup no contiene un dump MySQL válido."
-[[ -s "$PAYLOAD/database/integrity-row-counts.tsv" ]] || fail "El backup no contiene conteos de integridad."
+[[ -f "$PAYLOAD/database/integrity-row-counts.tsv" ]] || fail "El backup no contiene el archivo de conteos de integridad."
 
 log "Verificando checksums internos de todos los componentes..."
 (
@@ -134,6 +134,9 @@ PY
 )"
 
 [[ "$FORMAT_VERSION" == "SOLQARYN_BACKUP_V1" ]] || fail "Versión de backup no soportada: $FORMAT_VERSION"
+if [[ "$EXPECTED_TABLE_COUNT" != "0" && ! -s "$PAYLOAD/database/integrity-row-counts.tsv" ]]; then
+  fail "El backup declara tablas pero no contiene conteos de integridad."
+fi
 [[ "$(printf '%s' "$SOURCE_DB_NAME" | tr '[:upper:]' '[:lower:]')" != "$TARGET_DB_NORMALIZED" ]] || fail "La base destino no puede ser la misma base origen."
 
 export MYSQL_PWD="$TARGET_DB_PASSWORD"
@@ -154,7 +157,12 @@ MYSQL_DB=("${MYSQL[@]}" "$TARGET_DB_NAME")
 ACTUAL_TABLE_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';" | head -n 1)"
 [[ "$ACTUAL_TABLE_COUNT" == "$EXPECTED_TABLE_COUNT" ]] || fail "Cantidad de tablas inconsistente: esperado=$EXPECTED_TABLE_COUNT actual=$ACTUAL_TABLE_COUNT"
 
-ACTUAL_MIGRATION_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory'), (SELECT COUNT(*) FROM __EFMigrationsHistory), 0);" | head -n 1)"
+ACTUAL_MIGRATION_TABLE_EXISTS="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory';" | head -n 1)"
+if [[ "$ACTUAL_MIGRATION_TABLE_EXISTS" == "1" ]]; then
+  ACTUAL_MIGRATION_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM __EFMigrationsHistory;" | head -n 1)"
+else
+  ACTUAL_MIGRATION_COUNT="0"
+fi
 [[ "$ACTUAL_MIGRATION_COUNT" == "$EXPECTED_MIGRATION_COUNT" ]] || fail "Historial EF inconsistente: esperado=$EXPECTED_MIGRATION_COUNT actual=$ACTUAL_MIGRATION_COUNT"
 
 log "Comparando conteos exactos de todas las tablas..."
