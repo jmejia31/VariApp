@@ -1,3 +1,19 @@
+## 2026-09-23 — Namespace exclusivo de skills SOLQARYN
+
+- La única skill de gobierno activa del proyecto queda identificada como `.agents/skills/solqaryn-project-governance/SKILL.md`.
+- Convención obligatoria: directorio y frontmatter de toda skill deben comenzar por `solqaryn-`; el nombre visible debe comenzar por `SOLQARYN`.
+- Se eliminó la ruta anterior de la skill y no se conserva alias.
+- Los 18 archivos operativos de gobierno apuntan exclusivamente a la skill SOLQARYN.
+- `scripts/verify-project-scope.mjs` rechaza skills sin namespace SOLQARYN, identidades de proyecto no canónicas, repositorios no autorizados y URIs externas de skills.
+- `docs/PROJECT_SCOPE_LOCK.md` y `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` quedaron vinculados a SOLQARYN.
+- Auditoría de referencias de proyecto ajenas en el repositorio: sin coincidencias detectadas para los identificadores previamente contaminantes ni para URIs externas de skills.
+- Paquete de la skill SOLQARYN validado correctamente.
+
+`PROJECT_SCOPE_LOCK=STRICT`  
+`SKILL_NAMESPACE=solqaryn-`
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno y aislamiento de contexto; no modifica dominio, datos, tenancy ni deployment de la aplicación.
+
 ## 2026-09-23 — Blindaje estricto de aislamiento de proyecto y skill propia de VariApp
 
 **Objetivo:** impedir que chats, agentes, automatizaciones o scripts de VariApp consulten o utilicen skills, documentación, repositorios, chats, memorias o gobierno de otros proyectos sin autorización explícita del propietario.
