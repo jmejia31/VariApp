@@ -3,9 +3,9 @@ name: N8.23.G - Dry-run go-live runbooks DEV
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
-      - .github/workflows/n8-23-g-dry-run-desarrollo.yml
+      - .github/workflows/n8-23-g-dry-run-dev.yml
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
       Database__ServerVersion: '8.4.0'
 
     steps:
-      - name: Checkout exact Desarrollo head
+      - name: Checkout exact DEV head
         uses: actions/checkout@v4
 
       - name: Set up .NET 8
