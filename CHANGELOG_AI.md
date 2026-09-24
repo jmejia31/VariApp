@@ -1628,3 +1628,15 @@ Durante la auditoría final post-transfer se detectó deuda operativa real en do
 Se elimina esa dependencia personal. `fase8-validacion-completa.yml` y `m13-certificacion-final.yml` conservan `workflow_dispatch`, el repositorio exacto `solqaryn/Solqaryn`, la rama exacta `Desarrollo` y el token literal `AUTORIZADO_REABRIR`, pero ahora exigen que actor y triggering actor coincidan y que GitHub confirme dinámicamente permiso administrativo del actor sobre el repositorio. `test_reopen_authorization.py` pasa a usar la identidad canónica y un stub local de la consulta de permisos para verificar PASS/FAIL sin depender de una cuenta personal.
 
 No se modifica `main`, Producción, secretos, datos productivos, dominios ni certificados.
+
+
+## 2026-09-24 — Cutover canónico de Render DEV hacia solqaryn-api-dev
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+- Se normalizó la configuración declarativa de Render DEV para usar el nombre canónico `solqaryn-api-dev` y el objetivo público `https://solqaryn-api-dev.onrender.com`.
+- Durante el cutover, el servicio existente conserva temporalmente compatibilidad con el hostname histórico `solqaryn-api-desarrollo.onrender.com` para no romper el health check mientras se crea y valida el servicio con el slug canónico.
+- `.github/workflows/fase2-auditoria.yml` y `scripts/m13_static_audit.py` fueron alineados al naming canónico; la auditoría permite transitoriamente ambos hostnames DEV hasta completar el reemplazo.
+- Producción no fue modificada. No se tocaron `main`, datos productivos, secretos ni credenciales.
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/configuración de infraestructura DEV sin modificar dominio, persistencia, contratos funcionales ni Producción.
