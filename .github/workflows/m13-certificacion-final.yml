@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Exigir administrador, Desarrollo y token literal
+      - name: Exigir administrador, DEV y token literal
         env:
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
@@ -35,7 +35,7 @@ jobs:
           set -euo pipefail
           test "$EVENT_NAME" = workflow_dispatch
           test "$REPOSITORY" = solqaryn/Solqaryn
-          test "$TARGET_REF" = refs/heads/Desarrollo
+          test "$TARGET_REF" = refs/heads/dev
           test "$ACTOR" = "$TRIGGERING_ACTOR"
           test "$AUTHORIZATION" = AUTORIZADO_REABRIR
           admin="$(gh api "repos/$REPOSITORY/collaborators/$ACTOR/permission" --jq '.user.permissions.admin')"
@@ -466,13 +466,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Configuración de Desarrollo y Docker
+      - name: Configuración de DEV y Docker
         shell: bash
         run: |
           set -euo pipefail
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
-          grep -q 'branch: Desarrollo' render.yaml
+          grep -q 'branch: dev' render.yaml
           grep -q 'name: solqaryn-api-desarrollo' render.yaml
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
           docker build --file backend/Dockerfile --tag solqaryn-api:m13 .
@@ -480,14 +480,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          run_json="$(gh api 'repos/solqaryn/Solqaryn/actions/workflows/m11-backup-restore-desarrollo.yml/runs?branch=Desarrollo&status=success&per_page=1')"
+          run_json="$(gh api 'repos/solqaryn/Solqaryn/actions/workflows/m11-backup-restore-dev.yml/runs?branch=dev&status=success&per_page=1')"
           backup_sha="$(jq -r '.workflow_runs[0].head_sha // empty' <<<"$run_json")"
           test -n "$backup_sha"
           git merge-base --is-ancestor "$backup_sha" HEAD
           git diff --quiet "$backup_sha"..HEAD -- \
             scripts/backup_desarrollo.sh \
             scripts/restore_desarrollo.sh \
-            .github/workflows/backup-restore-desarrollo.yml \
+            .github/workflows/backup-restore-dev.yml \
             backend/src/Infrastructure/Migrations
           echo "SOLQARYN backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
       - uses: actions/upload-artifact@v4
