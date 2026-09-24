@@ -1,6 +1,6 @@
-# VariApp — ERP para la operación de VariStorehn
+# Solqaryn — ERP para la operación de VariStorehn
 
-VariApp es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
+Solqaryn es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
 
 La factura actual se considera comprobante comercial interno mientras no exista habilitación fiscal SAR/CAI aplicable.
 
