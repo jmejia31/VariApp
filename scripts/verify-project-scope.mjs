@@ -184,6 +184,32 @@ for (const abs of walk(root)) {
   }
 }
 
+
+const legacyOperationalIdentifiers = [
+  'M11_DESARROLLO_',
+  'M11_BACKUP_PASSPHRASE',
+  'SOLQARYN_DEV_DB_CONNECTION',
+  'secrets.AIVEN_TOKEN',
+  'Desarrollo - solqaryn-api-desarrollo',
+  'jmejia31/Solqaryn',
+  'scripts/m11_',
+  '.github/workflows/m11-',
+];
+
+for (const rel of ['.github/workflows', 'scripts/backup_desarrollo.sh', 'scripts/restore_desarrollo.sh', 'docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md']) {
+  const abs = join(root, rel);
+  if (!existsSync(abs)) continue;
+  const files = statSync(abs).isDirectory() ? walk(abs) : [abs];
+  for (const file of files) {
+    const operationalContent = readFileSync(file, 'utf8');
+    for (const legacy of legacyOperationalIdentifiers) {
+      if (operationalContent.includes(legacy)) {
+        errors.push(`legacy operational identifier remains in ${relative(root, file).split(sep).join('/')}: ${legacy}`);
+      }
+    }
+  }
+}
+
 if (errors.length) {
   console.error('SOLQARYN PROJECT SCOPE GATE FAILED');
   for (const error of errors) console.error(`- ${error}`);
