@@ -3,7 +3,7 @@ name: VariStoreHN Fase 12 - cuenta cliente evolucion
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'backend/src/API/Controllers/TiendaCuentaController.cs'
       - 'backend/src/Application/DTOs/TiendaCuentaDto.cs'
