@@ -1,13 +1,13 @@
-name: SOLQARYN - Backup y restauración en Desarrollo
+name: SOLQARYN - Backup y restauración en DEV
 
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - scripts/backup_desarrollo.sh
       - scripts/restore_desarrollo.sh
-      - .github/workflows/backup-restore-desarrollo.yml
+      - .github/workflows/backup-restore-dev.yml
       - backend/src/Infrastructure/Migrations/**
       - docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md
   pull_request:
@@ -16,7 +16,7 @@ on:
     paths:
       - scripts/backup_desarrollo.sh
       - scripts/restore_desarrollo.sh
-      - .github/workflows/backup-restore-desarrollo.yml
+      - .github/workflows/backup-restore-dev.yml
       - backend/src/Infrastructure/Migrations/**
       - docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md
   workflow_dispatch:
@@ -70,7 +70,7 @@ jobs:
       SOLQARYN_BACKUP_CI_PASSPHRASE: 'M11-CI-Disposable-Backup-Key-2026-Only'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
@@ -281,7 +281,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: solqaryn-backup-restore-desarrollo
+          name: solqaryn-backup-restore-dev
           path: |
             ${{ runner.temp }}/solqaryn-backups/*.tar.gz.gpg
             ${{ runner.temp }}/solqaryn-backups/*.tar.gz.gpg.sha256
