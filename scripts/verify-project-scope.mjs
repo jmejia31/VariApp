@@ -153,10 +153,40 @@ for (const rel of identityFiles) {
   }
 }
 
+
+const retiredIdentityToken = ['vari', 'app'].join('');
+const retiredIdentityPattern = new RegExp(retiredIdentityToken, 'i');
+
+function looksBinary(buffer) {
+  return buffer.includes(0);
+}
+
+for (const abs of walk(root)) {
+  const rel = relative(root, abs).split(sep).join('/');
+  if (rel.startsWith('.git/')) continue;
+  if (retiredIdentityPattern.test(rel)) {
+    errors.push(`retired project identity remains in path: ${rel}`);
+  }
+
+  const raw = readFileSync(abs);
+  if (looksBinary(raw)) continue;
+
+  let content;
+  try {
+    content = raw.toString('utf8');
+  } catch {
+    continue;
+  }
+
+  if (retiredIdentityPattern.test(content)) {
+    errors.push(`retired project identity remains in content: ${rel}`);
+  }
+}
+
 if (errors.length) {
   console.error('SOLQARYN PROJECT SCOPE GATE FAILED');
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log('SOLQARYN PROJECT SCOPE GATE OK: one local skill + nine pinned original references');
+console.log('SOLQARYN PROJECT SCOPE GATE OK: canonical SOLQARYN identity + one local skill + nine pinned original references');
