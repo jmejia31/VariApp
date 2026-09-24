@@ -2,7 +2,7 @@ name: N8.7.G - Performance proof
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/scripts/performance/n8_7_g_auth_perf.py'
       - '.github/workflows/n8-7-performance.yml'
