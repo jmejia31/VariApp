@@ -38,12 +38,12 @@ jobs:
       - name: Guard branch and required secret
         shell: bash
         env:
-          VARIAPP_DEV_DB_CONNECTION: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_DEV_DB_CONNECTION: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "Desarrollo"
-          if [ -z "${VARIAPP_DEV_DB_CONNECTION:-}" ]; then
-            echo "::error::Missing repository secret VARIAPP_DEV_DB_CONNECTION"
+          if [ -z "${SOLQARYN_DEV_DB_CONNECTION:-}" ]; then
+            echo "::error::Missing repository secret SOLQARYN_DEV_DB_CONNECTION"
             exit 21
           fi
           echo "Branch guard PASS: Desarrollo"
@@ -59,7 +59,7 @@ jobs:
         id: probe
         shell: bash
         env:
-          VARIAPP_DEV_DB_CONNECTION: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_DEV_DB_CONNECTION: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
           OUT_DIR: .n820c-proof/${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
