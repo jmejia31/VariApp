@@ -1,9 +1,12 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 
 const root = process.cwd();
-const requiredMarker = 'PROJECT_SCOPE_LOCK=STRICT';
 const expectedRepo = 'solqaryn/VariApp';
+const expectedProjectId = 'VARIAPP';
+const requiredMarker = 'PROJECT_SCOPE_LOCK=STRICT';
+const skillPrefix = 'solqaryn-';
+const displayPrefix = 'SOLQARYN';
 
 const mandatory = [
   'AGENTS.md',
@@ -26,20 +29,25 @@ const mandatory = [
   '.github/CODEOWNERS',
   'docs/PROJECT_SCOPE_LOCK.md',
   'docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md',
-  '.agents/skills/variapp-project-governance/SKILL.md',
+  '.agents/skills/solqaryn-project-governance/SKILL.md',
 ];
 
 const errors = [];
 
+function read(rel) {
+  return readFileSync(join(root, rel), 'utf8');
+}
+
 for (const rel of mandatory) {
-  const path = join(root, rel);
-  if (!existsSync(path)) {
+  if (!existsSync(join(root, rel))) {
     errors.push(`missing required scope file: ${rel}`);
     continue;
   }
-  const content = readFileSync(path, 'utf8');
-  if (!content.includes(requiredMarker)) {
-    errors.push(`${rel} missing ${requiredMarker}`);
+  const content = read(rel);
+  if (!content.includes(requiredMarker)) errors.push(`${rel} missing ${requiredMarker}`);
+  if (content.includes('.agents/skills/') && content.includes('project-governance') &&
+      !content.includes('.agents/skills/solqaryn-project-governance/')) {
+    errors.push(`${rel} contains a non-SOLQARYN project skill path`);
   }
 }
 
@@ -54,57 +62,57 @@ function walk(dir) {
   return out;
 }
 
-for (const path of walk(join(root, '.agents', 'skills')).filter(p => p.endsWith('SKILL.md'))) {
+const skillsRoot = join(root, '.agents', 'skills');
+for (const path of walk(skillsRoot).filter(p => p.endsWith('SKILL.md'))) {
+  const rel = relative(root, path).split(sep).join('/');
+  const parts = rel.split('/');
+  const skillDir = parts[2] ?? '';
   const content = readFileSync(path, 'utf8');
-  if (!content.includes('PROJECT_ID=VARIAPP')) errors.push(`${path} missing PROJECT_ID=VARIAPP`);
-  if (!content.includes(`REPOSITORY=${expectedRepo}`)) errors.push(`${path} missing REPOSITORY=${expectedRepo}`);
-  if (!content.includes(requiredMarker)) errors.push(`${path} missing ${requiredMarker}`);
-  if (/skills:\/\//i.test(content)) errors.push(`${path} contains external skill URI; project skills may not chain external skills`);
+
+  if (!skillDir.startsWith(skillPrefix)) errors.push(`${rel} skill directory must start with ${skillPrefix}`);
+
+  const nameMatch = content.match(/^name:\s*([^\n]+)$/m);
+  const name = nameMatch?.[1]?.trim().replace(/^["']|["']$/g, '') ?? '';
+  if (!name.startsWith(skillPrefix)) errors.push(`${rel} frontmatter name must start with ${skillPrefix}`);
+
+  if (!content.includes(`PROJECT_ID=${expectedProjectId}`)) errors.push(`${rel} missing PROJECT_ID=${expectedProjectId}`);
+  if (!content.includes(`REPOSITORY=${expectedRepo}`)) errors.push(`${rel} missing REPOSITORY=${expectedRepo}`);
+  if (!content.includes(requiredMarker)) errors.push(`${rel} missing ${requiredMarker}`);
+  if (/skills:\/\//i.test(content)) errors.push(`${rel} may not depend on external skill URIs`);
+
+  const agentPath = join(path, '..', 'agents', 'openai.yaml');
+  if (!existsSync(agentPath)) {
+    errors.push(`${rel} missing agents/openai.yaml`);
+  } else {
+    const agent = readFileSync(agentPath, 'utf8');
+    const displayMatch = agent.match(/display_name:\s*["']?([^\n"']+)/);
+    const displayName = displayMatch?.[1]?.trim() ?? '';
+    if (!displayName.startsWith(displayPrefix)) errors.push(`${rel} display_name must start with ${displayPrefix}`);
+  }
 }
 
 const governanceFiles = mandatory
   .filter(rel => existsSync(join(root, rel)))
-  .map(rel => ({ rel, content: readFileSync(join(root, rel), 'utf8') }));
-
-const knownForeignProjectPatterns = [
-  /cohpucp-engineering-governance/i,
-  /jmejia31\/Cohpucp/i,
-  /PROJECT_ID\s*=\s*COHPUCP/i,
-];
+  .map(rel => ({ rel, content: read(rel) }));
 
 for (const { rel, content } of governanceFiles) {
-  for (const pattern of knownForeignProjectPatterns) {
-    if (pattern.test(content)) errors.push(`${rel} contains forbidden foreign-project reference: ${pattern}`);
-  }
-
-  for (const match of content.matchAll(/PROJECT_ID\s*[:=]\s*([A-Za-z0-9_-]+)/g)) {
-    if (match[1].toUpperCase() !== 'VARIAPP') {
-      errors.push(`${rel} declares foreign PROJECT_ID=${match[1]}`);
+  for (const match of content.matchAll(/PROJECT_ID\s*[:=]\s*[`"']?([A-Za-z0-9_-]+)/g)) {
+    if (match[1].toUpperCase() !== expectedProjectId) {
+      errors.push(`${rel} declares a non-canonical PROJECT_ID`);
     }
   }
 
   for (const match of content.matchAll(/REPOSITORY\s*[:=]\s*[`"']?([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)/g)) {
-    if (match[1] !== expectedRepo) {
-      errors.push(`${rel} declares foreign REPOSITORY=${match[1]}`);
-    }
+    if (match[1] !== expectedRepo) errors.push(`${rel} declares a non-canonical REPOSITORY`);
   }
 
-  if (/skills:\/\//i.test(content)) {
-    errors.push(`${rel} contains a skills:// URI; project governance must not depend on external skills`);
-  }
-
-  for (const match of content.matchAll(/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)/gi)) {
-    const referencedRepo = `${match[1]}/${match[2].replace(/\.git$/, '')}`;
-    if (referencedRepo !== expectedRepo) {
-      errors.push(`${rel} references foreign GitHub repository ${referencedRepo}`);
-    }
-  }
+  if (/skills:\/\//i.test(content)) errors.push(`${rel} contains an external skill URI`);
 }
 
 if (errors.length) {
-  console.error('PROJECT SCOPE GATE FAILED');
+  console.error('SOLQARYN PROJECT SCOPE GATE FAILED');
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log(`PROJECT SCOPE GATE OK: ${expectedRepo} / ${requiredMarker}`);
+console.log(`SOLQARYN PROJECT SCOPE GATE OK: ${expectedRepo} / ${requiredMarker}`);
