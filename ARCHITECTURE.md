@@ -108,9 +108,9 @@ Cuando una operación modifica inventario/finanzas/documentos relacionados, debe
 - CORS por lista explícita.
 - Rate limiting de login.
 - Security headers.
-- Separación estricta de Producción/Desarrollo.
+- Separación estricta de PROD/DEV.
 - Secretos fuera del repositorio.
-- `main` congelada durante el trabajo en `Desarrollo`.
+- `main` congelada durante el trabajo en `dev`.
 
 RBAC debe basarse en relaciones persistentes y permisos explícitos, evitando bypasses implícitos por banderas administrativas.
 
@@ -122,8 +122,8 @@ Topología operacional vigente en Aiven:
 
 - proyecto `solqaryn`;
 - un único servicio MySQL Free `solqaryn-mysql`;
-- base `solqaryn_dev` con usuario `solqaryn_dev_user` para Desarrollo;
-- base `solqaryn_prod` con usuario `solqaryn_prod_user` para Produccion;
+- base `solqaryn_dev` con usuario `solqaryn_dev_user` para DEV;
+- base `solqaryn_prod` con usuario `solqaryn_prod_user` para PROD;
 - `avnadmin` reservado para administración;
 - aislamiento DEV/PROD lógico por base, usuario y GitHub Environment; ambos comparten el mismo servicio físico Aiven.
 
