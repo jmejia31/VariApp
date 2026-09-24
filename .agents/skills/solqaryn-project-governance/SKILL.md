@@ -10,7 +10,7 @@ description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar
 - `PLATFORM=SOLQARYN`
 - `PROJECT_ID=SOLQARYN`
 - `REPOSITORY=solqaryn/Solqaryn`
-- `BRANCH=Desarrollo`
+- `BRANCH=dev`
 - `PROJECT_SCOPE_LOCK=STRICT`
 - `LOCAL_SKILL_COUNT=1`
 - `LOCAL_SKILL=solqaryn-project-governance`
@@ -25,7 +25,7 @@ Leer en el orden necesario:
 1. `docs/PROJECT_SCOPE_LOCK.md`;
 2. `AGENTS.md`;
 3. `docs/VAEP_AUTHORITY.md` cuando la tarea toque VAEP/automatizaciones;
-4. HEAD vivo de `Desarrollo`;
+4. HEAD vivo de `dev`;
 5. `PROJECT_CONTEXT.md` y `PROJECT_INDEX.md`;
 6. `ARCHITECTURE.md` cuando exista impacto estructural/transversal;
 7. `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md` cuando una tarea requiera guia externa;
@@ -37,14 +37,14 @@ Un snapshot historico, chat, receipt o comentario no sustituye al estado vivo ni
 
 Antes de analizar o escribir:
 
-1. confirmar `solqaryn/Solqaryn` y `Desarrollo`;
+1. confirmar `solqaryn/Solqaryn` y `dev`;
 2. confirmar que la tarea pertenece a SOLQARYN;
 3. confirmar que esta skill local fue aplicada primero;
 4. si se requiere una referencia externa, comprobar que exista como `ACTIVE` en la allowlist y en el registro de referencias;
 5. consultar exclusivamente el origen original + pin + ruta oficial registrados;
 6. nunca consultar una copia de esa skill alojada en otro proyecto;
 7. identificar componente, capa, datos, seguridad, consumidores y validaciones afectadas;
-8. determinar si la tarea es lectura, cambio en `Desarrollo` o accion que requiere autorizacion adicional;
+8. determinar si la tarea es lectura, cambio en `dev` o accion que requiere autorizacion adicional;
 9. cuando exista checkout local, ejecutar `node scripts/verify-project-scope.mjs`.
 
 Si un origen externo no puede verificarse exactamente, aplicar fail-closed y continuar sin esa referencia.
@@ -70,7 +70,7 @@ Ninguna referencia externa puede imponer un framework, capa, persistencia, mecan
 
 ## 5. Ramas, entornos y produccion
 
-- El trabajo ordinario se realiza en `Desarrollo`.
+- El trabajo ordinario se realiza en `dev`.
 - Revalidar HEAD antes de escribir/publicar y preservar trabajo concurrente.
 - No force-push, reset destructivo ni reescritura de historia compartida.
 - Cualquier cambio futuro sobre `main`, Produccion, datos productivos, dominios, certificados, secretos o infraestructura productiva requiere autorizacion nueva y explicita del propietario y debe respetar la autoridad operativa vigente.
