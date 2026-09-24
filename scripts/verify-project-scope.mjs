@@ -36,7 +36,6 @@ const mandatory = [
 
 const expectedExternalSources = [
   ['agentskills/agentskills', '69ef37e9424c0a7ea9dd2293b559e43ec8176379'],
-  ['ChatGPT / OpenAI, integrado en el entorno', 'Integrado en el entorno'],
   ['pbakaus/impeccable', '2149fcce39a90bb409df5f16515f316a76dc6199'],
   ['emilkowalski/skills', 'd23d7f88a2e21c9e4b1418c7abe420f5c1052ba7'],
   ['Leonxlnx/taste-skill', 'ccbc15639c97057cbfcf32ecebc38ef716e4bb37'],
@@ -113,6 +112,7 @@ if (existsSync(join(root, onlyLocalSkill))) {
 
 if (existsSync(join(root, registryPath))) {
   const registry = read(registryPath);
+  if (!registry.includes('Skill Creator') || !registry.includes('ChatGPT / OpenAI, integrado en el entorno')) errors.push('registry missing official Skill Creator reference');
   if (!registry.includes('LOCAL_SKILL_COUNT=1')) errors.push('registry must declare LOCAL_SKILL_COUNT=1');
   if (!registry.includes('EXTERNAL_SKILL_SOURCES=9')) errors.push('registry must declare EXTERNAL_SKILL_SOURCES=9');
   for (const [source, pin] of expectedExternalSources) {
@@ -123,6 +123,7 @@ if (existsSync(join(root, registryPath))) {
 
 if (existsSync(join(root, allowlistPath))) {
   const allowlist = read(allowlistPath);
+  if (!allowlist.includes('Skill Creator oficial de ChatGPT / OpenAI') || !allowlist.includes('Integrado en el entorno')) errors.push('allowlist missing official Skill Creator reference');
   if (!allowlist.includes('AUTHORIZED_ORIGINAL_SKILL_SOURCES=9')) {
     errors.push('allowlist must declare nine authorized original skill sources');
   }
