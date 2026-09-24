@@ -14,7 +14,10 @@ Mantener una capacidad permanente de backup cifrado y restore descartable para D
 
 ## Variables GitHub Actions canónicas
 
+Repositorio:
 - `SOLQARYN_DESARROLLO_BACKUP_SCHEDULE_ENABLED`
+
+Environment `Desarrollo`:
 - `SOLQARYN_DESARROLLO_DB_HOST`
 - `SOLQARYN_DESARROLLO_DB_PORT`
 - `SOLQARYN_DESARROLLO_DB_NAME`
@@ -22,6 +25,7 @@ Mantener una capacidad permanente de backup cifrado y restore descartable para D
 
 ## Secrets GitHub Actions canónicos
 
+Todos viven en el environment `Desarrollo`:
 - `SOLQARYN_DESARROLLO_DB_PASSWORD`
 - `SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE`
 - `SOLQARYN_AIVEN_TOKEN`
