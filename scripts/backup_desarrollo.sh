@@ -78,7 +78,12 @@ log "Validando conectividad con la base autorizada usando SSL_MODE=$DB_SSL_MODE.
 
 MYSQL_VERSION="$("${MYSQL_DB[@]}" --batch --skip-column-names -e 'SELECT VERSION();' | head -n 1)"
 GIT_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || printf 'unknown')"
-MIGRATION_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory'), (SELECT COUNT(*) FROM __EFMigrationsHistory), 0);" | head -n 1)"
+MIGRATION_TABLE_EXISTS="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory';" | head -n 1)"
+if [[ "$MIGRATION_TABLE_EXISTS" == "1" ]]; then
+  MIGRATION_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM __EFMigrationsHistory;" | head -n 1)"
+else
+  MIGRATION_COUNT="0"
+fi
 TABLE_COUNT="$("${MYSQL_DB[@]}" --batch --skip-column-names -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';" | head -n 1)"
 
 log "Generando dump transaccional MySQL..."
