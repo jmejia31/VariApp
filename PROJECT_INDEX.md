@@ -26,6 +26,7 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 - `CONTRIBUTING.md`: flujo Git y criterios de contribución.
 - `implementation_plan.md`: plan de implementación histórico/específico cuando aplique.
 - `render.yaml`: configuración versionada relacionada con Render; tratar con cautela por separación de entornos.
+- `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`: fuente canónica para GitHub Environments y topología Aiven DEV/PROD (`Desarrollo`, `Produccion`, `solqaryn-mysql`, bases/usuarios aislados).
 
 ## Backend
 
