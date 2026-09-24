@@ -1,6 +1,6 @@
 # Índice de trazabilidad del Plan Maestro — corte vivo 2026-09-10
 
-Fuente rectora: Google Sheet `VariApp — PLAN MAESTRO DE AUTOMATIZACIONES`, spreadsheet `19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY`, rangos `PLAN_MAESTRO!A1:M130`, más evidencia Git bajo `Desarrollo`.
+Fuente rectora: Google Sheet `Solqaryn — PLAN MAESTRO DE AUTOMATIZACIONES`, spreadsheet `19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY`, rangos `PLAN_MAESTRO!A1:M130`, más evidencia Git bajo `Desarrollo`.
 
 ## Semántica fail-closed
 

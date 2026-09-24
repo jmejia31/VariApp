@@ -6,7 +6,7 @@ Aceptado para ERP-N2.7.
 
 ## Contexto
 
-VariApp ya distingue OrdenCompra, RecepcionCompra, FacturaProveedor y DevolucionProveedor. Una nota de crédito de proveedor debe registrar el crédito documental sin convertir ese documento en autoridad de inventario, Kardex o Cuentas por Pagar completas.
+Solqaryn ya distingue OrdenCompra, RecepcionCompra, FacturaProveedor y DevolucionProveedor. Una nota de crédito de proveedor debe registrar el crédito documental sin convertir ese documento en autoridad de inventario, Kardex o Cuentas por Pagar completas.
 
 ## Decisión
 

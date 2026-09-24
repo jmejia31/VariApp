@@ -1,7 +1,7 @@
 {
   "schema": "vaep-listo-real/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "parent": "N8.20.G",
   "macro_parent": "N8.20",
@@ -21,7 +21,7 @@
     "db_engine": "MYSQL",
     "db_version": "8.4.8",
     "provider": "AIVEN",
-    "provider_service": "variapp-mysql",
+    "provider_service": "solqaryn-mysql",
     "provider_plan": "free-1-1gb",
     "runtime_provider_host_sha256": "882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0",
     "control_plane_dev_host_sha256": "882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0",

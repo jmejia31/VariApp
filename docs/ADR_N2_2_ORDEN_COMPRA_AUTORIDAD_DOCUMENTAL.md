@@ -6,7 +6,7 @@ Aceptada para ERP-N2.2.
 
 ## Contexto
 
-VariApp ya dispone de `SolicitudCompra` como necesidad aprobable y de `Compra` como flujo transaccional histórico. ERP-N2 requiere separar explícitamente solicitud, orden, recepción y factura de proveedor para evitar que un único agregado termine controlando compromiso comercial, inventario y obligación financiera a la vez.
+Solqaryn ya dispone de `SolicitudCompra` como necesidad aprobable y de `Compra` como flujo transaccional histórico. ERP-N2 requiere separar explícitamente solicitud, orden, recepción y factura de proveedor para evitar que un único agregado termine controlando compromiso comercial, inventario y obligación financiera a la vez.
 
 La OrdenCompra debe soportar proveedor, moneda, condiciones, fecha esperada, líneas, descuentos, impuestos, observaciones, aprobación, cancelación e idempotencia durable. Al mismo tiempo, N2.3 establece que el stock aumenta por recepción de mercancía, no por la aprobación de la orden.
 

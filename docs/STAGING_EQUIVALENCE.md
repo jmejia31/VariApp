@@ -27,11 +27,11 @@ Esta certificación compara Desarrollo con metadata de Producción exclusivament
 
 | Superficie | Desarrollo | Producción / referencia read-only | Clasificación vigente |
 |---|---|---|---|
-| Backend Render | `variapp-api-desarrollo`, branch `Desarrollo`, Docker, plan free | `variapp-api`, branch `main`, Docker, plan free | `EQUIVALENT` para clase de runtime/plan; branch `EXPECTED_ENV_DIFFERENCE` |
+| Backend Render | `solqaryn-api-desarrollo`, branch `Desarrollo`, Docker, plan free | `solqaryn-api`, branch `main`, Docker, plan free | `EQUIVALENT` para clase de runtime/plan; branch `EXPECTED_ENV_DIFFERENCE` |
 | Región Render | Oregon | Virginia | `EXPECTED_ENV_DIFFERENCE` |
 | Health check Render | `/health/ready` | `/health` | `EXPECTED_ENV_DIFFERENCE`; endpoints coherentes con las versiones desplegadas |
 | Variables Render — nombres | Inventario sanitizado completo, sin valores | Inventario sanitizado completo, sin valores | nombres comunes equivalentes; diferencias justificadas como `EXPECTED_ENV_DIFFERENCE`; `UNKNOWN=0` |
-| Frontend Vercel | `variapp-desarrollo` | `varistorehn`, `prj_djMCand2yYeY3AvaUWsjwHDDJDkM`, branch productiva `main` según evidencia de control-plane | identidad productiva confirmada; separación de proyecto/branch es `EXPECTED_ENV_DIFFERENCE` |
+| Frontend Vercel | `solqaryn-desarrollo` | `varistorehn`, `prj_djMCand2yYeY3AvaUWsjwHDDJDkM`, branch productiva `main` según evidencia de control-plane | identidad productiva confirmada; separación de proyecto/branch es `EXPECTED_ENV_DIFFERENCE` |
 | Build frontend PROD | Angular, `npm run build`/`ng build` | root `frontend`, output `dist/inventoryapp-frontend/browser`, Node `24.x` | `EQUIVALENT` por contrato material |
 | Custom env frontend | API resuelta por contrato versionado/rewrite, sin dependencia custom runtime detectada | versión productiva certificada usa contrato Angular estático | `N_A_JUSTIFIED_FOR_CURRENT_PRODUCTION_FRONTEND_CONTRACT` |
 | Seguridad/observabilidad | JWT fail-closed, rate-limit, CORS, correlation y request observability revalidados | metadata no secreta/read-only | `PASS`; secretos expuestos `0` |

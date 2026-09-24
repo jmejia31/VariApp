@@ -15,7 +15,7 @@
     "logging_correlation": "PASS__current CorrelationIdMiddleware and RequestObservabilityMiddleware re-read; safe correlation ID validation/scoping and request/error/slow telemetry present",
     "health_policy": "PASS__current Program.cs exposes /health and DB-backed /health/ready; fresh Render metadata confirms DEV healthCheckPath=/health/ready and PROD metadata read-only confirms /health as expected environment/version difference",
     "policy_shape": "PASS__current SecurityBoundaryContractTests re-read: authenticated payment/upload boundaries, explicit public-store rate limit, narrowly anonymous inbound webhook, Render client-IP trust contract",
-    "dev_runtime": "PASS__fresh Render deploy for exact evidence head d269d607220f53cf41cf08348c28c1a47b1ac7b3 reached live on variapp-api-desarrollo",
+    "dev_runtime": "PASS__fresh Render deploy for exact evidence head d269d607220f53cf41cf08348c28c1a47b1ac7b3 reached live on solqaryn-api-desarrollo",
     "causal_tests": "PASS__functional product head current check set previously fresh-read as 21 terminal successful checks; current exact-head product delta remains 0"
   },
   "historical_support_only": {

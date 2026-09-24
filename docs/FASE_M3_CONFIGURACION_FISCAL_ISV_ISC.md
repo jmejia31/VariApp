@@ -196,7 +196,7 @@ El HEAD funcional certificado `9ea747acd110914d6445f687caabf4cf42a1fefe` demostr
 - Fase 8 - Validación completa automatizada: success;
 - ningún P0/P1 introducido por M3.
 
-`VariApp CI` se registró como `SKIPPED` y no se contabiliza como workflow verde.
+`Solqaryn CI` se registró como `SKIPPED` y no se contabiliza como workflow verde.
 
 Evidencia oficial del HEAD funcional certificado `9ea747acd110914d6445f687caabf4cf42a1fefe`:
 
@@ -205,7 +205,7 @@ Evidencia oficial del HEAD funcional certificado `9ea747acd110914d6445f687caabf4
 - `31330348396` — Fase 2 - Auditoría de configuración y dependencias — **success**;
 - `31330348421` — Bloque 2C.1 - Variante técnica y migración — **success**;
 - `31330348369` — Fase 8 - Validación completa automatizada — **success**;
-- `31330348386` — VariApp CI — **skipped**, no contabilizado como verde.
+- `31330348386` — Solqaryn CI — **skipped**, no contabilizado como verde.
 
 Dentro de `31330348378` quedaron en success backend Release, pruebas no integración, frontend lint/build, Docker/higiene, migraciones MySQL 8.4, pruebas de integración MySQL (incluidos los escenarios fiscales M3), verificación de snapshot EF y SQL forward.
 

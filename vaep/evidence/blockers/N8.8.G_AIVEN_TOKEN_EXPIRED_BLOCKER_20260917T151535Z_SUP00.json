@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.vaep.external-blocker.v1",
+  "schema": "solqaryn.vaep.external-blocker.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.8.G",
   "parent": "N8.8",

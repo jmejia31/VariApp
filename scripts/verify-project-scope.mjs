@@ -2,8 +2,8 @@ import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
 const root = process.cwd();
-const expectedRepo = 'solqaryn/VariApp';
-const expectedProjectId = 'VARIAPP';
+const expectedRepo = 'solqaryn/Solqaryn';
+const expectedProjectId = 'SOLQARYN';
 const requiredMarker = 'PROJECT_SCOPE_LOCK=STRICT';
 const onlyLocalSkill = '.agents/skills/solqaryn-project-governance/SKILL.md';
 const registryPath = 'docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md';

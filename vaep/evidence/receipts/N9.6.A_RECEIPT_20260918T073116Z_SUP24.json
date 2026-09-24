@@ -15,7 +15,7 @@
     "DEV backend health/readiness/latency PASS",
     "DEV frontend shell/latency PASS",
     "DEV protected critical surfaces fail closed anonymously PASS",
-    "Vercel variapp-desarrollo runtime errors last 1h: none found"
+    "Vercel solqaryn-desarrollo runtime errors last 1h: none found"
   ],
   "recovery": {
     "production_targeting_probe_retired": "209e265da623db814d9fc75a9e71521fc7bee2d6",

@@ -34,7 +34,7 @@
       "8736a575561369436e2207bfc20b839b286f4ff2"
     ],
     "uxFixCommit": "06164016626f0208c3c28f1d2550062c4eec8406",
-    "deployment": "variapp-desarrollo.vercel.app"
+    "deployment": "solqaryn-desarrollo.vercel.app"
   },
   "defectReferences": [
     "Physical existence context was not reachable from the legacy variant stock action; fixed in cb270df4 and 8736a575.",

@@ -20,7 +20,7 @@ prueba suficiente por sí solo.
    — 4/4 PASS.
 4. Runtime de Desarrollo: `GET /health` y `GET /health/ready` respondieron HTTP
    200; el segundo confirmó `database=connected`.
-5. Render identificó el servicio `variapp-api-desarrollo`, rama `Desarrollo`,
+5. Render identificó el servicio `solqaryn-api-desarrollo`, rama `Desarrollo`,
    plan Free, último deployment Live y variables presentes sin revelar valores.
 6. M11 histórico: GitHub Actions run `33504690547`, de 2026-09-01, ejecutó con
    éxito el backup cifrado real de Desarrollo y el restore/drill del mismo

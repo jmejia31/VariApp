@@ -60,7 +60,7 @@ static async Task<string?> SessionStatusValueAsync(MySqlConnection connection, s
 }
 
 var outputDirectory = args.Length > 0 ? args[0] : ".n820c-proof";
-var connectionString = Environment.GetEnvironmentVariable("VARIAPP_DEV_DB_CONNECTION");
+var connectionString = Environment.GetEnvironmentVariable("SOLQARYN_DEV_DB_CONNECTION");
 var repoRoot = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? Directory.GetCurrentDirectory();
 var functionalHead = Environment.GetEnvironmentVariable("GITHUB_SHA") ?? "UNKNOWN";
 var runId = Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "LOCAL";
@@ -160,7 +160,7 @@ try
 
     var evidence = new
     {
-        schemaVersion = "variapp.db-provider-proof.v1",
+        schemaVersion = "solqaryn.db-provider-proof.v1",
         authority = "docs/VAEP_AUTHORITY.md",
         task = "N8.20.C",
         status = pass ? "PASS_PROVIDER_IDENTIFIED" : "NOT_CERTIFIED",
@@ -278,7 +278,7 @@ catch (Exception ex)
 {
     var failure = new
     {
-        schemaVersion = "variapp.db-provider-proof.v1",
+        schemaVersion = "solqaryn.db-provider-proof.v1",
         task = "N8.20.C",
         status = "PROBE_FAILED",
         branch = "Desarrollo",

@@ -2,7 +2,7 @@
 
 Fecha de preparación: 2026-09-11
 Autoridad operativa: `docs/VAEP_AUTHORITY.md`
-Repositorio/rama: `jmejia31/VariApp` / `Desarrollo`
+Repositorio/rama: `jmejia31/Solqaryn` / `Desarrollo`
 Estado de este documento al publicarse: **CANDIDATO DE CIERRE H / VALIDANDO**. Este archivo no marca por sí solo `N6.4.H=LISTO_REAL`; el cierre exige REVIEW_FIRST, checkpoint exact-head y reconciliación de `TASKS.md`, `CHANGELOG_AI.md`, COLA y CONFIG.
 
 ## 1. Dictamen y alcance
@@ -107,7 +107,7 @@ N6.4.G reutiliza evidencia causal ya existente en lugar de duplicar suites:
 
 ### Eventos no causales preservados
 
-- Vercel `variapp-desarrollo`: failure por deployment rate limit observado durante F. Se conserva como telemetría externa; no es fallo de código/test y desplegar Producción no forma parte del DoD de N6.4.F/H.
+- Vercel `solqaryn-desarrollo`: failure por deployment rate limit observado durante F. Se conserva como telemetría externa; no es fallo de código/test y desplegar Producción no forma parte del DoD de N6.4.F/H.
 - `VAEP Jules Diagnostic / diagnose-jules`: `JULES_API_ERROR` sin manifest ni sesión durante G. Se conserva como telemetría; G fue ejecución directa `CHATGPT_VAEP`, sin offload Jules, por lo que no sustituye ni invalida las suites de aplicación exitosas.
 
 ## 6. Runbook operativo

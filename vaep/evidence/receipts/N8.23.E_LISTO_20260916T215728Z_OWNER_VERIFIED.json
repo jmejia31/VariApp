@@ -2,18 +2,18 @@
   "task": "N8.23.E",
   "status": "LISTO",
   "timestamp_utc": "2026-09-16T21:57:28Z",
-  "scope": "Vercel DEV project variapp-desarrollo only",
+  "scope": "Vercel DEV project solqaryn-desarrollo only",
   "sequence": "CURRENT -> PREVIOUS_KNOWN_GOOD -> HEALTHY -> CURRENT -> HEALTHY",
   "current": {
     "deployment_id": "dpl_4yGzfFqgmNahG4vNcEAmw7ncMiq1",
     "commit": "e0a205fdb082dc9dbbbc48f7f107a62f1a7e200f",
-    "url": "variapp-desarrollo-bmexuoon7-vari-app.vercel.app",
+    "url": "solqaryn-desarrollo-bmexuoon7-vari-app.vercel.app",
     "state": "READY"
   },
   "previous_known_good": {
     "deployment_id": "dpl_3opgmr8C7PKpnmYHUCSyiSxa2B8E",
     "commit": "738fdf1dd202c9eed72d53a6ee297c76d5533e90",
-    "url": "variapp-desarrollo-8iuon3yst-vari-app.vercel.app",
+    "url": "solqaryn-desarrollo-8iuon3yst-vari-app.vercel.app",
     "state": "READY"
   },
   "rollback": {
@@ -24,7 +24,7 @@
   "forward_recovery": {
     "mechanism": "Promote existing READY current deployment; no rebuild",
     "canonical_domain_resolves_to_current_deployment_id": "dpl_4yGzfFqgmNahG4vNcEAmw7ncMiq1",
-    "current_health": "HTTP 200 on https://variapp-desarrollo.vercel.app"
+    "current_health": "HTTP 200 on https://solqaryn-desarrollo.vercel.app"
   },
   "gates": {
     "FRONTEND_ROLLBACK": "PASS",

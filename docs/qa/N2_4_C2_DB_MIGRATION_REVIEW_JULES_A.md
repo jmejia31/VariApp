@@ -2,7 +2,7 @@
 
 ## Alcance y base revisada
 
-- Proyecto: VariApp / ERP-N2.4 FacturaProveedor.
+- Proyecto: Solqaryn / ERP-N2.4 FacturaProveedor.
 - Rama autoritativa: `Desarrollo`.
 - Base lógica revisada: `158161812e74fd9d6b91c9cdfba51f62671de5c4` y descendientes de control-plane hasta `c5b5153e88d49c58f774190855c95d4e6cd8f66c`.
 - Scope: revisión de configuración EF, claves/FK, índices, precisiones, check constraints y estrategia de migración. No incluye DDL/DML sobre ambientes reales ni cambios de runtime fuera de N2.4.C.

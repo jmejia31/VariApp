@@ -59,7 +59,7 @@ public class InventoryDocumentConcurrencyTests
         empresa.Setup(x => x.GetActivaEntidadAsync())
             .ReturnsAsync(new EmpresaConfiguracion
             {
-                NombreComercial = "VariApp CI",
+                NombreComercial = "Solqaryn CI",
                 RTN = "00000000000000",
                 Telefono = "0000-0000",
                 Correo = "ci@example.invalid",

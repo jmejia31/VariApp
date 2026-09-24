@@ -421,7 +421,7 @@ export class EmailEmpresarialCardComponent implements OnInit {
   }
 
   private nuevaClaveIdempotencia(): string {
-    return globalThis.crypto?.randomUUID?.() ?? `variapp-email-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return globalThis.crypto?.randomUUID?.() ?? `solqaryn-email-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
   private detalleError(error: HttpErrorResponse, fallback: string): string {

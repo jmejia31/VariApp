@@ -111,10 +111,10 @@ for path in files:
 render = read(ROOT / "render.yaml")
 required_render = [
     "branch: Desarrollo",
-    "name: variapp-api-desarrollo",
+    "name: solqaryn-api-desarrollo",
     "value: varistorehn_desarrollo",
-    "value: https://variapp-desarrollo.vercel.app",
-    "value: https://variapp-api-desarrollo.onrender.com",
+    "value: https://solqaryn-desarrollo.vercel.app",
+    "value: https://solqaryn-api-desarrollo.onrender.com",
 ]
 for token in required_render:
     if token not in render:

@@ -35,7 +35,7 @@ async function createInvoice(request: APIRequestContext, token: string): Promise
     headers: authHeaders(token),
     multipart: {
       Nombre: `Producto correo Fase 7 ${suffix}`,
-      Marca: 'VariApp',
+      Marca: 'Solqaryn',
       Modelo: 'SMTP',
       Descripcion: 'Producto temporal para validar correo y PDF adjunto.',
       Cantidad: '10',
@@ -137,7 +137,7 @@ test.describe('Fase 7 - correo SMTP aislado', () => {
     expect(firstResult.intentos).toBe(2);
     expect(firstResult.yaProcesado).toBe(false);
     expect(firstResult.codigo).toBe('ENVIADO');
-    expect(firstResult.messageId).toMatch(/^variapp-/);
+    expect(firstResult.messageId).toMatch(/^solqaryn-/);
 
     const duplicateResponse = await request.post(`${API_URL}/facturas/${invoice.id}/compartir/correo`, {
       headers,

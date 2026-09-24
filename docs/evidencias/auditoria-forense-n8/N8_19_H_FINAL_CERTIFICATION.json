@@ -5,7 +5,7 @@
   "macro_parent":"N8.19",
   "stage":"DOC_CERT",
   "branch":"Desarrollo",
-  "repo":"jmejia31/VariApp",
+  "repo":"jmejia31/Solqaryn",
   "base_head":"897787282ab7b241c3c58abdae3a08bd28d66314",
   "readme":"docs/evidencias/auditoria-forense-n8/README.md",
   "scope":{"first":"N8.6.G","last":"N8.18.H","tasks":98,"historical_segment":66,"owner_intervention_segment":32},

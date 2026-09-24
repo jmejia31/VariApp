@@ -1,5 +1,5 @@
 {
-  "schema":"variapp-dr-db-mig-recovery/v1",
+  "schema":"solqaryn-dr-db-mig-recovery/v1",
   "authority":"docs/VAEP_AUTHORITY.md",
   "scope":"N8.10.C",
   "parent":"N8.10",

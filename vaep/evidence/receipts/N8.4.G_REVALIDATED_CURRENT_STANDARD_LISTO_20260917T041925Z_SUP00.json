@@ -13,7 +13,7 @@
     "basis": "Se revalidaron controles aplicables del scanner/POS mediante evidencia read-only vigente y codigo canónico. Los perifericos fisicos no estan conectados al runner autorizado, por lo que no se inventa PASS de impresora/caja/lector fisico; la limitacion queda documentada como gap operativo conforme al criterio de validacion de la fila.",
     "scanner_static_contract": "PASS",
     "physical_hardware_claim": "NOT_CLAIMED",
-    "external_runtime_read_only": "Vercel DEV variapp-desarrollo inspected; READY deployment evidence observed; no mutation"
+    "external_runtime_read_only": "Vercel DEV solqaryn-desarrollo inspected; READY deployment evidence observed; no mutation"
   },
   "causal_validation": {
     "frontend_dependency": "html5-qrcode 2.3.8 pinned",

@@ -18,7 +18,7 @@
     ]
   },
   "production": {
-    "renderService": "variapp-api",
+    "renderService": "solqaryn-api",
     "renderServiceId": "srv-d983qti8qa3s73eqqne0",
     "branch": "main",
     "deployedCommit": "85b4e02814823e9671803c23798a6ff0bf05c8f6",

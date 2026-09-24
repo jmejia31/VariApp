@@ -24,13 +24,13 @@
     {"run": 35258969104, "workflow": "Priority 4 - Interfaces architecture and quality", "conclusion": "success", "tested_head": "6fd3e28cbf28164d110d6b83756b9094cec654a6"}
   ],
   "fresh_runtime_basis": {
-    "development_frontend": "variapp-desarrollo.vercel.app",
+    "development_frontend": "solqaryn-desarrollo.vercel.app",
     "development_deployment": "dpl_3epaGmgBtXmvEhjW8iBU46UFy12a",
     "development_state": "READY",
     "development_root_http": 200,
     "development_health_ready_http": 200,
     "development_health": {"status": "ready", "database": "connected"},
-    "development_backend_target": "variapp-api-desarrollo.onrender.com",
+    "development_backend_target": "solqaryn-api-desarrollo.onrender.com",
     "production_reference_read_only": true,
     "production_active_project": "varistorehn",
     "production_active_ref": "main",

@@ -4,14 +4,14 @@
   "stage":"FRONTEND_UX",
   "captured_at_utc":"2026-09-16T16:33:00Z",
   "lease_token":"SUP00-N822E-CLOSER-20260916T163225Z",
-  "sources":{"provider":"Vercel","team":"VariApp","dev_project":"variapp-desarrollo","other_linked_project":"varistorehn","repo":"jmejia31/VariApp","metadata_only":true},
+  "sources":{"provider":"Vercel","team":"Solqaryn","dev_project":"solqaryn-desarrollo","other_linked_project":"varistorehn","repo":"jmejia31/Solqaryn","metadata_only":true},
   "matrix":[
     {"dimension":"frontend_framework","dev":"Angular 20.3.x","prod_code_baseline":"Angular 20.3.x","classification":"EQUIVALENT"},
     {"dimension":"build_script","dev":"ng build / build:prod","prod_code_baseline":"ng build / build:prod","classification":"EQUIVALENT"},
     {"dimension":"vercel_node_version","dev":"24.x","varistorehn_project":"24.x","classification":"EQUIVALENT"},
-    {"dimension":"vercel_team_and_repository_link","dev":"VariApp team -> jmejia31/VariApp","varistorehn_project":"VariApp team -> jmejia31/VariApp","classification":"EQUIVALENT"},
+    {"dimension":"vercel_team_and_repository_link","dev":"Solqaryn team -> jmejia31/Solqaryn","varistorehn_project":"Solqaryn team -> jmejia31/Solqaryn","classification":"EQUIVALENT"},
     {"dimension":"release_branch_code_delta","dev":"Desarrollo Angular 20.3.27 plus candidate functionality/tests","prod_code_baseline":"main Angular 20.3.25","classification":"EXPECTED_ENV_DIFFERENCE"},
-    {"dimension":"authoritative_production_frontend_project_identity","dev":"variapp-desarrollo is explicit DEV project","prod":"no authoritative project-to-PROD binding exposed by current read-only Vercel metadata; varistorehn is only a candidate and must not be assumed","classification":"UNKNOWN","owner_action":"confirm the Vercel project that is authoritative for VariApp production without sharing secrets"},
+    {"dimension":"authoritative_production_frontend_project_identity","dev":"solqaryn-desarrollo is explicit DEV project","prod":"no authoritative project-to-PROD binding exposed by current read-only Vercel metadata; varistorehn is only a candidate and must not be assumed","classification":"UNKNOWN","owner_action":"confirm the Vercel project that is authoritative for Solqaryn production without sharing secrets"},
     {"dimension":"production_git_branch_setting_and_build_output_settings","dev":"project exists and has Desarrollo deployment aliases","prod":"current read-only project response does not expose production branch/root/build/output settings","classification":"UNKNOWN","owner_action":"provide/authorize non-secret Vercel project settings metadata for the authoritative PROD project"},
     {"dimension":"observed_varistorehn_recent_deployment_refs","dev":"n/a","prod_candidate":"recent visible deployments are associated with Desarrollo refs/aliases, but target metadata is null for those samples","classification":"UNKNOWN","reason":"cannot infer the authoritative production deployment branch from preview/history samples alone"}
   ],

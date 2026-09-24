@@ -1,8 +1,8 @@
-# ARCHITECTURE — VariApp
+# ARCHITECTURE — Solqaryn
 
 ## 1. Estilo arquitectónico
 
-VariApp usa una arquitectura backend por capas, cercana a Clean Architecture pragmática:
+Solqaryn usa una arquitectura backend por capas, cercana a Clean Architecture pragmática:
 
 `Domain <- Application <- Infrastructure`
 

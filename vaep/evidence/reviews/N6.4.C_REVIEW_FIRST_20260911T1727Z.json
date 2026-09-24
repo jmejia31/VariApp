@@ -43,7 +43,7 @@
     ],
     "result": "PASS",
     "omitted": [
-      "VariApp CI: SKIPPED by workflow policy; not a causal failure"
+      "Solqaryn CI: SKIPPED by workflow policy; not a causal failure"
     ]
   },
   "selfReview": {

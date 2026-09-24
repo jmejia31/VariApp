@@ -2,7 +2,7 @@
 
 ## Alcance y base
 
-- Proyecto: VariApp / ERP-N2.4 FacturaProveedor.
+- Proyecto: Solqaryn / ERP-N2.4 FacturaProveedor.
 - Rama: `Desarrollo`.
 - Base lógica: `158161812e74fd9d6b91c9cdfba51f62671de5c4` y descendientes de N2.4.C hasta el failover actual.
 - Scope exclusivo: estrategia de datos, preflight/postcheck, backfill si aplica, reconciliación y rollback lógico. No incluye ejecutar DDL/DML sobre Producción ni modificar runtime EF/API/frontend.

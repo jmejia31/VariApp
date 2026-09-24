@@ -58,7 +58,7 @@
     "workspace_id": "tea-d97f0k28qa3s73ejqhtg",
     "dev_service": {
       "id": "srv-d9jblq7avr4c73c74jng",
-      "name": "variapp-api-desarrollo",
+      "name": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "health_check_path": "/health/ready",
       "maintenance_mode": false,
@@ -66,7 +66,7 @@
     },
     "production_reference_read_only": {
       "id": "srv-d983qti8qa3s73eqqne0",
-      "name": "variapp-api",
+      "name": "solqaryn-api",
       "branch": "main",
       "health_check_path": "/health",
       "maintenance_mode": false,

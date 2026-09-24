@@ -192,7 +192,7 @@ Run 31215767604 — success
 Fase 2C.4 - Frontend del escáner
 Run 31215765486 — success
 
-VariApp CI
+Solqaryn CI
 Run 31215765320 — skipped por condición del workflow
 ```
 

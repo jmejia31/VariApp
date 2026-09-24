@@ -1,12 +1,12 @@
-# HYPERCARE_RUNBOOK — VariApp Desarrollo
+# HYPERCARE_RUNBOOK — Solqaryn Desarrollo
 
 ## Propósito y alcance
 
 Ventana de observación posterior a un cambio o ensayo autorizado de `Desarrollo`. No autoriza cambios de Producción, DNS, certificados, plan, secretos, `main` ni PR #2. Los únicos endpoints públicos usados por este runbook son:
 
-- `https://variapp-desarrollo.vercel.app`
-- `https://variapp-api-desarrollo.onrender.com/health`
-- `https://variapp-api-desarrollo.onrender.com/health/ready`
+- `https://solqaryn-desarrollo.vercel.app`
+- `https://solqaryn-api-desarrollo.onrender.com/health`
+- `https://solqaryn-api-desarrollo.onrender.com/health/ready`
 
 ## Roles y locks
 
@@ -22,9 +22,9 @@ Regla single-writer: un scope con writer vivo y progreso material fresco no reci
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/VariApp(\.git)?$'
-export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
-export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
+export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
+export BACKEND_URL="https://solqaryn-api-desarrollo.onrender.com"
 git rev-parse HEAD
 date -u +%Y-%m-%dT%H:%M:%SZ
 ```

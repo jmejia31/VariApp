@@ -1,5 +1,5 @@
 {
-  "schema": "variapp-staging-equivalence-cert/v1",
+  "schema": "solqaryn-staging-equivalence-cert/v1",
   "parent": "N8.22",
   "task": "N8.22.H",
   "branch": "Desarrollo",
@@ -30,7 +30,7 @@
     "render_prod_service_id": "srv-d983qti8qa3s73eqqne0",
     "render_prod_branch": "main",
     "render_prod_health_check_path": "/health",
-    "vercel_team": "VariApp",
+    "vercel_team": "Solqaryn",
     "vercel_prod_project": "varistorehn",
     "vercel_prod_project_id": "prj_djMCand2yYeY3AvaUWsjwHDDJDkM"
   },

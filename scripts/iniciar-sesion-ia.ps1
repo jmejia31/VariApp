@@ -12,13 +12,13 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ExpectedRepo = "solqaryn/VariApp"
+$ExpectedRepo = "solqaryn/Solqaryn"
 $ExpectedBranch = "Desarrollo"
 $ExpectedOrigins = @(
-    "https://github.com/solqaryn/VariApp",
-    "https://github.com/solqaryn/VariApp.git",
-    "git@github.com:solqaryn/VariApp.git",
-    "ssh://git@github.com/solqaryn/VariApp.git"
+    "https://github.com/solqaryn/Solqaryn",
+    "https://github.com/solqaryn/Solqaryn.git",
+    "git@github.com:solqaryn/Solqaryn.git",
+    "ssh://git@github.com/solqaryn/Solqaryn.git"
 )
 
 function Invoke-GitCapture {
@@ -58,8 +58,8 @@ try {
         }
     }
 
-    if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch "PROJECT_ID: VARIAPP" -Quiet)) {
-        throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma PROJECT_ID=VARIAPP."
+    if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch "PROJECT_ID: SOLQARYN" -Quiet)) {
+        throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma PROJECT_ID=SOLQARYN."
     }
     if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch $ExpectedRepo -Quiet)) {
         throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma '$ExpectedRepo'."
@@ -87,8 +87,8 @@ try {
     $dirty = -not [string]::IsNullOrWhiteSpace($status)
 
     Write-Host ""
-    Write-Host "=== VARIAPP / SESSION GATE ===" -ForegroundColor Cyan
-    Write-Host "PROJECT_ID=VARIAPP"
+    Write-Host "=== SOLQARYN / SESSION GATE ===" -ForegroundColor Cyan
+    Write-Host "PROJECT_ID=SOLQARYN"
     Write-Host "REPOSITORY=$ExpectedRepo"
     Write-Host "BRANCH=$branch"
     Write-Host "HEAD=$head"

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: variapp-api-desarrollo
+    name: solqaryn-api-desarrollo
     runtime: docker
     plan: free
     region: oregon
@@ -13,7 +13,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Staging
       - key: AllowedHosts
-        value: variapp-api-desarrollo.onrender.com
+        value: solqaryn-api-desarrollo.onrender.com
       - key: Database__ServerVersion
         value: 8.4.3
       - key: Database__ApplyMigrationsOnStartup
@@ -23,9 +23,9 @@ services:
       - key: Jwt__Secret
         generateValue: true
       - key: Jwt__Issuer
-        value: VariApp.Desarrollo.API
+        value: Solqaryn.Desarrollo.API
       - key: Jwt__Audience
-        value: VariApp.Desarrollo.Frontend
+        value: Solqaryn.Desarrollo.Frontend
       - key: Jwt__ExpiraMinutos
         value: "120"
       - key: Security__LoginRateLimitPerMinute
@@ -39,11 +39,11 @@ services:
       - key: Cloudinary__EnvironmentPrefix
         value: varistorehn_desarrollo
       - key: Cors__AllowedOrigins__0
-        value: https://variapp-desarrollo.vercel.app
+        value: https://solqaryn-desarrollo.vercel.app
       - key: AppSettings__BackendPublicUrl
-        value: https://variapp-api-desarrollo.onrender.com
+        value: https://solqaryn-api-desarrollo.onrender.com
       - key: AppSettings__LogoPublicUrl
-        value: https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png
+        value: https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png
       - key: AppSettings__EnlacePublicoFacturaHorasValidez
         value: "24"
       - key: AppSettings__EnlacePublicoFacturaMaximoAccesos

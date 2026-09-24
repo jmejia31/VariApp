@@ -7,11 +7,11 @@
 # EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 # LOCAL_SKILL_COUNT=1
 
-EXPECTED_REPO="solqaryn/VariApp"
+EXPECTED_REPO="solqaryn/Solqaryn"
 EXPECTED_BRANCH="Desarrollo"
 
 fail() {
-  echo "[VariApp][pre-commit] $1" >&2
+  echo "[Solqaryn][pre-commit] $1" >&2
   exit 1
 }
 
@@ -23,7 +23,7 @@ branch="$(git branch --show-current 2>/dev/null)"
 
 origin_url="$(git remote get-url origin 2>/dev/null)" || fail "No existe remote origin."
 case "$origin_url" in
-  "https://github.com/solqaryn/VariApp"|"https://github.com/solqaryn/VariApp.git"|"git@github.com:solqaryn/VariApp.git"|"ssh://git@github.com/solqaryn/VariApp.git") ;;
+  "https://github.com/solqaryn/Solqaryn"|"https://github.com/solqaryn/Solqaryn.git"|"git@github.com:solqaryn/Solqaryn.git"|"ssh://git@github.com/solqaryn/Solqaryn.git") ;;
   *) fail "origin='$origin_url' no corresponde a $EXPECTED_REPO. Posible confusión de proyecto." ;;
 esac
 
@@ -32,13 +32,13 @@ esac
 [ -f TASKS.md ] || fail "Falta TASKS.md."
 [ -f CHANGELOG_AI.md ] || fail "Falta CHANGELOG_AI.md."
 
-grep -Fq 'solqaryn/VariApp' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma $EXPECTED_REPO."
-grep -Fq 'PROJECT_ID: VARIAPP' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma PROJECT_ID=VARIAPP."
+grep -Fq 'solqaryn/Solqaryn' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma $EXPECTED_REPO."
+grep -Fq 'PROJECT_ID: SOLQARYN' PROJECT_CONTEXT.md || fail "PROJECT_CONTEXT.md no confirma PROJECT_ID=SOLQARYN."
 
 staged="$(git diff --cached --name-only --diff-filter=ACMR)"
 if [ -n "$staged" ] && ! printf '%s\n' "$staged" | grep -qx 'CHANGELOG_AI.md'; then
   fail "Todo changeset intencional debe incluir evidencia en CHANGELOG_AI.md."
 fi
 
-echo "[VariApp][pre-commit] Gate OK: $EXPECTED_REPO / $EXPECTED_BRANCH / evidencia presente."
+echo "[Solqaryn][pre-commit] Gate OK: $EXPECTED_REPO / $EXPECTED_BRANCH / evidencia presente."
 exit 0

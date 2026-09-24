@@ -45,7 +45,7 @@
       "other exact-head causal checks: QUEUED/IN_PROGRESS"
     ],
     "omitted": [
-      "VariApp CI: SKIPPED by workflow policy; not treated as causal failure",
+      "Solqaryn CI: SKIPPED by workflow policy; not treated as causal failure",
       "Vercel deployment status excluded; deploy is prohibited and non-causal to N6.4.D"
     ]
   },

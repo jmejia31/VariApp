@@ -199,7 +199,7 @@ try {
   expect(robotsProd.body.includes('Disallow: /varistorehn/pedido/'), 'robots de producción debe bloquear referencias de pedido.');
 
   const robotsPreview = responseMock();
-  await robotsHandler({ headers: { host: 'variapp-desarrollo-preview.vercel.app' }, query: {} }, robotsPreview);
+  await robotsHandler({ headers: { host: 'solqaryn-desarrollo-preview.vercel.app' }, query: {} }, robotsPreview);
   expect(robotsPreview.body.trim() === 'User-agent: *\nDisallow: /', 'Preview/desarrollo debe bloquear toda indexación.');
 
   const robotsCustom = responseMock();

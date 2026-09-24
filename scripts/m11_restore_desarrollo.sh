@@ -95,7 +95,7 @@ printf '%s' "$BACKUP_PASSPHRASE" \
 
 [[ -s "$ARCHIVE" ]] || fail "El archivo descifrado quedó vacío."
 tar -C "$WORKDIR" -xzf "$ARCHIVE"
-PAYLOAD="$(find "$WORKDIR" -mindepth 1 -maxdepth 1 -type d -name 'variapp-*' | head -n 1)"
+PAYLOAD="$(find "$WORKDIR" -mindepth 1 -maxdepth 1 -type d -name 'solqaryn-*' | head -n 1)"
 [[ -n "$PAYLOAD" && -d "$PAYLOAD" ]] || fail "No se encontró el payload M11 esperado."
 [[ -f "$PAYLOAD/MANIFEST.sha256" ]] || fail "El backup no contiene MANIFEST.sha256."
 [[ -f "$PAYLOAD/metadata.json" ]] || fail "El backup no contiene metadata.json."

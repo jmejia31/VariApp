@@ -1,4 +1,4 @@
-# VariApp — separación segura de Desarrollo y Producción
+# Solqaryn — separación segura de Desarrollo y Producción
 
 ## 1. Entornos oficiales
 
@@ -14,8 +14,8 @@ Los nombres técnicos de servicios, dominios, bases, usuarios o claves pueden di
 | Elemento | Producción | Desarrollo |
 |---|---|---|
 | Git | `main`, congelada | `Desarrollo`, única rama de trabajo |
-| Vercel | proyecto técnico `varistorehn` | proyecto técnico `variapp-desarrollo` |
-| Render | servicio técnico `variapp-api` | servicio técnico `variapp-api-desarrollo` |
+| Vercel | proyecto técnico `varistorehn` | proyecto técnico `solqaryn-desarrollo` |
+| Render | servicio técnico `solqaryn-api` | servicio técnico `solqaryn-api-desarrollo` |
 | Aiven | datos/variables/administración productiva | usuario/base/variables de aplicación de Desarrollo |
 | Cloudinary | claves/activos productivos | prefijo `varistorehn_desarrollo/` y credenciales de Desarrollo |
 
@@ -71,9 +71,9 @@ git pull --rebase origin Desarrollo
 
 ## 6. Render
 
-Producción conserva `variapp-api` sin cambios.
+Producción conserva `solqaryn-api` sin cambios.
 
-Desarrollo utiliza el servicio técnico `variapp-api-desarrollo`, rama `Desarrollo` y configuración/secretos exclusivos de Desarrollo.
+Desarrollo utiliza el servicio técnico `solqaryn-api-desarrollo`, rama `Desarrollo` y configuración/secretos exclusivos de Desarrollo.
 
 No copiar valores reales al repositorio.
 
@@ -94,7 +94,7 @@ No copiar valores reales al repositorio.
 ## 9. Vercel
 
 - Producción conserva el proyecto `varistorehn` y su dominio/configuración sin cambios.
-- Desarrollo utiliza `variapp-desarrollo`, con `frontend` como raíz técnica cuando corresponda y backend de Desarrollo.
+- Desarrollo utiliza `solqaryn-desarrollo`, con `frontend` como raíz técnica cuando corresponda y backend de Desarrollo.
 - Un preview de Desarrollo nunca debe apuntar a API/base productiva.
 
 ## 10. Rendimiento de los agentes

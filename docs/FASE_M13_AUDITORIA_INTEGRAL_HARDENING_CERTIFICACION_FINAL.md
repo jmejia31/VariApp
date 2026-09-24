@@ -10,7 +10,7 @@ Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 ## 1. Objetivo y criterio de cierre
 
-M13 constituye el gate final del Plan Maestro de Mejoras Empresariales M0–M13. Su objetivo fue auditar transversalmente VariApp, corregir los hallazgos P0/P1 demostrados y emitir un dictamen basado exclusivamente en evidencia reproducible de Desarrollo.
+M13 constituye el gate final del Plan Maestro de Mejoras Empresariales M0–M13. Su objetivo fue auditar transversalmente Solqaryn, corregir los hallazgos P0/P1 demostrados y emitir un dictamen basado exclusivamente en evidencia reproducible de Desarrollo.
 
 El cierre exige distinguir expresamente:
 

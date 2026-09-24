@@ -24,7 +24,7 @@
     "dev_backend_health_ready_latency": "PASS",
     "dev_frontend_shell_latency": "PASS",
     "dev_critical_surfaces_anonymous_fail_closed": "PASS",
-    "vercel_variapp_desarrollo_runtime_errors_last_1h": "NONE_FOUND"
+    "vercel_solqaryn_desarrollo_runtime_errors_last_1h": "NONE_FOUND"
   },
   "results": {
     "N9.6.B": {

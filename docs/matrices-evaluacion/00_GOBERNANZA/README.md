@@ -1,7 +1,7 @@
 # Matrices de evaluación de interfaces — Gobierno canónico
 
 ## Propósito
-Este árbol define el contrato verificable de cada interfaz de VariApp. Ninguna pantalla, diálogo de negocio, shell o componente interactivo con contrato propio se considera certificado sólo porque exista o compile.
+Este árbol define el contrato verificable de cada interfaz de Solqaryn. Ninguna pantalla, diálogo de negocio, shell o componente interactivo con contrato propio se considera certificado sólo porque exista o compile.
 
 ## Orden obligatorio de trabajo
 1. Inventario y baseline arquitectónico completo.

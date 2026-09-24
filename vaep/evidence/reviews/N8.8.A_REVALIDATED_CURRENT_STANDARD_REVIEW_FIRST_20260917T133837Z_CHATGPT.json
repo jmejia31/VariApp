@@ -32,7 +32,7 @@
       "providerProofRun": 35223698590,
       "providerProofJob": 105209843443,
       "providerProofResult": "FAILED_EXTERNAL_CREDENTIAL__AIVEN_TOKEN_EXPIRED_401",
-      "providerProofInterpretation": "El workflow llego con AIVEN_TOKEN y VARIAPP_DEV_DB_CONNECTION presentes, proyecto variapp y servicio variapp-mysql, pero Aiven rechazo el token con status 401 antes de generar evidencia de backups/PITR/restore. No se afirma provider PASS.",
+      "providerProofInterpretation": "El workflow llego con AIVEN_TOKEN y SOLQARYN_DEV_DB_CONNECTION presentes, proyecto solqaryn y servicio solqaryn-mysql, pero Aiven rechazo el token con status 401 antes de generar evidencia de backups/PITR/restore. No se afirma provider PASS.",
       "isolatedMySqlBackupRestoreRun": 35223693868,
       "isolatedMySqlBackupRestoreJob": 105209822216,
       "isolatedMySqlBackupRestoreResult": "SUCCESS",

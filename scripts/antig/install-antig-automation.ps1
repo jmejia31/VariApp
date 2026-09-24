@@ -4,7 +4,7 @@ param(
     [switch]$Remove,
     [switch]$SkipAuthProbe,
     [switch]$SelfTest,
-    [string]$TaskName = "VariApp-AntiG-Reviewer"
+    [string]$TaskName = "Solqaryn-AntiG-Reviewer"
 )
 
 $ErrorActionPreference = "Stop"

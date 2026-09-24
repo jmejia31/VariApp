@@ -36,7 +36,7 @@ public sealed class ProductoVarianteTecnicaLifecycleIntegrationTests
             var producto = new Producto
             {
                 Nombre = "Producto simple concurrente",
-                Marca = "VariApp",
+                Marca = "Solqaryn",
                 Modelo = "2C2",
                 Cantidad = 7,
                 Costo = 45m,

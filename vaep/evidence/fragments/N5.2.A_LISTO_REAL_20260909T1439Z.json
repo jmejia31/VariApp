@@ -47,7 +47,7 @@
     {"workflow":"VAEP Jules Diagnostic","runId":34364425315,"headSha":"2f21f9b470cb4895ec7e8ef655d435a5ea406222","conclusion":"success"}
   ],
   "nonGateObservations": [
-    {"workflow":"VariApp CI","runId":34364425087,"headSha":"2f21f9b470cb4895ec7e8ef655d435a5ea406222","conclusion":"skipped","countedAsPass":false}
+    {"workflow":"Solqaryn CI","runId":34364425087,"headSha":"2f21f9b470cb4895ec7e8ef655d435a5ea406222","conclusion":"skipped","countedAsPass":false}
   ],
   "p0Open": 0,
   "p1Open": 0,

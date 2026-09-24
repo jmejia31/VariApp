@@ -25,18 +25,18 @@ for cmd in mysql mysqldump tar sha256sum gpg python3 find git; do
   require_cmd "$cmd"
 done
 
-for name in VARIAPP_ENVIRONMENT DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD BACKUP_PASSPHRASE; do
+for name in SOLQARYN_ENVIRONMENT DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD BACKUP_PASSPHRASE; do
   require_env "$name"
 done
 
-ENV_NORMALIZED="$(printf '%s' "$VARIAPP_ENVIRONMENT" | tr '[:upper:]' '[:lower:]')"
+ENV_NORMALIZED="$(printf '%s' "$SOLQARYN_ENVIRONMENT" | tr '[:upper:]' '[:lower:]')"
 DB_NORMALIZED="$(printf '%s' "$DB_NAME" | tr '[:upper:]' '[:lower:]')"
 DB_SSL_MODE="${DB_SSL_MODE:-PREFERRED}"
 DB_SSL_MODE="$(printf '%s' "$DB_SSL_MODE" | tr '[:lower:]' '[:upper:]')"
 
 case "$ENV_NORMALIZED" in
   desarrollo|development|ci) ;;
-  *) fail "M11 solo permite backup de Desarrollo/CI. Entorno recibido: $VARIAPP_ENVIRONMENT" ;;
+  *) fail "M11 solo permite backup de Desarrollo/CI. Entorno recibido: $SOLQARYN_ENVIRONMENT" ;;
 esac
 
 case "$DB_SSL_MODE" in
@@ -58,7 +58,7 @@ mkdir -p "$OUTPUT_DIR"
 chmod 700 "$OUTPUT_DIR"
 
 TIMESTAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
-BACKUP_ID="variapp-${BACKUP_LABEL}-${TIMESTAMP}"
+BACKUP_ID="solqaryn-${BACKUP_LABEL}-${TIMESTAMP}"
 WORKDIR="$(mktemp -d)"
 PAYLOAD="$WORKDIR/$BACKUP_ID"
 mkdir -p "$PAYLOAD/database" "$PAYLOAD/configuration" "$PAYLOAD/repository-docs" "$PAYLOAD/references"
@@ -179,7 +179,7 @@ metadata = {
     "formatVersion": "M11.1",
     "backupId": "${BACKUP_ID}",
     "createdAtUtc": datetime.now(timezone.utc).isoformat(),
-    "environment": "${VARIAPP_ENVIRONMENT}",
+    "environment": "${SOLQARYN_ENVIRONMENT}",
     "databaseName": "${DB_NAME}",
     "databaseServerVersion": "${MYSQL_VERSION}",
     "databaseSslMode": "${DB_SSL_MODE}",
@@ -233,7 +233,7 @@ public = {
     "formatVersion": "M11.1",
     "backupId": "${BACKUP_ID}",
     "createdAtUtc": datetime.now(timezone.utc).isoformat(),
-    "environment": "${VARIAPP_ENVIRONMENT}",
+    "environment": "${SOLQARYN_ENVIRONMENT}",
     "databaseNameRedacted": True,
     "databaseServerVersion": "${MYSQL_VERSION}",
     "databaseSslMode": "${DB_SSL_MODE}",
@@ -250,7 +250,7 @@ chmod 600 "$OUTPUT_DIR/$BACKUP_ID.meta.json"
 
 log "Aplicando retención local de $RETENTION_DAYS días solo al patrón M11 autorizado..."
 find "$OUTPUT_DIR" -maxdepth 1 -type f \
-  \( -name 'variapp-desarrollo-*.tar.gz.gpg' -o -name 'variapp-desarrollo-*.tar.gz.gpg.sha256' -o -name 'variapp-desarrollo-*.meta.json' \) \
+  \( -name 'solqaryn-desarrollo-*.tar.gz.gpg' -o -name 'solqaryn-desarrollo-*.tar.gz.gpg.sha256' -o -name 'solqaryn-desarrollo-*.meta.json' \) \
   -mtime "+$RETENTION_DAYS" -delete
 
 log "Backup M11 creado y cifrado: $ENCRYPTED"

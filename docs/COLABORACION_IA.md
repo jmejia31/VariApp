@@ -1,4 +1,4 @@
-# Colaboración IA — VariApp
+# Colaboración IA — Solqaryn
 
 ## Objetivo
 
@@ -7,14 +7,14 @@ Coordinar a Javier Mejía, Codex, ChatGPT, Chat B (ChatGPT Business), Jules J1�
 ## Identidad de este proyecto
 
 ```text
-PROJECT_ID=VARIAPP
-REPOSITORY=solqaryn/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 BRANCH=Desarrollo
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 
-Estas reglas pertenecen a VariApp y solo el contexto canónico de VariApp puede autorizar cambios aquí.
+Estas reglas pertenecen a Solqaryn y solo el contexto canónico de Solqaryn puede autorizar cambios aquí.
 
 ## Inicio de CADA conversación/sesión
 
@@ -144,6 +144,6 @@ EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 LOCAL_SKILL_COUNT=1
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
 
 

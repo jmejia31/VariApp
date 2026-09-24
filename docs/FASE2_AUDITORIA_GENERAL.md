@@ -1,4 +1,4 @@
-# FASE 2 — Auditoría general de VariApp / VariStorehn
+# FASE 2 — Auditoría general de Solqaryn / VariStorehn
 
 Fecha de cierre técnico: 27 de julio de 2026.
 
@@ -112,7 +112,7 @@ La imagen continúa compilándose en GitHub Actions.
 Render Desarrollo declara:
 
 ```text
-AllowedHosts=variapp-api-desarrollo.onrender.com
+AllowedHosts=solqaryn-api-desarrollo.onrender.com
 ```
 
 Esto evita aceptar hosts arbitrarios en el servicio autorizado de Desarrollo.
@@ -124,7 +124,7 @@ Hallazgo: Render Desarrollo obtenía el logo desde `varistorehn.vercel.app`.
 Corrección:
 
 ```text
-https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png
+https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png
 ```
 
 Desarrollo ya no depende del frontend productivo para generar documentos o correos.
@@ -217,8 +217,8 @@ El correo es síncrono y no tiene cola de reintentos. Esto no se cambia en la Fa
 
 ### Dominios y certificados
 
-- Vercel Desarrollo: `variapp-desarrollo.vercel.app`.
-- Render Desarrollo: `variapp-api-desarrollo.onrender.com`.
+- Vercel Desarrollo: `solqaryn-desarrollo.vercel.app`.
+- Render Desarrollo: `solqaryn-api-desarrollo.onrender.com`.
 - CORS y rewrites apuntan al ambiente de Desarrollo.
 - TLS y certificados son administrados por Vercel y Render.
 - No se modificó ningún dominio o certificado productivo.

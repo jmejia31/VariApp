@@ -22,7 +22,7 @@ This row-scope contract is source-backed for the existing sales reports and is t
 
 The repository also contains a **separate precedent** in `ReportesInventarioValorizacionController`: base access is `Inventario:Ver`, while a runtime `Finanzas:Ver` check controls whether inventory financial values are returned; the censored and authorized paths are audited.
 
-That is evidence that VariApp already uses `Finanzas:Ver` as a financial-disclosure pivot in at least one non-Finanzas report. It is **not**, by itself, proof that N5.4 sales-profitability fields must automatically inherit the same rule.
+That is evidence that Solqaryn already uses `Finanzas:Ver` as a financial-disclosure pivot in at least one non-Finanzas report. It is **not**, by itself, proof that N5.4 sales-profitability fields must automatically inherit the same rule.
 
 The current `ReportesVentasController` requires `Ventas:Ver` and does not perform a `Finanzas:Ver` censorship check. Its current DTOs already expose `CostoTotal`, `UtilidadBruta`, and line `CostoUnitario`/`UtilidadBruta` under that sales-report path. Therefore the exact future rule for newly expanded profitability disclosure is not source-backed strongly enough to invent here.
 

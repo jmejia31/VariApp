@@ -1,6 +1,6 @@
 # VariStoreHN - reglas transversales de implementacion
 
-Estas reglas son obligatorias para cualquier cambio dentro de VariStoreHN en VariApp.
+Estas reglas son obligatorias para cualquier cambio dentro de VariStoreHN en Solqaryn.
 
 | Regla | Criterio verificable |
 | --- | --- |
@@ -13,4 +13,4 @@ Estas reglas son obligatorias para cualquier cambio dentro de VariStoreHN en Var
 | Seguridad | La tienda publica consume DTOs/endpoints publicos. No reutiliza rutas, guards, JWT ni secretos administrativos. Checkout externo solo se habilita con endpoint relativo y origen HTTPS permitido. |
 | Calidad | Ninguna fase se considera cerrada si lint, build o su regresion acumulativa estan rojos. Las fases posteriores vuelven a ejecutar las anteriores. |
 
-El guard `scripts/validate-varistorehn-transversal.mjs` bloquea regresiones estructurales de estas reglas dentro del pipeline de VariApp.
+El guard `scripts/validate-varistorehn-transversal.mjs` bloquea regresiones estructurales de estas reglas dentro del pipeline de Solqaryn.

@@ -239,7 +239,7 @@ if (maintenanceEnabled)
         {
             status = 503,
             title = "Servicio temporalmente en mantenimiento",
-            detail = "VariApp se encuentra temporalmente en mantenimiento programado."
+            detail = "Solqaryn se encuentra temporalmente en mantenimiento programado."
         });
     });
 }

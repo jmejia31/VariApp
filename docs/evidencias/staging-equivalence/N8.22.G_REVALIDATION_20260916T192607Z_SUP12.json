@@ -21,7 +21,7 @@
   "fresh_provider_readback":{
     "render_dev":{"service_id":"srv-d9jblq7avr4c73c74jng","branch":"Desarrollo","health_check_path":"/health/ready","plan":"free","region":"oregon","updated_at":"2026-09-16T17:09:28.668023Z"},
     "render_prod_metadata_read_only":{"service_id":"srv-d983qti8qa3s73eqqne0","branch":"main","health_check_path":"/health","plan":"free","region":"virginia","updated_at":"2026-09-16T17:59:05.334381Z"},
-    "vercel_dev":{"project":"variapp-desarrollo","project_id":"prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu","node":"24.x"},
+    "vercel_dev":{"project":"solqaryn-desarrollo","project_id":"prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu","node":"24.x"},
     "vercel_prod":{"project":"varistorehn","project_id":"prj_djMCand2yYeY3AvaUWsjwHDDJDkM","node":"24.x"}
   },
   "matrix":[

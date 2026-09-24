@@ -40,7 +40,7 @@ Este documento separa la certificación automatizada ya aprobada de las validaci
 - [x] Preview de Vercel disponible.
   - Commit: `5ad458c176ed4ec58c711dd23fd3f36a2b23155d`.
   - Estado: `Listo`.
-  - URL: `https://varistorehn-git-agent-mejoras-variapp-vari-app.vercel.app`.
+  - URL: `https://varistorehn-git-agent-mejoras-solqaryn-vari-app.vercel.app`.
   - Se corrigió `frontend/vercel.json`, cuya regla anterior cancelaba todos los deployments de Preview.
 - [ ] Preview de Render disponible para la rama.
 - [ ] Base Preview separada de Aiven productivo.

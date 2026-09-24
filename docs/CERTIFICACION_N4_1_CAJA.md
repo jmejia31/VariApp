@@ -21,7 +21,7 @@ No se certifican capacidades inexistentes. En particular, la revisión factual d
 
 ## Evidencia CI y seguridad
 
-Sobre `a1522d589940e87e6ca48dd8adf32d309cce2fb3` existen checks exact-head completados con resultado `success`, incluyendo el dictamen automatizado M13, dependencias productivas npm, dependencias vulnerables .NET y configuración/aislamiento/endurecimiento. El workflow genérico `VariApp CI` para ese SHA aparece `skipped`; por tanto no se contabiliza como PASS y no sustituye los checks causales aplicables.
+Sobre `a1522d589940e87e6ca48dd8adf32d309cce2fb3` existen checks exact-head completados con resultado `success`, incluyendo el dictamen automatizado M13, dependencias productivas npm, dependencias vulnerables .NET y configuración/aislamiento/endurecimiento. El workflow genérico `Solqaryn CI` para ese SHA aparece `skipped`; por tanto no se contabiliza como PASS y no sustituye los checks causales aplicables.
 
 La revisión del controller no mantiene P0/P1 funcionales reproducibles conocidos atribuibles a Caja en esta evidencia. Cualquier nuevo defecto P0/P1 reproducible reabre el gate y bloquea la promoción.
 

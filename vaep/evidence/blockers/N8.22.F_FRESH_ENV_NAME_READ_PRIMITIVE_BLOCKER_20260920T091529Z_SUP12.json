@@ -34,7 +34,7 @@
   "render_read_only_observations": {
     "development": {
       "service_id": "srv-d9jblq7avr4c73c74jng",
-      "name": "variapp-desarrollo",
+      "name": "solqaryn-desarrollo",
       "branch": "Desarrollo",
       "healthcheck": "/health",
       "latest_live_deploy_commit": "bbd2d5df1b26e083ac591d82dc88fd32f68e1597",
@@ -42,7 +42,7 @@
     },
     "production_reference_only": {
       "service_id": "srv-d983qti8qa3s73eqqne0",
-      "name": "variapp",
+      "name": "solqaryn",
       "branch": "main",
       "healthcheck": "/health",
       "latest_live_deploy_commit": "538d2861e40b810a68b3e695cd32ae0975518134",

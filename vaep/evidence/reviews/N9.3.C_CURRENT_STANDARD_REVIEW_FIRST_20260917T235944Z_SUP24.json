@@ -36,7 +36,7 @@
     "backupArtifactDigest": "sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d",
     "providerCertificateArtifactId": 10525571124,
     "providerCertificateDigest": "sha256:e32138b7292b5d2876b207190da24a69740c527710ddb375c44eee4c5903af3b",
-    "restoreTarget": "variapp_m11_restore_drill",
+    "restoreTarget": "solqaryn_m11_restore_drill",
     "restoreEnvironment": "ci",
     "baseTableCount": 132,
     "efMigrationCount": 104,

@@ -47,7 +47,7 @@ type AmbitoSucursal = 'empresa' | 'sucursal';
             <p class="eyebrow">Facturación fiscal/electrónica</p>
             <h2 id="fiscal-title">Emitir mediante proveedor fiscal</h2>
             <p>
-              VariApp envía un contrato técnico neutral. La jurisdicción, el proveedor y el tipo de documento
+              Solqaryn envía un contrato técnico neutral. La jurisdicción, el proveedor y el tipo de documento
               son códigos de la configuración aplicable; la interfaz no presume una legislación universal.
             </p>
           </div>

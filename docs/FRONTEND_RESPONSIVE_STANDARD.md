@@ -1,8 +1,8 @@
-# Estándar responsive global de VariApp
+# Estándar responsive global de Solqaryn
 
 ## Propósito
 
-VariApp mantiene una sola base visual empresarial. Toda pantalla nueva debe funcionar desde 320 px hasta escritorio amplio sin crear scroll horizontal de la página, perder acciones ni ocultar información crítica. Este estándar se aplica al shell, formularios, tablas, diálogos, tarjetas, gráficos, medios y flujos de scanner.
+Solqaryn mantiene una sola base visual empresarial. Toda pantalla nueva debe funcionar desde 320 px hasta escritorio amplio sin crear scroll horizontal de la página, perder acciones ni ocultar información crítica. Este estándar se aplica al shell, formularios, tablas, diálogos, tarjetas, gráficos, medios y flujos de scanner.
 
 ## Contrato de viewport
 

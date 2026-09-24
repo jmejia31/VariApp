@@ -1,5 +1,5 @@
 {
-  "schema": "variapp-navigation-contract/v1",
+  "schema": "solqaryn-navigation-contract/v1",
   "authority": "DOMINIO/PADRE -> SUBMODULO/HIJO -> INTERFAZ/ACCION; frontend reflects backend permissions and never replaces backend authorization.",
   "remove_safe_deletions": 0,
   "groups": [

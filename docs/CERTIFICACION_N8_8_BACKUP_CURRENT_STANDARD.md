@@ -7,7 +7,7 @@ Producción/main/merge PR #2/secrets/DNS/certificados: **fuera de alcance y no m
 
 ## Alcance certificado
 
-N8.8 comprueba el mecanismo de backup automático y restauración verificable de VariApp en Desarrollo. La revalidación current-standard preserva el diseño M11 existente y añade evidencia fresca del proveedor Aiven sin ejecutar restore, fork, upgrade ni acción pagada.
+N8.8 comprueba el mecanismo de backup automático y restauración verificable de Solqaryn en Desarrollo. La revalidación current-standard preserva el diseño M11 existente y añade evidencia fresca del proveedor Aiven sin ejecutar restore, fork, upgrade ni acción pagada.
 
 ## Evidencia causal vigente
 

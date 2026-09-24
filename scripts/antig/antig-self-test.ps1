@@ -9,7 +9,7 @@ $repoRoot = (& git rev-parse --show-toplevel 2>$null | Out-String).Trim()
 if ([string]::IsNullOrWhiteSpace($repoRoot)) { throw "Not inside a Git repository." }
 
 $required = @(
-    ".agents/agents/variapp-reviewer/agent.md",
+    ".agents/agents/solqaryn-reviewer/agent.md",
     "docs/ANTIGRAVITY_AUTOMATION.md",
     "scripts/antig/antig-review-worker.ps1",
     "scripts/antig/antig-self-test.ps1",
@@ -38,7 +38,7 @@ foreach ($marker in $antiGMasterMarkers) {
     if ($master -notlike "*$marker*") { throw "Current MASTER AntiG contract missing: $marker" }
 }
 
-$agentPath = Join-Path $repoRoot ".agents/agents/variapp-reviewer/agent.md"
+$agentPath = Join-Path $repoRoot ".agents/agents/solqaryn-reviewer/agent.md"
 $workerPath = Join-Path $repoRoot "scripts/antig/antig-review-worker.ps1"
 $installerPath = Join-Path $repoRoot "scripts/antig/install-antig-automation.ps1"
 $runbookPath = Join-Path $repoRoot "docs/ANTIGRAVITY_AUTOMATION.md"
@@ -114,7 +114,7 @@ if ($master -notmatch $antiGMasterContract) {
     throw "Current MASTER AntiG reserved-inactive contract is missing."
 }
 
-$agentPath = Join-Path $repoRoot ".agents/agents/variapp-reviewer/agent.md"
+$agentPath = Join-Path $repoRoot ".agents/agents/solqaryn-reviewer/agent.md"
 $workerPath = Join-Path $repoRoot "scripts/antig/antig-review-worker.ps1"
 $installerPath = Join-Path $repoRoot "scripts/antig/install-antig-automation.ps1"
 $runbookPath = Join-Path $repoRoot "docs/ANTIGRAVITY_AUTOMATION.md"

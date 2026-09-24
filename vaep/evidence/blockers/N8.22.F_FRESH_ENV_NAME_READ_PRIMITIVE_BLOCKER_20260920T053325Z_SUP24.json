@@ -63,7 +63,7 @@
     "environmentVariableMutationPrimitiveAvailableButUnused": true,
     "desarrollo": {
       "serviceId": "srv-d9jblq7avr4c73c74jng",
-      "serviceName": "variapp-api-desarrollo",
+      "serviceName": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "healthCheckPath": "/health/ready",
       "maintenanceMode": false,
@@ -73,7 +73,7 @@
     },
     "productionReferenceReadOnly": {
       "serviceId": "srv-d983qti8qa3s73eqqne0",
-      "serviceName": "variapp-api",
+      "serviceName": "solqaryn-api",
       "branch": "main",
       "healthCheckPath": "/health",
       "maintenanceMode": false,

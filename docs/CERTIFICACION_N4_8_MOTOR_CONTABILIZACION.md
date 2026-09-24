@@ -18,7 +18,7 @@ La autoridad operativa permanece exclusivamente en `docs/VAEP_AUTHORITY.md`. Est
 
 El estado operativo canónico certificó secuencialmente N4.8.A–N4.8.G antes de promover N4.8.H. El último cierre funcional previo a esta documentación es N4.8.G, certificado mediante REVIEW_FIRST sobre el baseline `94f8133e038da205fc5af8b09d6e98e5eeca5352`.
 
-En ese baseline se observó la matriz de GitHub Actions terminal para los checks aplicables. `VariApp CI` con conclusión `skipped` no se utiliza como PASS. Los gates históricos/legacy que no son causales al delta de N4.8 tampoco se reinterpretan como PASS.
+En ese baseline se observó la matriz de GitHub Actions terminal para los checks aplicables. `Solqaryn CI` con conclusión `skipped` no se utiliza como PASS. Los gates históricos/legacy que no son causales al delta de N4.8 tampoco se reinterpretan como PASS.
 
 ## Seguridad y defectos bloqueantes
 

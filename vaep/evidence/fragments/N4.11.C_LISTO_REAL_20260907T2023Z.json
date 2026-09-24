@@ -13,7 +13,7 @@
   ],
   "causalGates": "TERMINAL_SUCCESS_APPLICABLE",
   "combinedStatus": "SUCCESS",
-  "variAppCI": "SKIPPED_NOT_COUNTED_AS_PASS",
+  "SolqarynCI": "SKIPPED_NOT_COUNTED_AS_PASS",
   "p0Open": 0,
   "p1Open": 0,
   "nextParent": "N4.11.D",

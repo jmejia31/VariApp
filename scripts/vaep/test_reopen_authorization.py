@@ -23,7 +23,7 @@ class AuthorizationTests(unittest.TestCase):
             if 'certify' in jobs:
                 self.assertIn("needs.authorize.result == 'success'", jobs['certify']['if'])
             script = jobs['authorize']['steps'][0]['run']
-            base = dict(EVENT_NAME='workflow_dispatch', REPOSITORY='jmejia31/VariApp', OWNER='jmejia31',
+            base = dict(EVENT_NAME='workflow_dispatch', REPOSITORY='jmejia31/Solqaryn', OWNER='jmejia31',
                         ACTOR='jmejia31', TRIGGERING_ACTOR='jmejia31', TARGET_REF='refs/heads/Desarrollo',
                         AUTHORIZATION='AUTORIZADO_REABRIR')
             for changes, allowed in [({}, True), ({'AUTHORIZATION': ''}, False),
@@ -32,7 +32,7 @@ class AuthorizationTests(unittest.TestCase):
                                      ({'TRIGGERING_ACTOR': 'collaborator'}, False),
                                      ({'TARGET_REF': 'refs/heads/main'}, False),
                                      ({'EVENT_NAME': 'push'}, False),
-                                     ({'REPOSITORY': 'other/VariApp'}, False),
+                                     ({'REPOSITORY': 'other/Solqaryn'}, False),
                                      ({'AUTHORIZATION': '$(exit 0)'}, False)]:
                 with self.subTest(workflow=filename, changes=changes):
                     result = subprocess.run(['bash', '-c', script], env={**os.environ, **base, **changes},

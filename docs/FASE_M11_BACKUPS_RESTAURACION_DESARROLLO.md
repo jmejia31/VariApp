@@ -8,7 +8,7 @@ Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 ## 1. Objetivo
 
-Implementar un procedimiento reproducible, cifrado, verificable y fail-closed para respaldar los activos recuperables de VariApp en Desarrollo y demostrar una restauración completa sobre un entorno MySQL descartable antes de considerar el backup utilizable.
+Implementar un procedimiento reproducible, cifrado, verificable y fail-closed para respaldar los activos recuperables de Solqaryn en Desarrollo y demostrar una restauración completa sobre un entorno MySQL descartable antes de considerar el backup utilizable.
 
 ## 2. Activos incluidos
 
@@ -123,7 +123,7 @@ Se agregó:
 
 El workflow utiliza exclusivamente el environment GitHub existente:
 
-`Desarrollo - variapp-api-desarrollo`
+`Desarrollo - solqaryn-api-desarrollo`
 
 y espera secretos dedicados, cuyos valores nunca son leídos ni versionados por el código:
 
@@ -142,7 +142,7 @@ Mientras `main` permanezca congelada, GitHub no debe considerarse dependiente de
 
 - push a `Desarrollo` que afecte `.github/checkpoints/m11-backup-request` (o los scripts/workflow M11);
 - mensaje de commit que contenga exactamente `[M11-BACKUP-REAL]`;
-- secretos M11 disponibles en el environment `Desarrollo - variapp-api-desarrollo`.
+- secretos M11 disponibles en el environment `Desarrollo - solqaryn-api-desarrollo`.
 
 Sin el marcador explícito, el job real queda `skipped` y solo se ejecuta el gate estático de sintaxis/protecciones. Esto evita respaldos accidentales por cada commit.
 

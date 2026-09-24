@@ -16,7 +16,7 @@
     ]
   },
   "vercel_production": {
-    "team": "VariApp",
+    "team": "Solqaryn",
     "project": "varistorehn",
     "project_id": "prj_djMCand2yYeY3AvaUWsjwHDDJDkM",
     "authoritative_production_identity": "CONFIRMED_BY_OWNER_CONTROL_PLANE",
@@ -39,7 +39,7 @@
     },
     "repo_cross_check": {
       "production_commit": "85b4e02814823e9671803c23798a6ff0bf05c8f6",
-      "environment_prod_api_url": "https://variapp-api.onrender.com",
+      "environment_prod_api_url": "https://solqaryn-api.onrender.com",
       "build_script": "ng build",
       "custom_runtime_env_dependency_for_api_url": false
     },
@@ -51,7 +51,7 @@
     }
   },
   "render_production": {
-    "service": "variapp-api",
+    "service": "solqaryn-api",
     "service_id": "srv-d983qti8qa3s73eqqne0",
     "branch": "main",
     "region": "virginia",
@@ -100,7 +100,7 @@
         "id": "PROD_RENDER_HEALTHCHECK_POLICY_GAP",
         "current": "empty",
         "required": "/health/ready",
-        "action": "Set Render production variapp-api Health Check Path to /health/ready, then read back provider metadata."
+        "action": "Set Render production solqaryn-api Health Check Path to /health/ready, then read back provider metadata."
       }
     ],
     "remaining_unknown": [

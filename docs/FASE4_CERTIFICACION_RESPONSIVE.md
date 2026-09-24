@@ -8,7 +8,7 @@ Producción permaneció congelada. No se modificaron `main`, variables, credenci
 
 ## 1. Objetivo
 
-Certificar que VariApp conserve navegación, legibilidad, jerarquía, acciones y comportamiento estable desde un teléfono de 320 px hasta una pantalla 4K.
+Certificar que Solqaryn conserve navegación, legibilidad, jerarquía, acciones y comportamiento estable desde un teléfono de 320 px hasta una pantalla 4K.
 
 La fase amplía la certificación visual prioritaria de la Fase 3 a una matriz sistemática de resoluciones y módulos.
 

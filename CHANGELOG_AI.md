@@ -1,3 +1,12 @@
+## 2026-09-23 — Identidad canónica SOLQARYN consolidada
+
+- Repositorio canónico: `solqaryn/Solqaryn`.
+- Identidad de proyecto: `PROJECT_ID=SOLQARYN`.
+- Se normalizaron rutas, namespaces, scripts, documentación, guards y referencias operativas a SOLQARYN.
+- La rama canónica continúa siendo `Desarrollo`.
+- La migración no reescribe el historial Git; el árbol vigente queda gobernado únicamente por SOLQARYN.
+- MAPA_ARQUITECTURA: identidad/namespaces actualizados sin cambiar las fronteras funcionales del dominio.
+
 ## 2026-09-23 — Modelo definitivo: una skill local + nueve referencias originales
 
 - SOLQARYN mantiene exactamente una skill local: `.agents/skills/solqaryn-project-governance/SKILL.md`.
@@ -29,13 +38,13 @@
 
 MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno y aislamiento de contexto; no modifica dominio, datos, tenancy ni deployment de la aplicación.
 
-## 2026-09-23 — Blindaje estricto de aislamiento de proyecto y skill propia de VariApp
+## 2026-09-23 — Blindaje estricto de aislamiento de proyecto y skill propia de Solqaryn
 
-**Objetivo:** impedir que chats, agentes, automatizaciones o scripts de VariApp consulten o utilicen skills, documentación, repositorios, chats, memorias o gobierno de otros proyectos sin autorización explícita del propietario.
+**Objetivo:** impedir que chats, agentes, automatizaciones o scripts de Solqaryn consulten o utilicen skills, documentación, repositorios, chats, memorias o gobierno de otros proyectos sin autorización explícita del propietario.
 
 - Se creó la política canónica `docs/PROJECT_SCOPE_LOCK.md`.
 - Se creó `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` con estado inicial sin excepciones activas.
-- Se creó la skill propia `.agents/skills/solqaryn-project-governance/SKILL.md`, exclusiva de `solqaryn/VariApp`.
+- Se creó la skill propia `.agents/skills/solqaryn-project-governance/SKILL.md`, exclusiva de `solqaryn/Solqaryn`.
 - Se agregó `scripts/verify-project-scope.mjs` como gate fail-closed.
 - Se agregó `.github/workflows/project-scope-lock.yml` para validar el aislamiento en push/PR.
 - Los 18 archivos operativos solicitados declaran `PROJECT_SCOPE_LOCK=STRICT` y `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`.
@@ -44,11 +53,11 @@ MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno y aislamiento de contexto; n
 - Se verificó mediante lectura remota que los 18 archivos, la política, la allowlist y la skill contienen el lock y no contienen referencias conocidas al gobierno FUENTE_EXTERNA_RETIRADA.
 - Un permiso externo persistente solo existe si queda versionado como `ACTIVE` en la allowlist; en caso contrario, el default es DENY.
 
-`PROJECT_ID=VARIAPP`  
-`REPOSITORY=solqaryn/VariApp`  
+`PROJECT_ID=SOLQARYN`  
+`REPOSITORY=solqaryn/Solqaryn`  
 `PROJECT_SCOPE_LOCK=STRICT`
 
-- El validador fue endurecido para rechazar cualquier `PROJECT_ID` distinto de `VARIAPP`, cualquier `REPOSITORY` distinto de `solqaryn/VariApp`, URIs `skills://` en gobierno del proyecto y referencias GitHub a repositorios ajenos en la superficie canónica.
+- El validador fue endurecido para rechazar cualquier `PROJECT_ID` distinto de `SOLQARYN`, cualquier `REPOSITORY` distinto de `solqaryn/Solqaryn`, URIs `skills://` en gobierno del proyecto y referencias GitHub a repositorios ajenos en la superficie canónica.
 - La política declara explícitamente que cada chat/sesión nueva nace con el scope lock activo y no debe descubrir skills específicas de otros proyectos.
 
 MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno, aislamiento de contexto y controles de repositorio; no modifica arquitectura funcional, datos, tenancy ni deployment de la aplicación.
@@ -57,9 +66,9 @@ MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno, aislamiento de contexto y c
 
 **Objetivo:** cerrar la dependencia operativa del repositorio respecto a la cuenta personal `jmejia31`.
 
-- Propietario canónico del repositorio: `solqaryn/VariApp`.
+- Propietario canónico del repositorio: `solqaryn/Solqaryn`.
 - Rama de trabajo: `Desarrollo`.
-- Se actualizaron gates, hooks, scripts de sesión, documentación canónica, autoridad VAEP y runbooks activos para usar `solqaryn/VariApp`.
+- Se actualizaron gates, hooks, scripts de sesión, documentación canónica, autoridad VAEP y runbooks activos para usar `solqaryn/Solqaryn`.
 - `.github/CODEOWNERS` dejó de exigir a `@jmejia31` como aprobador obligatorio.
 - La evidencia histórica conserva referencias antiguas cuando corresponden a hechos pasados; no constituye autoridad operativa.
 - La instalación GitHub de la organización `solqaryn` existe para este repositorio.
@@ -71,8 +80,8 @@ MAPA_ARQUITECTURA: NO_APLICA — cambio de ownership/gobernanza GitHub, sin modi
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
 
-Se materializaron como PNG las pantallas reales de Render (servicio Live, Environment con secretos ocultos, arranque y logs del envío) y VariApp (facturación, FAC-000003, historial y evidencia persistente posterior al único envío). Se incorporaron la captura de recepción, el PDF A4 y la captura final del inventario de la carpeta en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`. No hubo cambios de código, nuevas ventas, nuevos correos, cambios de variables, Producción ni WhatsApp. La única reapertura diagnóstica permitida mostró un fallo transitorio y quedó descrita sin fabricar un PASS.
-# CHANGELOG_AI — VariApp
+Se materializaron como PNG las pantallas reales de Render (servicio Live, Environment con secretos ocultos, arranque y logs del envío) y Solqaryn (facturación, FAC-000003, historial y evidencia persistente posterior al único envío). Se incorporaron la captura de recepción, el PDF A4 y la captura final del inventario de la carpeta en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`. No hubo cambios de código, nuevas ventas, nuevos correos, cambios de variables, Producción ni WhatsApp. La única reapertura diagnóstica permitida mostró un fallo transitorio y quedó descrita sin fabricar un PASS.
+# CHANGELOG_AI — Solqaryn
 
 Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Chat B (ChatGPT Business) y futuros agentes autorizados.
 
@@ -174,7 +183,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Drive compartido:** se reconciliaron CONFIG, DASHBOARD, COLA, PLAN_MAESTRO, TAREAS_PROGRAMADAS, EJECUCION_MANUAL y LEYENDA. El estado vigente es `CURRENT_PARENT=N4.11.H`, `FUNCTIONAL_HEAD=b30b949e`, `HEAD=5ed9b3d6` como descendiente de control-plane, `dispatch-admission=FROZEN`, `N4.11.B–G=LISTO_REAL` con evidencia, y `N4.11.H=VALIDANDO` por REVIEW_FIRST/QA_TAKEOVER pendiente. No se despachó ningún Jules manual ni se fabricó backlog.
 
-**Documento rector compartido:** se añadió un bloque de vigencia al inicio de `Plan Maestro ERP V5 — VariApp — FUENTE RECTORA VAEP`, con chip nativo de fecha y precedencia explícita del MAESTRO versionado sobre contenido histórico.
+**Documento rector compartido:** se añadió un bloque de vigencia al inicio de `Plan Maestro ERP V5 — Solqaryn — FUENTE RECTORA VAEP`, con chip nativo de fecha y precedencia explícita del MAESTRO versionado sobre contenido histórico.
 
 **Verificación:** readback de todas las celdas objetivo, readback nativo del documento (incluido `dateElement` y estilos), `git diff --check`, rama default GitHub `Desarrollo`, `main` sin cambios. Pendiente externo: no se concedió una cuenta GitHub/Drive adicional porque no existe un email/login verificable de Chat B; el rol operativo quedó registrado sin inventar credenciales.
 
@@ -223,7 +232,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 ## 2026-08-24 — Codex — contexto ChatGPT/VAEP
 
-- Se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` como referencia histórica/operativa de VariApp.
+- Se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` como referencia histórica/operativa de Solqaryn.
 - Se enlazó desde `PROJECT_INDEX.md` y se registró en `ARCHITECTURE_CHANGELOG.md`.
 - Se documentaron VAEP, validación causal, cadena compras-recepciones-reservas-facturación, no duplicación y consulta selectiva sin presentarlos como estado no verificado.
 - Cambio exclusivamente documental; no se ejecutó ni modificó código de producción.
@@ -232,7 +241,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 - Se consolidó `PROJECT_INDEX.md` como mapa rápido con índice de decisión, puntos de entrada y comandos verificados.
 - Se creó `ARCHITECTURE_CHANGELOG.md` y se enlazó la convención de mantenimiento desde el contexto y la arquitectura canónicos.
-- Se alineó la declaración `PROJECT_ID: VARIAPP` con el guard obligatorio de inicio de sesión.
+- Se alineó la declaración `PROJECT_ID: SOLQARYN` con el guard obligatorio de inicio de sesión.
 - Cambio exclusivamente documental; no se ejecutó ni modificó código de producción.
 
 ## 2026-08-23 — ERP-N3.1 Cotizaciones — CIERRE FORMAL
@@ -465,7 +474,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive + Programación.
 
-**Objetivo/alcance:** corregir la selección que permitía dejar `N0.5` parcialmente abierto mientras el runner avanzaba `N0.6`. Se alinea `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG` y el prompt de `VariApp VAEP v2 Runner` para priorizar el punto padre más antiguo ya iniciado y terminar todos sus hijos/subhijos antes de abrir un hermano.
+**Objetivo/alcance:** corregir la selección que permitía dejar `N0.5` parcialmente abierto mientras el runner avanzaba `N0.6`. Se alinea `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG` y el prompt de `Solqaryn VAEP v2 Runner` para priorizar el punto padre más antiguo ya iniciado y terminar todos sus hijos/subhijos antes de abrir un hermano.
 
 **Cambios de gobierno:** `MAX_MICROTAREAS_POR_CORRIDA=SIN_TOPE_FIJO`; `REGLA_BLOQUEO=NO_SALTAR_ARBOL_FOCO`; política `RUNNER_SELECTION_POLICY=FINISH_FIRST`; locks propios stale deben reconciliarse/recuperarse; padres deben reflejar estado de hijos; un bloqueo real conserva el foco y detiene la corrida en vez de saltarlo. `RUNNER_CURRENT_RECOVERY_TARGET=N0.5` congela nuevas aperturas de N0.6 hasta cerrar N0.5, preservando intacto todo lo ya certificado en N0.6.
 
@@ -685,7 +694,7 @@ Estados estrictos, selección por prioridad/dependencias, lock lógico y bloqueo
 
 ## 2026-08-11 — Gobierno colaborativo v2
 
-Gate `PROJECT_ID=VARIAPP`, aislamiento entre proyectos, lectura mínima, evidencia obligatoria y hardening de publicación.
+Gate `PROJECT_ID=SOLQARYN`, aislamiento entre proyectos, lectura mínima, evidencia obligatoria y hardening de publicación.
 
 ## 2026-08-11 — Gobierno colaborativo y memoria canónica
 
@@ -812,7 +821,7 @@ Alcance: auditoría de los 43 workflows existentes, sin eliminar workflows ni ev
 
 Playwright: se agregó `actions/cache@v4` para `~/.cache/ms-playwright`, versionado mediante `hashFiles('frontend/package-lock.json')`, a los 12 workflows que ejecutan `npx playwright install --with-deps chromium`. Se conserva `--with-deps` para las dependencias Linux; no se afirma ahorro cuantitativo sin medición histórica comparable. No se implementó build-once entre jobs porque los jobs de base e integración tienen restores, bases MySQL y artefactos separados; hacerlo en este cambio ampliaría el riesgo.
 
-Vercel: `frontend/vercel.json` usa un `ignoreCommand` local fail-open que solo omite build cuando la comparación Git confirma que todos los archivos son documentación, gobierno, `.github` o `vaep`; cualquier cambio frontend, backend o no clasificado fuerza build. No se modificó el dashboard ni la separación externa de ramas/proyectos (`variapp-desarrollo` para `Desarrollo`, `varistorehn` para producción); esa configuración queda pendiente de verificación/ajuste externo seguro.
+Vercel: `frontend/vercel.json` usa un `ignoreCommand` local fail-open que solo omite build cuando la comparación Git confirma que todos los archivos son documentación, gobierno, `.github` o `vaep`; cualquier cambio frontend, backend o no clasificado fuerza build. No se modificó el dashboard ni la separación externa de ramas/proyectos (`solqaryn-desarrollo` para `Desarrollo`, `varistorehn` para producción); esa configuración queda pendiente de verificación/ajuste externo seguro.
 
 Validaciones realizadas: `git diff --check` sin errores; inspección de diff/stat/status; comprobación de que los workflows históricos conservan `workflow_dispatch`; comprobación estática de que los filtros N0.2-N0.5 ya no contienen los comodines genéricos; comprobación de los 12 caches Playwright y de la conservación de sus instalaciones; sintaxis JavaScript del script Vercel y pruebas de comportamiento fail-open/path-based con SHA document-only y SHA con cambios de código. No se ejecutaron builds o suites completas porque el changeset solo modifica workflows/configuración de CI y Vercel.
 
@@ -820,29 +829,29 @@ Riesgos y pendientes: GitHub Actions debe confirmar en el siguiente run que los 
 
 ## 2026-09-03 15:07:51 -06:00 - RCA P0 Vercel y aislamiento Desarrollo/Producción
 
-Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cb227f11ea65f42bef13`. La consulta read-only del equipo `VariApp` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/VariApp`: `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
+Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cb227f11ea65f42bef13`. La consulta read-only del equipo `Solqaryn` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/Solqaryn`: `solqaryn-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
 
 RCA confirmado: `varistorehn` acepta pushes de `Desarrollo` mediante Git Integration y crea deployments de fuente `git` con `githubCommitRef=Desarrollo`, `target=null` y alias `varistorehn-git-desarrollo-vari-app.vercel.app`. Ocurrió para `eaacb832dfc78723ad9cb7d119d88a32c62a0047` y nuevamente para `2658d5b0139e85957463cb227f11ea65f42bef13`. Por tanto, fijar solamente `Production Branch=main` no basta: debe deshabilitarse la creación de Preview Deployments de `Desarrollo` en el proyecto `varistorehn` mediante la configuración de Git Integration/Preview Branches, conservando producción en `main`. El conector read-only no expone ni permite editar esos campos; no se realizó cambio externo.
 
-Estado observado: para `2658d5b...`, `Vercel - variapp-desarrollo` quedó `FAILURE` con `Deployment rate limited - retry in 24 hours`; `Vercel - varistorehn` quedó `SUCCESS`. `variapp-desarrollo` sí generó su deployment para `Desarrollo` (`target=production`, alias `variapp-desarrollo-git-desarrollo-vari-app.vercel.app`), consistente con el diseño documentado. La duplicación real de builds/deployments quedó probada en ambos proyectos.
+Estado observado: para `2658d5b...`, `Vercel - solqaryn-desarrollo` quedó `FAILURE` con `Deployment rate limited - retry in 24 hours`; `Vercel - varistorehn` quedó `SUCCESS`. `solqaryn-desarrollo` sí generó su deployment para `Desarrollo` (`target=production`, alias `solqaryn-desarrollo-git-desarrollo-vari-app.vercel.app`), consistente con el diseño documentado. La duplicación real de builds/deployments quedó probada en ambos proyectos.
 
 La configuración local `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs` no se modificó en esta toma: JSON y JavaScript válidos; pruebas del ignore: solo documentación=`exit 0`, frontend/runtime=`exit 1`, diff no clasificable=`exit 1`. El mecanismo es fail-open y basado en paths, pero no puede impedir que un segundo proyecto Git cree el deployment antes de evaluar el ignore; además, un deployment cancelado puede seguir consumiendo cuota.
 
-Ajuste externo pendiente, seguro y reversible: en `varistorehn`, confirmar `Production Branch=main`, desactivar Preview Deployments para la rama `Desarrollo` (o excluir explícitamente `Desarrollo` en la regla de ramas de preview), conservar root `frontend` y no cambiar dominio, secrets ni producción. En `variapp-desarrollo`, confirmar `Production Branch=Desarrollo`, root `frontend` y que sus previews/runtime apunten únicamente a Desarrollo. La aplicación debe registrar estado antes/después y no usar deploy manual. No se relanzaron workflows, no se cambió `main`, no se tocó N0.2-N0.5, y no se modificó el commit concurrente N4.6.B.
+Ajuste externo pendiente, seguro y reversible: en `varistorehn`, confirmar `Production Branch=main`, desactivar Preview Deployments para la rama `Desarrollo` (o excluir explícitamente `Desarrollo` en la regla de ramas de preview), conservar root `frontend` y no cambiar dominio, secrets ni producción. En `solqaryn-desarrollo`, confirmar `Production Branch=Desarrollo`, root `frontend` y que sus previews/runtime apunten únicamente a Desarrollo. La aplicación debe registrar estado antes/después y no usar deploy manual. No se relanzaron workflows, no se cambió `main`, no se tocó N0.2-N0.5, y no se modificó el commit concurrente N4.6.B.
 
 ## 2026-09-03 15:33:53 -06:00 - Certificación read-only del aislamiento Vercel
 
-Responsable: Codex local autorizado; HEAD inicial `e5d48ef2f5dfdfabe0866f957beef4b744f9ac33`, repositorio `jmejia31/VariApp`, rama `Desarrollo`. El preflight confirmó árbol limpio, `HEAD=origin/Desarrollo` y no hubo fast-forward adicional.
+Responsable: Codex local autorizado; HEAD inicial `e5d48ef2f5dfdfabe0866f957beef4b744f9ac33`, repositorio `jmejia31/Solqaryn`, rama `Desarrollo`. El preflight confirmó árbol limpio, `HEAD=origin/Desarrollo` y no hubo fast-forward adicional.
 
-Ajuste externo manual reportado y verificado por el operador: `varistorehn` queda con Production Branch/tracking `main` y Preview/Avance `Disabled`; `variapp-desarrollo` queda con Production Branch/tracking `Desarrollo` y Preview/Avance `Disabled`. Codex no modificó Vercel, no hizo deployment, rollback, cambio de Git Integration, dominio ni secreto.
+Ajuste externo manual reportado y verificado por el operador: `varistorehn` queda con Production Branch/tracking `main` y Preview/Avance `Disabled`; `solqaryn-desarrollo` queda con Production Branch/tracking `Desarrollo` y Preview/Avance `Disabled`. Codex no modificó Vercel, no hizo deployment, rollback, cambio de Git Integration, dominio ni secreto.
 
-Evidencia read-only: el equipo `VariApp` mantiene exactamente los proyectos `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`), ambos vinculados a `jmejia31/VariApp`. Desde el commit documental anterior `e5d48ef2` no aparecen deployments nuevos en ninguno. El último evento de `varistorehn` es el Preview de `Desarrollo` cancelado por `Ignored Build Step`; no existe evidencia posterior que contradiga el ajuste manual.
+Evidencia read-only: el equipo `Solqaryn` mantiene exactamente los proyectos `solqaryn-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`), ambos vinculados a `jmejia31/Solqaryn`. Desde el commit documental anterior `e5d48ef2` no aparecen deployments nuevos en ninguno. El último evento de `varistorehn` es el Preview de `Desarrollo` cancelado por `Ignored Build Step`; no existe evidencia posterior que contradiga el ajuste manual.
 
-RCA previo: antes del ajuste, ambos proyectos reaccionaban al mismo repositorio y `varistorehn` creaba Preview Deployments desde `Desarrollo`; el ignore podía cancelar el build, pero el deployment ya consumía cuota. El estado manual actual asigna `Desarrollo` únicamente a `variapp-desarrollo` y `main` únicamente a `varistorehn`, desactivando Preview tracking automático en ambos proyectos.
+RCA previo: antes del ajuste, ambos proyectos reaccionaban al mismo repositorio y `varistorehn` creaba Preview Deployments desde `Desarrollo`; el ignore podía cancelar el build, pero el deployment ya consumía cuota. El estado manual actual asigna `Desarrollo` únicamente a `solqaryn-desarrollo` y `main` únicamente a `varistorehn`, desactivando Preview tracking automático en ambos proyectos.
 
-Limitación de certificación: el conector read-only no expone los campos Production Branch/Preview Tracking y todavía no existe un push legítimo posterior al cambio manual. Por ello, la configuración final se registra como verificada manualmente por el operador y respaldada por ausencia de deployments posteriores, pero la prueba natural definitiva queda pendiente del próximo push legítimo de `Desarrollo`. El resultado esperado es deployment solo en `variapp-desarrollo` cuando corresponda y ningún Preview en `varistorehn`.
+Limitación de certificación: el conector read-only no expone los campos Production Branch/Preview Tracking y todavía no existe un push legítimo posterior al cambio manual. Por ello, la configuración final se registra como verificada manualmente por el operador y respaldada por ausencia de deployments posteriores, pero la prueba natural definitiva queda pendiente del próximo push legítimo de `Desarrollo`. El resultado esperado es deployment solo en `solqaryn-desarrollo` cuando corresponda y ningún Preview en `varistorehn`.
 
-El estado `build-rate-limit` queda documentado como limitación previa de `variapp-desarrollo`; no se relanzó ningún workflow/deployment para intentar evadir la cuota. No se modificaron `main`, PR #2, Producción, secretos, BD, dominios, N0.2-N0.5, `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
+El estado `build-rate-limit` queda documentado como limitación previa de `solqaryn-desarrollo`; no se relanzó ningún workflow/deployment para intentar evadir la cuota. No se modificaron `main`, PR #2, Producción, secretos, BD, dominios, N0.2-N0.5, `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
 
 ## 2026-09-03 16:10:00 - N4.6.C persistencia de plan de cuentas
 
@@ -866,7 +875,7 @@ Validación real: `npm.cmd run lint` PASS; `npm.cmd run build -- --configuration
 
 Responsable: Codex local autorizado en `Desarrollo`; cierre documental append-only sobre el exact-head funcional `9d649bbbb4279e41e8cf5b7f5f9b84c26cc362bf`.
 
-N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `VariApp CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
+N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `Solqaryn CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
 
 La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.npmjs.org` durante `npm audit`; se clasifica `EXTERNAL_INFRA`, sin evidencia de regresión causal y sin rerun artificial. No se modificaron producción, secretos, dominios, Vercel ni workflows históricos N0.2-N0.5. El siguiente parent dependency-valid es `N4.7.A`; este changeset no inicia su scope.
 
@@ -874,7 +883,7 @@ La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.np
 
 Responsable: Codex local autorizado en `Desarrollo`; changeset preparado sobre el cierre N4.6 `d6ca66fd790eb3446d028f84f57bd03ccc5647bf`.
 
-Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
+Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad Solqaryn, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
 
 Validación real: JSON schema parseable, `node --check` en ambos scripts y `node scripts/vaep/dispatch-preflight-self-test.mjs` con 9/9 casos PASS. No se modifican manifests históricos, código de producto, Producción ni `main`.
 
@@ -896,9 +905,9 @@ Se añadió el workflow liviano `.github/workflows/vaep-engine-ci.yml`, limitado
 
 Responsable: ChatGPT remoto autorizado en `Desarrollo`.
 
-Se materializó la integración repo-side de Antigravity como reviewer/fixer automático entre Jules y VAEP. Componentes: Custom Agent `.agents/agents/variapp-reviewer/agent.md`, contrato `vaep/schemas/antig-review-result.schema.json`, worker `scripts/antig/antig-review-worker.ps1`, instalador `scripts/antig/install-antig-automation.ps1`, self-test `scripts/antig/antig-self-test.ps1` y runbook `docs/ANTIGRAVITY_AUTOMATION.md`.
+Se materializó la integración repo-side de Antigravity como reviewer/fixer automático entre Jules y VAEP. Componentes: Custom Agent `.agents/agents/solqaryn-reviewer/agent.md`, contrato `vaep/schemas/antig-review-result.schema.json`, worker `scripts/antig/antig-review-worker.ps1`, instalador `scripts/antig/install-antig-automation.ps1`, self-test `scripts/antig/antig-self-test.ps1` y runbook `docs/ANTIGRAVITY_AUTOMATION.md`.
 
-El worker consume únicamente Issues terminales `[VAEP-JULES*] ... result`, resuelve el workflow causal, descarga su artifact, valida task/dispatch/attempt/scope, invoca Antigravity CLI headless con el agente `variapp-reviewer`, permite correcciones menores/medias dentro del mismo scope y produce exclusivamente `READY_FOR_VAEP`, `RETURN_TO_JULES`, `BLOCKED_QA_TAKEOVER` o `NO_ACTION`. `LISTO_REAL` no existe en el schema de decisión AntiG.
+El worker consume únicamente Issues terminales `[VAEP-JULES*] ... result`, resuelve el workflow causal, descarga su artifact, valida task/dispatch/attempt/scope, invoca Antigravity CLI headless con el agente `solqaryn-reviewer`, permite correcciones menores/medias dentro del mismo scope y produce exclusivamente `READY_FOR_VAEP`, `RETURN_TO_JULES`, `BLOCKED_QA_TAKEOVER` o `NO_ACTION`. `LISTO_REAL` no existe en el schema de decisión AntiG.
 
 La publicación queda separada del agente: el Custom Agent tiene prohibidos commit/push/merge/rebase/reset/checkout/switch. El wrapper solo integra cuando el checkout comenzó limpio y sincronizado, la salida estructurada reporta P0=0/P1=0, no hay blocker ni scope leak, `git diff --check` pasa y `origin/Desarrollo` conserva el exact-head inicial. Nunca se usa force-push ni rebase automático. Si el remoto cambia, falla cerrado y preserva los commits locales para reconciliación humana/controller.
 
@@ -906,7 +915,7 @@ Gobernanza actualizada: ATTEMPT=1 con defecto estructural puede regresar al úni
 
 CI: `.github/workflows/vaep-engine-ci.yml` ahora incluye paths AntiG, parsea el schema estructurado y ejecuta `scripts/antig/antig-self-test.ps1 -StaticOnly`.
 
-Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `VariApp-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
+Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `Solqaryn-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
 
 ## 2026-09-03 — Hardening P1 AntiG posterior a auditoría Codex
 
@@ -934,7 +943,7 @@ La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\
 
 **Objetivo/alcance:** reconciliar de forma aditiva/history-preserving el cierre documental de N4.7 sin modificar producto ni adelantar N4.8. La certificación canónica es `docs/CERTIFICACION_N4_7_ASIENTOS.md`; el baseline funcional certificado de A-G es `c8d1e373ba8ea008bf773e69afa10f5f18d6de8b`.
 
-**Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `VariApp CI=SKIPPED` excluido; P0=0/P1=0.
+**Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `Solqaryn CI=SKIPPED` excluido; P0=0/P1=0.
 
 **Control fail-closed:** este changeset completa exclusivamente el rollup documental `TASKS.md` + `CHANGELOG_AI.md`. `N4.7.H` no se declara `LISTO_REAL` por este texto: permanece pendiente de gates aplicables terminales y revalidación P0/P1=0 sobre el exact-head resultante del rollup. Solo después VAEP puede cerrar H y promover `N4.8.A`. No se modifica `main`, Producción, secretos, deploy, ramas ni PR #2.
 
@@ -969,7 +978,7 @@ REVIEW_FIRST posterior al handoff AntiG detectó que la primera publicación de 
 
 El commit `dd518b608f0404f249a6315b10793da1c500226c` elimina esos gaps sin ampliar scope: master/worker capturan primero la salida del parser y abortan fail-closed si este falla; los self-tests dejan de duplicar los valores canónicos; retry validation, prompts, logs e Issues consumen `JULES_MAX_ATTEMPTS`/`JULES_REWORK_MAX` desde MASTER; los artifacts/resultados incluyen `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH`.
 
-La evidencia causal del exact-head de código corregido es `VAEP engine lightweight checks #33909740182 = SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS. Los ocho workflows Jules continúan sin overrides de budget y conservan solo `timeout-minutes: 25` como safety-net externo.
+La evidencia causal del exact-head de código corregido es `VAEP engine lightweight checks #33909740182 = SUCCESS`. `Solqaryn CI=SKIPPED` queda explícitamente excluido como PASS. Los ocho workflows Jules continúan sin overrides de budget y conservan solo `timeout-minutes: 25` como safety-net externo.
 
 Cierre corregido: `MIGRATION_PHASE_2=CLOSED/PASS`; `RUNTIME_POLICY_DUPLICATES=0`; `POLICY_BLOCK_COUNT=1`; `PARSER_FAIL_CLOSED=PASS`; `MASTER_SHA_POLICY_HASH_EVIDENCE=PASS`; `ACTIVE_NUMERIC_PROTOCOL_AUTHORITIES=0`; `FASE_3=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -983,7 +992,7 @@ El worker persiste estado causal de la sesión antes y después de adquirir sesi
 
 El worker consulta el ledger de supersession antes de crear/reanudar sesión y nuevamente antes de publicar un resultado. Un resultado tardío superseded se convierte en `LATE_RESULT_SUPERSEDED`, queda `lateResultAutoIntegrationDenied=true` y no puede terminar como COMPLETED integrable.
 
-Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícitamente a MASTER. Se corrigió además el heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el run PR `33911803009` volvió a ejecutar job y terminó SUCCESS. El gate causal del runtime `VAEP engine lightweight checks` push `33911698939` terminó SUCCESS con Validate VAEP/Jules MASTER y todos los VAEP self-tests en SUCCESS. `VariApp CI=SKIPPED` queda excluido como PASS.
+Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícitamente a MASTER. Se corrigió además el heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el run PR `33911803009` volvió a ejecutar job y terminó SUCCESS. El gate causal del runtime `VAEP engine lightweight checks` push `33911698939` terminó SUCCESS con Validate VAEP/Jules MASTER y todos los VAEP self-tests en SUCCESS. `Solqaryn CI=SKIPPED` queda excluido como PASS.
 
 Resultado: `MIGRATION_PHASE_3=CLOSED/PASS`; `NO_OP=PASS`; `MULTI_MANIFEST_FAIL_CLOSED=PASS`; `TIMEOUT_SUPERSESSION=PASS`; `LATE_RESULT_GUARD=PASS`; `DURABLE_TIMEOUT_EVIDENCE=PASS`; `FASE_4=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -993,11 +1002,11 @@ Responsable: ChatGPT/VAEP sobre `Desarrollo`.
 
 Se retiraron los siete writers históricos aprobados de Fase 4: `vaep-control-plane-ci-guard.yml`, `vaep-n36h-exact-publish.yml`, `vaep-n37h-exact-publish.yml`, `vaep-n38h-exact-publish.yml`, `vaep-n39h-exact-publish.yml`, `vaep-n310h-exact-publish.yml` y `vaep-n311h-exact-changelog-publisher.yml`. Todos contenían autoridad de escritura histórica sobre `Desarrollo` mediante `contents: write`, `git commit`, `git push` y/o `git reset --hard`.
 
-`.github/workflows/ci.yml` fue auditado por separado. Se preservaron sus jobs de backend, frontend y aceptación, sus builds/tests, MySQL temporal, Playwright y artifacts. Se redujo `permissions.contents` de `write` a `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-variapp`.
+`.github/workflows/ci.yml` fue auditado por separado. Se preservaron sus jobs de backend, frontend y aceptación, sus builds/tests, MySQL temporal, Playwright y artifacts. Se redujo `permissions.contents` de `write` a `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-solqaryn`.
 
 Después del changeset se auditaron los 38 workflows restantes. Resultado: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`. El CI de producto permanece presente; no se eliminó ninguna validación funcional de backend/frontend/acceptance.
 
-Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS` y `VAEP Jules Diagnostic #33912398627=SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS.
+Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS` y `VAEP Jules Diagnostic #33912398627=SUCCESS`. `Solqaryn CI=SKIPPED` queda explícitamente excluido como PASS.
 
 Resultado: `MIGRATION_PHASE_4=CLOSED/PASS`; `HISTORICAL_GIT_WRITERS=0`; `UNAUTHORIZED_COMMIT_PUSH_RESET=0`; `PRODUCT_CI_PRESERVED=PASS`; `FASE_5=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -1033,7 +1042,7 @@ Responsable: ChatGPT/VAEP sobre `Desarrollo`.
 
 Se certifica el cierre integral de la migración F0-F7 hacia el MAESTRO único `docs/VAEP_AUTHORITY.md`. Durante REVIEW_FIRST final se detectó y corrigió una regresión real: el control técnico `vaep/control/dispatch-admission.json` había sido retirado porque no estaba definido por MASTER. La corrección de Fase 7 incorpora la semántica de admisión dentro del mismo MAESTRO y reintroduce el state machine como consumidor subordinado, eliminando la contradicción de autoridad.
 
-El commit de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6` dejó admisión `FROZEN` y pasó `VAEP engine lightweight checks #33917014608=SUCCESS` y `VAEP Jules Diagnostic #33917014756=SUCCESS`. El self-test cubre `NO_OP`, multi-manifest fail-closed, `FROZEN`, `OPEN`, state inválido, clave desconocida y state ausente; el rechazo `FROZEN` ocurre antes de sesión/attempt/ownership/recovery. `VariApp CI=SKIPPED` no se usa como PASS.
+El commit de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6` dejó admisión `FROZEN` y pasó `VAEP engine lightweight checks #33917014608=SUCCESS` y `VAEP Jules Diagnostic #33917014756=SUCCESS`. El self-test cubre `NO_OP`, multi-manifest fail-closed, `FROZEN`, `OPEN`, state inválido, clave desconocida y state ausente; el rechazo `FROZEN` ocurre antes de sesión/attempt/ownership/recovery. `Solqaryn CI=SKIPPED` no se usa como PASS.
 
 La certificación integral revalida: un único bloque de política machine-readable; parser fail-closed sin `source`/`eval`; `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` en evidencia; runtime Jules con timeout/supersession/late-result guard; cero protocol docs versionados activos; cero manifests históricos en rutas activas; cero historical Git writers; CI de producto preservado; AntiG `RESERVED_INACTIVE`; cinco tareas `VAEP MASTER 00/15/30/45/55` enabled con telemetría reciente y prompts MASTER-bound.
 
@@ -1053,7 +1062,7 @@ Se eliminó del árbol activo la ruta legacy `vaep/jules-a/dispatch/` con sus 54
 
 El bloque `BEGIN_AUTOMATION_POLICY` conserva una sola instancia y pasa de 6 a 9 claves, incorporando `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE` y `VAEP_CHECKPOINTS`. El parser fail-closed, `vaep-jules-master.sh` y `vaep-jules-worker.sh` fueron actualizados para consumir esas claves; se retiró el literal runtime de checkpoints.
 
-Evidencia causal del hardening: `VAEP engine lightweight checks #33920294318=SUCCESS` y `VAEP Jules Diagnostic #33920294338=SUCCESS` sobre `09ee682712ba29d79d235a62415de20c308db7c9`. `VariApp CI=SKIPPED` queda excluido como PASS.
+Evidencia causal del hardening: `VAEP engine lightweight checks #33920294318=SUCCESS` y `VAEP Jules Diagnostic #33920294338=SUCCESS` sobre `09ee682712ba29d79d235a62415de20c308db7c9`. `Solqaryn CI=SKIPPED` queda excluido como PASS.
 
 El punto de Codex sobre las cinco automatizaciones era una limitación de auditoría Git-only, no una ausencia operativa: `VAEP MASTER 00/15/30/45/55` están presentes y habilitadas en el control-plane externo. La imposibilidad local de ejecutar Bash en su entorno Windows tampoco se usa como PASS; la validación causal proviene de GitHub Actions.
 
@@ -1280,7 +1289,7 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
 
-Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en VariApp, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
+Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en Solqaryn, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
 
 No se tocaron Producción, `main`, secretos ni WhatsApp. Las capturas tomadas por CUA quedaron observadas inline; como CUA no expone una ruta local para sus bytes, no se fabricaron PNG para completar los nombres restantes. La matriz y los archivos aportados están en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`.
 
@@ -1499,7 +1508,7 @@ Este bloque forma parte de N9.5.H y se añade de forma estrictamente aditiva jun
 
 **Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
 
-N9.6 fue revalidado bajo el estándar current-standard. En N9.6.A se detectó y corrigió same-run un probe temporal que apuntaba a URLs de Producción, incompatible con la autoridad vigente. El probe se retiró y se sustituyó por un one-shot estrictamente Desarrollo-only contra `variapp-api-desarrollo.onrender.com` y `variapp-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y validó health/readiness/latencia del backend DEV, shell/latencia del frontend DEV y comportamiento fail-closed anónimo de superficies críticas. El proyecto Vercel `variapp-desarrollo` no mostró runtime errors en la ventana fresca consultada.
+N9.6 fue revalidado bajo el estándar current-standard. En N9.6.A se detectó y corrigió same-run un probe temporal que apuntaba a URLs de Producción, incompatible con la autoridad vigente. El probe se retiró y se sustituyó por un one-shot estrictamente Desarrollo-only contra `solqaryn-api-desarrollo.onrender.com` y `solqaryn-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y validó health/readiness/latencia del backend DEV, shell/latencia del frontend DEV y comportamiento fail-closed anónimo de superficies críticas. El proyecto Vercel `solqaryn-desarrollo` no mostró runtime errors en la ventana fresca consultada.
 
 N9.6.B–E resultaron N/A materiales porque Hypercare no introdujo cambios de dominio, contratos, persistencia, migraciones, backend/API ni frontend/UX. N9.6.F confirmó los controles anónimos fail-closed y N9.6.G conservó como causal la aceptación exact-product `35316302603` (`100/100` Playwright + SMTP/PDF) por equivalencia demostrada con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`, complementada por el gate Hypercare DEV fresco.
 

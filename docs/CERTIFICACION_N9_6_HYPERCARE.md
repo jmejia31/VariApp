@@ -11,12 +11,12 @@ N9.6 vigila intensivamente errores, performance, jobs, integraciones, base de da
 
 ## REVIEW_FIRST y recovery
 
-Durante N9.6.A se detectó que un probe temporal apuntaba a URLs de Producción. Ese probe fue retirado same-run conforme a `FIRST_DETECTOR_OWNS_RECOVERY`. Después se ejecutó un gate one-shot estrictamente Desarrollo-only contra `variapp-api-desarrollo.onrender.com` y `variapp-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y su job `105519333459` confirmó:
+Durante N9.6.A se detectó que un probe temporal apuntaba a URLs de Producción. Ese probe fue retirado same-run conforme a `FIRST_DETECTOR_OWNS_RECOVERY`. Después se ejecutó un gate one-shot estrictamente Desarrollo-only contra `solqaryn-api-desarrollo.onrender.com` y `solqaryn-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y su job `105519333459` confirmó:
 
 - backend DEV `/health` y `/health/ready` saludables, con mediciones de latencia;
 - frontend DEV accesible y con muestras de latencia correctas;
 - superficies críticas protegidas en DEV permanecen fail-closed de forma anónima (`401/403`);
-- el proyecto Vercel `variapp-desarrollo` no reportó runtime errors en la ventana fresca de una hora consultada.
+- el proyecto Vercel `solqaryn-desarrollo` no reportó runtime errors en la ventana fresca de una hora consultada.
 
 El workflow temporal Desarrollo-only fue retirado inmediatamente después de obtener la evidencia. El árbol de producto quedó equivalente al baseline previo al recovery.
 

@@ -6,7 +6,7 @@ Aceptado para ERP-N1.9.
 
 ## Contexto
 
-VariApp ya posee una autoridad física agregada: `ExistenciaVariante`, identificada por Variante + Almacén + Ubicación. N1.9 necesita lote, serie y vencimiento sin duplicar esa autoridad ni transformar metadata logística en variantes comerciales.
+Solqaryn ya posee una autoridad física agregada: `ExistenciaVariante`, identificada por Variante + Almacén + Ubicación. N1.9 necesita lote, serie y vencimiento sin duplicar esa autoridad ni transformar metadata logística en variantes comerciales.
 
 ## Decisión
 

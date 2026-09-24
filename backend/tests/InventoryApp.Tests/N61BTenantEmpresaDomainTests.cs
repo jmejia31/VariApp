@@ -8,9 +8,9 @@ public class N61BTenantEmpresaDomainTests
     [Fact]
     public void Crear_normaliza_nombre_y_activa_la_raiz()
     {
-        var empresa = new Empresa("  VariApp Centro  ");
+        var empresa = new Empresa("  Solqaryn Centro  ");
 
-        Assert.Equal("VariApp Centro", empresa.Nombre);
+        Assert.Equal("Solqaryn Centro", empresa.Nombre);
         Assert.True(empresa.Activa);
         Assert.NotEqual(typeof(EmpresaConfiguracion), empresa.GetType());
     }

@@ -14,7 +14,7 @@
     "engine": "MYSQL",
     "server_version": "8.4.8",
     "provider": "AIVEN",
-    "service": "variapp-mysql",
+    "service": "solqaryn-mysql",
     "plan": "free-1-1gb",
     "backup_recovery_mode": "pitr",
     "pitr_available": true,

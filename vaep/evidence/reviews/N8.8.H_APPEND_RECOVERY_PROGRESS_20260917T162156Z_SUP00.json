@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.vaep.supervision-progress.v1",
+  "schema": "solqaryn.vaep.supervision-progress.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.8.H",
   "branch": "Desarrollo",

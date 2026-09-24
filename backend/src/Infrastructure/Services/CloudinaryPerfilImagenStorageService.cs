@@ -10,7 +10,7 @@ namespace InventoryApp.Infrastructure.Services;
 
 public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
 {
-    private const string BaseFolder = "variapp/perfiles";
+    private const string BaseFolder = "solqaryn/perfiles";
 
     private readonly Cloudinary _cloudinary;
     private readonly ILogger<CloudinaryPerfilImagenStorageService> _logger;

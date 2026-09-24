@@ -1,6 +1,6 @@
 # Estándar canónico de compartición por WhatsApp
 
-VariApp soporta actualmente compartición WhatsApp iniciada por el usuario mediante el cliente oficial de WhatsApp/WhatsApp Web. Este modo no requiere API de proveedor ni costo por mensaje y no declara delivery/read receipts. La integración automática mediante proveedor/API se considera capacidad opcional futura y no bloquea el ERP Core.
+Solqaryn soporta actualmente compartición WhatsApp iniciada por el usuario mediante el cliente oficial de WhatsApp/WhatsApp Web. Este modo no requiere API de proveedor ni costo por mensaje y no declara delivery/read receipts. La integración automática mediante proveedor/API se considera capacidad opcional futura y no bloquea el ERP Core.
 
 ## Flujo vigente
 

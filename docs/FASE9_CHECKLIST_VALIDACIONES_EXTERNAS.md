@@ -21,7 +21,7 @@ Para cada prueba:
 ### Preparación
 
 - [ ] Configurar secretos SMTP directamente en Render Desarrollo.
-- [ ] Confirmar que el servicio es `variapp-api-desarrollo`.
+- [ ] Confirmar que el servicio es `solqaryn-api-desarrollo`.
 - [ ] Confirmar que Producción no comparte estas credenciales.
 - [ ] Usar un buzón controlado por Javier Mejía.
 

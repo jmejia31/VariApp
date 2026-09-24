@@ -15,7 +15,7 @@ Las capturas del propietario confirmaron dos problemas diferentes:
 
 El generador ya utiliza `ContinuousSize` para POS‑58 y POS‑80. El PDF certificado anterior de POS‑80 tenía un `MediaBox` aproximado de `79.99 × 191.73 mm`, no `80 × 297 mm`.
 
-Por tanto, los `297 mm` observados no procedían del PDF generado por VariApp. El controlador `POS-80 (copy 2)` estaba imponiendo un tamaño fijo de papel en el diálogo de impresión.
+Por tanto, los `297 mm` observados no procedían del PDF generado por Solqaryn. El controlador `POS-80 (copy 2)` estaba imponiendo un tamaño fijo de papel en el diálogo de impresión.
 
 ### Corrección aplicada
 
@@ -74,7 +74,7 @@ La respuesta contiene solamente:
 
 ## Configuración requerida en Render Desarrollo
 
-Servicio exclusivo: `variapp-api-desarrollo`.
+Servicio exclusivo: `solqaryn-api-desarrollo`.
 
 ```text
 Smtp__Host=smtp.gmail.com

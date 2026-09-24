@@ -9,12 +9,12 @@
   "owner_execution_receipt": "vaep/evidence/receipts/N8.23.E_LISTO_20260916T215728Z_OWNER_VERIFIED.json",
   "owner_execution_receipt_commit": "2cfda5b6d06c8ab76d78384bdf8b8cb79e149d3d",
   "material_sequence": "CURRENT -> PREVIOUS_KNOWN_GOOD -> HEALTHY -> CURRENT -> HEALTHY",
-  "scope": "Vercel DEV project variapp-desarrollo only",
+  "scope": "Vercel DEV project solqaryn-desarrollo only",
   "current": {
     "deployment_id": "dpl_4yGzfFqgmNahG4vNcEAmw7ncMiq1",
     "runtime_commit": "e0a205fdb082dc9dbbbc48f7f107a62f1a7e200f",
     "state": "READY",
-    "canonical_alias": "variapp-desarrollo.vercel.app",
+    "canonical_alias": "solqaryn-desarrollo.vercel.app",
     "smoke": "HTTP 200"
   },
   "previous_known_good": {

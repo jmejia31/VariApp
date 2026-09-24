@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
-const expectedRepo = 'solqaryn/VariApp';
+const expectedRepo = 'solqaryn/Solqaryn';
 const expectedBranch = 'Desarrollo';
 
 function git(...args) {
@@ -13,10 +13,10 @@ if (branch !== expectedBranch) throw new Error(`SOLQARYN scope gate: branch ${br
 
 const origin = git('remote', 'get-url', 'origin');
 const allowed = new Set([
-  'https://github.com/solqaryn/VariApp',
-  'https://github.com/solqaryn/VariApp.git',
-  'git@github.com:solqaryn/VariApp.git',
-  'ssh://git@github.com/solqaryn/VariApp.git',
+  'https://github.com/solqaryn/Solqaryn',
+  'https://github.com/solqaryn/Solqaryn.git',
+  'git@github.com:solqaryn/Solqaryn.git',
+  'ssh://git@github.com/solqaryn/Solqaryn.git',
 ]);
 if (!allowed.has(origin)) throw new Error(`SOLQARYN scope gate: unexpected origin ${origin}`);
 

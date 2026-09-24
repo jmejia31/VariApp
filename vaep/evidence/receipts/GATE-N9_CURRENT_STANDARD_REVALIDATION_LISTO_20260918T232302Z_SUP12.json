@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "project": "VARIAPP",
-  "repository": "jmejia31/VariApp",
+  "project": "SOLQARYN",
+  "repository": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "parent": "GATE-N9",
   "state": "LISTO",
@@ -41,7 +41,7 @@
     "vaepAdmissionGuard": 35401799077,
     "scheduledCheckpointGuards": [35402502381, 35402991090]
   },
-  "externalNonCausalStatus": "Vercel variapp-desarrollo deployment rate limited; no authorized or attempted Vercel/production write; not causal to GATE-N9 certification",
+  "externalNonCausalStatus": "Vercel solqaryn-desarrollo deployment rate limited; no authorized or attempted Vercel/production write; not causal to GATE-N9 certification",
   "reviewFirst": "PASS",
   "dodMaterial": true,
   "severity": {

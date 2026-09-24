@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "variapp.db-provider-proof.v1",
+  "schemaVersion": "solqaryn.db-provider-proof.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.20.C",
   "status": "PASS_PROVIDER_IDENTIFIED",

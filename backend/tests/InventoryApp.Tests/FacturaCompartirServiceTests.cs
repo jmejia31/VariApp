@@ -203,7 +203,7 @@ public class FacturaCompartirServiceTests
                 Exito = true,
                 Codigo = "ENVIADO",
                 Intentos = 2,
-                MessageId = "variapp-test"
+                MessageId = "solqaryn-test"
             });
 
         var resultado = await _service.EnviarPorCorreoAsync(
@@ -213,7 +213,7 @@ public class FacturaCompartirServiceTests
 
         Assert.True(resultado.Exito);
         Assert.Equal(2, resultado.Intentos);
-        Assert.Equal("variapp-test", resultado.MessageId);
+        Assert.Equal("solqaryn-test", resultado.MessageId);
         Assert.Contains("2 intentos", resultado.Mensaje);
         _repository.Verify(r => r.AddHistorialAsync(It.Is<HistorialEnvioFactura>(h =>
             h.FacturaId == factura.Id &&
@@ -237,7 +237,7 @@ public class FacturaCompartirServiceTests
                 Exito = true,
                 Codigo = "ENVIADO",
                 Intentos = 1,
-                MessageId = "variapp-idem"
+                MessageId = "solqaryn-idem"
             });
 
         var primero = await _service.EnviarPorCorreoAsync(factura.Id, "cliente@example.com", clave);
@@ -268,7 +268,7 @@ public class FacturaCompartirServiceTests
                 Error = "El servidor de correo presentó un problema temporal.",
                 EsTransitorio = true,
                 Intentos = 3,
-                MessageId = "variapp-error"
+                MessageId = "solqaryn-error"
             });
 
         var resultado = await _service.EnviarPorCorreoAsync(

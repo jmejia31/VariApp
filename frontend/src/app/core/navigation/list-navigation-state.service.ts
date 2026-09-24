@@ -4,7 +4,7 @@ import { AuthService } from '../auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ListNavigationStateService {
-  private readonly prefix = 'variapp.navigation.v1';
+  private readonly prefix = 'solqaryn.navigation.v1';
 
   constructor(private router: Router, private auth: AuthService) {}
 

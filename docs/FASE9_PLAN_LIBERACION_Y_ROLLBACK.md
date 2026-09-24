@@ -6,7 +6,7 @@ Producción: **LIVE**
 
 ## 1. Objetivo
 
-Definir una secuencia segura para una liberación futura de VariApp sin ejecutarla durante la Fase 9.
+Definir una secuencia segura para una liberación futura de Solqaryn sin ejecutarla durante la Fase 9.
 
 Este documento no autoriza:
 
@@ -276,7 +276,7 @@ POSTCHECK PASS
 - Autorización: expresa del propietario para continuar hasta completar la liberación productiva.
 - Respaldo productivo: confirmado por el propietario antes del APPLY.
 - Commit productivo estabilizado: `7f140442d598aaea36b39952bad5ebd9ab4f2613`.
-- Servicio backend: `variapp-api` en Render.
+- Servicio backend: `solqaryn-api` en Render.
 - Deploy final de reapertura: `dep-damb4lqjnfac73efl1pg` — `live`.
 - Maintenance gate: activado antes del APPLY y desactivado después del postcheck.
 - Migración final observada: `20260914232400_N7_10_C_DocumentoFiscalPersistencia`.

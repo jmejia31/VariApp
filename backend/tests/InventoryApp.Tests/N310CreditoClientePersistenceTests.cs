@@ -25,7 +25,7 @@ public sealed class N310CreditoClientePersistenceTests
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql("Server=localhost;Database=variapp_test;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
+            .UseMySql("Server=localhost;Database=solqaryn_test;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
             .Options;
         return new AppDbContext(options);
     }

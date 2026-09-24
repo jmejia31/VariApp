@@ -8,12 +8,12 @@
 
 $ErrorActionPreference = "Stop"
 
-$ExpectedRepo = "solqaryn/VariApp"
+$ExpectedRepo = "solqaryn/Solqaryn"
 $ExpectedOrigins = @(
-    "https://github.com/solqaryn/VariApp",
-    "https://github.com/solqaryn/VariApp.git",
-    "git@github.com:solqaryn/VariApp.git",
-    "ssh://git@github.com/solqaryn/VariApp.git"
+    "https://github.com/solqaryn/Solqaryn",
+    "https://github.com/solqaryn/Solqaryn.git",
+    "git@github.com:solqaryn/Solqaryn.git",
+    "ssh://git@github.com/solqaryn/Solqaryn.git"
 )
 
 function Invoke-Git {
@@ -80,7 +80,7 @@ try {
 
     Write-Host ""
     Write-Host "Colaboración configurada correctamente." -ForegroundColor Green
-    Write-Host "Proyecto confirmado: VARIAPP / $ExpectedRepo"
+    Write-Host "Proyecto confirmado: SOLQARYN / $ExpectedRepo"
     Write-Host "Rama activa: Desarrollo"
     Write-Host "Hooks activos: pre-commit (identidad + evidencia) y post-commit (push seguro)."
     Write-Host "Main permanece congelada y no se fusionará automáticamente."

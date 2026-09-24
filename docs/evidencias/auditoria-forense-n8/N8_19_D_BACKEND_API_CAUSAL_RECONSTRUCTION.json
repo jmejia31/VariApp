@@ -1,6 +1,6 @@
 {
   "schema":"vaep-n8.19-d-backend-forensic/v1",
-  "parent":"N8.19.D","macro_parent":"N8.19","stage":"BACKEND_API","branch":"Desarrollo","repo":"jmejia31/VariApp","authority":"docs/VAEP_AUTHORITY.md",
+  "parent":"N8.19.D","macro_parent":"N8.19","stage":"BACKEND_API","branch":"Desarrollo","repo":"jmejia31/Solqaryn","authority":"docs/VAEP_AUTHORITY.md",
   "base_head":"ddda5cf8d8148dce003b05fe114cc2921725a754",
   "scope_source":"docs/evidencias/auditoria-forense-n8/N8_19_A_PRE_SCOPE.json",
   "method":"Underlying implementation/review/gate evidence is authoritative; receipts are indexes. Pending historical rows are preserved as pending and are not inferred PASS.",

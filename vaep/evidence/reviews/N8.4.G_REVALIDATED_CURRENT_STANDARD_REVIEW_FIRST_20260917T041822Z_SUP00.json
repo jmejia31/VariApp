@@ -13,7 +13,7 @@
     "frontend_dependency": "html5-qrcode=2.3.8",
     "scanner_validator": "frontend/scripts/validate-scanner-2c4.mjs exige carga diferida de camara, scanFile local, stop/clear, limites 10MB/16MP/4096, integracion ventas/compras, resolucion por codigo y Permissions-Policy de Vercel",
     "scanner_input": "frontend/src/app/shared/codigo-scanner-input/codigo-scanner-input.component.ts usa input enfocable compatible con lectores HID/teclado y ofrece dialogo de camara; no instala listeners globales",
-    "vercel_dev": "variapp-desarrollo fue inspeccionado read-only; existen deployments DEV visibles, incluido READY dpl_Jb6QMfpKAcbi7MaHcjYZv8zNoTZA; no se realizaron mutaciones",
+    "vercel_dev": "solqaryn-desarrollo fue inspeccionado read-only; existen deployments DEV visibles, incluido READY dpl_Jb6QMfpKAcbi7MaHcjYZv8zNoTZA; no se realizaron mutaciones",
     "github_exact_head_checks": "29 check-runs visibles sobre eb5ef159764771ae237c29d13292bf5efa3ebdd8; el CI general de PR fue skipped por su condicion, mientras gates no relacionados como backup aislado completaron success"
   },
   "exact_head_equivalence": {

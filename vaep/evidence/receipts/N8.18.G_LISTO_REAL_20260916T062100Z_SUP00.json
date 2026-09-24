@@ -10,7 +10,7 @@
   "stage_prefix": "G",
   "stage_name": "TEST_CI",
   "branch": "Desarrollo",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "candidate_commit": "c0d453957cea0e8600f2bbbc5a15e8e230a39eea",
   "functional_candidate": "c0d453957cea0e8600f2bbbc5a15e8e230a39eea",
   "receipt_commit": "PENDING_SELF_REFERENCE",

@@ -16,7 +16,7 @@ Evidencia GitHub Actions:
 - `31325383744` — Fase 2 - Auditoría de configuración y dependencias — success.
 - `31325383748` — Bloque 2C.1 - Variante técnica y migración — success.
 - `31325383772` — Fase 8 - Validación completa automatizada — success.
-- `31325383746` — VariApp CI — skipped; no contabilizado como verde.
+- `31325383746` — Solqaryn CI — skipped; no contabilizado como verde.
 
 ## Cierre documental
 

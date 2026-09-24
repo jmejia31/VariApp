@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.vaep.review-first.v1",
+  "schema": "solqaryn.vaep.review-first.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.8.G",
   "role": "SUPERVISOR_WATCHDOG_VERIFIER_RECOVERY",

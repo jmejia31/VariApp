@@ -1,4 +1,4 @@
-# Contexto ChatGPT / VAEP — VariApp
+# Contexto ChatGPT / VAEP — Solqaryn
 
 ## Autoridad operativa
 

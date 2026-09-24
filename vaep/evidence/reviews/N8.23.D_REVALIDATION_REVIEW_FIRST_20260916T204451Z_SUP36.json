@@ -17,8 +17,8 @@
   "owner_override": {
     "authorized": true,
     "authorized_scopes": ["N8.23.D", "N8.23.E", "N8.23.G", "N8.23.H"],
-    "render_service": "variapp-api-desarrollo",
-    "vercel_project": "variapp-desarrollo",
+    "render_service": "solqaryn-api-desarrollo",
+    "vercel_project": "solqaryn-desarrollo",
     "required_sequence": "CURRENT->PREVIOUS_KNOWN_GOOD->HEALTHY->CURRENT->HEALTHY",
     "production_allowed": false,
     "main_allowed": false,

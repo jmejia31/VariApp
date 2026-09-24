@@ -16,7 +16,7 @@
     "destructive_down_on_active_dev": false
   },
   "material_execution": {
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "service_id": "srv-d9jblq7avr4c73c74jng",
     "workspace_id": "tea-d97f0k28qa3s73ejqhtg",
     "health_check_path": "/health/ready",

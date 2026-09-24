@@ -21,7 +21,7 @@
   },
   "nonCausalSignals": [
     {
-      "context": "Vercel - variapp-desarrollo",
+      "context": "Vercel - solqaryn-desarrollo",
       "state": "failure",
       "classification": "NON_CAUSAL_EXTERNAL_DEPLOY_SIGNAL",
       "reason": "build-rate-limit; docs/VAEP_AUTHORITY.md section 11 states Vercel/deploy not applicable is not a causal hold"

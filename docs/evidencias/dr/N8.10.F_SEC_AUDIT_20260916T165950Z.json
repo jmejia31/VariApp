@@ -1,5 +1,5 @@
 {
-  "schema":"variapp-dr-security-audit/v1",
+  "schema":"solqaryn-dr-security-audit/v1",
   "authority":"docs/VAEP_AUTHORITY.md",
   "scope":"N8.10.F",
   "parent":"N8.10",

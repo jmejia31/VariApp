@@ -1,10 +1,10 @@
 # VAEP — MAESTRO OPERATIVO ÚNICO
 
-Este archivo es la única autoridad operativa de VAEP para VariApp.
+Este archivo es la única autoridad operativa de VAEP para Solqaryn.
 
 ```text
-PROJECT_ID=VARIAPP
-REPOSITORY=solqaryn/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 BRANCH=Desarrollo
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
@@ -216,7 +216,7 @@ Regla: `DEFECT_RECOVERY_FIRST + FIRST_DETECTOR_OWNS_RECOVERY + NO_REJECT_QUEUE`.
 
 ## 8. Retiro definitivo de workers externos
 
-La antigua infraestructura J1–J6/Jules está retirada del runtime de VariApp. Sus commits, receipts, Issues y demás evidencia histórica permanecen únicamente como historial inmutable. Ningún artefacto histórico puede reactivar workers externos, crear manifests, asignar lanes, consumir credenciales o convertirse en requisito de progreso, cierre o certificación.
+La antigua infraestructura J1–J6/Jules está retirada del runtime de Solqaryn. Sus commits, receipts, Issues y demás evidencia histórica permanecen únicamente como historial inmutable. Ningún artefacto histórico puede reactivar workers externos, crear manifests, asignar lanes, consumir credenciales o convertirse en requisito de progreso, cierre o certificación.
 
 El runtime vigente y completo es exclusivamente las diez automatizaciones canónicas definidas por este MAESTRO.
 
@@ -259,6 +259,6 @@ EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 LOCAL_SKILL_COUNT=1
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
 
 

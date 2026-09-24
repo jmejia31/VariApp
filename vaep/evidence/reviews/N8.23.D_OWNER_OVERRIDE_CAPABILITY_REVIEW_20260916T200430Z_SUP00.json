@@ -12,14 +12,14 @@
   "owner_override_revalidation": {
     "owner_authorization_received": true,
     "prior_owner_policy_blocker_resolved": true,
-    "authorized_scope": "DEV-only reversible rollback/forward-recovery for N8.23.D/E/G/H on Render variapp-api-desarrollo and Vercel variapp-desarrollo",
+    "authorized_scope": "DEV-only reversible rollback/forward-recovery for N8.23.D/E/G/H on Render solqaryn-api-desarrollo and Vercel solqaryn-desarrollo",
     "production_authorized": false,
     "main_authorized": false,
     "pr2_authorized": false
   },
   "fresh_render_state": {
     "workspace_id": "tea-d97f0k28qa3s73ejqhtg",
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "service_id": "srv-d9jblq7avr4c73c74jng",
     "branch": "Desarrollo",
     "health_check_path": "/health/ready",
@@ -57,7 +57,7 @@
     "type": "EXTERNAL_TOOL_CAPABILITY_REQUIRED",
     "causal": true,
     "reason": "The authorized Render connector can inspect deploys and trigger a fresh deploy of the configured branch, but it does not expose an action to roll back/promote the already existing PREVIOUS_KNOWN_GOOD deploy. The acceptance contract requires that exact reversible provider transition and forbids inventing PASS. Rewriting Desarrollo history or using a fresh build as a substitute is outside the authorized rollback contract and unsafe.",
-    "single_external_action_needed": "Execute Render rollback/promote of variapp-api-desarrollo from dep-dalcq261egvs73e56jr0 to dep-dalcge61egvs73e435t0 using a provider surface that can target an existing deploy, then make that capability available for the supervised return to dep-dalcq261egvs73e56jr0 with health/smoke/timing readback.",
+    "single_external_action_needed": "Execute Render rollback/promote of solqaryn-api-desarrollo from dep-dalcq261egvs73e56jr0 to dep-dalcge61egvs73e435t0 using a provider surface that can target an existing deploy, then make that capability available for the supervised return to dep-dalcq261egvs73e56jr0 with health/smoke/timing readback.",
     "pass_fabrication_prohibited": true
   },
   "guards": {

@@ -4,7 +4,7 @@ Authority: `docs/VAEP_AUTHORITY.md`.
 
 ## Source-backed security authorities
 
-- VariApp authorizes endpoints through relational role/permission grants and the existing `RequierePermiso` / permission-service path.
+- Solqaryn authorizes endpoints through relational role/permission grants and the existing `RequierePermiso` / permission-service path.
 - Existing sales/report queries apply user data scope independently of request filters; a transactional filter must intersect authorization scope and must never widen it.
 - Inventory valuation provides a repository precedent for separating access to a report from disclosure of sensitive financial fields: report access and financial-value disclosure can be governed separately, with audit behavior around censored financial data.
 - Existing audit services and request correlation patterns provide the implementation precedent for recording access/denial/censoring decisions.

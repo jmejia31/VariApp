@@ -36,12 +36,12 @@
     "workspace_id": "tea-d97f0k28qa3s73ejqhtg",
     "dev_service": {
       "id": "srv-d9jblq7avr4c73c74jng",
-      "name": "VariApp-Desarrollo",
+      "name": "Solqaryn-Desarrollo",
       "branch": "Desarrollo"
     },
     "prod_service": {
       "id": "srv-d8vbei75r7bs73a26flg",
-      "name": "VariApp",
+      "name": "Solqaryn",
       "branch": "main"
     },
     "env_name_read_primitive_present": false,

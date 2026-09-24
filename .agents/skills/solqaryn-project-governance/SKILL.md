@@ -1,6 +1,6 @@
 ---
 name: solqaryn-project-governance
-description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar antes de cualquier tarea que analice, modifique, documente, pruebe, despliegue o administre solqaryn/VariApp, y antes de consultar cualquier referencia externa de skills. Valida identidad, rama, arquitectura, seguridad, fuentes autorizadas, impacto, routing y cierre; impone PROJECT_SCOPE_LOCK=STRICT y fail-closed."
+description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar antes de cualquier tarea que analice, modifique, documente, pruebe, despliegue o administre solqaryn/Solqaryn, y antes de consultar cualquier referencia externa de skills. Valida identidad, rama, arquitectura, seguridad, fuentes autorizadas, impacto, routing y cierre; impone PROJECT_SCOPE_LOCK=STRICT y fail-closed."
 ---
 
 # SOLQARYN Project Governance
@@ -8,8 +8,8 @@ description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar
 ## 1. Identidad obligatoria
 
 - `PLATFORM=SOLQARYN`
-- `PROJECT_ID=VARIAPP`
-- `REPOSITORY=solqaryn/VariApp`
+- `PROJECT_ID=SOLQARYN`
+- `REPOSITORY=solqaryn/Solqaryn`
 - `BRANCH=Desarrollo`
 - `PROJECT_SCOPE_LOCK=STRICT`
 - `LOCAL_SKILL_COUNT=1`
@@ -37,7 +37,7 @@ Un snapshot historico, chat, receipt o comentario no sustituye al estado vivo ni
 
 Antes de analizar o escribir:
 
-1. confirmar `solqaryn/VariApp` y `Desarrollo`;
+1. confirmar `solqaryn/Solqaryn` y `Desarrollo`;
 2. confirmar que la tarea pertenece a SOLQARYN;
 3. confirmar que esta skill local fue aplicada primero;
 4. si se requiere una referencia externa, comprobar que exista como `ACTIVE` en la allowlist y en el registro de referencias;

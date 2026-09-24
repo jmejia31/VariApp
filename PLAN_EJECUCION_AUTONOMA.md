@@ -1,11 +1,11 @@
 # PLAN DE EJECUCIÓN AUTÓNOMA — CONSUMIDOR DEL MAESTRO
 
-> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `solqaryn/VariApp`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
+> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `solqaryn/Solqaryn`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
 
 ## Identidad
 
-- PROJECT_ID: `VARIAPP`
-- Repositorio: `solqaryn/VariApp`
+- PROJECT_ID: `SOLQARYN`
+- Repositorio: `solqaryn/Solqaryn`
 - Rama: `Desarrollo`
 - PR #2: OPEN + DRAFT
 - AUTOMATION_AUTHORITY: `MASTER`
@@ -47,6 +47,6 @@ EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 LOCAL_SKILL_COUNT=1
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
 
 

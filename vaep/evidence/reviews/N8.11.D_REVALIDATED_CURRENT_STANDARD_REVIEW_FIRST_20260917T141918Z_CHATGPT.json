@@ -1,6 +1,6 @@
 {
   "schema": "vaep.review-first.v1",
-  "project": "VARIAPP",
+  "project": "SOLQARYN",
   "parent": "N8.11.D",
   "stage": "BACKEND_API",
   "branch": "Desarrollo",
@@ -45,7 +45,7 @@
     "mysql_integration_job": "IN_PROGRESS_AT_REVIEW_RECORD"
   },
   "development_deploy": {
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "deploy_id": "dep-dalva67c0ldc73clvsug",
     "candidate": "6ce3ec581adb4c2c3ccf21e6a6d32ccebc86e080",
     "status": "LIVE"

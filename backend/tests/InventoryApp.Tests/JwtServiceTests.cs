@@ -15,8 +15,8 @@ public class JwtServiceTests
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Jwt:Secret"] = "Test-Only-Secret-With-More-Than-32-Characters-2026",
-                ["Jwt:Issuer"] = "VariApp.Tests",
-                ["Jwt:Audience"] = "VariApp.Tests.Frontend",
+                ["Jwt:Issuer"] = "Solqaryn.Tests",
+                ["Jwt:Audience"] = "Solqaryn.Tests.Frontend",
                 ["Jwt:ExpiraMinutos"] = "30"
             })
             .Build();

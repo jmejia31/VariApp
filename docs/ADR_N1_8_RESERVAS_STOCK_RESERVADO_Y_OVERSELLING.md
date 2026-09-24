@@ -6,7 +6,7 @@
 
 ## Contexto
 
-VariApp necesita reservar inventario para pedidos/ventas sin crear una segunda fuente de verdad, sin perder la ubicación física y sin permitir que dos solicitudes concurrentes comprometan la misma disponibilidad.
+Solqaryn necesita reservar inventario para pedidos/ventas sin crear una segunda fuente de verdad, sin perder la ubicación física y sin permitir que dos solicitudes concurrentes comprometan la misma disponibilidad.
 
 Antes de N1.8, `ExistenciaVariante` ya era la autoridad de stock por Variante + Almacén + Ubicación. La reserva debía integrarse a ese modelo, no competir con él.
 

@@ -1,5 +1,5 @@
 {
-  "schema":"variapp-dr-backend-api/v1",
+  "schema":"solqaryn-dr-backend-api/v1",
   "authority":"docs/VAEP_AUTHORITY.md",
   "scope":"N8.10.D",
   "parent":"N8.10",

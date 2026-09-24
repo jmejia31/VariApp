@@ -124,7 +124,7 @@ Resultados:
 - `Fase 2 - Auditoría de configuración y dependencias` — run `31344665923` — **SUCCESS**.
 - `Bloque 2C.1 - Variante técnica y migración` — run `31344665894` — **SUCCESS**.
 - `Fase 8 - Validación completa automatizada` — run `31344665921` — **SUCCESS**.
-- `VariApp CI` — run `31344665938` — **SKIPPED**; no se contabiliza como validación verde.
+- `Solqaryn CI` — run `31344665938` — **SKIPPED**; no se contabiliza como validación verde.
 
 Dentro de `Desarrollo - Compilación y pruebas` quedaron verificados, entre otros:
 
@@ -145,7 +145,7 @@ Resultados del HEAD documental:
 - `Fase 2 - Auditoría de configuración y dependencias` — run `31345152727` — **SUCCESS**.
 - `Bloque 2C.1 - Variante técnica y migración` — run `31345152784` — **SUCCESS**.
 - `Fase 8 - Validación completa automatizada` — run `31345152738` — **SUCCESS**.
-- `VariApp CI` — run `31345152747` — **SKIPPED**; no se contabiliza como fallo ni como validación verde.
+- `Solqaryn CI` — run `31345152747` — **SKIPPED**; no se contabiliza como fallo ni como validación verde.
 
 Por tanto, tanto el código funcional como el documento de certificación de M6 superaron los gates relevantes del repositorio.
 

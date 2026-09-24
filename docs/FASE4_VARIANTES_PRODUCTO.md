@@ -23,7 +23,7 @@ Completada y certificada exclusivamente en la rama `Desarrollo`.
 ## Corrección posterior de guardado y privacidad visual
 
 - Se retiraron del inicio de sesión los indicadores visibles **Acceso protegido**, **Permisos por rol** y **Operaciones auditadas**, además de la nota descriptiva sobre transmisión de credenciales.
-- El entorno `variapp-api-desarrollo` aplica sus migraciones pendientes antes de declararse listo mediante `/health/ready`.
+- El entorno `solqaryn-api-desarrollo` aplica sus migraciones pendientes antes de declararse listo mediante `/health/ready`.
 - Producción no fue modificada.
 - Los errores de persistencia entregan mensajes seguros y una referencia de seguimiento sin mostrar detalles técnicos internos.
 - Se agregó una prueba de interfaz que guarda exactamente dos colores con cantidades 2 y 3, SKU vacío, generación automática de SKU y stock consolidado de 5 unidades.

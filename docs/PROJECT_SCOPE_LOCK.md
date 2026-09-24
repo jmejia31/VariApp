@@ -2,8 +2,8 @@
 
 ```text
 PLATFORM=SOLQARYN
-PROJECT_ID=VARIAPP
-REPOSITORY=solqaryn/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 BRANCH=Desarrollo
 PROJECT_SCOPE_LOCK=STRICT
 LOCAL_SKILL_COUNT=1
@@ -56,7 +56,7 @@ Cada chat o sesion nueva relacionada con SOLQARYN debe:
 
 Sin autorizacion adicional pueden utilizarse:
 
-1. archivos versionados en `solqaryn/VariApp`;
+1. archivos versionados en `solqaryn/Solqaryn`;
 2. la unica skill local de SOLQARYN;
 3. las nueve referencias externas ACTIVE en la allowlist, solo dentro de su alcance;
 4. informacion entregada por el propietario y declarada expresamente como parte de SOLQARYN;

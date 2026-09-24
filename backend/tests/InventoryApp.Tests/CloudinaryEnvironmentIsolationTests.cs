@@ -11,7 +11,7 @@ public class CloudinaryEnvironmentIsolationTests
     {
         var valores = new Dictionary<string, string?>
         {
-            ["Cloudinary:CloudName"] = "variapp-test",
+            ["Cloudinary:CloudName"] = "solqaryn-test",
             ["Cloudinary:ApiKey"] = "test-key",
             ["Cloudinary:ApiSecret"] = "test-secret",
             ["Cloudinary:EnvironmentPrefix"] = "varistorehn_desarrollo"

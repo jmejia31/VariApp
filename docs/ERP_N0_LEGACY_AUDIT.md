@@ -10,7 +10,7 @@ Tipo de fase: **AUDITORÍA / PREFLIGHT — NO DESTRUCTIVA**
 
 ## 1. Objetivo
 
-Inventariar las fuentes de verdad duplicadas y dependencias legacy que deben retirarse gradualmente antes de ampliar VariApp con ERP-N1–ERP-N9.
+Inventariar las fuentes de verdad duplicadas y dependencias legacy que deben retirarse gradualmente antes de ampliar Solqaryn con ERP-N1–ERP-N9.
 
 ERP-N0.0 no elimina columnas, tablas, endpoints, enums, DTOs ni compatibilidad histórica. Su propósito es fijar el mapa de impacto, el orden de sustitución y los riesgos del saneamiento.
 

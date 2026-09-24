@@ -2,8 +2,8 @@
 
 ## Identidad y corte de inspección
 
-- Proyecto: `VARIAPP`.
-- Repositorio: `jmejia31/VariApp`.
+- Proyecto: `SOLQARYN`.
+- Repositorio: `jmejia31/Solqaryn`.
 - Rama: `Desarrollo`.
 - Parent: `N6.9.A` (`PRE`).
 - Base HEAD inspeccionado: `39cda5468d73cf79e4c47960eb16da04de3e60da`.

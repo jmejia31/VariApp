@@ -1,7 +1,7 @@
 # FASE M0 — Auditoría y mapa de impacto
 
 Fecha de auditoría: 2026-08-08  
-Repositorio: `jmejia31/VariApp`  
+Repositorio: `jmejia31/Solqaryn`  
 Rama auditada y única autorizada: `Desarrollo`  
 Baseline auditado: `47b4ad51a1be130e7072c3191f61d89095270145`  
 PR oficial: `#2 — Desarrollo -> main`
@@ -30,7 +30,7 @@ Sobre `47b4ad51...` se verificaron ejecuciones reales:
 - `Fase 2 - Auditoría de configuración y dependencias`: SUCCESS.
 - `Bloque 2C.1 - Variante técnica y migración`: SUCCESS.
 - `Fase 8 - Validación completa automatizada`: SUCCESS — run `31256980839`.
-- `VariApp CI`: SKIPPED; no se contabiliza como aprobado.
+- `Solqaryn CI`: SKIPPED; no se contabiliza como aprobado.
 
 El repositorio posee además workflows dedicados para catálogos, CI general, Desarrollo, auditoría, variante técnica, escáner y validación integral.
 

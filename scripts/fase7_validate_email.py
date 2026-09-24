@@ -10,7 +10,7 @@ from email import policy
 from email.parser import BytesParser
 from pathlib import Path
 
-capture_dir = Path(os.environ.get("SMTP_CAPTURE_DIR", "/tmp/variapp-smtp"))
+capture_dir = Path(os.environ.get("SMTP_CAPTURE_DIR", "/tmp/solqaryn-smtp"))
 state_file = capture_dir / "state.json"
 messages = sorted(capture_dir.glob("message-*.eml"))
 
@@ -28,14 +28,14 @@ if state.get("messages_saved") != 1 or len(messages) != 1:
 message = BytesParser(policy=policy.default).parsebytes(messages[0].read_bytes())
 recipient = str(message.get("To", ""))
 subject = str(message.get("Subject", ""))
-message_id = str(message.get("X-VariApp-Message-Id", ""))
+message_id = str(message.get("X-Solqaryn-Message-Id", ""))
 
 if "fase7@example.com" not in recipient.lower():
     raise SystemExit(f"Destinatario inesperado: {recipient}")
 if "Factura" not in subject:
     raise SystemExit(f"Asunto inesperado: {subject}")
-if not message_id.startswith("variapp-"):
-    raise SystemExit(f"Falta X-VariApp-Message-Id: {message_id}")
+if not message_id.startswith("solqaryn-"):
+    raise SystemExit(f"Falta X-Solqaryn-Message-Id: {message_id}")
 
 plain = []
 html = []

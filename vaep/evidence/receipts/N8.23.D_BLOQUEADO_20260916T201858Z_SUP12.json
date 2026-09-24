@@ -23,7 +23,7 @@
   "owner_override": {
     "authorized": true,
     "scope": "N8.23.D/E/G/H only",
-    "render_service": "variapp-api-desarrollo",
+    "render_service": "solqaryn-api-desarrollo",
     "required_sequence": "CURRENT->PREVIOUS_KNOWN_GOOD->HEALTHY->CURRENT->HEALTHY",
     "production_allowed": false,
     "main_allowed": false,
@@ -39,7 +39,7 @@
   "fresh_provider_readback": {
     "workspace_id": "tea-d97f0k28qa3s73ejqhtg",
     "service_id": "srv-d9jblq7avr4c73c74jng",
-    "service_name": "variapp-api-desarrollo",
+    "service_name": "solqaryn-api-desarrollo",
     "branch": "Desarrollo",
     "health_check_path": "/health/ready",
     "current_deploy_id": "dep-dalcq261egvs73e56jr0",
@@ -61,7 +61,7 @@
   "external_blocker": {
     "class": "AUTHORIZED_PROVIDER_ACTION_NOT_EXPOSED_BY_CONNECTED_TOOL",
     "detail": "The connected Render actions expose deploy listing/readback and trigger_deploy for the current service source, but no rollback/promote/reactivate action that accepts an existing deployment ID. trigger_deploy cannot select dep-dalcge61egvs73e435t0, so using it would not satisfy the required CURRENT->PREVIOUS_KNOWN_GOOD->HEALTHY->CURRENT->HEALTHY sequence.",
-    "human_action_required": "In the Render provider control plane for variapp-api-desarrollo only, activate/rollback to previous-known-good deployment dep-dalcge61egvs73e435t0 without changing plan, DNS, certificates, secrets or Production; record health/ready/smoke/logs and timing; then restore current deployment dep-dalcq261egvs73e56jr0 and repeat health/ready/smoke/logs and timing. If the provider cannot perform this on the existing plan, stop and obtain owner decision rather than buying/upgrading.",
+    "human_action_required": "In the Render provider control plane for solqaryn-api-desarrollo only, activate/rollback to previous-known-good deployment dep-dalcge61egvs73e435t0 without changing plan, DNS, certificates, secrets or Production; record health/ready/smoke/logs and timing; then restore current deployment dep-dalcq261egvs73e56jr0 and repeat health/ready/smoke/logs and timing. If the provider cannot perform this on the existing plan, stop and obtain owner decision rather than buying/upgrading.",
     "safe_substitute_available": false
   },
   "causal_gate": {

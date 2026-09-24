@@ -330,7 +330,7 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
       headers: authHeaders(adminToken),
       multipart: {
         Nombre: 'Producto Factura E2E',
-        Marca: 'VariApp',
+        Marca: 'Solqaryn',
         Modelo: 'F7',
         Descripcion: 'Producto temporal para validar el PDF oficial',
         Cantidad: '20',

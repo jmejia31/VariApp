@@ -1,12 +1,12 @@
-# Espacio de Coordinación Colaborativa — VariApp
+# Espacio de Coordinación Colaborativa — Solqaryn
 
 Este documento define el handoff entre Javier Mejía, Codex, AntiG/Antigravity y ChatGPT. El estado técnico vivo se consulta en Git, `TASKS.md` y `CHANGELOG_AI.md`; no se congelan aquí cifras de tests/builds que puedan quedar obsoletas.
 
 ## 1. Identidad y gate de sesión
 
 ```text
-PROJECT_ID=VARIAPP
-REPOSITORY=solqaryn/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 BRANCH=Desarrollo
 ```
 
@@ -41,8 +41,8 @@ Nadie debe asumir acceso local que no esté documentado.
 
 ## 4. Aislamiento entre proyectos
 
-- Esta coordinación aplica exclusivamente a VariApp.
-- Usar únicamente rutas, ramas, planes y decisiones verificadas de VariApp.
+- Esta coordinación aplica exclusivamente a Solqaryn.
+- Usar únicamente rutas, ramas, planes y decisiones verificadas de Solqaryn.
 - Una conversación no cambia de proyecto por inferencia.
 - Un cambio explícito de proyecto obliga a ejecutar el gate del proyecto destino antes de escribir.
 
@@ -90,7 +90,7 @@ No repetir arquitectura completa; referenciar `PROJECT_CONTEXT.md`.
 ## 8. Guardrails locales
 
 - `.githooks/pre-commit`: bloquea repo/rama incorrectos y exige `CHANGELOG_AI.md`.
-- `.githooks/post-commit`: auto-push solo si `origin` es VariApp y la rama es `Desarrollo`.
+- `.githooks/post-commit`: auto-push solo si `origin` es Solqaryn y la rama es `Desarrollo`.
 - `scripts/iniciar-sesion-ia.ps1`: diagnóstico corto de sesión.
 
 ## 9. Mejora continua
@@ -109,6 +109,6 @@ EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 LOCAL_SKILL_COUNT=1
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
 
 

@@ -12,7 +12,7 @@
   "p1": [
     "No existe cliente frontend para el contrato /api/pagos-online de N7.8.D.",
     "La UI de factura no ofrece inicio/listado/filtrado de pagos online ni estados loading/error/empty.",
-    "No existe UX explicita que mantenga PAN/CVV fuera de VariApp y delegue el checkout al proveedor externo.",
+    "No existe UX explicita que mantenga PAN/CVV fuera de Solqaryn y delegue el checkout al proveedor externo.",
     "No existen pruebas frontend dirigidas al contrato y seguridad de redireccion de pagos online."
   ],
   "p0_count": 0,

@@ -156,7 +156,7 @@ public sealed class SmtpEmailService : IEmailService
         if (errorAdjuntos is not null)
             return Fallo("ADJUNTOS_INVALIDOS", errorAdjuntos, false, 0);
 
-        var messageId = $"variapp-{Guid.NewGuid():N}";
+        var messageId = $"solqaryn-{Guid.NewGuid():N}";
         Exception? ultimaExcepcion = null;
 
         for (var intento = 1; intento <= configuracion.MaximoIntentos; intento++)
@@ -339,7 +339,7 @@ public sealed class SmtpEmailService : IEmailService
             ? remitente.Address
             : configuracion.CorreoRespuesta;
         mensaje.ReplyTo.Add(new MailboxAddress(configuracion.NombreRemitente, respuesta));
-        mensaje.Headers.Add("X-VariApp-Message-Id", messageId);
+        mensaje.Headers.Add("X-Solqaryn-Message-Id", messageId);
         mensaje.Headers.Add("X-Auto-Response-Suppress", "All");
 
         var bodyBuilder = new BodyBuilder

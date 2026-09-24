@@ -54,7 +54,7 @@ Responsabilidades:
 
 La clave de sesión se compone con:
 
-`variapp.navigation.v1.<usuario>.<scope>`
+`solqaryn.navigation.v1.<usuario>.<scope>`
 
 Por tanto, los filtros de un usuario autenticado no se reutilizan como estado de otro usuario.
 

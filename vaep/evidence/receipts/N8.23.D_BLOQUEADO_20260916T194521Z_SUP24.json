@@ -31,7 +31,7 @@
     "pass_fabrication_prohibited": true
   },
   "fresh_provider_state": {
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "service_id": "srv-d9jblq7avr4c73c74jng",
     "current": {
       "deploy_id": "dep-dalcq261egvs73e56jr0",

@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.db-provider-revalidation.v1",
+  "schema": "solqaryn.db-provider-revalidation.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.20.G",
   "branch": "Desarrollo",
@@ -23,7 +23,7 @@
       "source": "docs/evidencias/database-provider/n8-20-f/github-actions/35101887861-1/N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json",
       "workflow_run_id": 35101887861,
       "workflow_conclusion": "success",
-      "service": "variapp-mysql",
+      "service": "solqaryn-mysql",
       "service_type": "mysql",
       "provider": "AIVEN",
       "service_plan": "free-1-1gb",

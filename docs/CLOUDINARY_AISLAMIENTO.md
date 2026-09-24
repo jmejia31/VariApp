@@ -12,7 +12,7 @@ Cuando `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`:
 
 - las nuevas imágenes de productos se almacenan bajo `varistorehn_desarrollo/inventoryapp/productos`;
 - los nuevos comprobantes se almacenan bajo `varistorehn_desarrollo/inventoryapp/compras`;
-- las nuevas fotografías de perfil se almacenan bajo `varistorehn_desarrollo/variapp/perfiles`;
+- las nuevas fotografías de perfil se almacenan bajo `varistorehn_desarrollo/solqaryn/perfiles`;
 - cualquier eliminación cuyo `PublicId` no comience con `varistorehn_desarrollo/` queda bloqueada antes de llamar a Cloudinary.
 
 Esto protege los activos productivos aunque la base de Aiven Desarrollo conserve URLs y `PublicId` históricos de Producción.

@@ -23,7 +23,7 @@ interface WhatsAppSessionStatus {
         <div>
           <h2 id="whatsapp-business-title">WhatsApp Business</h2>
           <p class="subtitle">
-            Consulta el estado seguro de la integración para la empresa activa. VariApp nunca inventa un QR ni expone credenciales del proveedor.
+            Consulta el estado seguro de la integración para la empresa activa. Solqaryn nunca inventa un QR ni expone credenciales del proveedor.
           </p>
         </div>
         <span class="status-chip" [attr.data-state]="estado()?.status || 'SIN_CONSULTAR'">
@@ -33,7 +33,7 @@ interface WhatsAppSessionStatus {
 
       @if (!empresaId()) {
         <div class="notice warning" role="status">
-          Selecciona una empresa activa para consultar WhatsApp Business. La integración usa el mismo tenant validado por el resto de VariApp.
+          Selecciona una empresa activa para consultar WhatsApp Business. La integración usa el mismo tenant validado por el resto de Solqaryn.
         </div>
       } @else {
         <div class="summary-grid" aria-label="Resumen de WhatsApp Business">

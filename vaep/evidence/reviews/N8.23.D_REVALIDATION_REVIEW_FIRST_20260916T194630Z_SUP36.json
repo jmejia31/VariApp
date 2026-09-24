@@ -22,7 +22,7 @@
   "dod_readback": {
     "required_operation": "Execute backend DEV CURRENT -> PREVIOUS_KNOWN_GOOD -> HEALTHY -> CURRENT -> HEALTHY and record health/readiness/smoke/log/timings",
     "acceptance": "BACKEND_ROLLBACK=PASS; FORWARD_RECOVERY=PASS; timings recorded; PROD untouched",
-    "target": "variapp-api-desarrollo"
+    "target": "solqaryn-api-desarrollo"
   },
   "authority_conflict": {
     "master": "docs/VAEP_AUTHORITY.md",

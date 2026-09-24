@@ -3,7 +3,7 @@
   "reviewer_role": "DEBT_BUILDER_CLOSER",
   "automation": "VAEP :48 Debt",
   "timestamp_utc": "2026-09-19T10:46:19Z",
-  "repository": "jmejia31/VariApp",
+  "repository": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "authority": "docs/VAEP_AUTHORITY.md",
   "status": "LISTO",

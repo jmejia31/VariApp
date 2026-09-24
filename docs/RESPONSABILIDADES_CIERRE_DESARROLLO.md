@@ -33,7 +33,7 @@ Responsable: Javier Mejía u operador autorizado con acceso al panel de Aiven.
 
 Recurso designado por el propietario:
 
-- servicio visible: `variapp-mysql`;
+- servicio visible: `solqaryn-mysql`;
 - usuario de aplicación: `varistorehn_desarrollo`.
 
 Validación obligatoria:
@@ -92,7 +92,7 @@ Responsable: operador con acceso al dashboard de Render y a los secretos de Desa
 Recurso designado por el propietario:
 
 - entorno: `Desarrollo`;
-- servicio: `variapp-api-desarrollo`;
+- servicio: `solqaryn-api-desarrollo`;
 - rama: `Desarrollo`.
 
 Validación obligatoria:
@@ -146,16 +146,16 @@ Responsable: operador con acceso al proyecto de Vercel.
 
 Recurso designado por el propietario:
 
-- proyecto: `variapp-desarrollo`;
+- proyecto: `solqaryn-desarrollo`;
 - Production Branch: `Desarrollo`;
-- dominio: `variapp-desarrollo.vercel.app`.
+- dominio: `solqaryn-desarrollo.vercel.app`.
 
 Validación obligatoria:
 
 1. Confirmar Root Directory `frontend`.
-2. Confirmar que `/api` llega a `variapp-api-desarrollo.onrender.com`.
-3. Confirmar por separado que `varistorehn.vercel.app` sigue llegando a `variapp-api.onrender.com`.
-4. Confirmar que no existe un tercer proyecto permanente de VariApp/VariStorehn.
+2. Confirmar que `/api` llega a `solqaryn-api-desarrollo.onrender.com`.
+3. Confirmar por separado que `varistorehn.vercel.app` sigue llegando a `solqaryn-api.onrender.com`.
+4. Confirmar que no existe un tercer proyecto permanente de Solqaryn/VariStorehn.
 5. No promover un deployment de Desarrollo al proyecto productivo.
 
 Evidencia requerida:

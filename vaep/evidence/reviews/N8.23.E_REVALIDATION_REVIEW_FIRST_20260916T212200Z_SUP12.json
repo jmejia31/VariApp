@@ -17,7 +17,7 @@
   "owner_override": {
     "authorized": true,
     "scope": "N8.23.E",
-    "provider_project": "variapp-desarrollo",
+    "provider_project": "solqaryn-desarrollo",
     "required_sequence": "CURRENT->PREVIOUS_KNOWN_GOOD->HEALTHY->CURRENT->HEALTHY",
     "prefer_existing_ready_deployments": true,
     "production_project_prohibited": "varistorehn",
@@ -31,7 +31,7 @@
   "fresh_vercel_readback": {
     "team_id": "team_XUrQ5DwZvK9Eh3iHmvbWMDG6",
     "project_id": "prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu",
-    "project_name": "variapp-desarrollo",
+    "project_name": "solqaryn-desarrollo",
     "latest_project_deployment": {
       "id": "dpl_5GEp1b52U5MMWXh3A7YLoR7ePoRd",
       "state": "CANCELED"
@@ -50,7 +50,7 @@
       "rollback_candidate": true
     },
     "current_project_root_smoke": {
-      "url": "https://variapp-desarrollo.vercel.app/",
+      "url": "https://solqaryn-desarrollo.vercel.app/",
       "http_status": 200,
       "checked_at_utc": "2026-09-16T21:18:40Z"
     },

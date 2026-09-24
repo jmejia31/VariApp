@@ -6,11 +6,11 @@
 
 Baseline funcional certificado: `142435e063767e6106bdc8dad2ccb9dd7645f137`.
 
-Este documento consolida el cierre de ERP-N1.10 A–H y es la referencia canónica de la capacidad de costeo empresarial implementada en VariApp.
+Este documento consolida el cierre de ERP-N1.10 A–H y es la referencia canónica de la capacidad de costeo empresarial implementada en Solqaryn.
 
 ## Objetivo funcional
 
-VariApp dispone de una política de costeo única para la empresa activa, con historial temporal inmutable y tres métodos canónicos:
+Solqaryn dispone de una política de costeo única para la empresa activa, con historial temporal inmutable y tres métodos canónicos:
 
 - Promedio ponderado.
 - FIFO.

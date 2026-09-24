@@ -7,7 +7,7 @@ Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 ## 1. Objetivo
 
-Cerrar la evolución de búsqueda y rendimiento de VariApp sin crear un motor paralelo, reutilizando la arquitectura existente de productos, variantes, clientes, proveedores, ventas y compras. La fase cubre búsqueda multidimensional, autocompletado, paginación, cancelación de consultas obsoletas, observabilidad segura de latencia y decisiones de índices basadas en evidencia.
+Cerrar la evolución de búsqueda y rendimiento de Solqaryn sin crear un motor paralelo, reutilizando la arquitectura existente de productos, variantes, clientes, proveedores, ventas y compras. La fase cubre búsqueda multidimensional, autocompletado, paginación, cancelación de consultas obsoletas, observabilidad segura de latencia y decisiones de índices basadas en evidencia.
 
 ## 2. Cobertura funcional cerrada
 
@@ -201,7 +201,7 @@ El gate integral terminó correctamente incluyendo backend, MySQL descartable, f
 
 - `Bloque 2C.1 - Variante técnica y migración` run `31362727109` — **SUCCESS**.
 - `Fase 2 - Auditoría de configuración y dependencias` run `31362727170` — **SUCCESS**.
-- `VariApp CI` run `31362727113` — **SKIPPED** por su condición de workflow; no se contabiliza como gate verde.
+- `Solqaryn CI` run `31362727113` — **SKIPPED** por su condición de workflow; no se contabiliza como gate verde.
 
 ## 9. Seguridad y compatibilidad
 

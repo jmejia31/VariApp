@@ -48,7 +48,7 @@ Ninguna variable de entorno nueva en la Fase 1.
 
 **Desde la Fase 5/6 (WhatsApp/Correo), variables requeridas en producción:**
 ```
-AppSettings__BackendPublicUrl=https://variapp-api.onrender.com
+AppSettings__BackendPublicUrl=https://solqaryn-api.onrender.com
 AppSettings__EnlacePublicoFacturaDiasValidez=7
 Smtp__Host=smtp.tu-proveedor.com
 Smtp__Port=587
@@ -70,7 +70,7 @@ variables de entorno planas.
 Nota de robustez agregada el 19/07/2026: si `AppSettings__BackendPublicUrl`
 falta o apunta a `localhost`, el backend ahora genera enlaces públicos de
 factura usando el host real de la petición. Aun así, se recomienda mantener
-la variable explícita con `https://variapp-api.onrender.com`.
+la variable explícita con `https://solqaryn-api.onrender.com`.
 
 ## Ejecución
 ```
@@ -95,10 +95,10 @@ npm start
 
 ## Backend
 
-Desde `C:\VariApp`:
+Desde `C:\Solqaryn`:
 
 ```powershell
-$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_CLI_HOME='C:\Solqaryn\.dotnet_cli_home'
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
 dotnet build backend\InventoryApp.sln --no-restore
 dotnet test backend\InventoryApp.sln --no-build
@@ -108,7 +108,7 @@ No modifica base de datos.
 
 ## Frontend
 
-Desde `C:\VariApp\frontend`:
+Desde `C:\Solqaryn\frontend`:
 
 ```powershell
 npm.cmd run build
@@ -118,11 +118,11 @@ No modifica base de datos.
 
 ## Migración local o producción
 
-Desde `C:\VariApp`, con las variables de entorno apuntando a la base correcta
+Desde `C:\Solqaryn`, con las variables de entorno apuntando a la base correcta
 (local o Aiven):
 
 ```powershell
-$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_CLI_HOME='C:\Solqaryn\.dotnet_cli_home'
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
 dotnet ef database update -p backend\src\Infrastructure -s backend\src\API
 ```
@@ -137,7 +137,7 @@ Jwt__ExpirationMinutes=30
 Swagger__Enabled=true
 Cors__AllowedOrigins__0=http://localhost:4200
 Cors__AllowedOrigins__1=https://varistorehn.vercel.app
-AppSettings__BackendPublicUrl=https://variapp-api.onrender.com
+AppSettings__BackendPublicUrl=https://solqaryn-api.onrender.com
 Smtp__Host=<smtp-real>
 Smtp__Port=587
 Smtp__UsuarioSmtp=<usuario-smtp>
@@ -160,10 +160,10 @@ Smtp__NombreRemitente=VariStorehn
 
 ## Backend
 
-Desde `C:\VariApp`:
+Desde `C:\Solqaryn`:
 
 ```powershell
-$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_CLI_HOME='C:\Solqaryn\.dotnet_cli_home'
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
 dotnet build backend\InventoryApp.sln
 dotnet test backend\InventoryApp.sln --no-build
@@ -173,7 +173,7 @@ No modifica base de datos.
 
 ## Frontend
 
-Desde `C:\VariApp\frontend`:
+Desde `C:\Solqaryn\frontend`:
 
 ```powershell
 npm.cmd run build

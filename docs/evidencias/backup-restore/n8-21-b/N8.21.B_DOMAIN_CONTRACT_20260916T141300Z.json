@@ -8,12 +8,12 @@
   "scope": {
     "source_environment": "Desarrollo",
     "source_provider": "Aiven",
-    "source_service": "variapp-mysql",
+    "source_service": "solqaryn-mysql",
     "source_engine": "MySQL 8.4.8",
     "source_access": "read-only logical export",
     "production_excluded": true,
     "restore_environment": "GitHub Actions runner / CI disposable",
-    "restore_database": "variapp_m11_restore_drill",
+    "restore_database": "solqaryn_m11_restore_drill",
     "restore_host_policy": "loopback-only: 127.0.0.1, localhost or ::1"
   },
   "backup_contract": {

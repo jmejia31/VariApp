@@ -4,7 +4,7 @@ Fecha: 2026-08-07
 
 ## Objetivo
 
-Certificar la regla monetaria del plan maestro de VariApp sin duplicar implementación ya existente en `Desarrollo`:
+Certificar la regla monetaria del plan maestro de Solqaryn sin duplicar implementación ya existente en `Desarrollo`:
 
 - redondeo monetario explícito a 2 decimales con `MidpointRounding.AwayFromZero`;
 - subtotal calculado por línea antes de sumar el documento;
@@ -26,7 +26,7 @@ private static decimal RedondearMoneda(decimal valor) =>
 
 Cada subtotal de línea se calcula y redondea antes de formar el total del documento. Los impuestos incluidos se extraen del importe sujeto, los impuestos adicionales se agregan al total y el envío se trata como un único componente de la venta.
 
-La política comercial histórica de VariApp se conserva: `ImporteBruto` representa el total comercial de la venta antes del descuento y el componente de productos se obtiene descontando el envío del importe bruto. No se modifica esta semántica para evitar romper facturas y pruebas existentes.
+La política comercial histórica de Solqaryn se conserva: `ImporteBruto` representa el total comercial de la venta antes del descuento y el componente de productos se obtiene descontando el envío del importe bruto. No se modifica esta semántica para evitar romper facturas y pruebas existentes.
 
 ### `FacturaDetalleDistribuidor`
 

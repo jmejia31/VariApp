@@ -563,7 +563,7 @@ Antes de tocar código, se auditó el estado real:
   esas variables — auditado con grep, no supuesto. La gran mayoría son
   grises de badges de estado (ej. "Borrador" en gris neutro) y el verde
   oficial `#25d366` de WhatsApp (que deliberadamente NO se centralizó,
-  porque es la identidad de marca de WhatsApp, no de VariApp). **No se
+  porque es la identidad de marca de WhatsApp, no de Solqaryn). **No se
   migraron los 21 archivos en esta fase** — es trabajo real pendiente,
   documentado como deuda técnica, no towel-fixeado.
 - **El proyecto usa el tema prebuilt `indigo-pink.css` de Angular

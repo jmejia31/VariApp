@@ -25,13 +25,13 @@
   "read_only_sources_opened": {
     "render": {
       "workspace":"My Workspace",
-      "dev_service":"variapp-api-desarrollo",
-      "prod_service":"variapp-api",
+      "dev_service":"solqaryn-api-desarrollo",
+      "prod_service":"solqaryn-api",
       "metadata_only":true
     },
     "vercel": {
-      "team":"VariApp",
-      "dev_project":"variapp-desarrollo",
+      "team":"Solqaryn",
+      "dev_project":"solqaryn-desarrollo",
       "prod_candidate_project":"varistorehn",
       "metadata_only":true,
       "prod_candidate_identity_requires_classification_not_assumption":true

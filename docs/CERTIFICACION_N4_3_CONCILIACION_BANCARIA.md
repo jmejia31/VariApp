@@ -8,7 +8,7 @@ Baseline funcional certificado previo al paquete documental:
 
 `ad0cf70fc6ced126de1878b61fe4ae02c8d41a01`
 
-Repositorio: `jmejia31/VariApp`
+Repositorio: `jmejia31/Solqaryn`
 Rama autorizada: `Desarrollo`
 PR rector: `#2 Desarrollo -> main`, OPEN + DRAFT, sin merge ni auto-merge.
 Producción: no tocada.
@@ -56,7 +56,7 @@ Sobre `ad0cf70fc6ced126de1878b61fe4ae02c8d41a01` los workflows aplicables observ
 - Fase 2 — auditoría de configuración y dependencias;
 - Bloque 2C.1 — variante técnica y migración.
 
-`VariApp CI` apareció `SKIPPED` y no se contabiliza como PASS.
+`Solqaryn CI` apareció `SKIPPED` y no se contabiliza como PASS.
 
 P0/P1 atribuibles conocidos al cierre funcional: `0/0`.
 

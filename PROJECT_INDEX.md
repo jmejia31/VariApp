@@ -1,11 +1,11 @@
-# PROJECT_INDEX — VariApp
+# PROJECT_INDEX — Solqaryn
 
 Índice operativo del repositorio. Su objetivo es llevar al equipo directamente al área correcta sin reindexar todo el proyecto.
 
 ## Lectura inicial mínima
 
 1. `AGENTS.md` — reglas obligatorias y gate de identidad.
-2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `VARIAPP`.
+2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `SOLQARYN`.
 3. `TASKS.md` — trabajo pendiente/vigente.
 4. última entrada relevante de `CHANGELOG_AI.md` — continuidad entre agentes.
 5. `PROJECT_INDEX.md` — localizar archivos.
@@ -84,7 +84,7 @@ Administración colaborativa central:
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
 - `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`
-- `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de VariApp; no es fuente de estado actual.
+- `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de Solqaryn; no es fuente de estado actual.
 
 Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
 
@@ -95,7 +95,7 @@ No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento aso
 - `scripts/iniciar-sesion-ia.ps1`: gate read-only de identidad, rama, HEAD, divergencia y estado del checkout. Ejecutarlo al inicio de cada conversación/sesión local.
 - `scripts/configurar-colaboracion.ps1`: configuración inicial/sincronización del flujo local y hooks.
 - `.githooks/pre-commit`: bloquea commits locales si repo/rama son incorrectos o falta `CHANGELOG_AI.md` en el changeset.
-- `.githooks/post-commit`: publica commits de `Desarrollo` solo si `origin` pertenece realmente a VariApp.
+- `.githooks/post-commit`: publica commits de `Desarrollo` solo si `origin` pertenece realmente a Solqaryn.
 
 ## CI
 

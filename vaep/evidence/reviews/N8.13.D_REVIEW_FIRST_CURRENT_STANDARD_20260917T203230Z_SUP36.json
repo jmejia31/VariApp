@@ -14,7 +14,7 @@
   },
   "fresh_runtime_comparison": {
     "development": {
-      "service": "variapp-api-desarrollo",
+      "service": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "runtime": "docker",
       "plan": "free",
@@ -24,7 +24,7 @@
       "later_evidence_only_deploys": "queued_or_updating"
     },
     "production_reference": {
-      "service": "variapp-api",
+      "service": "solqaryn-api",
       "branch": "main",
       "runtime": "docker",
       "plan": "free",

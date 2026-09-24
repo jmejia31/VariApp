@@ -2,8 +2,8 @@
 
 ```text
 PLATFORM=SOLQARYN
-PROJECT_ID=VARIAPP
-REPOSITORY=solqaryn/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 LOCAL_SKILL_COUNT=1
 LOCAL_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
 EXTERNAL_SKILL_SOURCES=9

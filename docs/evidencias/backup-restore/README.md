@@ -1,10 +1,10 @@
 # N8.21 — Backup real y restore aislado de Desarrollo
 
-Esta carpeta contiene la certificación causal de N8.21 para `jmejia31/VariApp`, exclusivamente sobre la rama `Desarrollo`.
+Esta carpeta contiene la certificación causal de N8.21 para `jmejia31/Solqaryn`, exclusivamente sobre la rama `Desarrollo`.
 
 ## Resultado certificado
 
-- Backup automático administrado de la instancia DEV: **PROVEN** por la evidencia causal de N8.20 sobre Aiven `variapp-mysql`, con recovery mode `pitr`, política de retención demostrada y ruta de restore autorizada.
+- Backup automático administrado de la instancia DEV: **PROVEN** por la evidencia causal de N8.20 sobre Aiven `solqaryn-mysql`, con recovery mode `pitr`, política de retención demostrada y ruta de restore autorizada.
 - Backup lógico temporal real de la base de Desarrollo: **PASS**.
 - Restore aislado del mismo artefacto lógico cifrado: **PASS**.
 - Verificación de checksums externos e internos: **PASS**.

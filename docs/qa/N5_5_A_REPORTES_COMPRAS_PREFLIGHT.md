@@ -4,7 +4,7 @@ Authority: `docs/VAEP_AUTHORITY.md`.
 
 ## Alcance inspeccionado
 
-El roadmap de N5.5 pide analizar proveedor, precio, variación, recepción, devoluciones y cumplimiento. La inspección dirigida del HEAD vivo de `Desarrollo` confirma que VariApp ya tiene primitivas operativas suficientes para diseñar el reporte, pero no un subsistema dedicado `ReporteCompras`; el contrato debe fijarse antes de persistencia/API.
+El roadmap de N5.5 pide analizar proveedor, precio, variación, recepción, devoluciones y cumplimiento. La inspección dirigida del HEAD vivo de `Desarrollo` confirma que Solqaryn ya tiene primitivas operativas suficientes para diseñar el reporte, pero no un subsistema dedicado `ReporteCompras`; el contrato debe fijarse antes de persistencia/API.
 
 Fuentes inspeccionadas:
 

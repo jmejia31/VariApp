@@ -1,10 +1,10 @@
-# Fase 7 — Certificación integral aislada de VariApp
+# Fase 7 — Certificación integral aislada de Solqaryn
 
 Fecha: 22 de julio de 2026  
-Rama: `agent/mejoras-variapp`  
+Rama: `agent/mejoras-solqaryn`  
 Pull Request: `#1`  
 Commit certificado: `57b609ddd3549dffb6b99c0b5106e22d2946def6`  
-Workflow: `VariApp CI`  
+Workflow: `Solqaryn CI`  
 Run ID: `29938871994`
 
 ## Resultado
@@ -94,7 +94,7 @@ El Preview de Vercel quedó disponible después de corregir `frontend/vercel.jso
 - Commit del Preview: `5ad458c176ed4ec58c711dd23fd3f36a2b23155d`.
 - Estado: **Listo**.
 - Duración del build: 25 segundos.
-- URL de rama: `https://varistorehn-git-agent-mejoras-variapp-vari-app.vercel.app`.
+- URL de rama: `https://varistorehn-git-agent-mejoras-solqaryn-vari-app.vercel.app`.
 
 La corrección cambió `ignoreCommand` a `exit 1`, permitiendo builds tanto de Preview como de producción. Los deployments anteriores marcados como `Cancelado` no representaban errores de compilación de Angular; eran consecuencia directa de la regla de exclusión.
 

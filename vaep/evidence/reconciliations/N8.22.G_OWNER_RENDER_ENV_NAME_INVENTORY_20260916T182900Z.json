@@ -10,7 +10,7 @@
   "secret_values_persisted": false,
   "dev_service": {
     "id": "srv-d9jblq7avr4c73c74jng",
-    "name": "variapp-api-desarrollo",
+    "name": "solqaryn-api-desarrollo",
     "branch": "Desarrollo",
     "environment_variable_names": [
       "AllowedHosts",
@@ -53,7 +53,7 @@
   },
   "production_service_metadata_read_only": {
     "id": "srv-d983qti8qa3s73eqqne0",
-    "name": "variapp-api",
+    "name": "solqaryn-api",
     "branch": "main",
     "environment_variable_names": [
       "Cloudinary__ApiKey",

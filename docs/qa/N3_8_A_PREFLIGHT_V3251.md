@@ -8,7 +8,7 @@ Este documento fija únicamente el estado real, alcance, riesgos y decisiones pe
 
 ## CURRENT_CONFIRMED_FACT
 
-- El repositorio `jmejia31/VariApp` en `Desarrollo` no contiene actualmente una entidad, servicio, controller, DTO, ruta frontend o migración denominada `NotaDebitoCliente`.
+- El repositorio `jmejia31/Solqaryn` en `Desarrollo` no contiene actualmente una entidad, servicio, controller, DTO, ruta frontend o migración denominada `NotaDebitoCliente`.
 - N3.7 `NotaCreditoCliente` ya está cerrado y constituye únicamente un patrón adyacente observado; su semántica no se transfiere automáticamente a una nota de débito.
 - La autoridad actual de facturación/venta continúa en los modelos y contratos existentes de `Factura` / `Venta`; cualquier relación futura de una nota de débito con esas autoridades deberá probarse antes de fijarla como contrato.
 - N3.8.A es un preflight: no corresponde introducir todavía cambios grandes de dominio, persistencia, Application/API o frontend.

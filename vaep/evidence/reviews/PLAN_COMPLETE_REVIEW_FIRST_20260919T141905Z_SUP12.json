@@ -2,7 +2,7 @@
   "schema": "VAEP_REVIEW_FIRST_RECEIPT_V1",
   "generated_at_utc": "2026-09-19T14:19:05Z",
   "role": "SUPERVISOR_RECOVERY_VERIFIER_SECONDARY_BUILDER",
-  "repository": "jmejia31/VariApp",
+  "repository": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "authority": {
     "path": "docs/VAEP_AUTHORITY.md",

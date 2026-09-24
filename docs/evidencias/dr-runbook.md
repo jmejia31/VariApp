@@ -1,4 +1,4 @@
-# VariApp — Disaster Recovery Runbook (N8.10)
+# Solqaryn — Disaster Recovery Runbook (N8.10)
 
 Status: versioned engineering baseline for `Desarrollo`; N8.10.A preflight/model.  
 Authority: `docs/VAEP_AUTHORITY.md`.  
@@ -6,7 +6,7 @@ Scope guard: this document defines the recovery model only. It does not authoriz
 
 ## 1. Objective and recovery boundary
 
-Recover VariApp after an application, API, database, configuration, DNS/TLS, credential, or storage incident while preserving tenant isolation and auditable evidence. The recovery boundary is the web application, API, MySQL data, versioned configuration, and any external asset references required by the application.
+Recover Solqaryn after an application, API, database, configuration, DNS/TLS, credential, or storage incident while preserving tenant isolation and auditable evidence. The recovery boundary is the web application, API, MySQL data, versioned configuration, and any external asset references required by the application.
 
 N8.10.A defines the operating model. It does **not** claim that a Production disaster drill, provider fork/restore, DNS cutover, or final RPO/RTO certification has already been executed. Those claims require later N8.10 evidence and REVIEW_FIRST on the exact candidate HEAD.
 
@@ -14,7 +14,7 @@ N8.10.A defines the operating model. It does **not** claim that a Production dis
 
 The current engineering model is grounded in newer causal evidence rather than historical declarations:
 
-- MySQL DEV is Aiven MySQL 8.4.8, service `variapp-mysql`, plan `free-1-1gb`, recovery mode `pitr`; the provider backup endpoint, PITR availability, retention policy, restore path `AIVEN_FORK_AND_RESTORE_CONTROL_PLANE`, and effective restore authority were proven read-only in N8.20.
+- MySQL DEV is Aiven MySQL 8.4.8, service `solqaryn-mysql`, plan `free-1-1gb`, recovery mode `pitr`; the provider backup endpoint, PITR availability, retention policy, restore path `AIVEN_FORK_AND_RESTORE_CONTROL_PLANE`, and effective restore authority were proven read-only in N8.20.
 - Provider metadata showed a 24-hour backup interval and three actual backups; no provider restore/fork was executed by that proof.
 - N8.21 executed a real logical backup of Desarrollo and restored the **same encrypted artifact** into an isolated disposable MySQL instance. The restore step itself completed successfully in the GitHub Actions job window 14:54:50Z–14:55:17Z (27 seconds). Exact table counts, 104 EF migrations, 240 foreign keys and 542 indexes matched, and the active Desarrollo database was not used as the restore target.
 - N8.21 then ran backend sanity against the isolated restore successfully. This proves recovery mechanics in a disposable DEV/CI context; it is not a Production RTO measurement.
