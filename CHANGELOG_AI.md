@@ -1618,3 +1618,13 @@ El primer intento one-shot del barrido post-transferencia falló por un HTTP 502
 - Se retira el workflow temporal `.github/workflows/github-post-transfer-cleanup.yml` después de cumplir su función para no dejar una superficie administrativa residual.
 - Los triggers administrativos #3414/#3415 se usaron exclusivamente durante el cierre y quedan cerrados.
 - Este changeset no modifica producto, `main`, `Produccion`, secretos, datos productivos, dominios ni certificados.
+
+## 2026-09-24 — Autorización GitHub org-safe post-transfer
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+Durante la auditoría final post-transfer se detectó deuda operativa real en dos workflows manuales cerrados: su guard comparaba `github.actor` con `github.repository_owner`. Tras la transferencia, el owner es la organización `solqaryn`, por lo que ningún usuario humano podía satisfacer esa condición y el test offline todavía simulaba `jmejia31/Solqaryn`.
+
+Se elimina esa dependencia personal. `fase8-validacion-completa.yml` y `m13-certificacion-final.yml` conservan `workflow_dispatch`, el repositorio exacto `solqaryn/Solqaryn`, la rama exacta `Desarrollo` y el token literal `AUTORIZADO_REABRIR`, pero ahora exigen que actor y triggering actor coincidan y que GitHub confirme dinámicamente permiso administrativo del actor sobre el repositorio. `test_reopen_authorization.py` pasa a usar la identidad canónica y un stub local de la consulta de permisos para verificar PASS/FAIL sin depender de una cuenta personal.
+
+No se modifica `main`, Producción, secretos, datos productivos, dominios ni certificados.

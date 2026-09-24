@@ -21,11 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Exigir propietario, Desarrollo y token literal
+      - name: Exigir administrador, Desarrollo y token literal
         env:
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
-          OWNER: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ github.token }}
           ACTOR: ${{ github.actor }}
           TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           TARGET_REF: ${{ github.ref }}
@@ -36,9 +36,10 @@ jobs:
           test "$EVENT_NAME" = workflow_dispatch
           test "$REPOSITORY" = solqaryn/Solqaryn
           test "$TARGET_REF" = refs/heads/Desarrollo
-          test "$ACTOR" = "$OWNER"
-          test "$TRIGGERING_ACTOR" = "$OWNER"
+          test "$ACTOR" = "$TRIGGERING_ACTOR"
           test "$AUTHORIZATION" = AUTORIZADO_REABRIR
+          admin="$(gh api "repos/$REPOSITORY/collaborators/$ACTOR/permission" --jq '.user.permissions.admin')"
+          test "$admin" = "true"
           echo 'REOPEN_AUTHORIZATION=PASS'
 
   audit:
