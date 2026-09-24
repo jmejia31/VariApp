@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: solqaryn-api-desarrollo
+    name: solqaryn-api-dev
     runtime: docker
     plan: free
     region: oregon
@@ -13,7 +13,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Staging
       - key: AllowedHosts
-        value: solqaryn-api-desarrollo.onrender.com
+        value: solqaryn-api-dev.onrender.com
       - key: Database__ServerVersion
         value: 8.4.3
       - key: Database__ApplyMigrationsOnStartup
@@ -41,7 +41,7 @@ services:
       - key: Cors__AllowedOrigins__0
         value: https://solqaryn-desarrollo.vercel.app
       - key: AppSettings__BackendPublicUrl
-        value: https://solqaryn-api-desarrollo.onrender.com
+        value: https://solqaryn-api-dev.onrender.com
       - key: AppSettings__LogoPublicUrl
         value: https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png
       - key: AppSettings__EnlacePublicoFacturaHorasValidez

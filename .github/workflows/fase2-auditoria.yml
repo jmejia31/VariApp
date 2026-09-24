@@ -46,15 +46,15 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
 
           grep -q 'branch: Desarrollo' render.yaml
-          grep -q 'name: solqaryn-api-desarrollo' render.yaml
+          grep -q 'name: solqaryn-api-dev' render.yaml
           grep -q 'healthCheckPath: /health/ready' render.yaml
-          grep -A1 'AllowedHosts' render.yaml | grep -q 'solqaryn-api-desarrollo.onrender.com'
+          grep -A1 'AllowedHosts' render.yaml | grep -q 'solqaryn-api-dev.onrender.com'
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Security__LoginRateLimitPerMinute' render.yaml | grep -q '"20"'
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
           grep -A1 'AppSettings__LogoPublicUrl' render.yaml | grep -q 'solqaryn-desarrollo.vercel.app'
-          grep -q 'solqaryn-api-desarrollo.onrender.com' frontend/vercel.json
-          grep -q 'solqaryn-api.onrender.com' frontend/vercel.json
+          grep -q 'solqaryn-api-dev.onrender.com' frontend/vercel.json
+          grep -q 'solqaryn-api-prod.onrender.com' frontend/vercel.json
 
           grep -Fq 'USER $APP_UID' backend/Dockerfile
           grep -q 'AddRateLimiter' backend/src/API/Program.cs
