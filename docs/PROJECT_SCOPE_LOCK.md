@@ -4,7 +4,7 @@
 PLATFORM=SOLQARYN
 PROJECT_ID=SOLQARYN
 REPOSITORY=solqaryn/Solqaryn
-BRANCH=Desarrollo
+BRANCH=dev
 PROJECT_SCOPE_LOCK=STRICT
 LOCAL_SKILL_COUNT=1
 LOCAL_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
