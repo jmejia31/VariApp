@@ -41,8 +41,8 @@ jobs:
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: Fase-2C1-CI-Only-Secret-With-More-Than-32-Characters
-      Jwt__Issuer: VariApp.Fase2C1.CI
-      Jwt__Audience: VariApp.Fase2C1.CI.Frontend
+      Jwt__Issuer: Solqaryn.Fase2C1.CI
+      Jwt__Audience: Solqaryn.Fase2C1.CI.Frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -61,9 +61,9 @@ jobs:
           mysql_container="${{ job.services.mysql.id }}"
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_2c1 -e "
             INSERT INTO Productos (Nombre, Marca, Modelo, Cantidad, Costo, Precio, UmbralStockBajo, Activo, Eliminado, FechaCreacion, FechaActualizacion) VALUES
-            ('Simple activo 2C1','VariApp','SIMPLE-A',7,12.34,20.50,2,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
-            ('Simple inactivo 2C1','VariApp','SIMPLE-I',0,8.00,15.00,1,0,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
-            ('Comercial 2C1','VariApp','COMERCIAL',4,30.00,45.00,1,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+            ('Simple activo 2C1','Solqaryn','SIMPLE-A',7,12.34,20.50,2,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+            ('Simple inactivo 2C1','Solqaryn','SIMPLE-I',0,8.00,15.00,1,0,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+            ('Comercial 2C1','Solqaryn','COMERCIAL',4,30.00,45.00,1,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
             INSERT INTO CatalogosProducto (Tipo,Nombre,Descripcion,CodigoVisual,Orden,Activo,Eliminado,FechaCreacion,FechaActualizacion)
             VALUES ('Color','Azul 2C1','Validación variante comercial','#2563EB',901,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
             SET @p=(SELECT Id FROM Productos WHERE Nombre='Comercial 2C1'); SET @c=LAST_INSERT_ID();
