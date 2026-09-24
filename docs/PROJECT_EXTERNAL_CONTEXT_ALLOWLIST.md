@@ -1,37 +1,34 @@
-# Allowlist de contexto externo — VariApp
+# Allowlist de contexto externo — SOLQARYN
 
 ```text
+PLATFORM=SOLQARYN
 PROJECT_ID=VARIAPP
 REPOSITORY=solqaryn/VariApp
 PROJECT_SCOPE_LOCK=STRICT
 DEFAULT=DENY
 ```
 
-Esta lista registra únicamente excepciones persistentes autorizadas por el propietario para consultar una fuente externa al proyecto.
-
 ## Entradas activas
 
 **Ninguna.**
 
-Por tanto, el estado actual es:
+Estado efectivo:
 
 `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`
 
-## Formato obligatorio para una excepción futura
+## Requisito para una excepción futura
 
-Cada excepción debe incluir:
+Cada excepción debe registrar:
 
 - ID estable;
-- estado: `ACTIVE` o `REVOKED`;
-- fuente exacta: repositorio, documento, skill, URL o recurso;
+- estado `ACTIVE` o `REVOKED`;
+- fuente exacta;
 - propósito;
 - alcance permitido;
-- qué NO autoriza;
-- autorizado por: propietario;
+- límites explícitos;
+- autorización del propietario;
 - evidencia de autorización;
-- fecha de autorización;
+- fecha;
 - vigencia o condición de expiración.
 
-Un permiso conversacional no se vuelve persistente hasta que se registre aquí.
-
-Una entrada revocada permanece como historial, pero no autoriza consultas nuevas.
+Un permiso conversacional no se vuelve persistente hasta quedar versionado aquí.
