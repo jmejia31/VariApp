@@ -21,19 +21,19 @@ jobs:
       - name: Guard secret presence
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
         run: |
           set -euo pipefail
-          test -n "$AIVEN_TOKEN" || { echo 'AIVEN_TOKEN unavailable in effective job scope'; exit 20; }
-          test -n "$DEV_DB" || { echo 'SOLQARYN_DEV_DB_CONNECTION unavailable in effective job scope'; exit 21; }
+          test -n "$SOLQARYN_AIVEN_TOKEN" || { echo 'SOLQARYN_AIVEN_TOKEN unavailable in effective job scope'; exit 20; }
+          test -n "$DEV_DB" || { echo 'SOLQARYN_DESARROLLO_DB_CONNECTION unavailable in effective job scope'; exit 21; }
           echo 'Required secret names are available; values are not printed.'
 
       - name: Normalize token in-memory and prove exact DEV MySQL backup control plane
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
           PROJECT: solqaryn
           SERVICE: solqaryn-mysql
         run: |
@@ -42,12 +42,12 @@ jobs:
           import hashlib, json, os, re, urllib.request, urllib.error
           from urllib.parse import quote
 
-          raw=os.environ['AIVEN_TOKEN']
+          raw=os.environ['SOLQARYN_AIVEN_TOKEN']
           token=raw.strip()
           if len(token) >= 2 and token[0] == token[-1] and token[0] in ('"', "'"):
               token=token[1:-1].strip()
           if not token:
-              raise SystemExit('Normalized AIVEN_TOKEN is empty')
+              raise SystemExit('Normalized SOLQARYN_AIVEN_TOKEN is empty')
 
           conn=os.environ['DEV_DB']
           project=os.environ['PROJECT']
