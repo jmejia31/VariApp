@@ -4,14 +4,14 @@ services:
     runtime: docker
     plan: free
     region: oregon
-    branch: Desarrollo
+    branch: dev
     autoDeployTrigger: checksPass
     healthCheckPath: /health/ready
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
-        value: Staging
+        value: Development
       - key: AllowedHosts
         value: solqaryn-api-dev.onrender.com
       - key: Database__ServerVersion
@@ -23,9 +23,9 @@ services:
       - key: Jwt__Secret
         generateValue: true
       - key: Jwt__Issuer
-        value: Solqaryn.Desarrollo.API
+        value: Solqaryn.DEV.API
       - key: Jwt__Audience
-        value: Solqaryn.Desarrollo.Frontend
+        value: Solqaryn.DEV.Frontend
       - key: Jwt__ExpiraMinutos
         value: "120"
       - key: Security__LoginRateLimitPerMinute
@@ -37,13 +37,13 @@ services:
       - key: Cloudinary__ApiSecret
         sync: false
       - key: Cloudinary__EnvironmentPrefix
-        value: varistorehn_desarrollo
+        value: varistorehn_dev
       - key: Cors__AllowedOrigins__0
-        value: https://solqaryn-desarrollo.vercel.app
+        value: https://solqaryn-dev.vercel.app
       - key: AppSettings__BackendPublicUrl
         value: https://solqaryn-api-dev.onrender.com
       - key: AppSettings__LogoPublicUrl
-        value: https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png
+        value: https://solqaryn-dev.vercel.app/assets/varistorehn-logo.png
       - key: AppSettings__EnlacePublicoFacturaHorasValidez
         value: "24"
       - key: AppSettings__EnlacePublicoFacturaMaximoAccesos
@@ -69,7 +69,7 @@ services:
       - key: Smtp__CorreoRespuesta
         sync: false
       - key: Smtp__NombreRemitente
-        value: VariStorehn Desarrollo
+        value: VariStorehn DEV
       - key: Smtp__TimeoutSeconds
         value: "60"
       - key: Smtp__MaxAttempts
