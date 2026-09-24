@@ -36,7 +36,7 @@ const mandatory = [
 
 const expectedExternalSources = [
   ['agentskills/agentskills', '69ef37e9424c0a7ea9dd2293b559e43ec8176379'],
-  ['Skill Creator oficial de ChatGPT / OpenAI', 'Integrado en el entorno'],
+  ['ChatGPT / OpenAI, integrado en el entorno', 'Integrado en el entorno'],
   ['pbakaus/impeccable', '2149fcce39a90bb409df5f16515f316a76dc6199'],
   ['emilkowalski/skills', 'd23d7f88a2e21c9e4b1418c7abe420f5c1052ba7'],
   ['Leonxlnx/taste-skill', 'ccbc15639c97057cbfcf32ecebc38ef716e4bb37'],
