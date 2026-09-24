@@ -3,7 +3,7 @@ name: VariStoreHn Fase 4 - regresion detalle
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
       - chatgpt/varistorehn-fase4-detalle
     paths:
       - 'frontend/src/app/features/varistorehn/**'
@@ -22,7 +22,7 @@ on:
       - '.github/workflows/varistorehn-fase4-regression.yml'
   pull_request:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
