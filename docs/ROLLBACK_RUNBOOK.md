@@ -4,7 +4,7 @@
 
 Este documento define el procedimiento; no concede por sí mismo permiso para mutar servicios. Dentro de N8.23, las mutaciones reversibles DEV están autorizadas únicamente en los scopes expresamente habilitados por el propietario (`N8.23.D`, `N8.23.E`, `N8.23.G`, `N8.23.H`) y solo sobre:
 
-- Render DEV `solqaryn-api-desarrollo`;
+- Render DEV `solqaryn-api-dev`;
 - Vercel DEV `solqaryn-desarrollo`.
 
 Sigue prohibido tocar `main`, Producción, el proyecto Vercel `varistorehn`, Render `solqaryn-api`, datos/migraciones productivas, DNS, certificados, secretos, compras/upgrades, cambios de plan y PR #2.
@@ -33,7 +33,7 @@ set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
 git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
 export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
-export BACKEND_URL="https://solqaryn-api-desarrollo.onrender.com"
+export BACKEND_URL="https://solqaryn-api-dev.onrender.com"
 curl --fail-with-body --silent --show-error --max-time 30 "$BACKEND_URL/health/ready"
 curl --fail-with-body --silent --show-error --max-time 30 -L -o /dev/null "$FRONTEND_URL/"
 ```
@@ -59,17 +59,17 @@ Si la herramienta autorizada no expone Instant Rollback/Promote, STOP: no simula
 
 ## Render DEV
 
-Servicio permitido: `solqaryn-api-desarrollo`.
+Servicio permitido: `solqaryn-api-dev`.
 
 Usar la capacidad autorizada de rollback/redeploy del proveedor hacia PREVIOUS_KNOWN_GOOD y después recuperar CURRENT. En cada estado `HEALTHY` ejecutar:
 
 ```bash
 set -euo pipefail
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://solqaryn-api-desarrollo.onrender.com/health"
+  "https://solqaryn-api-dev.onrender.com/health"
 printf '\n'
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://solqaryn-api-desarrollo.onrender.com/health/ready"
+  "https://solqaryn-api-dev.onrender.com/health/ready"
 printf '\n'
 ```
 
@@ -89,7 +89,7 @@ Para cada transición registrar `start_utc`, `healthy_utc` y duración en segund
 
 ## STOP inmediato
 
-- destino no es `solqaryn-api-desarrollo` o `solqaryn-desarrollo`;
+- destino no es `solqaryn-api-dev` o `solqaryn-desarrollo`;
 - rama no es `Desarrollo`;
 - previous known good no está demostrado/READY;
 - se requiere build nuevo para fingir el rollback cuando existe uno previo utilizable;
