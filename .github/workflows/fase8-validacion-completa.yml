@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Exigir administrador, Desarrollo y token literal
+      - name: Exigir administrador, DEV y token literal
         env:
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
@@ -34,7 +34,7 @@ jobs:
           set -euo pipefail
           test "$EVENT_NAME" = workflow_dispatch
           test "$REPOSITORY" = solqaryn/Solqaryn
-          test "$TARGET_REF" = refs/heads/Desarrollo
+          test "$TARGET_REF" = refs/heads/dev
           test "$ACTOR" = "$TRIGGERING_ACTOR"
           test "$AUTHORIZATION" = AUTORIZADO_REABRIR
           admin="$(gh api "repos/$REPOSITORY/collaborators/$ACTOR/permission" --jq '.user.permissions.admin')"
@@ -112,7 +112,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
