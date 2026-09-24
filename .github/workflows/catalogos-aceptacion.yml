@@ -1,9 +1,9 @@
-name: Desarrollo - aceptación funcional integral
+name: DEV - aceptación funcional integral
 
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/catalogos-aceptacion.yml
       - frontend/e2e/**
@@ -91,7 +91,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
