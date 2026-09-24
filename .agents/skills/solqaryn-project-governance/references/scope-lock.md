@@ -1,13 +1,17 @@
 # SOLQARYN scope lock reference
 
+`PLATFORM=SOLQARYN`
+
 `PROJECT_ID=VARIAPP`
 
-`REPOSITORY=solqaryn/SOLQARYN`
+`REPOSITORY=solqaryn/VariApp`
 
 `PROJECT_SCOPE_LOCK=STRICT`
 
+`SKILL_NAMESPACE=solqaryn-`
+
 `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`
 
-Ninguna skill, documentacion, chat, repositorio, memoria o regla de otro proyecto puede utilizarse como contexto de SOLQARYN sin autorizacion explicita del propietario o una entrada activa en `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md`.
+Solo las skills `solqaryn-*`, los archivos de `solqaryn/VariApp` y las fuentes expresamente autorizadas para SOLQARYN pueden utilizarse como contexto del proyecto.
 
-Las capacidades genericas de plataforma no son autoridad de proyecto y no habilitan contexto cruzado.
+La disponibilidad tecnica de cualquier otra fuente no constituye permiso.
