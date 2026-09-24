@@ -26,7 +26,7 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 - `CONTRIBUTING.md`: flujo Git y criterios de contribución.
 - `implementation_plan.md`: plan de implementación histórico/específico cuando aplique.
 - `render.yaml`: configuración versionada relacionada con Render; tratar con cautela por separación de entornos.
-- `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`: fuente canónica para GitHub Environments y topología Aiven DEV/PROD (`Desarrollo`, `Produccion`, `solqaryn-mysql`, bases/usuarios aislados).
+- `docs/ENTORNOS_DEV_PROD.md`: fuente canónica para GitHub Environments y topología Aiven DEV/PROD (`dev`, `Produccion`, `solqaryn-mysql`, bases/usuarios aislados).
 
 ## Backend
 
@@ -84,7 +84,7 @@ Administración colaborativa central:
 
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
-- `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`
+- `docs/ENTORNOS_DEV_PROD.md`
 - `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de Solqaryn; no es fuente de estado actual.
 
 Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
@@ -96,7 +96,7 @@ No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento aso
 - `scripts/iniciar-sesion-ia.ps1`: gate read-only de identidad, rama, HEAD, divergencia y estado del checkout. Ejecutarlo al inicio de cada conversación/sesión local.
 - `scripts/configurar-colaboracion.ps1`: configuración inicial/sincronización del flujo local y hooks.
 - `.githooks/pre-commit`: bloquea commits locales si repo/rama son incorrectos o falta `CHANGELOG_AI.md` en el changeset.
-- `.githooks/post-commit`: publica commits de `Desarrollo` solo si `origin` pertenece realmente a Solqaryn.
+- `.githooks/post-commit`: publica commits de `dev` solo si `origin` pertenece realmente a Solqaryn.
 
 ## CI
 
@@ -129,7 +129,7 @@ No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estruc
 | Ruta, menú o permiso visual | `frontend/src/app/app.routes.ts` o `features/**/**.routes.ts` | `core/guards`, `core/navigation` y permiso del endpoint backend |
 | Login, JWT o permisos | `AuthController.cs`, `Program.cs` y servicios Auth/RBAC | `core/auth`, `core/guards`, interceptor y pruebas de acceso |
 | Imagen, PDF, correo o exportación | interfaz en `Application/Interfaces` | implementación en `Infrastructure/Services` y registro DI en `Program.cs` |
-| Variable o entorno | `backend/src/API/appsettings*.json`, `frontend/src/environments`, `frontend/vercel.json`, `render.yaml` | `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`; nunca copiar secretos |
+| Variable o entorno | `backend/src/API/appsettings*.json`, `frontend/src/environments`, `frontend/vercel.json`, `render.yaml` | `docs/ENTORNOS_DEV_PROD.md`; nunca copiar secretos |
 | Prueba localizada | `backend/tests/InventoryApp.Tests` o `frontend/e2e` | workflow específico en `.github/workflows` |
 
 ## Puntos de entrada, API y datos
@@ -188,7 +188,7 @@ Los nombres de migración son anclas de búsqueda, no una lista exhaustiva ni au
 - Escritura transaccional: componente -> servicio HTTP -> controlador -> servicio Application -> repositorio/`IUnitOfWork` -> `AppDbContext`.
 - Inventario comercial: compra/recepción o venta/pedido -> servicio funcional -> existencia/reserva/kardex -> movimiento y trazabilidad; revisar ambos dominios solo si el cambio cruza esa frontera.
 - Facturación: venta/documento -> `FacturaService` -> repositorios -> QuestPDF; correo y enlaces públicos pasan por sus interfaces/adaptadores.
-- Multimedia: UI multipart -> controlador/servicio -> interfaz de almacenamiento -> Cloudinary; las reglas de entorno permanecen en `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
+- Multimedia: UI multipart -> controlador/servicio -> interfaz de almacenamiento -> Cloudinary; las reglas de entorno permanecen en `docs/ENTORNOS_DEV_PROD.md`.
 - Errores y observabilidad: `Program.cs` -> `CorrelationIdMiddleware` -> `ExceptionHandlingMiddleware`; filtros y health checks viven en API.
 
 ## Alcance: qué no volver a inspeccionar
