@@ -9,7 +9,7 @@
 - Rama de trabajo: `Desarrollo`
 - `main`: congelada; no tocar sin autorización expresa.
 - PR oficial `Desarrollo -> main`: #2, abierto y Draft; no merge automático.
-- Entornos lógicos: `varistorehn_producción` y `varistorehn_desarrollo`.
+- Environments GitHub canónicos: `Produccion` y `Desarrollo`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
 - Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
 - Tracks obligatorios: T0–T12.
@@ -47,6 +47,8 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 ## 4. Persistencia, seguridad e invariantes
 
 - MySQL mediante EF Core/Pomelo y migraciones forward-only cuando aplique.
+- Aiven canónico: proyecto `solqaryn`, servicio único `solqaryn-mysql`, bases `solqaryn_dev`/`solqaryn_prod` y usuarios aislados `solqaryn_dev_user`/`solqaryn_prod_user`; `avnadmin` queda solo para administración.
+- Los Environments GitHub canónicos son `Desarrollo` y `Produccion`; secretos y variables no se cruzan entre ambos.
 - JWT y permisos relacionales; no reintroducir bypass de administrador legacy.
 - No tocar Producción ni `main` desde el flujo de Desarrollo.
 - No exponer secretos ni inventar validaciones externas.
