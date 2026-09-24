@@ -9,27 +9,22 @@ function git(...args) {
 }
 
 const branch = git('branch', '--show-current');
-if (branch !== expectedBranch) {
-  throw new Error(`SOLQARYN scope gate: branch ${branch} != ${expectedBranch}`);
-}
+if (branch !== expectedBranch) throw new Error(`SOLQARYN scope gate: branch ${branch} != ${expectedBranch}`);
 
 const origin = git('remote', 'get-url', 'origin');
-const allowedOrigins = new Set([
+const allowed = new Set([
   'https://github.com/solqaryn/VariApp',
   'https://github.com/solqaryn/VariApp.git',
   'git@github.com:solqaryn/VariApp.git',
   'ssh://git@github.com/solqaryn/VariApp.git',
 ]);
+if (!allowed.has(origin)) throw new Error(`SOLQARYN scope gate: unexpected origin ${origin}`);
 
-if (!allowedOrigins.has(origin)) {
-  throw new Error(`SOLQARYN scope gate: origin ${origin} no corresponde a ${expectedRepo}`);
-}
-
-for (const path of ['AGENTS.md', 'docs/PROJECT_SCOPE_LOCK.md']) {
-  if (!existsSync(path)) throw new Error(`SOLQARYN scope gate: falta ${path}`);
+for (const path of ['AGENTS.md', 'docs/PROJECT_SCOPE_LOCK.md', 'docs/VAEP_AUTHORITY.md']) {
+  if (!existsSync(path)) throw new Error(`SOLQARYN scope gate: missing ${path}`);
   const content = readFileSync(path, 'utf8');
-  if (!content.includes('PROJECT_SCOPE_LOCK=STRICT')) {
-    throw new Error(`SOLQARYN scope gate: ${path} no declara PROJECT_SCOPE_LOCK=STRICT`);
+  if (path !== 'docs/VAEP_AUTHORITY.md' && !content.includes('PROJECT_SCOPE_LOCK=STRICT')) {
+    throw new Error(`SOLQARYN scope gate: ${path} missing PROJECT_SCOPE_LOCK=STRICT`);
   }
 }
 
