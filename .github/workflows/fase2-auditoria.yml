@@ -3,7 +3,7 @@ name: Fase 2 - Auditoría de configuración y dependencias
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/fase2-auditoria.yml
       - backend/**
@@ -45,7 +45,7 @@ jobs:
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
 
-          grep -q 'branch: Desarrollo' render.yaml
+          grep -q 'branch: dev' render.yaml
           grep -q 'name: solqaryn-api-dev' render.yaml
           grep -q 'healthCheckPath: /health/ready' render.yaml
           grep -A1 'AllowedHosts' render.yaml | grep -q 'solqaryn-api-dev.onrender.com'
@@ -63,7 +63,7 @@ jobs:
           grep -q 'EnableRateLimiting("AuthLogin")' backend/src/API/Controllers/AuthController.cs
 
           if grep -A1 'AppSettings__LogoPublicUrl' render.yaml | grep -q 'varistorehn.vercel.app'; then
-            echo 'Render Desarrollo no debe depender del logo servido por Producción.' >&2
+            echo 'Render DEV no debe depender del logo servido por Producción.' >&2
             exit 1
           fi
 
