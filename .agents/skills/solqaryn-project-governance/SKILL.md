@@ -73,7 +73,7 @@ Ninguna referencia externa puede imponer un framework, capa, persistencia, mecan
 - El trabajo ordinario se realiza en `dev`.
 - Revalidar HEAD antes de escribir/publicar y preservar trabajo concurrente.
 - No force-push, reset destructivo ni reescritura de historia compartida.
-- Cualquier cambio futuro sobre `main`, Produccion, datos productivos, dominios, certificados, secretos o infraestructura productiva requiere autorizacion nueva y explicita del propietario y debe respetar la autoridad operativa vigente.
+- Cualquier cambio futuro sobre `main`, PROD, datos productivos, dominios, certificados, secretos o infraestructura productiva requiere autorizacion nueva y explicita del propietario y debe respetar la autoridad operativa vigente.
 - Nunca inferir autorizacion productiva a partir de un release historico.
 
 ## 6. Impacto antes de editar
