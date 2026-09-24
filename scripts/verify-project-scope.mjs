@@ -5,8 +5,9 @@ const root = process.cwd();
 const expectedRepo = 'solqaryn/VariApp';
 const expectedProjectId = 'VARIAPP';
 const requiredMarker = 'PROJECT_SCOPE_LOCK=STRICT';
-const skillPrefix = 'solqaryn-';
-const displayPrefix = 'SOLQARYN';
+const onlyLocalSkill = '.agents/skills/solqaryn-project-governance/SKILL.md';
+const registryPath = 'docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md';
+const allowlistPath = 'docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md';
 
 const mandatory = [
   'AGENTS.md',
@@ -28,27 +29,27 @@ const mandatory = [
   'docs/runbooks/GO_LIVE_SMOKE_RUNBOOK.md',
   '.github/CODEOWNERS',
   'docs/PROJECT_SCOPE_LOCK.md',
-  'docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md',
-  '.agents/skills/solqaryn-project-governance/SKILL.md',
+  allowlistPath,
+  registryPath,
+  onlyLocalSkill,
+];
+
+const expectedExternalSources = [
+  ['agentskills/agentskills', '69ef37e9424c0a7ea9dd2293b559e43ec8176379'],
+  ['Skill Creator oficial de ChatGPT / OpenAI', 'Integrado en el entorno'],
+  ['pbakaus/impeccable', '2149fcce39a90bb409df5f16515f316a76dc6199'],
+  ['emilkowalski/skills', 'd23d7f88a2e21c9e4b1418c7abe420f5c1052ba7'],
+  ['Leonxlnx/taste-skill', 'ccbc15639c97057cbfcf32ecebc38ef716e4bb37'],
+  ['blader/humanizer', '9862685f575c65a8247f90369951df1b3416e3d6'],
+  ['blader/napkin', '27fa60a895de4383b26a539136bc983155cb979c'],
+  ['alexgreensh/token-optimizer', '37a9546b9fecba2c4e9a02ef4e90855d449bf08f'],
+  ['JuliusBrussee/caveman', '15581d14007fd01fb3f132016741962f34936ca2'],
 ];
 
 const errors = [];
 
 function read(rel) {
   return readFileSync(join(root, rel), 'utf8');
-}
-
-for (const rel of mandatory) {
-  if (!existsSync(join(root, rel))) {
-    errors.push(`missing required scope file: ${rel}`);
-    continue;
-  }
-  const content = read(rel);
-  if (!content.includes(requiredMarker)) errors.push(`${rel} missing ${requiredMarker}`);
-  if (content.includes('.agents/skills/') && content.includes('project-governance') &&
-      !content.includes('.agents/skills/solqaryn-project-governance/')) {
-    errors.push(`${rel} contains a non-SOLQARYN project skill path`);
-  }
 }
 
 function walk(dir) {
@@ -62,51 +63,94 @@ function walk(dir) {
   return out;
 }
 
-const skillsRoot = join(root, '.agents', 'skills');
-for (const path of walk(skillsRoot).filter(p => p.endsWith('SKILL.md'))) {
-  const rel = relative(root, path).split(sep).join('/');
-  const parts = rel.split('/');
-  const skillDir = parts[2] ?? '';
-  const content = readFileSync(path, 'utf8');
-
-  if (!skillDir.startsWith(skillPrefix)) errors.push(`${rel} skill directory must start with ${skillPrefix}`);
-
-  const nameMatch = content.match(/^name:\s*([^\n]+)$/m);
-  const name = nameMatch?.[1]?.trim().replace(/^["']|["']$/g, '') ?? '';
-  if (!name.startsWith(skillPrefix)) errors.push(`${rel} frontmatter name must start with ${skillPrefix}`);
-
-  if (!content.includes(`PROJECT_ID=${expectedProjectId}`)) errors.push(`${rel} missing PROJECT_ID=${expectedProjectId}`);
-  if (!content.includes(`REPOSITORY=${expectedRepo}`)) errors.push(`${rel} missing REPOSITORY=${expectedRepo}`);
-  if (!content.includes(requiredMarker)) errors.push(`${rel} missing ${requiredMarker}`);
-  if (/skills:\/\//i.test(content)) errors.push(`${rel} may not depend on external skill URIs`);
-
-  const agentPath = join(path, '..', 'agents', 'openai.yaml');
-  if (!existsSync(agentPath)) {
-    errors.push(`${rel} missing agents/openai.yaml`);
-  } else {
-    const agent = readFileSync(agentPath, 'utf8');
-    const displayMatch = agent.match(/display_name:\s*["']?([^\n"']+)/);
-    const displayName = displayMatch?.[1]?.trim() ?? '';
-    if (!displayName.startsWith(displayPrefix)) errors.push(`${rel} display_name must start with ${displayPrefix}`);
+for (const rel of mandatory) {
+  if (!existsSync(join(root, rel))) {
+    errors.push(`missing required SOLQARYN file: ${rel}`);
   }
 }
 
-const governanceFiles = mandatory
-  .filter(rel => existsSync(join(root, rel)))
-  .map(rel => ({ rel, content: read(rel) }));
+const lockRequired = mandatory.filter(rel =>
+  ![registryPath].includes(rel) && existsSync(join(root, rel))
+);
+for (const rel of lockRequired) {
+  const content = read(rel);
+  if (!content.includes(requiredMarker)) {
+    errors.push(`${rel} missing ${requiredMarker}`);
+  }
+}
 
-for (const { rel, content } of governanceFiles) {
+const skillFiles = walk(join(root, '.agents', 'skills'))
+  .filter(path => path.endsWith('SKILL.md'))
+  .map(path => relative(root, path).split(sep).join('/'))
+  .sort();
+
+if (skillFiles.length !== 1) {
+  errors.push(`SOLQARYN must contain exactly one local SKILL.md; found ${skillFiles.length}`);
+}
+if (skillFiles[0] !== onlyLocalSkill) {
+  errors.push(`the only local skill must be ${onlyLocalSkill}`);
+}
+
+if (existsSync(join(root, onlyLocalSkill))) {
+  const content = read(onlyLocalSkill);
+  const nameMatch = content.match(/^name:\s*([^\n]+)$/m);
+  const name = nameMatch?.[1]?.trim().replace(/^["']|["']$/g, '') ?? '';
+  if (name !== 'solqaryn-project-governance') errors.push('local skill name must be solqaryn-project-governance');
+  if (!content.includes(`PROJECT_ID=${expectedProjectId}`)) errors.push('local skill missing canonical PROJECT_ID');
+  if (!content.includes(`REPOSITORY=${expectedRepo}`)) errors.push('local skill missing canonical REPOSITORY');
+  if (!content.includes(requiredMarker)) errors.push('local skill missing strict scope lock');
+
+  const agentPath = join(root, '.agents/skills/solqaryn-project-governance/agents/openai.yaml');
+  if (!existsSync(agentPath)) {
+    errors.push('local skill missing agents/openai.yaml');
+  } else {
+    const agent = readFileSync(agentPath, 'utf8');
+    if (!/display_name:\s*["']?SOLQARYN\b/.test(agent)) {
+      errors.push('local skill display_name must start with SOLQARYN');
+    }
+  }
+}
+
+if (existsSync(join(root, registryPath))) {
+  const registry = read(registryPath);
+  if (!registry.includes('LOCAL_SKILL_COUNT=1')) errors.push('registry must declare LOCAL_SKILL_COUNT=1');
+  if (!registry.includes('EXTERNAL_SKILL_SOURCES=9')) errors.push('registry must declare EXTERNAL_SKILL_SOURCES=9');
+  for (const [source, pin] of expectedExternalSources) {
+    if (!registry.includes(source)) errors.push(`registry missing authorized source: ${source}`);
+    if (!registry.includes(pin)) errors.push(`registry missing authorized pin/resolution for: ${source}`);
+  }
+}
+
+if (existsSync(join(root, allowlistPath))) {
+  const allowlist = read(allowlistPath);
+  if (!allowlist.includes('AUTHORIZED_ORIGINAL_SKILL_SOURCES=9')) {
+    errors.push('allowlist must declare nine authorized original skill sources');
+  }
+  for (const [source, pin] of expectedExternalSources) {
+    if (!allowlist.includes(source)) errors.push(`allowlist missing authorized source: ${source}`);
+    if (!allowlist.includes(pin)) errors.push(`allowlist missing pin/resolution for: ${source}`);
+  }
+}
+
+const identityFiles = mandatory.filter(rel =>
+  existsSync(join(root, rel)) &&
+  ![registryPath, allowlistPath].includes(rel)
+);
+for (const rel of identityFiles) {
+  const content = read(rel);
   for (const match of content.matchAll(/PROJECT_ID\s*[:=]\s*[`"']?([A-Za-z0-9_-]+)/g)) {
     if (match[1].toUpperCase() !== expectedProjectId) {
       errors.push(`${rel} declares a non-canonical PROJECT_ID`);
     }
   }
-
   for (const match of content.matchAll(/REPOSITORY\s*[:=]\s*[`"']?([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)/g)) {
-    if (match[1] !== expectedRepo) errors.push(`${rel} declares a non-canonical REPOSITORY`);
+    if (match[1] !== expectedRepo) {
+      errors.push(`${rel} declares a non-canonical REPOSITORY`);
+    }
   }
-
-  if (/skills:\/\//i.test(content)) errors.push(`${rel} contains an external skill URI`);
+  if (/skills:\/\//i.test(content)) {
+    errors.push(`${rel} contains a direct external skill URI; resolve external references through the SOLQARYN registry`);
+  }
 }
 
 if (errors.length) {
@@ -115,4 +159,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`SOLQARYN PROJECT SCOPE GATE OK: ${expectedRepo} / ${requiredMarker}`);
+console.log('SOLQARYN PROJECT SCOPE GATE OK: one local skill + nine pinned original references');
