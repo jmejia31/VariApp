@@ -22,20 +22,20 @@ jobs:
         shell: bash
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
         run: |
           set -euo pipefail
           test -n "$AIVEN_TOKEN" || { echo 'AIVEN_TOKEN unavailable in effective job scope'; exit 20; }
-          test -n "$DEV_DB" || { echo 'VARIAPP_DEV_DB_CONNECTION unavailable in effective job scope'; exit 21; }
+          test -n "$DEV_DB" || { echo 'SOLQARYN_DEV_DB_CONNECTION unavailable in effective job scope'; exit 21; }
           echo 'Required secret names are available; values are not printed.'
 
       - name: Normalize token in-memory and prove exact DEV MySQL backup control plane
         shell: bash
         env:
           AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
-          PROJECT: variapp
-          SERVICE: variapp-mysql
+          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
+          PROJECT: solqaryn
+          SERVICE: solqaryn-mysql
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -58,7 +58,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.8.G-normalized-token-proof/1.0'})
+                  'User-Agent':'Solqaryn-N8.8.G-normalized-token-proof/1.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
