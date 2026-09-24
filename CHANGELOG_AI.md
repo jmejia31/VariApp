@@ -1640,3 +1640,20 @@ No se modifica `main`, Producción, secretos, datos productivos, dominios ni cer
 - Producción no fue modificada. No se tocaron `main`, datos productivos, secretos ni credenciales.
 
 MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/configuración de infraestructura DEV sin modificar dominio, persistencia, contratos funcionales ni Producción.
+
+
+## 2026-09-24 — Cutover canónico GitHub a dev / DEV / PROD
+
+**Responsable:** ChatGPT/VAEP remoto, rama `dev`.
+
+- La rama ordinaria canónica pasa a ser `dev`; `main` continúa reservada para PROD.
+- Los GitHub Environments canónicos pasan a ser exclusivamente `DEV` y `PROD`.
+- Workflows activos fueron migrados desde referencias antiguas de rama/environment a `dev`, `DEV` y `PROD`.
+- Variables y secretos operativos pasan a los prefijos `SOLQARYN_DEV_*` y `SOLQARYN_PROD_*`; no se persisten connection strings completas como secretos duplicados.
+- Scripts operativos de backup/restore fueron renombrados a `scripts/backup_dev.sh` y `scripts/restore_dev.sh`.
+- El documento canónico de topología fue renombrado a `docs/ENTORNOS_DEV_PROD.md`.
+- VariStoreHN permanece como cliente/módulo funcional: sus pruebas de regresión pueden conservar el nombre del cliente, pero sus triggers operan sobre la rama `dev` y no definen infraestructura de plataforma.
+- El Project Scope Lock fue ajustado para el nuevo naming y continúa actuando fail-closed contra identificadores operativos retirados.
+- Antes de eliminar los environments antiguos, GitHub debe quedar con default branch `dev` y ruleset activo apuntando a `dev`.
+
+MAPA_ARQUITECTURA: ACTUALIZADO — normalización transversal de gobierno, CI y topología GitHub; no modifica datos de PROD.
