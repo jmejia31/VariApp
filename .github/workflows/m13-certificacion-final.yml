@@ -473,7 +473,7 @@ jobs:
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
           grep -q 'branch: dev' render.yaml
-          grep -q 'name: solqaryn-api-desarrollo' render.yaml
+          grep -q 'name: solqaryn-api-dev' render.yaml
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'solqaryn_dev'
           docker build --file backend/Dockerfile --tag solqaryn-api:m13 .
       - name: Exigir drill de backup/restore exitoso y vigente
