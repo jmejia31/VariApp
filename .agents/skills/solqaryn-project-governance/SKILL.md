@@ -1,6 +1,6 @@
 ---
 name: solqaryn-project-governance
-description: "Gobierno tecnico obligatorio y primera skill de entrada de SOLQARYN. Usar antes de cualquier tarea que analice, modifique, documente, pruebe, despliegue o administre solqaryn/VariApp, y antes de abrir cualquier otra skill SOLQARYN. Valida identidad, rama, arquitectura, seguridad, fuentes, autorizacion, impacto, skill routing y cierre; impone PROJECT_SCOPE_LOCK=STRICT y fail-closed."
+description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar antes de cualquier tarea que analice, modifique, documente, pruebe, despliegue o administre solqaryn/VariApp, y antes de consultar cualquier referencia externa de skills. Valida identidad, rama, arquitectura, seguridad, fuentes autorizadas, impacto, routing y cierre; impone PROJECT_SCOPE_LOCK=STRICT y fail-closed."
 ---
 
 # SOLQARYN Project Governance
@@ -12,38 +12,42 @@ description: "Gobierno tecnico obligatorio y primera skill de entrada de SOLQARY
 - `REPOSITORY=solqaryn/VariApp`
 - `BRANCH=Desarrollo`
 - `PROJECT_SCOPE_LOCK=STRICT`
-- `SKILL_NAMESPACE=solqaryn-`
+- `LOCAL_SKILL_COUNT=1`
+- `LOCAL_SKILL=solqaryn-project-governance`
 - `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`
 
-Esta es la primera skill de entrada. No abrir otra skill del proyecto antes de pasar este gate.
+Esta es la unica skill local y la primera puerta de entrada para cualquier chat, agente o automatizacion que trabaje sobre SOLQARYN.
 
 ## 2. Fuentes canonicas
 
 Leer en el orden necesario:
 
-1. `docs/PROJECT_SCOPE_LOCK.md` para aislamiento;
-2. `AGENTS.md` para reglas de colaboracion;
-3. `docs/VAEP_AUTHORITY.md` para reglas operativas vigentes cuando la tarea toque VAEP/automatizaciones;
+1. `docs/PROJECT_SCOPE_LOCK.md`;
+2. `AGENTS.md`;
+3. `docs/VAEP_AUTHORITY.md` cuando la tarea toque VAEP/automatizaciones;
 4. HEAD vivo de `Desarrollo`;
-5. `PROJECT_CONTEXT.md` y `PROJECT_INDEX.md` para contexto y localizacion;
-6. `ARCHITECTURE.md` cuando exista impacto estructural o transversal;
-7. documentos especificos del scope y evidencia causal.
+5. `PROJECT_CONTEXT.md` y `PROJECT_INDEX.md`;
+6. `ARCHITECTURE.md` cuando exista impacto estructural/transversal;
+7. `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md` cuando una tarea requiera guia externa;
+8. documentos especificos del scope y evidencia causal.
 
-Un snapshot historico, chat, receipt o comentario no sustituye el estado vivo ni la autoridad vigente.
+Un snapshot historico, chat, receipt o comentario no sustituye al estado vivo ni a la autoridad vigente.
 
 ## 3. Gate de entrada para cualquier agente o chat
 
 Antes de analizar o escribir:
 
-1. confirmar repositorio y rama;
-2. comprobar que la tarea pertenece a SOLQARYN;
-3. comprobar que toda skill a usar empiece por `solqaryn-`;
-4. no consultar fuentes fuera de SOLQARYN salvo excepcion expresamente autorizada;
-5. identificar componente, capa, datos, seguridad, consumidores y validaciones afectadas;
-6. determinar si la tarea es solo lectura, cambio en `Desarrollo` o accion que requiere autorizacion adicional;
-7. cuando exista checkout local, ejecutar `node scripts/verify-project-scope.mjs`.
+1. confirmar `solqaryn/VariApp` y `Desarrollo`;
+2. confirmar que la tarea pertenece a SOLQARYN;
+3. confirmar que esta skill local fue aplicada primero;
+4. si se requiere una referencia externa, comprobar que exista como `ACTIVE` en la allowlist y en el registro de referencias;
+5. consultar exclusivamente el origen original + pin + ruta oficial registrados;
+6. nunca consultar una copia de esa skill alojada en otro proyecto;
+7. identificar componente, capa, datos, seguridad, consumidores y validaciones afectadas;
+8. determinar si la tarea es lectura, cambio en `Desarrollo` o accion que requiere autorizacion adicional;
+9. cuando exista checkout local, ejecutar `node scripts/verify-project-scope.mjs`.
 
-Si cualquier punto material es incierto, aplicar fail-closed en ese punto sin abandonar el proyecto.
+Si un origen externo no puede verificarse exactamente, aplicar fail-closed y continuar sin esa referencia.
 
 ## 4. Arquitectura de referencia
 
@@ -62,7 +66,7 @@ Reglas no negociables:
 - Cambios de inventario, finanzas y documentos relacionados deben preservar consistencia y trazabilidad.
 - Secretos permanecen fuera del repositorio.
 
-No introducir un framework, capa, persistencia, mecanismo de auth, libreria transversal o via paralela solo porque una skill lo sugiera.
+Ninguna referencia externa puede imponer un framework, capa, persistencia, mecanismo de auth, libreria transversal o via paralela que contradiga esta arquitectura.
 
 ## 5. Ramas, entornos y produccion
 
@@ -89,26 +93,22 @@ Responder al menos:
 
 Si el cambio es arquitectonico, actualizar en el mismo changeset `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y `ARCHITECTURE_CHANGELOG.md` cuando corresponda.
 
-## 7. Routing de skills
+## 7. Routing de referencias externas
 
-Consultar `references/skill-routing.md` y aplicar solo las skills SOLQARYN pertinentes.
+Consultar `references/skill-routing.md` y `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md`.
 
 Reglas:
 
-- esta skill siempre va primero;
-- una skill especializada no puede contradecir esta skill;
-- UI administrativa: `solqaryn-ui-product`;
-- motion: `solqaryn-motion` ademas de la skill de superficie;
-- superficies publicas/marketing: `solqaryn-marketing-design`;
-- redaccion persistente: `solqaryn-human-writing`;
-- runbooks/lecciones recurrentes: `solqaryn-runbook-memory`;
-- sesiones/contexto extensos: `solqaryn-context-efficiency`;
-- resumen efimero de bajo riesgo: `solqaryn-low-risk-summary` solamente dentro de sus limites;
-- creacion/edicion de skills: `solqaryn-skill-standard` + `solqaryn-skill-authoring`.
+- esta skill local siempre va primero;
+- las otras nueve entradas son referencias externas, no skills locales;
+- cada referencia debe leerse desde el propietario/origen registrado y pin fijado;
+- solo se aplican los principios compatibles con SOLQARYN;
+- no instalar ni ejecutar herramientas externas por defecto;
+- una referencia externa nunca puede contradecir esta skill ni las autoridades canonicas del proyecto.
 
 ## 8. Calidad y cierre
 
-No declarar una tarea cerrada solo porque compile o porque una skill fue leida.
+No declarar una tarea cerrada solo porque compile o porque una referencia fue consultada.
 
 El cierre debe demostrar, segun aplique:
 
@@ -123,9 +123,10 @@ El cierre debe demostrar, segun aplique:
 
 ## 9. Prohibiciones
 
-- no usar skills sin prefijo `solqaryn-`;
+- no crear copias locales de las nueve referencias externas;
+- no consultar mirrors, forks o copias dentro de otros proyectos como sustituto del origen registrado;
+- no cambiar pins sin autorizacion expresa;
 - no importar gobierno, arquitectura o decisiones externas;
 - no inventar pruebas, CI, estados ni autorizaciones;
 - no duplicar una autoridad canonica;
-- no crear busywork para aparentar actividad;
 - no degradar seguridad, QA o trazabilidad para ahorrar tiempo o tokens.
