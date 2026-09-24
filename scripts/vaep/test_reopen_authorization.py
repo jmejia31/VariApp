@@ -26,7 +26,7 @@ class AuthorizationTests(unittest.TestCase):
             script = jobs['authorize']['steps'][0]['run']
             self.assertNotIn('github.repository_owner', str(jobs['authorize']))
             base = dict(EVENT_NAME='workflow_dispatch', REPOSITORY='solqaryn/Solqaryn',
-                        ACTOR='repo-admin', TRIGGERING_ACTOR='repo-admin', TARGET_REF='refs/heads/Desarrollo',
+                        ACTOR='repo-admin', TRIGGERING_ACTOR='repo-admin', TARGET_REF='refs/heads/dev',
                         AUTHORIZATION='AUTORIZADO_REABRIR', MOCK_ADMIN='true')
             cases = [
                 ({}, True),
