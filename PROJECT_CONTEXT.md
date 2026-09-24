@@ -8,8 +8,8 @@
 - Repositorio: `solqaryn/Solqaryn`
 - Rama de trabajo: `dev`
 - `main`: congelada; no tocar sin autorización expresa.
-- PR histórico `Desarrollo -> main`: #2 está `CLOSED + MERGED` por la liberación ERP-N9 ya ejecutada; no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario.
-- Environments GitHub canónicos: `Produccion` y `dev`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
+- PR histórico de la antigua rama DEV -> `main`: #2 está `CLOSED + MERGED` por la liberación ERP-N9 ya ejecutada; no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario.
+- Environments GitHub canónicos: `PROD` y `DEV`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
 - Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
 - Tracks obligatorios: T0–T12.
@@ -48,9 +48,9 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 
 - MySQL mediante EF Core/Pomelo y migraciones forward-only cuando aplique.
 - Aiven canónico: proyecto `solqaryn`, servicio único `solqaryn-mysql`, bases `solqaryn_dev`/`solqaryn_prod` y usuarios aislados `solqaryn_dev_user`/`solqaryn_prod_user`; `avnadmin` queda solo para administración.
-- Los Environments GitHub canónicos son `dev` y `Produccion`; secretos y variables no se cruzan entre ambos.
+- Los Environments GitHub canónicos son `DEV` y `PROD`; secretos y variables no se cruzan entre ambos.
 - JWT y permisos relacionales; no reintroducir bypass de administrador legacy.
-- No tocar Producción ni `main` desde el flujo de Desarrollo.
+- No tocar PROD ni `main` desde el flujo de DEV.
 - No exponer secretos ni inventar validaciones externas.
 - No force-push.
 - Preservar commits ajenos y reconciliar HEAD antes de publicar.
