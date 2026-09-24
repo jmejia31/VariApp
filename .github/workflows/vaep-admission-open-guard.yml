@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      BRANCH: DEV
+      BRANCH: dev
       ADMISSION_PATH: vaep/control/dispatch-admission.json
       MASTER_PATH: docs/VAEP_AUTHORITY.md
     steps:
