@@ -1,8 +1,8 @@
-name: Desarrollo - Compilación y pruebas
+name: DEV - Compilación y pruebas
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/**'
       - 'frontend/**'
@@ -13,14 +13,14 @@ on:
       - 'render.yaml'
       - 'global.json'
       - 'Directory.*'
-      - '.github/workflows/desarrollo-ci.yml'
+      - '.github/workflows/dev-ci.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: desarrollo-ci-${{ github.workflow }}-${{ github.ref }}
+  group: dev-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -347,11 +347,11 @@ jobs:
           set -euo pipefail
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
-          grep -q 'branch: Desarrollo' render.yaml
+          grep -q 'branch: dev' render.yaml
           grep -q 'name: solqaryn-api-desarrollo' render.yaml
           grep -q 'healthCheckPath: /health/ready' render.yaml
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
-      - run: docker build --file backend/Dockerfile --tag solqaryn-api:desarrollo-ci .
+      - run: docker build --file backend/Dockerfile --tag solqaryn-api:dev-ci .
 
 # Activación de certificación Bloque 2C.2; no modifica la lógica del workflow.
