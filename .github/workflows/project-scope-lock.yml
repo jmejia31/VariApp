@@ -1,4 +1,4 @@
-name: Project Scope Lock
+name: SOLQARYN Project Scope Lock
 
 on:
   push:
@@ -11,12 +11,12 @@ on:
       - main
 
 jobs:
-  verify-project-scope:
+  verify-solqaryn-project-scope:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify strict VariApp project scope
+      - name: Verify SOLQARYN project scope
         run: node scripts/verify-project-scope.mjs
