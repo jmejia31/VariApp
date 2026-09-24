@@ -6,29 +6,37 @@ PROJECT_ID=VARIAPP
 REPOSITORY=solqaryn/VariApp
 PROJECT_SCOPE_LOCK=STRICT
 DEFAULT=DENY
+AUTHORIZED_ORIGINAL_SKILL_SOURCES=9
 ```
 
-## Entradas activas
+## Regla
 
-**Ninguna.**
+Toda fuente externa queda denegada por defecto excepto las nueve referencias de skills autorizadas por el propietario y registradas en `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md`.
 
-Estado efectivo:
+Estas excepciones permiten **consulta de instrucciones en origen**. No autorizan por sí mismas instalar dependencias, ejecutar scripts externos, copiar binarios, cambiar arquitectura, acceder a datos/secretos ni realizar acciones productivas.
 
-`EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`
+## Entradas ACTIVE
 
-## Requisito para una excepción futura
+| ID | Fuente exacta | Pin / resolucion | Alcance |
+|---|---|---|---|
+| SKREF-01 | `agentskills/agentskills` | `69ef37e9424c0a7ea9dd2293b559e43ec8176379` | Consultar especificacion oficial de formato de skills. |
+| SKREF-02 | Skill Creator oficial de ChatGPT / OpenAI | Integrado en el entorno | Consultar para autoria/validacion de la unica skill local cuando la tarea lo requiera. |
+| SKREF-03 | `pbakaus/impeccable` | `2149fcce39a90bb409df5f16515f316a76dc6199` | Consultar guia original de UI/producto. |
+| SKREF-04 | `emilkowalski/skills` | `d23d7f88a2e21c9e4b1418c7abe420f5c1052ba7` | Consultar skills originales de motion/interaccion. |
+| SKREF-05 | `Leonxlnx/taste-skill` | `ccbc15639c97057cbfcf32ecebc38ef716e4bb37` | Consultar skill original de diseno visual/marketing. |
+| SKREF-06 | `blader/humanizer` | `9862685f575c65a8247f90369951df1b3416e3d6` | Consultar skill original de redaccion. |
+| SKREF-07 | `blader/napkin` | `27fa60a895de4383b26a539136bc983155cb979c` | Consultar skill original de runbook/memoria operativa. |
+| SKREF-08 | `alexgreensh/token-optimizer` | `37a9546b9fecba2c4e9a02ef4e90855d449bf08f` | Consultar skill original de eficiencia de contexto. |
+| SKREF-09 | `JuliusBrussee/caveman` | `15581d14007fd01fb3f132016741962f34936ca2` | Consultar skills originales de compresion de contexto. |
 
-Cada excepción debe registrar:
+## Condiciones de uso
 
-- ID estable;
-- estado `ACTIVE` o `REVOKED`;
-- fuente exacta;
-- propósito;
-- alcance permitido;
-- límites explícitos;
-- autorización del propietario;
-- evidencia de autorización;
-- fecha;
-- vigencia o condición de expiración.
+1. La consulta debe ir al origen exacto registrado, nunca a una copia alojada en otro proyecto.
+2. Debe usarse el pin registrado.
+3. Debe leerse primero la ruta oficial indicada en el registro.
+4. Solo pueden leerse referencias adicionales del mismo origen/pin cuando sean necesarias para la tarea.
+5. Si el pin o ruta no existe, la referencia queda bloqueada; no se sustituye por una copia o version distinta.
+6. Cualquier cambio de pin exige autorizacion del propietario y actualizacion conjunta del registro.
+7. La autoridad final siempre permanece en la skill local y documentacion canonica de SOLQARYN.
 
-Un permiso conversacional no se vuelve persistente hasta quedar versionado aquí.
+Cualquier otra fuente externa permanece en `DENY`.
