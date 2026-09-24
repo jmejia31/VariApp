@@ -2,7 +2,7 @@ name: VAEP N6.1.C Exact Head Gate
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - '.github/workflows/vaep-n61c-ef-generate.yml'
       - 'backend/src/Domain/Entities/Empresa.cs'
