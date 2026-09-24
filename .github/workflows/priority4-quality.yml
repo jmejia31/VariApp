@@ -2,7 +2,7 @@ name: Priority 4 - Interfaces architecture and quality
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'frontend/**'
       - 'backend/**'
