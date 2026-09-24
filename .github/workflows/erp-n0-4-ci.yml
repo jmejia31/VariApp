@@ -2,7 +2,7 @@ name: ERP-N0.4 - Certificación RBAC relacional
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*RbacN04*.cs'
       - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
