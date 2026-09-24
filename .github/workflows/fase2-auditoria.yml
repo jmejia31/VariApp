@@ -51,8 +51,8 @@ jobs:
           grep -A1 'AllowedHosts' render.yaml | grep -q 'solqaryn-api-dev.onrender.com'
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Security__LoginRateLimitPerMinute' render.yaml | grep -q '"20"'
-          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
-          grep -A1 'AppSettings__LogoPublicUrl' render.yaml | grep -q 'solqaryn-desarrollo.vercel.app'
+          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'solqaryn_dev'
+          grep -A1 'AppSettings__LogoPublicUrl' render.yaml | grep -q 'solqaryn-dev.vercel.app'
           grep -Eq 'solqaryn-api-(desarrollo|dev)\.onrender\.com' frontend/vercel.json
           grep -q 'solqaryn-api-prod.onrender.com' frontend/vercel.json
 
