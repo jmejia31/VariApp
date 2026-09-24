@@ -1,13 +1,13 @@
-name: Desarrollo - recuperación de migración MySQL parcial
+name: DEV - recuperación de migración MySQL parcial
 
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - backend/src/Infrastructure/Migrations/**
       - backend/src/API/Program.cs
-      - .github/workflows/migration-recovery-desarrollo.yml
+      - .github/workflows/migration-recovery-dev.yml
   workflow_dispatch:
 
 permissions:
@@ -58,7 +58,7 @@ jobs:
       Cloudinary__ApiSecret: 'ci-not-used'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
@@ -258,7 +258,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: migration-recovery-desarrollo
+          name: migration-recovery-dev
           path: |
             backend/migration-recovery-api.log
             backend/migration-recovery-second-start.log
