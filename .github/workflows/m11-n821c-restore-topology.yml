@@ -19,7 +19,7 @@ jobs:
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-N821C-TOPOLOGY]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: "Desarrollo - solqaryn-api-desarrollo"
+    environment: Desarrollo
 
     services:
       mysql-m11-restore:
@@ -45,13 +45,13 @@ jobs:
         shell: bash
         env:
           SOLQARYN_ENVIRONMENT: desarrollo
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
-          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
           DB_SSL_MODE: REQUIRED
-          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
           OUTPUT_DIR: ${{ runner.temp }}/m11-n821c-backups
           RETENTION_DAYS: '0'
           BACKUP_LABEL: desarrollo
@@ -80,7 +80,7 @@ jobs:
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: m11-ci-root-only
           TARGET_DB_SSL_MODE: DISABLED
-          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
           BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
           BACKUP_CHECKSUM_FILE: ${{ steps.backup.outputs.checksum_file }}
           ALLOW_DESTRUCTIVE_RESTORE: YES_M11
@@ -102,11 +102,11 @@ jobs:
         id: topology
         shell: bash
         env:
-          SOURCE_DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
-          SOURCE_DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
-          SOURCE_DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
-          SOURCE_DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
-          SOURCE_DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          SOURCE_DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          SOURCE_DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          SOURCE_DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          SOURCE_DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          SOURCE_DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
           TARGET_DB_HOST: 127.0.0.1
           TARGET_DB_PORT: '3306'
           TARGET_DB_NAME: solqaryn_m11_restore_drill
