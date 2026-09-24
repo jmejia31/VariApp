@@ -71,8 +71,8 @@ El acceso local y la participación de agentes se rigen por `AGENTS.md`: Javier 
 
 ```powershell
 git fetch origin
-git switch Desarrollo
-git pull --rebase origin Desarrollo
+git switch dev
+git pull --rebase origin dev
 ```
 
 Backend:
