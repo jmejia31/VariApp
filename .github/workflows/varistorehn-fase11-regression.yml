@@ -3,7 +3,7 @@ name: VariStoreHN Fase 11 - SEO URLs rendimiento
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.component.ts'
