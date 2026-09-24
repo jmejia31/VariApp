@@ -2,7 +2,7 @@ name: Bloque 2C.1 - Variante técnica y migración
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - backend/src/Domain/Entities/ProductoVariante.cs
       - backend/src/Infrastructure/Persistence/Configurations/ProductoVarianteConfiguration.cs
