@@ -20,7 +20,7 @@ jobs:
           ref: Desarrollo
           fetch-depth: 0
 
-      - name: Normalize current tree to SOLQARYN
+      - name: Normalize non-workflow tree to SOLQARYN
         shell: bash
         run: |
           python3 - <<'PY'
@@ -39,10 +39,14 @@ jobs:
                   return "solqaryn"
               return "Solqaryn"
 
+          def is_workflow(path):
+              parts = path.parts
+              return len(parts) >= 3 and parts[0] == ".github" and parts[1] == "workflows"
+
           changed = 0
           skipped_binary = 0
           for path in root.rglob("*"):
-              if not path.is_file() or ".git" in path.parts:
+              if not path.is_file() or ".git" in path.parts or is_workflow(path):
                   continue
               data = path.read_bytes()
               if b"\x00" in data:
@@ -58,7 +62,10 @@ jobs:
                   path.write_text(new_text, encoding="utf-8", newline="")
                   changed += 1
 
-          paths = [p for p in root.rglob("*") if ".git" not in p.parts and pattern.search(p.name)]
+          paths = [
+              p for p in root.rglob("*")
+              if ".git" not in p.parts and not is_workflow(p) and pattern.search(p.name)
+          ]
           for path in sorted(paths, key=lambda p: len(p.parts), reverse=True):
               if not path.exists():
                   continue
@@ -77,7 +84,7 @@ jobs:
                       marker + "\n\n"
                       "- Repositorio canónico: `solqaryn/Solqaryn`.\n"
                       "- Identidad de proyecto: `PROJECT_ID=SOLQARYN`.\n"
-                      "- Se normalizaron rutas, namespaces, scripts, documentación, guards, workflows y referencias operativas a SOLQARYN.\n"
+                      "- Se normalizaron rutas, namespaces, scripts, documentación, guards y referencias operativas a SOLQARYN.\n"
                       "- La rama canónica continúa siendo `Desarrollo`.\n"
                       "- La migración no reescribe el historial Git; el árbol vigente queda gobernado únicamente por SOLQARYN.\n"
                       "- MAPA_ARQUITECTURA: identidad/namespaces actualizados sin cambiar las fronteras funcionales del dominio.\n\n"
@@ -88,10 +95,7 @@ jobs:
           print(f"binary_files_skipped={skipped_binary}")
           PY
 
-      - name: Remove one-time migration workflow
-        run: git rm .github/workflows/solqaryn-identity-migration.yml
-
-      - name: Verify retired identity is absent from current tree
+      - name: Verify retired identity is absent outside workflows
         shell: bash
         run: |
           python3 - <<'PY'
@@ -99,9 +103,14 @@ jobs:
           import re, sys
           retired = "vari" + "app"
           pattern = re.compile(re.escape(retired), re.IGNORECASE)
+
+          def is_workflow(path):
+              parts = path.parts
+              return len(parts) >= 3 and parts[0] == ".github" and parts[1] == "workflows"
+
           findings = []
           for path in Path(".").rglob("*"):
-              if ".git" in path.parts:
+              if ".git" in path.parts or is_workflow(path):
                   continue
               if pattern.search(str(path)):
                   findings.append(f"path:{path}")
@@ -119,17 +128,17 @@ jobs:
           if findings:
               print("\n".join(findings[:200]))
               sys.exit(1)
-          print("SOLQARYN identity verification: PASS")
+          print("SOLQARYN non-workflow identity verification: PASS")
           PY
 
-      - name: Commit canonical identity migration
+      - name: Commit non-workflow canonical identity migration
         shell: bash
         run: |
           git config user.name "SOLQARYN Automation"
           git config user.email "solqaryn.platform@outlook.com"
-          git add -A
+          git add -A -- ':!.github/workflows'
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No non-workflow changes to commit."
             exit 0
           fi
           git commit -m "refactor(identity): consolidate SOLQARYN canonical naming"
