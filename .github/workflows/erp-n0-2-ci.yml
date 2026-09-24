@@ -2,7 +2,7 @@ name: ERP-N0.2 - Certificación CatalogoProducto legacy
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*CatalogoProducto*.cs'
       - 'backend/src/**/*TipoCatalogoProducto*.cs'
