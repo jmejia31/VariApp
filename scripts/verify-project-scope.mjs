@@ -196,7 +196,7 @@ const legacyOperationalIdentifiers = [
   '.github/workflows/m11-',
 ];
 
-for (const rel of ['.github/workflows', 'scripts/backup_desarrollo.sh', 'scripts/restore_desarrollo.sh', 'docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md']) {
+for (const rel of ['.github/workflows', 'scripts/backup_dev.sh', 'scripts/restore_dev.sh', 'docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md']) {
   const abs = join(root, rel);
   if (!existsSync(abs)) continue;
   const files = statSync(abs).isDirectory() ? walk(abs) : [abs];
