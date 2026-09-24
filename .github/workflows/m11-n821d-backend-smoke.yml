@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-N821D-SMOKE]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    environment: "Desarrollo - variapp-api-desarrollo"
+    environment: "Desarrollo - solqaryn-api-desarrollo"
     services:
       mysql-m11-restore:
         image: mysql:8.4
@@ -43,7 +43,7 @@ jobs:
         id: backup
         shell: bash
         env:
-          VARIAPP_ENVIRONMENT: desarrollo
+          SOLQARYN_ENVIRONMENT: desarrollo
           DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
           DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
           DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
@@ -71,7 +71,7 @@ jobs:
           RESTORE_ENVIRONMENT: ci
           TARGET_DB_HOST: 127.0.0.1
           TARGET_DB_PORT: '3306'
-          TARGET_DB_NAME: variapp_m11_restore_drill
+          TARGET_DB_NAME: solqaryn_m11_restore_drill
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: m11-ci-root-only
           TARGET_DB_SSL_MODE: DISABLED
@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          q() { MYSQL_PWD=m11-ci-root-only mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot --ssl-mode=DISABLED variapp_m11_restore_drill --batch --raw --skip-column-names -e "$1"; }
+          q() { MYSQL_PWD=m11-ci-root-only mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot --ssl-mode=DISABLED solqaryn_m11_restore_drill --batch --raw --skip-column-names -e "$1"; }
           TABLES="$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';")"
           MIGRATIONS="$(q "SELECT COUNT(*) FROM __EFMigrationsHistory;")"
           test "$TABLES" -gt 0
@@ -119,7 +119,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: http://127.0.0.1:5088
-          ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=variapp_m11_restore_drill;User=root;Password=m11-ci-root-only;SslMode=None
+          ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=solqaryn_m11_restore_drill;User=root;Password=m11-ci-root-only;SslMode=None
           Database__ServerVersion: 8.4.0
           Database__ApplyMigrationsOnStartup: 'false'
           Jwt__Secret: n821d-ci-only-long-random-secret-32chars-minimum
@@ -151,7 +151,7 @@ jobs:
           EXPECTED_MIGRATIONS: ${{ steps.dbsanity.outputs.migrations }}
         run: |
           set -euo pipefail
-          ACTUAL="$(MYSQL_PWD=m11-ci-root-only mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot --ssl-mode=DISABLED variapp_m11_restore_drill --batch --raw --skip-column-names -e 'SELECT COUNT(*) FROM __EFMigrationsHistory;')"
+          ACTUAL="$(MYSQL_PWD=m11-ci-root-only mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot --ssl-mode=DISABLED solqaryn_m11_restore_drill --batch --raw --skip-column-names -e 'SELECT COUNT(*) FROM __EFMigrationsHistory;')"
           test "$ACTUAL" = "$EXPECTED_MIGRATIONS"
 
       - name: Write safe backend smoke report
