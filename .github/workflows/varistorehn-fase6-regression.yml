@@ -3,7 +3,7 @@ name: VariStoreHn Fase 6 - checkout y pedido
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
       - chatgpt/varistorehn-fase6-checkout
     paths:
       - 'frontend/src/app/features/varistorehn/**'
@@ -28,7 +28,7 @@ on:
       - '.github/workflows/varistorehn-fase6-regression.yml'
   pull_request:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
