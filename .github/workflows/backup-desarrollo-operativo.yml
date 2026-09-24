@@ -75,19 +75,19 @@ jobs:
       - name: Verificar configuración externa requerida
         shell: bash
         env:
-          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_HOST: ${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ vars.SOLQARYN_DESARROLLO_DB_USER }}
           DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
           BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
           declare -A source_names=(
-            [DB_HOST]='SOLQARYN_DESARROLLO_DB_HOST (secret o variable)'
-            [DB_PORT]='SOLQARYN_DESARROLLO_DB_PORT (secret o variable)'
-            [DB_NAME]='SOLQARYN_DESARROLLO_DB_NAME (secret o variable)'
-            [DB_USER]='SOLQARYN_DESARROLLO_DB_USER (secret o variable)'
+            [DB_HOST]='SOLQARYN_DESARROLLO_DB_HOST (variable)'
+            [DB_PORT]='SOLQARYN_DESARROLLO_DB_PORT (variable)'
+            [DB_NAME]='SOLQARYN_DESARROLLO_DB_NAME (variable)'
+            [DB_USER]='SOLQARYN_DESARROLLO_DB_USER (variable)'
             [DB_PASSWORD]='SOLQARYN_DESARROLLO_DB_PASSWORD (secret)'
             [BACKUP_PASSPHRASE]='SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE (secret)'
           )
@@ -101,10 +101,10 @@ jobs:
       - name: Consultar motor y proveedor sin secretos
         shell: bash
         env:
-          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_HOST: ${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ vars.SOLQARYN_DESARROLLO_DB_USER }}
           DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
         run: |
           set -euo pipefail
@@ -197,10 +197,10 @@ jobs:
         shell: bash
         env:
           SOLQARYN_ENVIRONMENT: desarrollo
-          DB_HOST: ${{ secrets.SOLQARYN_DESARROLLO_DB_HOST || vars.SOLQARYN_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.SOLQARYN_DESARROLLO_DB_PORT || vars.SOLQARYN_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.SOLQARYN_DESARROLLO_DB_NAME || vars.SOLQARYN_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.SOLQARYN_DESARROLLO_DB_USER || vars.SOLQARYN_DESARROLLO_DB_USER }}
+          DB_HOST: ${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ vars.SOLQARYN_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ vars.SOLQARYN_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ vars.SOLQARYN_DESARROLLO_DB_USER }}
           DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
           DB_SSL_MODE: REQUIRED
           BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
