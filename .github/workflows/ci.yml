@@ -1,4 +1,4 @@
-name: VariApp CI
+name: Solqaryn CI
 
 # Certificación controlada de Fases 6 y 7. Nunca despliega a Render/Vercel
 # ni ejecuta migraciones contra Aiven; la aceptación usa MySQL temporal.
@@ -17,14 +17,14 @@ permissions:
   actions: read
 
 concurrency:
-  group: variapp-ci-${{ github.event.pull_request.number || github.ref }}
+  group: solqaryn-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   backend:
     name: Backend migration, build and tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-variapp'
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-solqaryn'
     defaults:
       run:
         working-directory: backend
@@ -143,7 +143,7 @@ jobs:
   frontend:
     name: Frontend production build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-variapp'
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-solqaryn'
     defaults:
       run:
         working-directory: frontend
@@ -193,7 +193,7 @@ jobs:
     name: Phase 7 isolated MySQL and browser acceptance
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-variapp'
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-solqaryn'
 
     services:
       mysql:
@@ -223,7 +223,7 @@ jobs:
       SeedAdmin__Password: 'E2E.Admin#2026!'
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cors__AllowedOrigins__1: 'http://localhost:4200'
-      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
+      AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
       AppSettings__LogoPublicUrl: 'https://varistorehn.vercel.app/assets/varistorehn-logo.png'
       AppSettings__EnlacePublicoFacturaHorasValidez: '1'
       AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
@@ -236,7 +236,7 @@ jobs:
       Smtp__PasswordSmtp: 'phase7-not-used'
       Smtp__UsarSsl: 'true'
       Smtp__CorreoRemitente: 'phase7-not-used@example.invalid'
-      Smtp__NombreRemitente: 'VariApp Phase 7'
+      Smtp__NombreRemitente: 'Solqaryn Phase 7'
       PHASE7_API_URL: 'http://127.0.0.1:5005'
       PHASE7_ADMIN_USERNAME: 'e2e_admin'
       PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
