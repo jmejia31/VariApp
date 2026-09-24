@@ -67,7 +67,7 @@ Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componen
 
 ## Preparación local
 
-El acceso local y la participación de agentes se rigen por `AGENTS.md`: Javier Mejía conserva la decisión final; Codex participa solo por orden explícita y AntiG/Antigravity permanece `RESERVED_INACTIVE`. ChatGPT/VAEP y Chat B operan como controladores/QA remotos sobre `Desarrollo` bajo el MAESTRO.
+El acceso local y la participación de agentes se rigen por `AGENTS.md`: Javier Mejía conserva la decisión final; Codex participa solo por orden explícita y AntiG/Antigravity permanece `RESERVED_INACTIVE`. ChatGPT/VAEP y Chat B operan como controladores/QA remotos sobre `dev` bajo el MAESTRO.
 
 ```powershell
 git fetch origin
@@ -170,7 +170,7 @@ scripts/
 
 ## Flujo de publicación
 
-1. Trabajar **únicamente en `Desarrollo`**.
+1. Trabajar **únicamente en `dev`**.
 2. No crear ramas adicionales sin autorización expresa.
 3. PR #2 es histórico y está cerrado/fusionado; no reabrirlo. No abrir ni fusionar un nuevo PR hacia `main` sin autorización nueva y explícita de Javier Mejía.
 4. Ejecutar validación proporcional y CI cuando aplique.
