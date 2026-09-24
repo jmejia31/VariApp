@@ -6,72 +6,72 @@ PROJECT_ID=VARIAPP
 REPOSITORY=solqaryn/VariApp
 BRANCH=Desarrollo
 PROJECT_SCOPE_LOCK=STRICT
-SKILL_NAMESPACE=solqaryn-
-PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+LOCAL_SKILL_COUNT=1
+LOCAL_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
 EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
 ```
 
 ## 1. Regla absoluta de alcance
 
-Todo agente, automatización, chat, sesión, script o proceso que trabaje sobre SOLQARYN debe operar exclusivamente con fuentes identificadas como pertenecientes a SOLQARYN.
+Todo agente, automatizacion, chat, sesion, script o proceso que trabaje sobre SOLQARYN debe operar con autoridad y contexto de SOLQARYN.
 
-No se permite consultar, listar, leer, invocar, importar, resumir ni utilizar como autoridad una fuente que no pertenezca inequívocamente a SOLQARYN.
+La disponibilidad tecnica de una fuente no constituye autorizacion.
 
-La disponibilidad técnica de una fuente no constituye autorización.
+## 2. Unica skill local
 
-## 2. Skills de SOLQARYN
-
-Toda skill propia del proyecto debe cumplir simultáneamente:
-
-- vivir bajo `.agents/skills/`;
-- usar un directorio cuyo nombre empiece por `solqaryn-`;
-- declarar un `name:` que empiece por `solqaryn-`;
-- usar un nombre visible que empiece por `SOLQARYN`;
-- declarar `PROJECT_SCOPE_LOCK=STRICT`;
-- declarar `REPOSITORY=solqaryn/VariApp`;
-- no depender de skills fuera del namespace `solqaryn-`.
-
-La skill rectora actual es:
+La unica skill local permitida es:
 
 `.agents/skills/solqaryn-project-governance/SKILL.md`
 
-Si una skill no cumple estas condiciones, queda fuera del proyecto y no puede utilizarse.
+No se permiten otras copias locales de skills externas bajo `.agents/skills/`.
 
-## 3. Chats y sesiones
+## 3. Referencias externas de skills autorizadas
 
-Cada chat o sesión nueva relacionada con SOLQARYN nace con este bloqueo activo.
+Existen nueve referencias externas autorizadas por el propietario. Su inventario, origen, pin y ruta oficial viven en:
 
-Antes de utilizar una skill, se debe comprobar que pertenece al namespace `solqaryn-`.
+`docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md`
 
-No se debe descubrir ni seleccionar una skill por semejanza, conveniencia o disponibilidad. La identidad SOLQARYN es requisito previo.
+Su autorizacion persistente vive en:
 
-## 4. Fuentes permitidas
+`docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md`
 
-Sin autorización adicional solo pueden utilizarse:
+Estas referencias se consultan directamente en el origen original registrado. No se consultan copias, mirrors o reutilizaciones alojadas en otros proyectos.
+
+La consulta externa autoriza leer instrucciones en el pin fijado. No autoriza instalar, ejecutar o copiar dependencias/scripts/binarios sin el analisis y autorizacion aplicables.
+
+## 4. Chats y agentes
+
+Cada chat o sesion nueva relacionada con SOLQARYN debe:
+
+1. aplicar primero `solqaryn-project-governance`;
+2. confirmar repo/rama;
+3. usar fuentes internas de SOLQARYN para gobierno, arquitectura y estado;
+4. si una tarea requiere una referencia externa de skill, resolverla exclusivamente mediante el registro;
+5. no descubrir fuentes externas adicionales por semejanza o conveniencia;
+6. aplicar fail-closed si origen, pin o ruta no pueden verificarse.
+
+## 5. Fuentes permitidas
+
+Sin autorizacion adicional pueden utilizarse:
 
 1. archivos versionados en `solqaryn/VariApp`;
-2. skills `solqaryn-*` versionadas dentro del proyecto;
-3. información entregada por el propietario y declarada expresamente como parte de SOLQARYN;
-4. recursos conectados identificados inequívocamente como recursos de SOLQARYN.
+2. la unica skill local de SOLQARYN;
+3. las nueve referencias externas ACTIVE en la allowlist, solo dentro de su alcance;
+4. informacion entregada por el propietario y declarada expresamente como parte de SOLQARYN;
+5. recursos conectados identificados inequívocamente como recursos de SOLQARYN.
 
-## 5. Excepciones
+## 6. Precedencia
 
-Una fuente fuera del alcance solo puede utilizarse cuando:
+Las referencias externas aportan metodologia o criterios especializados, pero nunca sustituyen:
 
-1. el propietario autoriza expresamente esa fuente y alcance en la conversación actual; o
-2. existe una entrada `ACTIVE` en `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md`.
-
-No se infieren permisos. Una excepción no autoriza ninguna otra fuente.
-
-## 6. Fail-closed
-
-Ante cualquier duda:
-
-1. no consultar la fuente;
-2. continuar únicamente con SOLQARYN;
-3. si la fuente es materialmente necesaria, exigir autorización;
-4. no utilizar contenido cargado accidentalmente para decidir, editar, recomendar, validar ni certificar.
+- `AGENTS.md`;
+- `docs/VAEP_AUTHORITY.md`;
+- `PROJECT_CONTEXT.md`;
+- `ARCHITECTURE.md`;
+- `docs/PROJECT_SCOPE_LOCK.md`;
+- estado vivo de Git/CI/proveedores autorizado.
 
 ## 7. Gate obligatorio
 
@@ -81,8 +81,19 @@ Antes de editar o publicar:
 node scripts/verify-project-scope.mjs
 ```
 
-El gate debe rechazar cualquier skill sin prefijo SOLQARYN, cualquier identidad de proyecto distinta de la canónica, cualquier repositorio distinto del autorizado o cualquier referencia operativa de skill fuera del namespace SOLQARYN.
+El gate debe fallar si:
 
-## 8. Precedencia
+- existe mas de una skill local;
+- la skill local no es la rectora autorizada;
+- faltan el registro o la allowlist;
+- la identidad canonica se contradice;
+- se introduce una URI de skill externa en la gobernanza en lugar de resolverla por registro;
+- una regla intenta convertir una referencia externa en autoridad de proyecto.
 
-Esta política es vinculante para toda superficie operativa de SOLQARYN. Ningún documento histórico, evidencia previa ni contexto de sesión puede anularla.
+## 8. Excepciones adicionales
+
+Fuera de las nueve referencias ACTIVE, cualquier fuente externa permanece en `DENY` salvo autorizacion explicita del propietario y actualizacion versionada de la allowlist cuando deba ser persistente.
+
+## 9. Precedencia final
+
+Ningun documento historico, evidencia previa, chat ni fuente externa puede anular este bloqueo.
