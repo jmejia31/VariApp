@@ -6,16 +6,16 @@ on:
       - dev
     paths:
       - .github/workflows/backup-dev-operativo.yml
-      - scripts/backup_desarrollo.sh
-      - scripts/restore_desarrollo.sh
+      - scripts/backup_dev.sh
+      - scripts/restore_dev.sh
       - .github/checkpoints/backup-request
   pull_request:
     branches:
       - main
     paths:
       - .github/workflows/backup-dev-operativo.yml
-      - scripts/backup_desarrollo.sh
-      - scripts/restore_desarrollo.sh
+      - scripts/backup_dev.sh
+      - scripts/restore_dev.sh
   workflow_dispatch:
   schedule:
     - cron: '30 07 * * *'
@@ -40,19 +40,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash -n scripts/backup_desarrollo.sh
-          bash -n scripts/restore_desarrollo.sh
+          bash -n scripts/backup_dev.sh
+          bash -n scripts/restore_dev.sh
 
       - name: Validar invariantes de seguridad
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'Producción' scripts/backup_desarrollo.sh
-          grep -q 'ALLOW_DESTRUCTIVE_RESTORE=YES_SOLQARYN_DISPOSABLE_RESTORE' scripts/restore_desarrollo.sh
-          grep -q 'DB_SSL_MODE' scripts/backup_desarrollo.sh
-          grep -q 'TARGET_DB_SSL_MODE' scripts/restore_desarrollo.sh
-          grep -q 'productionInScope' scripts/backup_desarrollo.sh
-          grep -q 'productionTouched' scripts/restore_desarrollo.sh
+          grep -q 'Producción' scripts/backup_dev.sh
+          grep -q 'ALLOW_DESTRUCTIVE_RESTORE=YES_SOLQARYN_DISPOSABLE_RESTORE' scripts/restore_dev.sh
+          grep -q 'DB_SSL_MODE' scripts/backup_dev.sh
+          grep -q 'TARGET_DB_SSL_MODE' scripts/restore_dev.sh
+          grep -q 'productionInScope' scripts/backup_dev.sh
+          grep -q 'productionTouched' scripts/restore_dev.sh
 
   certificar-proveedor:
     name: Certificar motor y proveedor de DEV sin secretos
@@ -209,8 +209,8 @@ jobs:
           BACKUP_LABEL: desarrollo
         run: |
           set -euo pipefail
-          chmod +x scripts/backup_desarrollo.sh
-          scripts/backup_desarrollo.sh | tee "$RUNNER_TEMP/solqaryn-backup-operativo.log"
+          chmod +x scripts/backup_dev.sh
+          scripts/backup_dev.sh | tee "$RUNNER_TEMP/solqaryn-backup-operativo.log"
           backup_file="$(grep '^SOLQARYN_BACKUP_FILE=' "$RUNNER_TEMP/solqaryn-backup-operativo.log" | cut -d= -f2-)"
           checksum_file="$(grep '^SOLQARYN_BACKUP_SHA256=' "$RUNNER_TEMP/solqaryn-backup-operativo.log" | cut -d= -f2-)"
           metadata_file="$(grep '^SOLQARYN_BACKUP_METADATA=' "$RUNNER_TEMP/solqaryn-backup-operativo.log" | cut -d= -f2-)"
@@ -245,8 +245,8 @@ jobs:
           set -euo pipefail
           test -s "$BACKUP_FILE"
           test -s "$BACKUP_CHECKSUM_FILE"
-          chmod +x scripts/restore_desarrollo.sh
-          scripts/restore_desarrollo.sh | tee "$RUNNER_TEMP/solqaryn-restore-operativo.log"
+          chmod +x scripts/restore_dev.sh
+          scripts/restore_dev.sh | tee "$RUNNER_TEMP/solqaryn-restore-operativo.log"
           report_file="$(grep '^SOLQARYN_RESTORE_REPORT=' "$RUNNER_TEMP/solqaryn-restore-operativo.log" | cut -d= -f2-)"
           test -s "$report_file"
           grep -q '"checksumsVerified": true' "$report_file"
