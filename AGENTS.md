@@ -7,7 +7,7 @@ Este archivo es vinculante para Javier Mejía, ChatGPT/VAEP, Chat B, Vibe y cual
 ```text
 PROJECT_ID=SOLQARYN
 REPOSITORY=solqaryn/Solqaryn
-BRANCH=Desarrollo
+BRANCH=dev
 AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 EXECUTION_MODEL=TASKS_ONLY
@@ -43,7 +43,7 @@ Una supervisora que encuentra la primaria trabajando correctamente ejecuta QA/re
 
 - Javier: propietario y autorización final.
 - ChatGPT/VAEP: controller, developer directo, QA, REVIEW_FIRST, integración, CI, certificación, rollup y failover.
-- Chat B: controller/developer/QA par de ChatGPT/VAEP en `Desarrollo`, bajo el mismo MAESTRO.
+- Chat B: controller/developer/QA par de ChatGPT/VAEP en `dev`, bajo el mismo MAESTRO.
 - Vibe: QA/corrector externo sólo por delegación.
 - AntiG/Antigravity: reservado e inactivo; no scheduler, handoff ni certificación.
 - Codex: fuera del flujo salvo orden explícita del usuario.
@@ -68,7 +68,7 @@ Un trigger, workflow, planner, lease sin progreso o declaración no es `ACTIVE_R
 
 ## Git y Producción
 
-- Trabajar sólo en `Desarrollo`.
+- Trabajar sólo en `dev`.
 - `main` permanece congelada.
 - PR #2 es evidencia histórica del release ERP-N9: está `CLOSED + MERGED` y no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario; auto-merge permanece prohibido.
 - No ramas nuevas, force-push, reset destructivo ni amend de historia compartida.
