@@ -1,9 +1,9 @@
 name: Fase 2C.4 - Frontend del escáner
-# Recertificación sobre el HEAD vigente de Desarrollo tras correcciones transversales de backend.
+# Recertificación sobre el HEAD vigente de DEV tras correcciones transversales de backend.
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - .github/workflows/fase2c4-escaner-frontend.yml
       - frontend/src/app/shared/codigo-scanner-*/**
@@ -69,7 +69,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
