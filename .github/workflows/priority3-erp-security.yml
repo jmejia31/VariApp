@@ -2,7 +2,7 @@ name: Priority 3 - ERP security and isolated restore
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/**'
       - 'scripts/security/**'
@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           export_dir="$RUNNER_TEMP/priority3-actions"
           mkdir -p "$export_dir"
-          mapfile -t run_ids < <(gh run list --repo "$GITHUB_REPOSITORY" --branch Desarrollo --limit 20 --json databaseId,status --jq '.[] | select(.status=="completed") | .databaseId' | head -n 5)
+          mapfile -t run_ids < <(gh run list --repo "$GITHUB_REPOSITORY" --branch DEV --limit 20 --json databaseId,status --jq '.[] | select(.status=="completed") | .databaseId' | head -n 5)
           for run_id in "${run_ids[@]}"; do
             gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --log > "$export_dir/run-$run_id.log" 2>/dev/null || true
             mkdir -p "$export_dir/artifacts-$run_id"
