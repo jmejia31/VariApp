@@ -28,7 +28,7 @@ jobs:
           gh workflow run n8-20-f-aiven-capabilities-proof.yml \
             --repo "$GITHUB_REPOSITORY" \
             --ref Desarrollo \
-            -f aiven_project=variapp \
-            -f aiven_service=variapp-mysql \
+            -f aiven_project=solqaryn \
+            -f aiven_service=solqaryn-mysql \
             -f persist_evidence=true
           echo 'N8.20.F proof dispatch requested; no secret values were read or printed.'
