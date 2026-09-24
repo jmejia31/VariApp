@@ -6,8 +6,8 @@ on:
       - dev
     paths:
       - .github/workflows/backup-restore-topology.yml
-      - scripts/backup_desarrollo.sh
-      - scripts/restore_desarrollo.sh
+      - scripts/backup_dev.sh
+      - scripts/restore_dev.sh
       - .github/checkpoints/backup-request
 
 permissions:
@@ -57,8 +57,8 @@ jobs:
           BACKUP_LABEL: desarrollo
         run: |
           set -euo pipefail
-          chmod +x scripts/backup_desarrollo.sh
-          scripts/backup_desarrollo.sh | tee "$RUNNER_TEMP/n821c-backup.log"
+          chmod +x scripts/backup_dev.sh
+          scripts/backup_dev.sh | tee "$RUNNER_TEMP/n821c-backup.log"
           backup_file="$(grep '^SOLQARYN_BACKUP_FILE=' "$RUNNER_TEMP/n821c-backup.log" | cut -d= -f2-)"
           checksum_file="$(grep '^SOLQARYN_BACKUP_SHA256=' "$RUNNER_TEMP/n821c-backup.log" | cut -d= -f2-)"
           metadata_file="$(grep '^SOLQARYN_BACKUP_METADATA=' "$RUNNER_TEMP/n821c-backup.log" | cut -d= -f2-)"
@@ -88,8 +88,8 @@ jobs:
           RESTORE_REPORT_PATH: ${{ runner.temp }}/m11-n821c-restore-report.json
         run: |
           set -euo pipefail
-          chmod +x scripts/restore_desarrollo.sh
-          scripts/restore_desarrollo.sh | tee "$RUNNER_TEMP/n821c-restore.log"
+          chmod +x scripts/restore_dev.sh
+          scripts/restore_dev.sh | tee "$RUNNER_TEMP/n821c-restore.log"
           report_file="$(grep '^SOLQARYN_RESTORE_REPORT=' "$RUNNER_TEMP/n821c-restore.log" | cut -d= -f2-)"
           test -s "$report_file"
           grep -q '"checksumsVerified": true' "$report_file"
