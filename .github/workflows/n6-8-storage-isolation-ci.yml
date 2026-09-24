@@ -2,7 +2,7 @@ name: N6.8 - Storage isolation regression
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/Application/Interfaces/IImageStorageService.cs'
       - 'backend/src/Application/Interfaces/ICompraDocumentoStorageService.cs'
