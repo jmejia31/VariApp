@@ -35,7 +35,7 @@ No volver a indexar todo el repositorio ni releer archivos ya documentados si no
 - `main`: referencia productiva congelada.
 - `Desarrollo`: **única rama de trabajo e integración autorizada**.
 - No crear ramas temporales sin autorización expresa de Javier Mejía.
-- PR #2 `Desarrollo -> main`: abierto y borrador; no fusionar ni habilitar auto-merge.
+- PR #2 `Desarrollo -> main` es histórico y está `CLOSED + MERGED`; no reabrirlo. Un nuevo PR/merge hacia `main` requiere autorización nueva y explícita de Javier Mejía; auto-merge permanece deshabilitado.
 
 ## Preparación local
 

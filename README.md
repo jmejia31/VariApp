@@ -67,7 +67,7 @@ Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componen
 
 ## Preparación local
 
-El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity. ChatGPT/VAEP y Chat B (ChatGPT Business) operan como controladores/QA remotos full-access sobre `Desarrollo`, bajo el MAESTRO, salvo cambio explícito documentado por Javier.
+El acceso local y la participación de agentes se rigen por `AGENTS.md`: Javier Mejía conserva la decisión final; Codex participa solo por orden explícita y AntiG/Antigravity permanece `RESERVED_INACTIVE`. ChatGPT/VAEP y Chat B operan como controladores/QA remotos sobre `Desarrollo` bajo el MAESTRO.
 
 ```powershell
 git fetch origin
@@ -172,7 +172,7 @@ scripts/
 
 1. Trabajar **únicamente en `Desarrollo`**.
 2. No crear ramas adicionales sin autorización expresa.
-3. Mantener el PR `Desarrollo -> main` en borrador.
+3. PR #2 es histórico y está cerrado/fusionado; no reabrirlo. No abrir ni fusionar un nuevo PR hacia `main` sin autorización nueva y explícita de Javier Mejía.
 4. Ejecutar validación proporcional y CI cuando aplique.
 5. No tocar Producción.
 6. Fusionar a `main` únicamente cuando Javier Mejía lo autorice expresamente.

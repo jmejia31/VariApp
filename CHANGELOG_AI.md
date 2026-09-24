@@ -1592,3 +1592,15 @@ No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni dat
 - Se añadieron regresiones dirigidas del servicio/controlador y el workflow Fase 9 observa las nuevas superficies.
 - Inventario por sucursal sigue NO_APLICA: sin selección pública de sucursal, VariStoreHN agrega stock vendible de raíces operativas.
 - MAPA_ARQUITECTURA: NO_APLICA — se conecta la tienda a la autoridad de inventario ya existente sin nueva persistencia ni migración.
+## 2026-09-24 — Normalización canónica de GitHub post-transferencia
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+Se auditó el estado vivo de GitHub después de consolidar el repositorio bajo la organización `solqaryn`. La identidad canónica queda en `solqaryn/Solqaryn`, con `Desarrollo` como rama de trabajo y los únicos GitHub Environments canónicos `Desarrollo` y `Produccion`.
+
+Se reconciliaron fuentes operativas que todavía describían PR #2 como abierto/borrador: el estado vivo y el MAESTRO confirman que PR #2 es histórico, `CLOSED + MERGED`, no debe reabrirse y cualquier nuevo cambio de `main` o Producción requiere autorización fresca del propietario. El baseline observado de `main` se actualiza a `6ad48116a93bb1d02a85b941994395ba7382dc93`. También se normalizaron dos contratos AntiG dormidos para que apunten a `solqaryn/Solqaryn` sin reactivar AntiG.
+
+Como barrido administrativo one-shot se incorpora temporalmente `.github/workflows/github-post-transfer-cleanup.yml`, activable únicamente por un Issue administrativo exacto del propietario. Su alcance es cerrar Issues históricos abiertos salvo el Issue funcional vigente #3410 y eliminar todas las ramas remotas salvo `Desarrollo` y `main`. El workflow debe retirarse inmediatamente después de validar el barrido.
+
+No se toca `main`, no se despliega Producción, no se leen/modifican secretos y no se reescribe historial Git.
+

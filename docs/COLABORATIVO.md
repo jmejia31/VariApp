@@ -32,8 +32,8 @@ Si existe contradicción entre texto histórico/memoria y estas fuentes, prevale
 | Integrante | Proyecto local PC | GitHub | Rol principal |
 |---|---:|---:|---|
 | Javier Mejía | Sí | Sí | Propietario/decisión final |
-| Codex | Sí, cuando opera en PC autorizada | Sí | Implementación/pruebas |
-| AntiG / Antigravity | Sí, cuando opera en PC autorizada | Sí | Implementación/pruebas |
+| Codex | Sí, sólo cuando Javier lo autoriza | Sí | Fuera del flujo por defecto; implementación/pruebas por orden explícita |
+| AntiG / Antigravity | No operativo por defecto | Sí | `RESERVED_INACTIVE`; sin scheduler, handoff ni certificación |
 | ChatGPT | No | Sí, con conector autorizado | Arquitectura/revisión/coordinación/cambios remotos |
 | Otros agentes | No por defecto | Solo con conector autorizado | Según asignación |
 
@@ -50,7 +50,7 @@ Nadie debe asumir acceso local que no esté documentado.
 
 - `Desarrollo`: única rama de trabajo.
 - `main`: congelada.
-- PR #2: abierto y borrador.
+- PR #2: histórico, `CLOSED + MERGED`; no reabrir. Cualquier nuevo merge a `main` exige autorización nueva y explícita.
 - No ramas temporales.
 - No auto-merge.
 - Producción no se modifica.

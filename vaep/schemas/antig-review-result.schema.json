@@ -8,7 +8,7 @@
   "properties": {
     "schemaVersion": {"const": "1.0"},
     "projectId": {"const": "SOLQARYN"},
-    "repository": {"const": "jmejia31/Solqaryn"},
+    "repository": {"const": "solqaryn/Solqaryn"},
     "branch": {"const": "Desarrollo"},
     "issueNumber": {"type": "integer", "minimum": 1},
     "taskId": {"type": "string", "minLength": 1},

@@ -70,7 +70,7 @@ Un trigger, workflow, planner, lease sin progreso o declaración no es `ACTIVE_R
 
 - Trabajar sólo en `Desarrollo`.
 - `main` permanece congelada.
-- PR #2 debe permanecer OPEN + DRAFT; no merge ni auto-merge.
+- PR #2 es evidencia histórica del release ERP-N9: está `CLOSED + MERGED` y no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario; auto-merge permanece prohibido.
 - No ramas nuevas, force-push, reset destructivo ni amend de historia compartida.
 - No Producción, secretos, credenciales, dominios, certificados, datos productivos, deploys ni infraestructura productiva.
 - Revalidar HEAD antes de publicar y preservar trabajo concurrente.

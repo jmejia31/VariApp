@@ -85,7 +85,7 @@ OWNER_BULK_REOPEN_701_881_EXECUTED=TRUE
 PRODUCTION_RELEASE_EXCEPTION_EXECUTED=TRUE
 PRODUCTION_RELEASE_PR=2
 PRODUCTION_RELEASE_PR_STATE=CLOSED_MERGED
-PRODUCTION_RELEASE_MAIN_BASELINE=7fcc3d3f4baa3dfbb93587734eb2c62f49cea70d
+PRODUCTION_RELEASE_MAIN_BASELINE=6ad48116a93bb1d02a85b941994395ba7382dc93
 PR2_REOPEN_REQUIRED=FALSE
 FUTURE_MAIN_CHANGES_REQUIRE_FRESH_OWNER_AUTH=TRUE
 FUTURE_PRODUCTION_CHANGES_REQUIRE_FRESH_OWNER_AUTH=TRUE
@@ -206,7 +206,7 @@ Regla: `DEFECT_RECOVERY_FIRST + FIRST_DETECTOR_OWNS_RECOVERY + NO_REJECT_QUEUE`.
 - El trabajo ordinario continúa exclusivamente en `Desarrollo`.
 - La excepción productiva autorizada por el propietario para ERP-N9 ya fue ejecutada y queda cerrada como hecho histórico.
 - PR #2 fue merged y cerrada durante esa liberación autorizada. Su estado `closed + merged + not-draft` es válido y **no debe reabrirse** para satisfacer reglas anteriores.
-- `main@7fcc3d3f4baa3dfbb93587734eb2c62f49cea70d` es el baseline productivo congelado current-standard después del release y hotfix tenant de smoke.
+- `main@6ad48116a93bb1d02a85b941994395ba7382dc93` es el baseline productivo congelado current-standard después del release y hotfix tenant de smoke.
 - A partir de ese baseline, cualquier cambio futuro en `main`, Producción, deploys productivos, datos productivos, dominios, certificados o infraestructura productiva requiere una **nueva autorización explícita del propietario**.
 - La regla histórica “PR #2 OPEN + DRAFT + unmerged” queda retirada porque su propósito era impedir una liberación no autorizada antes del go-live; no puede reinterpretarse para invalidar retroactivamente una liberación que el propietario autorizó expresamente y que ya fue certificada.
 - Esta reconciliación documental no autoriza ningún nuevo merge, deploy, cambio de schema/datos ni modificación productiva.

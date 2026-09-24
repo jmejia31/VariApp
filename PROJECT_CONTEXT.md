@@ -8,7 +8,7 @@
 - Repositorio: `solqaryn/Solqaryn`
 - Rama de trabajo: `Desarrollo`
 - `main`: congelada; no tocar sin autorización expresa.
-- PR oficial `Desarrollo -> main`: #2, abierto y Draft; no merge automático.
+- PR histórico `Desarrollo -> main`: #2 está `CLOSED + MERGED` por la liberación ERP-N9 ya ejecutada; no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario.
 - Environments GitHub canónicos: `Produccion` y `Desarrollo`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
 - Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
@@ -57,7 +57,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 
 ## 5. Gobierno colaborativo vigente
 
-`AGENTS.md` es vinculante. ChatGPT/VAEP y Chat B operan como controller/QA bajo el MAESTRO. El runtime canónico de implementación/autorefill es **J1–J6**; referencias Jules A/B/C/D son legado/histórico y no deben usarse para crear trabajo nuevo. Codex participa solo por orden explícita del usuario. AntiG/Antigravity permanece `RESERVED_INACTIVE`: puede leer este handoff, pero no tiene scheduler, procesamiento de handoffs ni autoridad `LISTO_REAL` hasta autorización explícita futura.
+`AGENTS.md` es vinculante. ChatGPT/VAEP y Chat B operan como controller/QA bajo el MAESTRO. El runtime canónico son exclusivamente las **diez automatizaciones programadas** definidas por `docs/VAEP_AUTHORITY.md`; J1–J6/Jules y las referencias Jules A/B/C/D son legado/histórico y no deben usarse para crear trabajo nuevo. Codex participa solo por orden explícita del usuario. AntiG/Antigravity permanece `RESERVED_INACTIVE`: puede leer este handoff, pero no tiene scheduler, procesamiento de handoffs ni autoridad `LISTO_REAL` hasta autorización explícita futura.
 
 Todo changeset intencional deja evidencia en `CHANGELOG_AI.md`. `TASKS.md` cambia cuando cambia el estado operativo. Índice/arquitectura/contexto solo cambian cuando cambia la realidad que describen.
 
@@ -84,8 +84,8 @@ Para reanudar trabajo, usar exclusivamente la secuencia de lectura viva de la se
 - Localizar el `currentParent` directamente en el catálogo vivo y comprobar su último recibo de cierre/promoción.
 - Exigir `newDispatchAdmission=OPEN`. Cualquier otro valor global es inválido y debe repararse a `OPEN`; la causa técnica se conserva únicamente en la tarea/lane afectada.
 - Si `VAEP_CLOSE=BLOCKED`, buscar el diagnóstico causal exacto en el job, no generar trabajo para ocultar el bloqueo.
-- Si no hay scope material seguro, detener refill y extender roadmap solo desde Plan/COLA frescos; nunca por orden léxico ni por llenar J1–J6.
-- Verificar que PR #2 siga `open + draft + unmerged` y que `main` no haya cambiado por este flujo.
+- Si no hay scope material seguro, detener refill y extender roadmap solo desde Plan/COLA frescos; nunca por orden léxico ni por llenar slots/automatizaciones con trabajo artificial.
+- Tratar PR #2 como evidencia histórica `closed + merged` y no reabrirlo. Verificar que `main` no cambie por el flujo ordinario y que no exista un nuevo merge o cambio productivo sin autorización fresca del propietario.
 - Mantener visibles como deuda no-P0/P1 los gaps aceptados de N5.1 (B4, C1–C4, D1–D2, E4–E5); no convertirlos silenciosamente en PASS.
 
 ## 9. Regla de actualización
