@@ -56,8 +56,8 @@ jobs:
           BACKUP_LABEL: desarrollo
         run: |
           set -euo pipefail
-          chmod +x scripts/backup_desarrollo.sh
-          scripts/backup_desarrollo.sh | tee "$RUNNER_TEMP/n821d-backup.log"
+          chmod +x scripts/backup_dev.sh
+          scripts/backup_dev.sh | tee "$RUNNER_TEMP/n821d-backup.log"
           backup_file="$(grep '^SOLQARYN_BACKUP_FILE=' "$RUNNER_TEMP/n821d-backup.log" | cut -d= -f2-)"
           checksum_file="$(grep '^SOLQARYN_BACKUP_SHA256=' "$RUNNER_TEMP/n821d-backup.log" | cut -d= -f2-)"
           test -s "$backup_file" && test -s "$checksum_file"
@@ -83,8 +83,8 @@ jobs:
           RESTORE_REPORT_PATH: ${{ runner.temp }}/n821d-restore-report.json
         run: |
           set -euo pipefail
-          chmod +x scripts/restore_desarrollo.sh
-          scripts/restore_desarrollo.sh | tee "$RUNNER_TEMP/n821d-restore.log"
+          chmod +x scripts/restore_dev.sh
+          scripts/restore_dev.sh | tee "$RUNNER_TEMP/n821d-restore.log"
           report_file="$(grep '^SOLQARYN_RESTORE_REPORT=' "$RUNNER_TEMP/n821d-restore.log" | cut -d= -f2-)"
           test -s "$report_file"
           grep -q '"status": "SUCCESS"' "$report_file"
