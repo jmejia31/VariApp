@@ -327,14 +327,14 @@ jobs:
       Cors__AllowedOrigins__1: 'http://localhost:4200'
       Swagger__Enabled: 'false'
       AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
-      AppSettings__LogoPublicUrl: 'https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__LogoPublicUrl: ''
       AppSettings__EnlacePublicoFacturaHorasValidez: '1'
       AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
       AppSettings__CorreoFacturaIdempotenciaMinutos: '15'
       Cloudinary__CloudName: 'm13-not-used'
       Cloudinary__ApiKey: 'm13-not-used'
       Cloudinary__ApiSecret: 'm13-not-used'
-      Cloudinary__EnvironmentPrefix: 'varistorehn_desarrollo'
+      Cloudinary__EnvironmentPrefix: 'solqaryn_dev'
       Smtp__Host: '127.0.0.1'
       Smtp__Port: '1025'
       Smtp__UsuarioSmtp: 'smtp-user'
@@ -474,7 +474,7 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
           grep -q 'branch: dev' render.yaml
           grep -q 'name: solqaryn-api-desarrollo' render.yaml
-          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
+          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'solqaryn_dev'
           docker build --file backend/Dockerfile --tag solqaryn-api:m13 .
       - name: Exigir drill de backup/restore exitoso y vigente
         shell: bash
@@ -485,8 +485,8 @@ jobs:
           test -n "$backup_sha"
           git merge-base --is-ancestor "$backup_sha" HEAD
           git diff --quiet "$backup_sha"..HEAD -- \
-            scripts/backup_desarrollo.sh \
-            scripts/restore_desarrollo.sh \
+            scripts/backup_dev.sh \
+            scripts/restore_dev.sh \
             .github/workflows/backup-restore-dev.yml \
             backend/src/Infrastructure/Migrations
           echo "SOLQARYN backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
