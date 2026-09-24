@@ -38,14 +38,14 @@ jobs:
       - name: Guard inputs and secrets
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
           set -euo pipefail
-          test -n "$AIVEN_TOKEN" || { echo 'AIVEN_TOKEN secret is missing'; exit 20; }
-          test -n "$DEV_DB" || { echo 'SOLQARYN_DEV_DB_CONNECTION secret is missing'; exit 21; }
+          test -n "$SOLQARYN_AIVEN_TOKEN" || { echo 'SOLQARYN_AIVEN_TOKEN secret is missing'; exit 20; }
+          test -n "$DEV_DB" || { echo 'SOLQARYN_DESARROLLO_DB_CONNECTION secret is missing'; exit 21; }
           test -n "$PROJECT" || { echo 'aiven_project input is missing'; exit 22; }
           test -n "$SERVICE" || { echo 'aiven_service input is missing'; exit 23; }
           echo 'Required values are present; secret values are not printed.'
@@ -57,8 +57,8 @@ jobs:
       - name: Capture and certify actual Aiven DEV control-plane metadata
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
@@ -67,14 +67,14 @@ jobs:
           mkdir -p "$RUN_DIR"
           export RUN_DIR
 
-          avn --auth-token "$AIVEN_TOKEN" user info --json > /tmp/aiven-user.json
+          avn --auth-token "$SOLQARYN_AIVEN_TOKEN" user info --json > /tmp/aiven-user.json
 
           python3 - <<'PY'
           import hashlib, json, os, re, urllib.request, urllib.error
           from urllib.parse import quote
           from datetime import datetime, timezone
 
-          token=os.environ['AIVEN_TOKEN']
+          token=os.environ['SOLQARYN_AIVEN_TOKEN']
           conn=os.environ['DEV_DB']
           project=os.environ['PROJECT']
           service=os.environ['SERVICE']
@@ -101,7 +101,7 @@ jobs:
           cs=parse_conn(conn)
           dev_host=cs.get('server') or cs.get('host') or cs.get('data source')
           if not dev_host:
-              raise SystemExit('Could not parse DEV DB host from SOLQARYN_DEV_DB_CONNECTION')
+              raise SystemExit('Could not parse DEV DB host from SOLQARYN_DESARROLLO_DB_CONNECTION')
           dev_host_hash=hashlib.sha256(dev_host.lower().encode()).hexdigest()
 
           svc_payload=get(f'/project/{quote(project, safe="")}/service/{quote(service, safe="")}')
