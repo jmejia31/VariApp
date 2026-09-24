@@ -3,7 +3,7 @@ name: VariStoreHn Fase 1 - regresion publica
 on:
   pull_request:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - '.github/workflows/varistorehn-fase1-regression.yml'
       - 'frontend/e2e/varistorehn-fase1.spec.ts'
@@ -25,7 +25,7 @@ on:
       - 'frontend/package-lock.json'
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - '.github/workflows/varistorehn-fase1-regression.yml'
       - 'frontend/e2e/varistorehn-fase1.spec.ts'
