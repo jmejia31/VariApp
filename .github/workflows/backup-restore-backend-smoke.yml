@@ -2,7 +2,7 @@ name: N8.21.D - Backend smoke against isolated restore
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - .github/workflows/backup-restore-backend-smoke.yml
       - .github/checkpoints/backup-request
@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[SOLQARYN-BACKUP-SMOKE]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    environment: Desarrollo
+    environment: DEV
     services:
       mysql-m11-restore:
         image: mysql:8.4
@@ -39,18 +39,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Backup real read-only de Desarrollo
+      - name: Backup real read-only de DEV
         id: backup
         shell: bash
         env:
           SOLQARYN_ENVIRONMENT: desarrollo
-          DB_HOST: ${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ vars.SOLQARYN_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ vars.SOLQARYN_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ vars.SOLQARYN_DESARROLLO_DB_USER }}
-          DB_PASSWORD: ${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}
+          DB_HOST: ${{ vars.SOLQARYN_DEV_DB_HOST }}
+          DB_PORT: ${{ vars.SOLQARYN_DEV_DB_PORT }}
+          DB_NAME: ${{ vars.SOLQARYN_DEV_DB_NAME }}
+          DB_USER: ${{ vars.SOLQARYN_DEV_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SOLQARYN_DEV_DB_PASSWORD }}
           DB_SSL_MODE: REQUIRED
-          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DEV_BACKUP_PASSPHRASE }}
           OUTPUT_DIR: ${{ runner.temp }}/n821d-backups
           RETENTION_DAYS: '0'
           BACKUP_LABEL: desarrollo
@@ -75,7 +75,7 @@ jobs:
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: m11-ci-root-only
           TARGET_DB_SSL_MODE: DISABLED
-          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE }}
+          BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DEV_BACKUP_PASSPHRASE }}
           BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
           BACKUP_CHECKSUM_FILE: ${{ steps.backup.outputs.checksum_file }}
           ALLOW_DESTRUCTIVE_RESTORE: YES_SOLQARYN_DISPOSABLE_RESTORE
