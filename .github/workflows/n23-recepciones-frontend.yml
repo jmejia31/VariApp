@@ -2,7 +2,7 @@ name: N2.3 - RecepcionCompra frontend CI
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - .github/workflows/n23-recepciones-frontend.yml
       - frontend/e2e/recepciones-compra-shell.spec.ts
