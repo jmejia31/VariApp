@@ -59,7 +59,7 @@ jobs:
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cors__AllowedOrigins__1: 'http://localhost:4200'
       AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
-      AppSettings__LogoPublicUrl: 'https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__LogoPublicUrl: ''
       AppSettings__EnlacePublicoFacturaHorasValidez: '1'
       AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
       AppSettings__CorreoFacturaIdempotenciaMinutos: '15'
