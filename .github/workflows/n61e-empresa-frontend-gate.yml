@@ -3,7 +3,7 @@ name: N6.1.E - Empresa frontend exact-head gate
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/n61e-empresa-frontend-gate.yml
       - frontend/src/app/features/configuracion/empresa-administracion-card.component.ts
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
