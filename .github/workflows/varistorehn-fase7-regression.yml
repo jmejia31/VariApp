@@ -3,7 +3,7 @@ name: VariStoreHn Fase 7 - home comercial
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
       - chatgpt/varistorehn-fase7-final-20260918
     paths:
       - 'frontend/src/app/features/varistorehn/**'
@@ -44,7 +44,7 @@ on:
       - 'frontend/src/app/services/producto.service.ts'
   pull_request:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
