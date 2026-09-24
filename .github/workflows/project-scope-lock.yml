@@ -3,11 +3,11 @@ name: SOLQARYN Project Scope Lock
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
       - main
   pull_request:
     branches:
-      - Desarrollo
+      - dev
       - main
 
 jobs:
