@@ -1,16 +1,16 @@
-# PROJECT_CONTEXT — VariApp
+# PROJECT_CONTEXT — Solqaryn
 
 > Fuente principal de contexto técnico compartido para ChatGPT/VAEP, Chat B, Codex cuando sea autorizado y cualquier colaborador futuro. No reconstruir el proyecto desde cero ni confiar en snapshots antiguos.
 
 ## 1. Estado canónico
 
-- PROJECT_ID: VARIAPP
-- Repositorio: `solqaryn/VariApp`
+- PROJECT_ID: SOLQARYN
+- Repositorio: `solqaryn/Solqaryn`
 - Rama de trabajo: `Desarrollo`
 - `main`: congelada; no tocar sin autorización expresa.
 - PR oficial `Desarrollo -> main`: #2, abierto y Draft; no merge automático.
 - Entornos lógicos: `varistorehn_producción` y `varistorehn_desarrollo`.
-- Plan rector: **Plan Maestro ERP V5 — VariApp**.
+- Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
 - Tracks obligatorios: T0–T12.
 
@@ -38,7 +38,7 @@ Si dos superficies difieren, GitHub/CI prueba actividad técnica real y el Sheet
 
 ## 3. Arquitectura resumida
 
-VariApp/VariStorehn evoluciona hacia un ERP empresarial. Backend ASP.NET Core 8 Web API con capas Domain/Application/Infrastructure/API, EF Core 8 + Pomelo/MySQL, JWT/BCrypt, RBAC relacional, auditoría e integraciones Cloudinary/QuestPDF/SMTP. Frontend Angular 20 standalone con Signals, Angular Material, guards de autenticación/permisos, servicios y features lazy. E2E con Playwright.
+Solqaryn/VariStorehn evoluciona hacia un ERP empresarial. Backend ASP.NET Core 8 Web API con capas Domain/Application/Infrastructure/API, EF Core 8 + Pomelo/MySQL, JWT/BCrypt, RBAC relacional, auditoría e integraciones Cloudinary/QuestPDF/SMTP. Frontend Angular 20 standalone con Signals, Angular Material, guards de autenticación/permisos, servicios y features lazy. E2E con Playwright.
 
 Áreas principales: productos/variantes/catálogos, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, descuentos, impuestos, envíos, cargas masivas, auditoría, reportes y tienda pública VariStorehn.
 
@@ -102,6 +102,6 @@ EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
 LOCAL_SKILL_COUNT=1
 ```
 
-Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/VariApp`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
 
 
