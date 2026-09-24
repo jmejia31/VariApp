@@ -1,5 +1,16 @@
 # ARCHITECTURE_CHANGELOG — Solqaryn
 
+
+## 2026-09-24 — Topología Aiven canónica y environments SOLQARYN
+
+- GitHub queda normalizado a dos environments canónicos: `Desarrollo` y `Produccion`.
+- Aiven usa el proyecto `solqaryn` y un único servicio MySQL Free `solqaryn-mysql`.
+- Desarrollo usa `solqaryn_dev` + `solqaryn_dev_user`; Produccion usa `solqaryn_prod` + `solqaryn_prod_user`.
+- `avnadmin` queda reservado para administración y los usuarios de aplicación fueron restringidos a su base respectiva.
+- La separación entre DEV y PROD es lógica dentro del mismo servicio físico; host/puerto/recursos se comparten, mientras base, usuario, secretos y GitHub Environment permanecen aislados.
+- La prueba Aiven del Environment Desarrollo y el backup cifrado + restore same-artifact en MySQL descartable quedaron validados en GitHub Actions sin exponer secretos.
+
+
 Registro conciso de cambios que obligan a actualizar `PROJECT_INDEX.md`, `PROJECT_CONTEXT.md` o `ARCHITECTURE.md`. No reconstruye historial anterior.
 
 ## Convención
