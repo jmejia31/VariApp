@@ -5,8 +5,8 @@ on:
     branches:
       - dev
     paths:
-      - scripts/backup_desarrollo.sh
-      - scripts/restore_desarrollo.sh
+      - scripts/backup_dev.sh
+      - scripts/restore_dev.sh
       - .github/workflows/backup-restore-dev.yml
       - backend/src/Infrastructure/Migrations/**
       - docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md
@@ -14,8 +14,8 @@ on:
     branches:
       - main
     paths:
-      - scripts/backup_desarrollo.sh
-      - scripts/restore_desarrollo.sh
+      - scripts/backup_dev.sh
+      - scripts/restore_dev.sh
       - .github/workflows/backup-restore-dev.yml
       - backend/src/Infrastructure/Migrations/**
       - docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md
@@ -63,7 +63,7 @@ jobs:
       SeedAdmin__Password: 'SOLQARYN.Restore#2026!'
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
-      AppSettings__LogoPublicUrl: 'https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__LogoPublicUrl: 'https://solqaryn-dev.vercel.app/assets/varistorehn-logo.png'
       Cloudinary__CloudName: 'ci-not-used'
       Cloudinary__ApiKey: 'ci-not-used'
       Cloudinary__ApiSecret: 'ci-not-used'
@@ -166,8 +166,8 @@ jobs:
           BACKUP_LABEL: desarrollo
         run: |
           set -euo pipefail
-          chmod +x scripts/backup_desarrollo.sh scripts/restore_desarrollo.sh
-          scripts/backup_desarrollo.sh | tee "$RUNNER_TEMP/solqaryn-backup.log"
+          chmod +x scripts/backup_dev.sh scripts/restore_dev.sh
+          scripts/backup_dev.sh | tee "$RUNNER_TEMP/solqaryn-backup.log"
           backup_file="$(grep '^SOLQARYN_BACKUP_FILE=' "$RUNNER_TEMP/solqaryn-backup.log" | cut -d= -f2-)"
           checksum_file="$(grep '^SOLQARYN_BACKUP_SHA256=' "$RUNNER_TEMP/solqaryn-backup.log" | cut -d= -f2-)"
           metadata_file="$(grep '^SOLQARYN_BACKUP_METADATA=' "$RUNNER_TEMP/solqaryn-backup.log" | cut -d= -f2-)"
@@ -207,7 +207,7 @@ jobs:
           RESTORE_REPORT_PATH: ${{ runner.temp }}/solqaryn-restore-report.json
         run: |
           set -euo pipefail
-          scripts/restore_desarrollo.sh | tee "$RUNNER_TEMP/solqaryn-restore.log"
+          scripts/restore_dev.sh | tee "$RUNNER_TEMP/solqaryn-restore.log"
           test -s "$RUNNER_TEMP/solqaryn-restore-report.json"
           grep -q '"status": "SUCCESS"' "$RUNNER_TEMP/solqaryn-restore-report.json"
           grep -q '"productionTouched": false' "$RUNNER_TEMP/solqaryn-restore-report.json"
@@ -261,18 +261,18 @@ jobs:
           if SOLQARYN_ENVIRONMENT=produccion \
              DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=varistorehn_produccion DB_USER=root DB_PASSWORD=root \
              BACKUP_PASSPHRASE="$SOLQARYN_BACKUP_CI_PASSPHRASE" \
-             scripts/backup_desarrollo.sh > /dev/null 2>&1; then
+             scripts/backup_dev.sh > /dev/null 2>&1; then
             echo 'El backup no bloqueó Producción.' >&2
             exit 1
           fi
 
           if RESTORE_ENVIRONMENT=desarrollo-descartable \
-             TARGET_DB_HOST=127.0.0.1 TARGET_DB_PORT=3306 TARGET_DB_NAME=varistorehn_desarrollo \
+             TARGET_DB_HOST=127.0.0.1 TARGET_DB_PORT=3306 TARGET_DB_NAME=solqaryn_dev \
              TARGET_DB_USER=root TARGET_DB_PASSWORD=root BACKUP_PASSPHRASE="$SOLQARYN_BACKUP_CI_PASSPHRASE" \
              BACKUP_FILE="${{ steps.backup.outputs.backup_file }}" \
              BACKUP_CHECKSUM_FILE="${{ steps.backup.outputs.checksum_file }}" \
              ALLOW_DESTRUCTIVE_RESTORE=YES_SOLQARYN_DISPOSABLE_RESTORE \
-             scripts/restore_desarrollo.sh > /dev/null 2>&1; then
+             scripts/restore_dev.sh > /dev/null 2>&1; then
             echo 'El restore permitió un destino no descartable.' >&2
             exit 1
           fi
