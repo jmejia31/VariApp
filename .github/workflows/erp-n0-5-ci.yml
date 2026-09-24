@@ -2,7 +2,7 @@ name: ERP-N0.5 - Certificación MetodoPago histórico
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*MetodoPago*.cs'
       - 'backend/src/**/*CompraMetodoPagoResolver*.cs'
