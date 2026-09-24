@@ -29,7 +29,6 @@ Todos viven en el environment `Desarrollo`:
 - `SOLQARYN_DESARROLLO_DB_PASSWORD`
 - `SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE`
 - `SOLQARYN_AIVEN_TOKEN`
-- `SOLQARYN_DESARROLLO_DB_CONNECTION`
 
 Los valores nunca se documentan ni se copian al repositorio.
 
@@ -41,7 +40,7 @@ No crear environments con nombres de proveedor, servicio, milestone o fase salvo
 
 ## Rotación de Aiven
 
-Cambiar de cuenta Aiven obliga a reemplazar el valor de `SOLQARYN_AIVEN_TOKEN`.
+Cambiar de cuenta Aiven obliga a reemplazar el valor de `SOLQARYN_AIVEN_TOKEN`. La connection string no se guarda como un secreto duplicado: los workflows la construyen en memoria desde HOST/PORT/DB/USER/PASSWORD del environment `Desarrollo`.
 
 Los datos de conexión MySQL solo cambian si cambia el servicio, endpoint, usuario, contraseña o base de datos. Rotar el token API de Aiven no rota automáticamente las credenciales MySQL.
 
