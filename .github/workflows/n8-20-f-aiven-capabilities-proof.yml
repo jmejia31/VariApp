@@ -40,13 +40,14 @@ jobs:
         shell: bash
         env:
           SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
+          DEV_DB: Server=${{ vars.SOLQARYN_DESARROLLO_DB_HOST }};Port=${{ vars.SOLQARYN_DESARROLLO_DB_PORT }};Database=${{ vars.SOLQARYN_DESARROLLO_DB_NAME }};User Id=${{ vars.SOLQARYN_DESARROLLO_DB_USER }};Password=${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }};SslMode=Required;
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
           set -euo pipefail
           test -n "$SOLQARYN_AIVEN_TOKEN" || { echo 'SOLQARYN_AIVEN_TOKEN secret is missing'; exit 20; }
-          test -n "$DEV_DB" || { echo 'SOLQARYN_DESARROLLO_DB_CONNECTION secret is missing'; exit 21; }
+          test -n "${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}" || { echo 'SOLQARYN_DESARROLLO_DB_HOST variable is missing'; exit 21; }
+          test -n "${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}" || { echo 'SOLQARYN_DESARROLLO_DB_PASSWORD secret is missing'; exit 22; }
           test -n "$PROJECT" || { echo 'aiven_project input is missing'; exit 22; }
           test -n "$SERVICE" || { echo 'aiven_service input is missing'; exit 23; }
           echo 'Required values are present; secret values are not printed.'
@@ -59,7 +60,7 @@ jobs:
         shell: bash
         env:
           SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.SOLQARYN_DESARROLLO_DB_CONNECTION }}
+          DEV_DB: Server=${{ vars.SOLQARYN_DESARROLLO_DB_HOST }};Port=${{ vars.SOLQARYN_DESARROLLO_DB_PORT }};Database=${{ vars.SOLQARYN_DESARROLLO_DB_NAME }};User Id=${{ vars.SOLQARYN_DESARROLLO_DB_USER }};Password=${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }};SslMode=Required;
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
@@ -102,7 +103,7 @@ jobs:
           cs=parse_conn(conn)
           dev_host=cs.get('server') or cs.get('host') or cs.get('data source')
           if not dev_host:
-              raise SystemExit('Could not parse DEV DB host from SOLQARYN_DESARROLLO_DB_CONNECTION')
+              raise SystemExit('Could not parse DEV DB host from canonical Desarrollo configuration')
           dev_host_hash=hashlib.sha256(dev_host.lower().encode()).hexdigest()
 
           svc_payload=get(f'/project/{quote(project, safe="")}/service/{quote(service, safe="")}')
