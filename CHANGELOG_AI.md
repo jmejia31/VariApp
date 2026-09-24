@@ -98,6 +98,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+
+## 2026-09-24 — Cierre de configuración Aiven/GitHub canónica DEV/PROD
+
+**Responsable:** ChatGPT/VAEP con autorización expresa del propietario.
+
+- Aiven quedó normalizado al proyecto `solqaryn`, servicio MySQL Free único `solqaryn-mysql`, bases `solqaryn_dev` y `solqaryn_prod`.
+- Los usuarios `solqaryn_dev_user` y `solqaryn_prod_user` fueron limitados exclusivamente a su base; las pruebas cruzadas devolvieron Access denied en el entorno opuesto.
+- GitHub recibió los Environments canónicos `Desarrollo` y `Produccion` con variables/secrets separados y tokens Aiven independientes.
+- La prueba `N8.8.G - Aiven DEV Environment Token Scope Proof` pasó en el run `35959515163`.
+- El primer backup real detectó un defecto legítimo del script al consultar `__EFMigrationsHistory` sobre una base nueva sin esquema. Se corrigieron backup/restore para soportar una base canónica vacía sin degradar integridad: tabla de migraciones opcional y archivo de conteos vacío permitido solo cuando `baseTableCount=0`.
+- El run `35959731072` terminó con provider proof, backup cifrado real y restore same-artifact descartable en SUCCESS; artifact `solqaryn-backup-desarrollo-35959731072` generado.
+- Se actualizaron `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md`, `ARCHITECTURE_CHANGELOG.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md` para reflejar la topología real.
+- No se desplegó Produccion, no se modificó `main`, no se escribieron datos productivos y no se expusieron secretos.
+
 ## 2026-09-15 — Reconciliación de cola N8.5/N8.6
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
