@@ -33,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$EVENT_NAME" = workflow_dispatch
-          test "$REPOSITORY" = jmejia31/Solqaryn
+          test "$REPOSITORY" = solqaryn/Solqaryn
           test "$TARGET_REF" = refs/heads/Desarrollo
           test "$ACTOR" = "$OWNER"
           test "$TRIGGERING_ACTOR" = "$OWNER"
