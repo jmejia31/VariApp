@@ -60,7 +60,7 @@ static async Task<string?> SessionStatusValueAsync(MySqlConnection connection, s
 }
 
 var outputDirectory = args.Length > 0 ? args[0] : ".n820c-proof";
-var connectionString = Environment.GetEnvironmentVariable("SOLQARYN_DEV_DB_CONNECTION");
+var connectionString = Environment.GetEnvironmentVariable("SOLQARYN_DB_CONNECTION");
 var repoRoot = Environment.GetEnvironmentVariable("GITHUB_WORKSPACE") ?? Directory.GetCurrentDirectory();
 var functionalHead = Environment.GetEnvironmentVariable("GITHUB_SHA") ?? "UNKNOWN";
 var runId = Environment.GetEnvironmentVariable("GITHUB_RUN_ID") ?? "LOCAL";
