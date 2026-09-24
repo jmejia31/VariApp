@@ -12,7 +12,6 @@ jobs:
   finalize:
     if: >-
       github.repository == 'solqaryn/Solqaryn' &&
-      github.actor == 'jmejia31' &&
       github.event.issue.title == '[ADMIN] SOLQARYN GitHub finalizer'
     runs-on: ubuntu-latest
     timeout-minutes: 10
