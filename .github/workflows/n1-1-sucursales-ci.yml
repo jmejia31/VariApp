@@ -3,7 +3,7 @@ name: ERP-N1.1 - Certificación Sucursales
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/n1-1-sucursales-ci.yml
       - backend/src/API/Controllers/SucursalesController.cs
@@ -97,7 +97,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
