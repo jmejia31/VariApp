@@ -2,7 +2,7 @@ name: ERP-N0.6 - Preflight referencias polimorficas
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
       - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
