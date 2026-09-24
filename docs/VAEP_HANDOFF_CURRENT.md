@@ -44,4 +44,4 @@ Execution, material-action, synchronization and supervision clocks are separate.
 
 Previous J1–J6/Jules manifests, receipts, sessions, recoveries and commits remain historical evidence only. They do not reactivate any worker, credential, workflow, queue, lane or dispatch path. Late historical results are evidence-only and cannot enter runtime automatically.
 
-Work only on `Desarrollo`. Preserve `main`, Production, secrets and PR #2 OPEN+DRAFT.
+Work only on `Desarrollo`. Preserve `main`, `Produccion` and secrets. PR #2 is historical evidence in `CLOSED + MERGED` state from the already-authorized ERP-N9 release and must not be reopened; any future `main`/production change requires fresh owner authorization.

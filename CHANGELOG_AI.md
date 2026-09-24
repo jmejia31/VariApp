@@ -1608,3 +1608,13 @@ No se toca `main`, no se despliega Producción, no se leen/modifican secretos y 
 ## 2026-09-24 — Recovery del barrido administrativo GitHub
 
 El primer intento one-shot del barrido post-transferencia falló por un HTTP 502 de GitHub GraphQL antes de alcanzar la fase de ramas. Se aplicó recovery same-run: el workflow temporal reduce los lotes de mutación, incorpora reintentos con backoff, elimina primero referencias de ramas históricas y revalida fail-closed antes de cerrar Issues históricos. El Issue funcional vigente #3410 continúa preservado. No se toca `main`, Producción, secretos ni historial Git.
+
+
+## 2026-09-24 — Cierre de control GitHub post-transfer a SOLQARYN
+
+- Repositorio canónico confirmado bajo la organización `solqaryn/Solqaryn`; rama ordinaria `Desarrollo` y baseline productivo `main`.
+- La limpieza administrativa post-transfer eliminó 40 ramas históricas y cerró la deuda histórica de Issues; #3410 fue revalidado contra el código actual y cerrado como resuelto.
+- `docs/VAEP_HANDOFF_CURRENT.md` se reconcilió con la autoridad vigente: PR #2 es evidencia histórica `CLOSED + MERGED` del release ERP-N9 autorizado y no debe reabrirse.
+- Se retira el workflow temporal `.github/workflows/github-post-transfer-cleanup.yml` después de cumplir su función para no dejar una superficie administrativa residual.
+- Los triggers administrativos #3414/#3415 se usaron exclusivamente durante el cierre y quedan cerrados.
+- Este changeset no modifica producto, `main`, `Produccion`, secretos, datos productivos, dominios ni certificados.
