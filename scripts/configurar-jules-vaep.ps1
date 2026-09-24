@@ -2,6 +2,8 @@
 # EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
 # PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
 # PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+# EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+# LOCAL_SKILL_COUNT=1
 # Prohibido usar skills/documentacion/contexto fuera de SOLQARYN sin autorizacion explicita o allowlist ACTIVE.
 
 [CmdletBinding()]
