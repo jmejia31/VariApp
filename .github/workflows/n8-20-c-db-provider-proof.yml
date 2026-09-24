@@ -39,11 +39,11 @@ jobs:
       - name: Guard branch and required secret
         shell: bash
         env:
-          SOLQARYN_DEV_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
+          SOLQARYN_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "dev"
-          if [ -z "${SOLQARYN_DEV_DB_CONNECTION:-}" ]; then
+          if [ -z "${SOLQARYN_DB_CONNECTION:-}" ]; then
             echo "::error::Missing DEV database configuration"
             exit 21
           fi
@@ -60,7 +60,7 @@ jobs:
         id: probe
         shell: bash
         env:
-          SOLQARYN_DEV_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
+          SOLQARYN_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
           OUT_DIR: .n820c-proof/${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
