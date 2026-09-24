@@ -20,6 +20,7 @@ jobs:
   prove-dev-db-runtime:
     name: Prove DEV DB runtime/provider without secrets
     runs-on: ubuntu-latest
+    environment: Desarrollo
     timeout-minutes: 15
     if: github.ref_name == 'Desarrollo'
 
