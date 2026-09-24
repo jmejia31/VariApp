@@ -1,3 +1,18 @@
+## 2026-09-23 — Modelo definitivo: una skill local + nueve referencias originales
+
+- SOLQARYN mantiene exactamente una skill local: `.agents/skills/solqaryn-project-governance/SKILL.md`.
+- Las nueve capacidades adicionales no se copian ni instalan como skills locales; quedan registradas como referencias externas autorizadas a sus fuentes originales.
+- Registro canónico: `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md`.
+- Allowlist canónica: `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md`.
+- Se verificó la existencia de los ocho repositorios externos y sus pins fijados; las rutas oficiales de especificación/`SKILL.md` quedaron registradas.
+- La referencia oficial de autoría integrada se resuelve directamente en ChatGPT/OpenAI cuando la tarea de skills la requiere.
+- Queda prohibido sustituir una fuente original por una copia, fork, mirror o reutilización alojada dentro de otro proyecto.
+- Se retiraron las nueve copias locales creadas durante la iteración previa; el gate ahora exige `LOCAL_SKILL_COUNT=1`.
+- Los 18 puntos operativos declaran el registro externo y la única skill local.
+- `scripts/verify-project-scope.mjs` valida una sola skill local, nueve fuentes originales autorizadas y sus pins/resoluciones.
+- Consultar una referencia externa no autoriza instalar dependencias, ejecutar scripts/binarios ni modificar arquitectura, seguridad o Producción.
+- MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno de skills y fuentes; no modifica dominio, persistencia, tenancy ni deployment.
+
 ## 2026-09-23 — Namespace exclusivo de skills SOLQARYN
 
 - La única skill de gobierno activa del proyecto queda identificada como `.agents/skills/solqaryn-project-governance/SKILL.md`.
@@ -20,14 +35,13 @@ MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno y aislamiento de contexto; n
 
 - Se creó la política canónica `docs/PROJECT_SCOPE_LOCK.md`.
 - Se creó `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` con estado inicial sin excepciones activas.
-- Se creó la skill propia `.agents/skills/variapp-project-governance/SKILL.md`, exclusiva de `solqaryn/VariApp`.
+- Se creó la skill propia `.agents/skills/solqaryn-project-governance/SKILL.md`, exclusiva de `solqaryn/VariApp`.
 - Se agregó `scripts/verify-project-scope.mjs` como gate fail-closed.
 - Se agregó `.github/workflows/project-scope-lock.yml` para validar el aislamiento en push/PR.
 - Los 18 archivos operativos solicitados declaran `PROJECT_SCOPE_LOCK=STRICT` y `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`.
 - `.githooks/pre-commit` ejecuta el scope validator y bloquea el commit si falla.
 - `.githooks/post-commit` bloquea el auto-push cuando el scope validator falla.
-- Se verificó mediante lectura remota que los 18 archivos, la política, la allowlist y la skill contienen el lock y no contienen referencias conocidas al gobierno COHPUCP.
-- Las capacidades genéricas de plataforma no se consideran autoridad de proyecto y no habilitan contexto cruzado.
+- Se verificó mediante lectura remota que los 18 archivos, la política, la allowlist y la skill contienen el lock y no contienen referencias conocidas al gobierno FUENTE_EXTERNA_RETIRADA.
 - Un permiso externo persistente solo existe si queda versionado como `ACTIVE` en la allowlist; en caso contrario, el default es DENY.
 
 `PROJECT_ID=VARIAPP`  
