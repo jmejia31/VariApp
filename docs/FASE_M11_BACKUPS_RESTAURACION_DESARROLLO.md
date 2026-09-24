@@ -1,3 +1,5 @@
+> HISTÓRICO — evidencia de una fase cerrada. No define nombres vigentes de secrets, variables, environments, scripts ni workflows. La autoridad operativa actual es `docs/BACKUP_RESTORE_DESARROLLO_RUNBOOK.md`.
+
 # FASE M11 — Backups y restauración en Desarrollo
 
 Fecha de cierre: 2026-08-10  
