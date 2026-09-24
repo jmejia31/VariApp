@@ -1,8 +1,8 @@
-name: Desarrollo - Gobierno de matrices
+name: DEV - Gobierno de matrices
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'docs/matrices-evaluacion/**'
       - 'scripts/validate_matrix_governance.py'
