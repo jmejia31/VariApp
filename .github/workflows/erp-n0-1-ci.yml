@@ -2,7 +2,7 @@ name: ERP-N0.1 - Certificación ProductoVariante
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/scripts/preflight-erp-n0-1-producto-variante.sql'
       - 'backend/scripts/backfill-erp-n0-1-producto-variante.sql'
