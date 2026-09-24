@@ -71,7 +71,7 @@ jobs:
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cors__AllowedOrigins__1: 'http://localhost:4200'
       AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
-      AppSettings__LogoPublicUrl: 'https://solqaryn-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__LogoPublicUrl: 'https://solqaryn-dev.vercel.app/assets/varistorehn-logo.png'
       Cloudinary__CloudName: 'e2e-not-used'
       Cloudinary__ApiKey: 'e2e-not-used'
       Cloudinary__ApiSecret: 'e2e-not-used'
