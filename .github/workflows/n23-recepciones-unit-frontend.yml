@@ -3,7 +3,7 @@ name: N2.3 - RecepcionCompra unit frontend
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - "frontend/angular.json"
       - "frontend/tsconfig.spec.json"
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Setup Node 20
