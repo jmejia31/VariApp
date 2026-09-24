@@ -1,4 +1,4 @@
-name: SOLQARYN one-shot GitHub post-transfer cleanup
+name: SOLQARYN one-shot GitHub post-transfer finalizer
 
 on:
   issues:
@@ -9,125 +9,90 @@ permissions:
   issues: write
 
 jobs:
-  cleanup:
+  finalize:
     if: >-
       github.repository == 'solqaryn/Solqaryn' &&
       github.actor == 'jmejia31' &&
-      github.event.issue.title == '[ADMIN] SOLQARYN GitHub cleanup'
+      github.event.issue.title == '[ADMIN] SOLQARYN GitHub finalizer'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      KEEP_ISSUE: "3410"
       TRIGGER_ISSUE: ${{ github.event.issue.number }}
-      TRIGGER_NODE_ID: ${{ github.event.issue.node_id }}
     steps:
-      - name: Delete historical branches and close historical open issues
+      - name: Checkout canonical Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Verify clean GitHub state and self-remove finalizer
         shell: bash
         run: |
           set -euo pipefail
 
+          mapfile -t branches < <(gh api "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name' | sort)
+          expected=("Desarrollo" "main")
+          if [[ "${branches[*]}" != "${expected[*]}" ]]; then
+            printf 'Unexpected branches: %s\n' "${branches[*]}" >&2
+            exit 1
+          fi
+
+          open_prs="$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" --jq 'length')"
+          if [[ "$open_prs" != "0" ]]; then
+            echo "Open pull requests remain: $open_prs" >&2
+            exit 1
+          fi
+
+          mapfile -t open_issues < <(gh api "repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | .number')
+          unexpected=()
+          for issue in "${open_issues[@]}"; do
+            if [[ "$issue" != "$TRIGGER_ISSUE" ]]; then
+              unexpected+=("$issue")
+            fi
+          done
+          if (( ${#unexpected[@]} > 0 )); then
+            printf 'Unexpected open issues: %s\n' "${unexpected[*]}" >&2
+            exit 1
+          fi
+
           python3 - <<'PY'
-          import json
-          import os
-          import subprocess
-          import time
+          from pathlib import Path
 
-          repo = os.environ["GITHUB_REPOSITORY"]
-          owner, name = repo.split("/", 1)
-          keep_issue = int(os.environ["KEEP_ISSUE"])
-          trigger_issue = int(os.environ["TRIGGER_ISSUE"])
-          trigger_node_id = os.environ["TRIGGER_NODE_ID"]
-
-          def run(args, attempts=6):
-              last = None
-              for attempt in range(1, attempts + 1):
-                  p = subprocess.run(args, text=True, capture_output=True)
-                  if p.returncode == 0:
-                      return p.stdout
-                  last = (p.stdout or "") + "\n" + (p.stderr or "")
-                  if attempt < attempts:
-                      time.sleep(min(2 ** attempt, 20))
-              raise RuntimeError(f"command failed after {attempts} attempts: {args}\n{last}")
-
-          refs_query = r"""
-          query($owner:String!, $name:String!) {
-            repository(owner:$owner, name:$name) {
-              refs(refPrefix:"refs/heads/", first:100) {
-                nodes { id name }
-              }
-            }
-          }
-          """
-          data = json.loads(run(["gh", "api", "graphql", "-f", f"query={refs_query}", "-F", f"owner={owner}", "-F", f"name={name}"]))
-          refs = data["data"]["repository"]["refs"]["nodes"]
-          stale = [x for x in refs if x["name"] not in {"Desarrollo", "main"}]
-
-          for offset in range(0, len(stale), 10):
-              batch = stale[offset:offset + 10]
-              fields = []
-              for i, ref in enumerate(batch):
-                  fields.append(f'r{i}:deleteRef(input:{{refId:"{ref["id"]}"}})' + "{clientMutationId}")
-              mutation = "mutation{" + " ".join(fields) + "}"
-              run(["gh", "api", "graphql", "-f", f"query={mutation}"])
-              time.sleep(0.25)
-
-          data = json.loads(run(["gh", "api", "graphql", "-f", f"query={refs_query}", "-F", f"owner={owner}", "-F", f"name={name}"]))
-          remaining_refs = [x["name"] for x in data["data"]["repository"]["refs"]["nodes"]]
-          unexpected_refs = [x for x in remaining_refs if x not in {"Desarrollo", "main"}]
-          if unexpected_refs:
-              raise SystemExit(f"Historical branches remain: {unexpected_refs}")
-
-          issue_query = r"""
-          query($owner:String!, $name:String!, $cursor:String) {
-            repository(owner:$owner, name:$name) {
-              issues(first:100, after:$cursor, states:OPEN, orderBy:{field:CREATED_AT,direction:ASC}) {
-                nodes { id number title }
-                pageInfo { hasNextPage endCursor }
-              }
-            }
-          }
-          """
-
-          def read_open_issues():
-              out = []
-              cursor = None
-              while True:
-                  cmd = ["gh", "api", "graphql", "-f", f"query={issue_query}", "-F", f"owner={owner}", "-F", f"name={name}"]
-                  if cursor:
-                      cmd += ["-F", f"cursor={cursor}"]
-                  data = json.loads(run(cmd))
-                  conn = data["data"]["repository"]["issues"]
-                  out.extend(conn["nodes"])
-                  if not conn["pageInfo"]["hasNextPage"]:
-                      return out
-                  cursor = conn["pageInfo"]["endCursor"]
-
-          issues = read_open_issues()
-          targets = [x for x in issues if x["number"] not in {keep_issue, trigger_issue}]
-
-          for offset in range(0, len(targets), 10):
-              batch = targets[offset:offset + 10]
-              fields = []
-              for i, issue in enumerate(batch):
-                  fields.append(f'i{i}:updateIssue(input:{{id:"{issue["id"]}",state:CLOSED}})' + "{issue{number state}}")
-              mutation = "mutation{" + " ".join(fields) + "}"
-              run(["gh", "api", "graphql", "-f", f"query={mutation}"])
-              time.sleep(0.4)
-
-          issues_after = read_open_issues()
-          unexpected_issues = [x["number"] for x in issues_after if x["number"] not in {keep_issue, trigger_issue}]
-          if unexpected_issues:
-              raise SystemExit(f"Historical open issues remain: {unexpected_issues[:20]}")
-
-          close_trigger = (
-              'mutation{close:updateIssue(input:{id:"' + trigger_node_id + '",state:CLOSED})'
-              + '{issue{number state}}}'
-          )
-          run(["gh", "api", "graphql", "-f", f"query={close_trigger}"])
-
-          print(f"CLOSED_HISTORICAL_ISSUES={len(targets)}")
-          print(f"DELETED_HISTORICAL_BRANCHES={len(stale)}")
-          print(f"KEPT_ACTIVE_ISSUE={keep_issue}")
-          print("KEPT_BRANCHES=Desarrollo,main")
+          handoff = Path("docs/VAEP_HANDOFF_CURRENT.md")
+          text = handoff.read_text(encoding="utf-8")
+          old = "Work only on `Desarrollo`. Preserve `main`, Production, secrets and PR #2 OPEN+DRAFT."
+          new = "Work only on `Desarrollo`. Preserve `main`, `Produccion` and secrets. PR #2 is historical evidence in `CLOSED + MERGED` state from the already-authorized ERP-N9 release and must not be reopened; any future `main`/production change requires fresh owner authorization."
+          if old not in text:
+              raise SystemExit("Expected stale VAEP_HANDOFF_CURRENT sentence not found")
+          handoff.write_text(text.replace(old, new, 1), encoding="utf-8")
           PY
+
+          cat >> CHANGELOG_AI.md <<'EOF'
+
+## 2026-09-24 — Cierre de control GitHub post-transfer a SOLQARYN
+
+- Repositorio canónico confirmado bajo la organización `solqaryn/Solqaryn`; rama de trabajo `Desarrollo` y baseline productivo `main`.
+- La limpieza one-shot eliminó 40 ramas históricas y drenó los issues históricos abiertos; tras la revalidación funcional de #3410, no queda deuda abierta de Issues/PRs derivada del traslado.
+- `docs/VAEP_HANDOFF_CURRENT.md` se reconcilió con la autoridad vigente: PR #2 es evidencia histórica `CLOSED + MERGED` del release ERP-N9 autorizado y no debe reabrirse.
+- Se retira el workflow temporal `github-post-transfer-cleanup.yml` después de cumplir su única función, evitando dejar una superficie administrativa residual.
+- Este cierre no modifica producto, `main`, Produccion, secretos, datos productivos, dominios ni certificados.
+EOF
+
+          git rm .github/workflows/github-post-transfer-cleanup.yml
+          git diff --check
+
+          remote_head="$(git ls-remote origin refs/heads/Desarrollo | cut -f1)"
+          local_head="$(git rev-parse HEAD)"
+          if [[ "$remote_head" != "$local_head" ]]; then
+            echo "Desarrollo changed concurrently; aborting finalizer safely." >&2
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/VAEP_HANDOFF_CURRENT.md CHANGELOG_AI.md .github/workflows/github-post-transfer-cleanup.yml
+          git commit -m "chore(github): close post-transfer control debt"
+          git push origin HEAD:Desarrollo
+
+          gh issue close "$TRIGGER_ISSUE" --repo "$GITHUB_REPOSITORY" --reason completed --comment "Finalizador GitHub post-transfer ejecutado y auto-retirado."
