@@ -2,7 +2,7 @@ name: ERP-N0.3 - Certificación ProductoVariante autoridad única
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*ProductoVariante*.cs'
       - 'backend/src/**/*TipoCatalogoProducto*.cs'
