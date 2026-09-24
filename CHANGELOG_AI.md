@@ -1,3 +1,14 @@
+## 2026-09-23 — Configuración externa SOLQARYN generalizada
+
+- La configuración operativa de GitHub Actions dejó de usar nombres ligados a una fase histórica.
+- Environment canónico: `Desarrollo`.
+- Variables canónicas: `SOLQARYN_DESARROLLO_BACKUP_SCHEDULE_ENABLED`, `SOLQARYN_DESARROLLO_DB_HOST`, `SOLQARYN_DESARROLLO_DB_PORT`, `SOLQARYN_DESARROLLO_DB_NAME`, `SOLQARYN_DESARROLLO_DB_USER`.
+- Secrets canónicos: `SOLQARYN_DESARROLLO_DB_PASSWORD`, `SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE`, `SOLQARYN_AIVEN_TOKEN`, `SOLQARYN_DESARROLLO_DB_CONNECTION`.
+- Los scripts y workflows activos de backup/restore se renombraron por propósito; la documentación de la fase histórica quedó marcada como evidencia histórica.
+- Se eliminaron dependencias operativas restantes a `jmejia31/Solqaryn` en workflows activos.
+- Los valores secretos no fueron leídos ni copiados; la migración de valores debe completarse desde GitHub Settings/Aiven y validarse antes de retirar los nombres antiguos.
+- MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/gobierno de configuración operativa, sin cambio de dominio ni persistencia de producto.
+
 ## 2026-09-23 — Identidad canónica SOLQARYN consolidada
 
 - Repositorio canónico: `solqaryn/Solqaryn`.
