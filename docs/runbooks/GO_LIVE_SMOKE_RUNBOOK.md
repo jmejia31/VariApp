@@ -162,8 +162,8 @@ PROJECT_SCOPE_LOCK=STRICT
 EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
 PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
 EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
-PROJECT_SKILL=.agents/skills/variapp-project-governance/SKILL.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
 ```
 
-Este runbook solo puede ejecutarse con contexto de VariApp. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed.
+Este runbook solo puede ejecutarse con contexto de SOLQARYN. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed.
 
