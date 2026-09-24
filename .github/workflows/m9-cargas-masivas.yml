@@ -3,7 +3,7 @@ name: M9 - Cargas masivas profesionales
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/m9-cargas-masivas.yml
       - backend/src/API/Controllers/CargasMasivasController.cs
@@ -88,7 +88,7 @@ jobs:
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
 
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar .NET
