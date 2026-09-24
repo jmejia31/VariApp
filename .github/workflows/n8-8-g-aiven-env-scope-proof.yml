@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - '.github/workflows/n8-8-g-aiven-env-scope-proof.yml'
 
@@ -15,7 +15,7 @@ permissions:
 jobs:
   prove-environment-token:
     name: Prove normalized Aiven token from GitHub Environment without exposing secrets
-    environment: Desarrollo
+    environment: DEV
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,19 +23,19 @@ jobs:
         shell: bash
         env:
           SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
-          DEV_DB: Server=${{ vars.SOLQARYN_DESARROLLO_DB_HOST }};Port=${{ vars.SOLQARYN_DESARROLLO_DB_PORT }};Database=${{ vars.SOLQARYN_DESARROLLO_DB_NAME }};User Id=${{ vars.SOLQARYN_DESARROLLO_DB_USER }};Password=${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }};SslMode=Required;
+          DEV_DB: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
         run: |
           set -euo pipefail
           test -n "$SOLQARYN_AIVEN_TOKEN" || { echo 'SOLQARYN_AIVEN_TOKEN unavailable in effective job scope'; exit 20; }
-          test -n "${{ vars.SOLQARYN_DESARROLLO_DB_HOST }}" || { echo 'SOLQARYN_DESARROLLO_DB_HOST unavailable in Desarrollo'; exit 21; }
-          test -n "${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }}" || { echo 'SOLQARYN_DESARROLLO_DB_PASSWORD unavailable in Desarrollo'; exit 22; }
+          test -n "${{ vars.SOLQARYN_DEV_DB_HOST }}" || { echo 'SOLQARYN_DEV_DB_HOST unavailable in DEV'; exit 21; }
+          test -n "${{ secrets.SOLQARYN_DEV_DB_PASSWORD }}" || { echo 'SOLQARYN_DEV_DB_PASSWORD unavailable in DEV'; exit 22; }
           echo 'Required secret names are available; values are not printed.'
 
       - name: Normalize token in-memory and prove exact DEV MySQL backup control plane
         shell: bash
         env:
           SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
-          DEV_DB: Server=${{ vars.SOLQARYN_DESARROLLO_DB_HOST }};Port=${{ vars.SOLQARYN_DESARROLLO_DB_PORT }};Database=${{ vars.SOLQARYN_DESARROLLO_DB_NAME }};User Id=${{ vars.SOLQARYN_DESARROLLO_DB_USER }};Password=${{ secrets.SOLQARYN_DESARROLLO_DB_PASSWORD }};SslMode=Required;
+          DEV_DB: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
           PROJECT: solqaryn
           SERVICE: solqaryn-mysql
         run: |
