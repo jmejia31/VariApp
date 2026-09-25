@@ -126,18 +126,30 @@ public sealed class CloudinaryLegacyDevMigrationService
 
         foreach (var document in purchaseDocuments)
         {
-            var migrated = string.Equals(document.ResourceType, "raw", StringComparison.OrdinalIgnoreCase)
-                ? await CopyRawAsync(
-                    document.Url,
-                    purchaseFolder,
-                    $"legacy-purchase-document-{document.Id}{ExtensionFromUrl(document.Url)}",
-                    cancellationToken)
-                : await CopyImageAsync(
-                    document.Url,
-                    purchaseFolder,
-                    $"legacy-purchase-document-{document.Id}",
-                    cancellationToken);
-            stagedPurchases.Add((document, migrated.Url, migrated.PublicId));
+            try
+            {
+                var migrated = string.Equals(document.ResourceType, "raw", StringComparison.OrdinalIgnoreCase)
+                    ? await CopyRawAsync(
+                        document.Url,
+                        purchaseFolder,
+                        $"legacy-purchase-document-{document.Id}{ExtensionFromUrl(document.Url)}",
+                        cancellationToken)
+                    : await CopyImageAsync(
+                        document.Url,
+                        purchaseFolder,
+                        $"legacy-purchase-document-{document.Id}",
+                        cancellationToken);
+                stagedPurchases.Add((document, migrated.Url, migrated.PublicId));
+            }
+            catch (HttpRequestException ex) when (
+                document.Eliminado &&
+                ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning(
+                    "CLOUDINARY_LEGACY_DEV_MIGRATION TOMBSTONE missing_deleted_purchase_document id={DocumentId}",
+                    document.Id);
+                stagedPurchases.Add((document, string.Empty, string.Empty));
+            }
         }
 
         foreach (var user in profileUsers)
