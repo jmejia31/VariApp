@@ -59,6 +59,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 - No exponer secretos ni inventar validaciones externas.
 - No force-push.
 - Render DEV certificado el 2026-09-25: workspace `SOLQARYN` bajo `solqaryn.platform@outlook.com`; servicio `solqaryn-api-dev` en rama `dev`, repo `solqaryn/Solqaryn`, health `/health/ready`, URL `https://solqaryn-api-dev-fxx8.onrender.com`; logs actuales confirman conexión a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com` y health HTTP 200.
+- Vercel DEV certificado técnicamente el 2026-09-25: team `SOLQARYN` (`team_owJ2SudSPWiEzeiDthSVV063`), único proyecto visible `solqaryn-dev` (`prj_1Anhx5mWyXEBX89lWC24Py6JXe7A`), dominio `solqaryn-dev.vercel.app`, deploys desde `solqaryn/Solqaryn` rama `dev`, último deployment observado `READY`, rutas plataforma/storefront y APIs DEV en HTTP 200, sin runtime errors en las últimas 24h. El conector Vercel no expone el email del owner del team ni acceso al proyecto legacy de la cuenta personal; esas dos comprobaciones requieren panel del propietario.
 - Preservar commits ajenos y reconciliar HEAD antes de publicar.
 
 ## 5. Gobierno colaborativo vigente

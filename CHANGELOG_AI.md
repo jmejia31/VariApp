@@ -1,3 +1,14 @@
+## 2026-09-25 — Vercel DEV técnicamente certificado; cierre de ownership/legacy requiere panel
+
+- Team leído por el conector: `SOLQARYN` / `team_owJ2SudSPWiEzeiDthSVV063`.
+- Único proyecto visible: `solqaryn-dev` / `prj_1Anhx5mWyXEBX89lWC24Py6JXe7A`.
+- Dominio canónico: `solqaryn-dev.vercel.app`; deployments `READY` desde `solqaryn/Solqaryn`, rama `dev`.
+- Rutas `/`, `/login`, `/dashboard`, `/varistorehn` y `/varistorehn/productos` responden HTTP 200.
+- APIs de identidad, categorías y productos responden HTTP 200 con los datos migrados de VariStoreHN.
+- Vercel reporta cero runtime errors en las últimas 24 horas.
+- El conector no expone el email del owner del team ni tiene acceso al proyecto personal legacy `variapp-desarrollo`; el propietario debe confirmar el email del team y, al final del punto, eliminar el proyecto legacy desde la cuenta personal.
+- Se observan URLs Cloudinary históricas en el catálogo; se trasladan al punto Cloudinary y no se borran activos aún.
+
 ## 2026-09-25 — Render DEV certificado bajo SOLQARYN
 
 - Workspace leído directamente por el conector Render: `SOLQARYN`, email `solqaryn.platform@outlook.com`.

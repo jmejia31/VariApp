@@ -129,6 +129,29 @@ Evidencia leída directamente del workspace y servicio Render:
 
 Conclusión: Render DEV canónico está bajo la cuenta/workspace SOLQARYN y consume el Aiven DEV nuevo, no el host/base legacy personal. Cualquier servicio Render DEV de la cuenta personal puede retirarse únicamente después de identificarlo en esa cuenta y comprobar que no tiene consumidores restantes.
 
+### Certificación Vercel DEV — 2026-09-25
+
+Estado técnico del recurso nuevo: **PASS**.
+
+- team: `SOLQARYN`;
+- team ID: `team_owJ2SudSPWiEzeiDthSVV063`;
+- proyectos visibles en el team: únicamente `solqaryn-dev`;
+- project ID: `prj_1Anhx5mWyXEBX89lWC24Py6JXe7A`;
+- dominio canónico: `solqaryn-dev.vercel.app`;
+- deployments observados: `READY` y vinculados a `solqaryn/Solqaryn`, rama `dev`;
+- `/`, `/login`, `/dashboard`, `/varistorehn` y `/varistorehn/productos`: HTTP 200;
+- `/api/empresa-configuracion/publica`: HTTP 200 y devuelve VariStoreHN;
+- `/api/tienda/categorias`: HTTP 200 con 2 categorías;
+- `/api/tienda/productos?pagina=1&tamano=1`: HTTP 200 con catálogo migrado;
+- runtime errors Vercel últimas 24h: ninguno.
+
+Pendientes externos al conector Vercel antes de declarar el punto completamente cerrado y retirar el legacy personal:
+
+1. confirmar en el dashboard que el team `SOLQARYN` está administrado por la cuenta corporativa `solqaryn.platform@outlook.com`, porque el API disponible no expone el email del owner;
+2. entrar a la cuenta personal antigua y confirmar/eliminar el proyecto `variapp-desarrollo` únicamente después de esa verificación. El conector actual no tiene acceso a ese team/proyecto legacy.
+
+La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
+
 ## 8. Gobierno de acceso GitHub
 
 - Organización y repositorio canónicos: `solqaryn/Solqaryn`.
