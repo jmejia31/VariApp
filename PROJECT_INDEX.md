@@ -80,15 +80,13 @@ Pruebas Playwright para flujos críticos.
 
 ### `docs/`
 
-Documentación funcional, técnica, certificaciones, auditorías ERP-N0 y guías complementarias.
+Documentación funcional, técnica y guías complementarias de estado vigente.
 
 Administración colaborativa central:
 
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
 - `docs/ENTORNOS_DEV_PROD.md`
-
-Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
 
 No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento asociado al punto en ejecución.
 
