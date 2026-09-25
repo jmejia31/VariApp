@@ -74,7 +74,10 @@ public sealed class CloudinaryLegacyDevMigrationService
         var empresaId = activeCompanyIds[0];
 
         var productImages = await _db.ProductoImagenes
-            .Where(x => EsReferenciaLegacySql(x.Url, x.PublicId))
+            .Where(x =>
+                x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
+                x.PublicId.StartsWith("desarrollo/") ||
+                x.PublicId.StartsWith("varistorehn_desarrollo/"))
             .OrderBy(x => x.Id)
             .ToListAsync(cancellationToken);
 
@@ -217,11 +220,19 @@ public sealed class CloudinaryLegacyDevMigrationService
     {
         var products = await _db.ProductoImagenes
             .AsNoTracking()
-            .CountAsync(x => EsReferenciaLegacySql(x.Url, x.PublicId), cancellationToken);
+            .CountAsync(x =>
+                x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
+                x.PublicId.StartsWith("desarrollo/") ||
+                x.PublicId.StartsWith("varistorehn_desarrollo/"),
+                cancellationToken);
 
         var purchases = await _db.CompraDocumentos
             .AsNoTracking()
-            .CountAsync(x => EsReferenciaLegacySql(x.Url, x.PublicId), cancellationToken);
+            .CountAsync(x =>
+                x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
+                x.PublicId.StartsWith("desarrollo/") ||
+                x.PublicId.StartsWith("varistorehn_desarrollo/"),
+                cancellationToken);
 
         var profiles = await _db.Usuarios
             .AsNoTracking()
@@ -234,11 +245,6 @@ public sealed class CloudinaryLegacyDevMigrationService
 
         return products + purchases + profiles;
     }
-
-    private static bool EsReferenciaLegacySql(string url, string publicId) =>
-        url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
-        publicId.StartsWith("desarrollo/") ||
-        publicId.StartsWith("varistorehn_desarrollo/");
 
     private async Task<(string Url, string PublicId)> CopyImageAsync(
         string sourceUrl,
