@@ -285,7 +285,7 @@ jobs:
           export MYSQL_PWD="$DB_PASSWORD"
           MYSQL_BASE=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME")
           MYSQL_BATCH=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names)
-          mysqldump --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED             --no-create-info --skip-triggers --skip-add-locks --skip-disable-keys             --single-transaction --skip-lock-tables --quick --complete-insert --hex-blob             --default-character-set=utf8mb4 --no-tablespaces             --ignore-table="$DB_NAME.__EFMigrationsHistory"             "$DB_NAME" > "$RUNNER_TEMP/rollback-data.sql"
+          mysqldump --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED             --no-create-info --skip-triggers --skip-add-locks --skip-disable-keys             --single-transaction --skip-lock-tables --quick --complete-insert --hex-blob             --default-character-set=utf8mb4 --no-tablespaces --set-gtid-purged=OFF             --ignore-table="$DB_NAME.__EFMigrationsHistory"             "$DB_NAME" > "$RUNNER_TEMP/rollback-data.sql"
 
           "${MYSQL_BATCH[@]}" -e "
             SELECT CONCAT('DELETE FROM \`', TABLE_NAME, '\`;')
