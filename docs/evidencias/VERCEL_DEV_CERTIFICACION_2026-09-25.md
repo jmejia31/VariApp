@@ -1,6 +1,6 @@
 # Certificación Vercel DEV — 2026-09-25
 
-Estado: **PASS técnico / PENDIENTE ownership visual + retiro legacy personal**
+Estado: **PASS / CERRADO para el recurso nuevo; pendiente únicamente retiro legacy personal**
 
 ## Team y proyecto nuevo
 
@@ -25,14 +25,20 @@ Estado: **PASS técnico / PENDIENTE ownership visual + retiro legacy personal**
 - `/api/tienda/categorias`: HTTP 200; 2 categorías observadas
 - `/api/tienda/productos?pagina=1&tamano=1`: HTTP 200; producto migrado observado
 
-## Pendiente manual mínimo
+## Ownership confirmado visualmente
 
-El conector Vercel actual no expone el email del owner/member principal del team y no ve el proyecto legacy de la cuenta personal. Para cerrar este punto completamente, el propietario debe:
+Capturas del propietario en `vercel.com/solqaryn` muestran:
 
-1. mostrar `Vercel -> SOLQARYN team -> Settings/Members/General` donde se vea que la cuenta corporativa es `solqaryn.platform@outlook.com`;
-2. después abrir la cuenta personal antigua y mostrar el proyecto `variapp-desarrollo` antes de eliminarlo.
+- workspace/team activo: `SOLQARYN`;
+- cuenta de sesión: `solqarynplatform-5337`;
+- correo de la sesión: `solqaryn.platform@outlook.com`;
+- único proyecto visible en ese workspace: `solqaryn-dev`.
 
-No se debe tocar `varistorehn` productivo en esta fase DEV.
+Con esto el ownership operativo del Vercel DEV nuevo queda confirmado.
+
+## Pendiente de retiro legacy
+
+El conector Vercel actual no tiene acceso al team/cuenta personal antigua. El siguiente paso manual es abrir esa cuenta y revisar el proyecto `variapp-desarrollo`; si no contiene dominios/variables/recursos que deban conservarse, se elimina. No se debe tocar `varistorehn` productivo en esta fase DEV.
 
 ## Observación Cloudinary
 

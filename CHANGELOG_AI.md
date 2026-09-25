@@ -1,3 +1,11 @@
+## 2026-09-25 — Vercel DEV cerrado con ownership corporativo confirmado visualmente
+
+- Evidencia visual del dashboard `vercel.com/solqaryn` muestra el workspace/team activo `SOLQARYN` y la sesión `solqarynplatform-5337` asociada a `solqaryn.platform@outlook.com`.
+- Esto completa la comprobación de ownership que el conector Vercel no podía exponer por API.
+- El proyecto nuevo `solqaryn-dev` queda **CERRADO / PASS** en Vercel DEV.
+- Permanece pendiente únicamente retirar `variapp-desarrollo` desde la cuenta Vercel personal antigua, tras inspeccionar que no tenga dominios/variables que deban conservarse.
+- `varistorehn` de Producción no se toca en la fase DEV.
+
 ## 2026-09-25 — Vercel DEV técnicamente certificado; cierre de ownership/legacy requiere panel
 
 - Team leído por el conector: `SOLQARYN` / `team_owJ2SudSPWiEzeiDthSVV063`.

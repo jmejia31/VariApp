@@ -131,7 +131,7 @@ Conclusión: Render DEV canónico está bajo la cuenta/workspace SOLQARYN y cons
 
 ### Certificación Vercel DEV — 2026-09-25
 
-Estado técnico del recurso nuevo: **PASS**.
+Estado del recurso nuevo: **CERRADO / PASS**.
 
 - team: `SOLQARYN`;
 - team ID: `team_owJ2SudSPWiEzeiDthSVV063`;
@@ -145,10 +145,9 @@ Estado técnico del recurso nuevo: **PASS**.
 - `/api/tienda/productos?pagina=1&tamano=1`: HTTP 200 con catálogo migrado;
 - runtime errors Vercel últimas 24h: ninguno.
 
-Pendientes externos al conector Vercel antes de declarar el punto completamente cerrado y retirar el legacy personal:
+Ownership visual confirmado por el propietario en el dashboard: la sesión que administra `vercel.com/solqaryn` corresponde a `solqarynplatform-5337` con correo `solqaryn.platform@outlook.com`, mientras el workspace/team activo es `SOLQARYN`.
 
-1. confirmar en el dashboard que el team `SOLQARYN` está administrado por la cuenta corporativa `solqaryn.platform@outlook.com`, porque el API disponible no expone el email del owner;
-2. entrar a la cuenta personal antigua y confirmar/eliminar el proyecto `variapp-desarrollo` únicamente después de esa verificación. El conector actual no tiene acceso a ese team/proyecto legacy.
+El recurso nuevo Vercel DEV queda cerrado. El único pendiente de Vercel para retirar la dependencia personal es entrar a la cuenta antigua y eliminar exclusivamente el proyecto `variapp-desarrollo` después de una última inspección de dominios/variables. No tocar `varistorehn` PROD durante esta fase.
 
 La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
 
