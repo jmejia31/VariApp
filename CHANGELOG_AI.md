@@ -1,3 +1,14 @@
+## 2026-09-25 — Ratificación de ownership GitHub y colaboradores canónicos
+
+**Decisión explícita del propietario; supersede la nota operativa anterior que proponía retirar a `jmejia31`.**
+
+- Repositorio canónico: `solqaryn/Solqaryn`, dentro de la organización `solqaryn`; no se regresa a un repositorio personal.
+- Identidad corporativa primaria para cuentas/proveedores de SOLQARYN: `solqaryn.platform@outlook.com`.
+- `jmejia31` permanece intencionalmente como **Owner secundario/de recuperación** de la organización. Su permiso efectivo `admin` sobre el repositorio es esperado y no constituye deuda de migración.
+- `morales35alex` permanece como colaborador externo con permiso `write`.
+- No remover, degradar ni tratar a `jmejia31` como acceso residual sin una nueva autorización explícita del propietario.
+- Esta decisión queda documentada en `PROJECT_CONTEXT.md`, `docs/ENTORNOS_DEV_PROD.md` y `docs/COLABORATIVO.md` para que cualquier conversación/agente nuevo recupere el criterio correcto desde el repositorio.
+
 ## 2026-09-25 — Inicio controlado de migración DEV legacy de VariStoreHN
 
 - Se añade un workflow aislado que usa el environment `LEGACY_DEV_MIGRATION` para extraer únicamente `varistorehn_desarrollo` desde el Aiven legacy.

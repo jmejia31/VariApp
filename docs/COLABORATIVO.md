@@ -31,10 +31,11 @@ Si existe contradicción entre texto histórico/memoria y estas fuentes, prevale
 
 | Integrante | Proyecto local PC | GitHub | Rol principal |
 |---|---:|---:|---|
-| Javier Mejía | Sí | Sí | Propietario/decisión final |
+| Javier Mejía (`jmejia31`) | Sí | Sí | Propietario/decisión final y Owner secundario/de recuperación de la organización `solqaryn` |
 | Codex | Sí, sólo cuando Javier lo autoriza | Sí | Fuera del flujo por defecto; implementación/pruebas por orden explícita |
 | AntiG / Antigravity | No operativo por defecto | Sí | `RESERVED_INACTIVE`; sin scheduler, handoff ni certificación |
 | ChatGPT | No | Sí, con conector autorizado | Arquitectura/revisión/coordinación/cambios remotos |
+| Alex Morales (`morales35alex`) | Según su entorno | Sí | Colaborador externo `write`; no Owner/Admin organizacional |
 | Otros agentes | No por defecto | Solo con conector autorizado | Según asignación |
 
 Nadie debe asumir acceso local que no esté documentado.

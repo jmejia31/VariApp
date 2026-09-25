@@ -10,6 +10,10 @@
 - `main`: congelada; no tocar sin autorización expresa.
 - PR histórico de la antigua rama DEV -> `main`: #2 está `CLOSED + MERGED` por la liberación ERP-N9 ya ejecutada; no debe reabrirse. Cualquier nuevo merge a `main` o cambio productivo requiere autorización nueva y explícita del propietario.
 - Environments GitHub canónicos: `PROD` y `DEV`; VariStoreHN es cliente de la plataforma y no define la identidad de estos environments.
+- Identidad corporativa primaria de la plataforma para cuentas/proveedores: `solqaryn.platform@outlook.com`.
+- Gobierno GitHub ratificado 2026-09-25: el repositorio canónico permanece en la organización `solqaryn`; `jmejia31` se conserva **intencionalmente como Owner secundario/de recuperación** de la organización. Por ese motivo su permiso efectivo `admin` sobre `solqaryn/Solqaryn` es esperado y **NO es deuda ni acceso residual a retirar**.
+- `morales35alex` se conserva como colaborador externo con permiso `write` sobre el repositorio, sin rol Owner/Admin organizacional.
+- La permanencia de `jmejia31` como Owner es una excepción de continuidad/recuperación al objetivo general de centralizar proveedores en SOLQARYN; no convierte la cuenta personal en repositorio canónico ni autoriza mover recursos fuera de la organización. No remover ni degradar a `jmejia31` sin una nueva decisión explícita del propietario.
 - Plan rector: **Plan Maestro ERP V5 — Solqaryn**.
 - Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
 - Tracks obligatorios: T0–T12.

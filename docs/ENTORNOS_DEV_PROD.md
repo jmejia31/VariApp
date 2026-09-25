@@ -84,6 +84,15 @@ La configuración canónica de DEV se valida con:
 - restore del mismo artifact en MySQL descartable;
 - scope lock de SOLQARYN.
 
+## 8. Gobierno de acceso GitHub
+
+- Organización y repositorio canónicos: `solqaryn/Solqaryn`.
+- Identidad corporativa primaria para la plataforma y sus proveedores: `solqaryn.platform@outlook.com`.
+- `jmejia31` permanece deliberadamente como **Owner secundario/de recuperación** de la organización `solqaryn`. Su permiso efectivo `admin` sobre el repositorio es correcto mientras conserve ese rol.
+- `morales35alex` permanece como colaborador externo con permiso `write`.
+- No clasificar el rol Owner/Admin efectivo de `jmejia31` como legado a eliminar. La anotación histórica del 2026-09-23 que proponía retirarlo queda **supersedida** por esta decisión ratificada el 2026-09-25.
+- El repositorio, workflows, environments y configuración canónica siguen perteneciendo a la organización `solqaryn`; ninguna operación debe volver a depender de un repositorio personal.
+
 ## 8. Acceso y operación
 
 El trabajo ordinario continúa en `dev`. No crear ramas adicionales, no force-push y no auto-merge de `dev -> main`.
