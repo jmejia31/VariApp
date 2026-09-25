@@ -223,3 +223,37 @@ Readback de proveedores canónicos:
 - no hay configuración Cloudflare en el repositorio ni hostname `solqaryn.com` usado por el runtime DEV.
 
 Conclusión: DEV opera directamente sobre hostnames administrados por Vercel y Render. No existe una dependencia DNS de Cloudflare que deba migrarse antes de retirar recursos personales DEV. La cuenta/zona Cloudflare sigue siendo relevante para dominios propios futuros y/o PROD, pero no es un blocker de cierre DEV y no se tocó en esta fase.
+
+
+### Certificación funcional final DEV — 2026-09-25
+
+Estado: **PASS / CERRADO**.
+
+Evidencia automatizada principal:
+
+- workflow: `DEV - Certificación funcional final`;
+- run: `36192919335`;
+- resultado: `SUCCESS`;
+- `HTTP_ROUTE_CHECK=PASS`;
+- `API_AND_IMAGES=PASS`;
+- `RENDER_HEALTH=PASS`;
+- `DB_TEMP_WRITE_READ=PASS`;
+- `LEGACY_RUNTIME_REFERENCES=0`;
+- `FINAL_DEV_CERTIFICATION=PASS`;
+- `PRODUCTION_TOUCHED=FALSE`.
+
+Validaciones funcionales:
+
+- `https://solqaryn-dev.vercel.app/login`: HTTP 200, identidad de plataforma SOLQARYN;
+- `https://solqaryn-dev.vercel.app/dashboard`: HTTP 200, shell SOLQARYN; evidencia visual autenticada ya recibida;
+- `https://solqaryn-dev.vercel.app/varistorehn`: HTTP 200;
+- `https://solqaryn-dev.vercel.app/varistorehn/productos`: HTTP 200;
+- identidad pública: `VariStorehn`, eslogan `Eleva tu mundo digital`;
+- categorías públicas: 2;
+- productos públicos: 4;
+- Cloudinary: imágenes bajo `riyrzmob/solqaryn_dev` con HTTP 200;
+- Render: `/health/ready` HTTP 200;
+- DB: escritura/lectura efímera confirmada en `solqaryn_dev` mediante tabla temporal, sin persistencia;
+- referencias runtime legacy: 0 para proyecto Vercel DEV antiguo, host Aiven personal y nombre de base legacy.
+
+Los logs de Render observados inmediatamente después muestran conexiones únicamente a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`, y cero coincidencias para el host Aiven personal o el proyecto Vercel DEV retirado.

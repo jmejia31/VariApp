@@ -1,3 +1,20 @@
+## 2026-09-25 — DEV: certificación funcional final PASS
+
+- Workflow canónico: `DEV - Certificación funcional final`.
+- Run: `36192919335` → SUCCESS.
+- `/login`: HTTP 200 y shell/SEO SOLQARYN.
+- `/dashboard`: HTTP 200 y shell/SEO SOLQARYN; la evidencia visual autenticada del propietario muestra el administrativo SOLQARYN operativo.
+- `/varistorehn` y `/varistorehn/productos`: HTTP 200.
+- API identidad: VariStorehn / “Eleva tu mundo digital”.
+- API categorías: 2 categorías.
+- API productos: 4 productos públicos migrados y stock reconciliado.
+- Imágenes: URLs canónicas `res.cloudinary.com/riyrzmob/.../solqaryn_dev/...` verificadas con HTTP 200.
+- Render: `/health/ready` HTTP 200.
+- Aiven DEV: escritura + lectura sobre tabla temporal dentro de `solqaryn_dev` → PASS, sin cambio persistente.
+- Runtime source gate: cero referencias a `variapp-desarrollo`, `variapp-mysql-variapp.c.aivencloud.com` y `varistorehn_desarrollo`.
+- Logs Render actuales: conexiones únicamente a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`; búsqueda del host Aiven personal y del proyecto Vercel legacy devolvió cero logs.
+- PROD touched: FALSE.
+
 ## 2026-09-25 — Cloudflare DEV/DNS cerrado como N/A runtime
 
 - Vercel DEV canónico `solqaryn-dev` fue leído por API y expone únicamente dominios administrados por Vercel: `solqaryn-dev.vercel.app`, `solqaryn-dev-solqaryn.vercel.app` y `solqaryn-dev-git-dev-solqaryn.vercel.app`.
