@@ -107,13 +107,26 @@ export class DashboardComponent implements OnInit {
 
   etiquetaKpi(item: DashboardKpiResuelto): string {
     if (item.etiquetaVisible?.trim()) return item.etiquetaVisible.trim();
+    return this.etiquetaKpiConfiguracion(item.metricKey);
+  }
+
+  etiquetaKpiConfiguracion(metricKey: string): string {
     return ({
       INGRESOS_MES: 'Ingresos del mes', VENTAS_MES: 'Ventas del mes', COMPRAS_MES: 'Compras del mes',
       TOTAL_PRODUCTOS: 'Productos registrados', TOTAL_UNIDADES: 'Unidades en inventario',
       VALOR_INVENTARIO: 'Valor de inventario', UTILIDAD_BRUTA: 'Utilidad bruta',
       BALANCE_OPERATIVO: 'Balance operativo', CUENTAS_POR_COBRAR: 'Cuentas por cobrar',
       CUENTAS_POR_PAGAR: 'Cuentas por pagar', PRODUCTOS_STOCK_BAJO: 'Productos con stock bajo'
-    } as Record<string, string>)[item.metricKey] ?? item.metricKey;
+    } as Record<string, string>)[metricKey] ?? metricKey;
+  }
+
+  iconoKpi(metricKey: string): string {
+    return ({
+      INGRESOS_MES: 'payments', VENTAS_MES: 'point_of_sale', COMPRAS_MES: 'shopping_cart',
+      TOTAL_PRODUCTOS: 'inventory_2', TOTAL_UNIDADES: 'warehouse', VALOR_INVENTARIO: 'account_balance_wallet',
+      UTILIDAD_BRUTA: 'trending_up', BALANCE_OPERATIVO: 'monitoring', CUENTAS_POR_COBRAR: 'request_quote',
+      CUENTAS_POR_PAGAR: 'receipt_long', PRODUCTOS_STOCK_BAJO: 'warning_amber'
+    } as Record<string, string>)[metricKey] ?? 'analytics';
   }
 
   private persistirConfiguracion(configuracion: DashboardKpiConfiguracion[]): void {
