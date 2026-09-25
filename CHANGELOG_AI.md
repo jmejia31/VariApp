@@ -1,3 +1,10 @@
+## 2026-09-25 — Inicio controlado de migración DEV legacy de VariStoreHN
+
+- Se añade un workflow aislado que usa el environment `LEGACY_DEV_MIGRATION` para extraer únicamente `varistorehn_desarrollo` desde el Aiven legacy.
+- El backup se cifra antes de publicarse como artifact, incluye SHA-256, conteos por tabla, metadata y referencias externas, y se restaura en MySQL 8.4 descartable para verificar integridad.
+- El workflow no toca `defaultdb`, Producción, `solqaryn_dev`, `solqaryn_prod` ni recursos legacy de Vercel/Render.
+- No se versionan passwords ni passphrases; los valores viven únicamente en GitHub Environment secrets.
+
 ## 2026-09-25 — Auditoría DEV: proxy Vercel, CI y endpoint Render canónico
 
 - Vercel DEV deja de apuntar al hostname inexistente `solqaryn-api-dev.onrender.com` y usa `solqaryn-api-dev-fxx8.onrender.com`.
