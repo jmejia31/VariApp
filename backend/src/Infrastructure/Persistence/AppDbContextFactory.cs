@@ -14,7 +14,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Server=127.0.0.1;Port=3306;Database=varistorehn_desarrollo_design;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;";
+            ?? "Server=127.0.0.1;Port=3306;Database=solqaryn_dev_design;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;";
 
         var serverVersionText = Environment.GetEnvironmentVariable("Database__ServerVersion") ?? "8.4.3";
         if (!Version.TryParse(serverVersionText, out var serverVersion))

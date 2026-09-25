@@ -138,7 +138,6 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IImageStorageService, CloudinaryImageStorageService>();
 builder.Services.AddScoped<ICompraDocumentoStorageService, CloudinaryCompraDocumentoStorageService>();
-builder.Services.AddScoped<CloudinaryLegacyDevMigrationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICompraRepository, CompraRepository>();
 builder.Services.AddScoped<ICompraDocumentoRepository, CompraDocumentoRepository>();
@@ -270,19 +269,6 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
         db.Usuarios.Add(new Usuario { NombreUsuario = adminUsername, NombreCompleto = "Administrador", PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword), RolId = adminRolId, Activo = true, FechaCreacion = DateTime.UtcNow }); await db.SaveChangesAsync();
     }
     var seedFiscalService = new SeedFiscalService(db); await seedFiscalService.SeedDefaultsAsync();
-}
-if (app.Configuration.GetValue<bool>("CloudinaryLegacyMigration:Enabled"))
-{
-    await using var scope = app.Services.CreateAsyncScope();
-    var migration = scope.ServiceProvider.GetRequiredService<CloudinaryLegacyDevMigrationService>();
-    var result = await migration.MigrateAsync();
-    app.Logger.LogInformation(
-        "CloudinaryLegacyDevMigration status={Status} sourceRows={SourceRows} migratedRows={MigratedRows} remainingLegacyRows={RemainingLegacyRows} productionTouched={ProductionTouched}",
-        result.Status,
-        result.SourceRows,
-        result.MigratedRows,
-        result.RemainingLegacyRows,
-        false);
 }
 await app.RunAsync();
 
