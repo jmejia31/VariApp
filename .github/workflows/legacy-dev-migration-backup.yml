@@ -107,7 +107,7 @@ jobs:
           TARGET_DB_NAME: solqaryn_legacy_restore_drill
           TARGET_DB_USER: root
           TARGET_DB_PASSWORD: root
-          TARGET_DB_SSL_MODE: DISABLED
+          TARGET_DB_SSL_MODE: REQUIRED
           ALLOW_DESTRUCTIVE_RESTORE: YES_SOLQARYN_DISPOSABLE_RESTORE
           RESTORE_REPORT_PATH: ${{ runner.temp }}/legacy-restore-report.json
           RESTORE_FILES_DIR: ${{ runner.temp }}/legacy-restored-files
