@@ -189,3 +189,22 @@ Inventario read-only canónico: GitHub Actions run `36182095589`, artifact `clou
 El trabajo ordinario continúa en `dev`. No crear ramas adicionales, no force-push y no auto-merge de `dev -> main`.
 
 Las reglas colaborativas completas están en `AGENTS.md`; la memoria técnica está en `PROJECT_CONTEXT.md`.
+
+### Reconciliación stock DEV — administración vs tienda pública
+
+El 2026-09-25 se detectó un desfase de autoridad: el administrativo mostraba el bridge legacy `ProductoVariante.Cantidad`, mientras la tienda pública consume correctamente `ExistenciaVariante.StockDisponible`. El dataset migrado no había materializado seis existencias físicas de productos activos.
+
+Controles ejecutados:
+
+- diagnóstico read-only: run `36188235798`;
+- backup cifrado + restore drill: run `36188392969`;
+- reconciliación fail-closed: run `36190745792`;
+- único almacén operativo activo usado de forma determinista: `UAT-ALM-001`;
+- 6 existencias creadas;
+- stock activo bridge: 52;
+- stock físico activo: 52;
+- variantes activas sin existencia: 0;
+- diferencias bridge/físico: 0;
+- API pública verificada: Cargador 26, Laptop 15, Funda para samsung 1, UAT Producto 001 10.
+
+Dos variantes asociadas a productos eliminados conservan 5 unidades en campos legacy históricos y permanecen fuera del stock activo y del storefront. No se alteró Producción.

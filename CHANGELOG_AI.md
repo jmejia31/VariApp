@@ -1,3 +1,14 @@
+## 2026-09-25 — DEV: reconciliado stock administrativo vs storefront
+
+- Causa confirmada: el listado administrativo proyecta `ProductoVariante.Cantidad` como bridge de compatibilidad; el storefront y checkout usan `ExistenciaVariante.StockDisponible` como autoridad física.
+- Diagnóstico read-only run `36188235798`: 9 variantes legacy, una sola existencia física, 8 variantes legacy con stock positivo y 7 de ellas sin existencia; total bridge 57 vs stock físico 10. En productos activos/no eliminados, el desfase era 52 vs 10.
+- Antes de escribir se ejecutó backup cifrado real + restore drill del mismo artifact: run `36188392969` SUCCESS.
+- Reconciliación fail-closed run `36190745792`: único almacén operativo activo `UAT-ALM-001`; 6 filas `ExistenciaVariante` creadas para productos activos, sin sobrescribir la existencia ya correcta del UAT.
+- Postcheck transaccional: stock activo `ProductoVariante.Cantidad=52` y `ExistenciaVariante.StockFisico=52`; 0 variantes activas sin existencia; 0 diferencias.
+- Verificación API pública posterior: Cargador 26, Laptop 15, Funda para samsung 1, UAT Producto 001 10; todos con disponibilidad coherente.
+- Se dejaron fuera dos variantes de productos eliminados que suman 5 unidades legacy; no se reactivaron ni se convirtieron en stock público.
+- PROD no fue tocado.
+
 ## 2026-09-25 — Cloudinary DEV: upload canónico validado e inventario legacy cuantificado
 
 - El upload real desde la aplicación DEV creó un asset en el cloud `riyrzmob` bajo `solqaryn_dev/inventoryapp/productos/empresas/1/`; la API pública devuelve la URL nueva.
