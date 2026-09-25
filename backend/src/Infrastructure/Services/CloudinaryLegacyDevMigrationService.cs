@@ -82,7 +82,10 @@ public sealed class CloudinaryLegacyDevMigrationService
             .ToListAsync(cancellationToken);
 
         var purchaseDocuments = await _db.CompraDocumentos
-            .Where(x => EsReferenciaLegacySql(x.Url, x.PublicId))
+            .Where(x =>
+                x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
+                x.PublicId.StartsWith("desarrollo/") ||
+                x.PublicId.StartsWith("varistorehn_desarrollo/"))
             .OrderBy(x => x.Id)
             .ToListAsync(cancellationToken);
 
