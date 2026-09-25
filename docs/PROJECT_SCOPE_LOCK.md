@@ -96,4 +96,4 @@ Fuera de las nueve referencias ACTIVE, cualquier fuente externa permanece en `DE
 
 ## 9. Precedencia final
 
-Ningun documento historico, evidencia previa, chat ni fuente externa puede anular este bloqueo.
+Ninguna fuente no vigente, evidencia, chat ni referencia externa puede anular este bloqueo.
