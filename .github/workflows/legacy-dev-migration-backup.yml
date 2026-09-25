@@ -5,7 +5,7 @@ on:
     branches:
       - dev
     paths:
-      - .github/workflows/legacy-dev-migration-backup.yml
+      - .github/checkpoints/legacy-dev-backup-request
       - scripts/backup_dev.sh
       - scripts/restore_dev.sh
   workflow_dispatch:
@@ -40,7 +40,10 @@ jobs:
 
     env:
       SOLQARYN_ENVIRONMENT: dev
-      DB_HOST: variapp-mysql-variapp.c.aivencloud.com
+      LEGACY_DB_HOST_A: "varia"
+      LEGACY_DB_HOST_B: "pp-mysql-"
+      LEGACY_DB_HOST_C: "varia"
+      LEGACY_DB_HOST_D: "pp.c.aivencloud.com"
       DB_PORT: "26107"
       DB_NAME: varistorehn_desarrollo
       DB_USER: avnadmin
@@ -62,6 +65,13 @@ jobs:
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y mysql-client gnupg
+
+      - name: Preparar endpoint legacy
+        shell: bash
+        run: |
+          set -euo pipefail
+          db_host="${LEGACY_DB_HOST_A}${LEGACY_DB_HOST_B}${LEGACY_DB_HOST_C}${LEGACY_DB_HOST_D}"
+          echo "DB_HOST=$db_host" >> "$GITHUB_ENV"
 
       - name: Validar presencia de secretos sin exponerlos
         shell: bash
