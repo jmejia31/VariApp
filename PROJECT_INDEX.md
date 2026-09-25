@@ -4,6 +4,9 @@
 
 ## Lectura inicial mínima
 
+Regla: navegar por estado y arquitectura vigentes. No abrir planes, fases o documentos no vigentes como requisito de trabajo salvo que el MAESTRO actual los cite expresamente.
+
+
 1. `AGENTS.md` — reglas obligatorias y gate de identidad.
 2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `SOLQARYN`.
 3. `TASKS.md` — trabajo pendiente/vigente.
@@ -24,7 +27,6 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 - `CHANGELOG_AI.md`: bitácora/evidencia de cada changeset.
 - `README.md`: introducción, stack y operación básica.
 - `CONTRIBUTING.md`: flujo Git y criterios de contribución.
-- `implementation_plan.md`: plan de implementación histórico/específico cuando aplique.
 - `render.yaml`: configuración versionada relacionada con Render; tratar con cautela por separación de entornos.
 - `docs/ENTORNOS_DEV_PROD.md`: fuente canónica para GitHub Environments y topología Aiven DEV/PROD (`DEV`, `PROD`, `solqaryn-mysql`, bases/usuarios aislados).
 
@@ -85,7 +87,6 @@ Administración colaborativa central:
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
 - `docs/ENTORNOS_DEV_PROD.md`
-- `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de Solqaryn; no es fuente de estado actual.
 
 Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
 
@@ -136,7 +137,7 @@ No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estruc
 
 - Backend: `backend/src/API/Program.cs`; controladores bajo `backend/src/API/Controllers`. La mayoría declara una base con `[Route("...")]`; salud se expone directamente como `/health` y `/health/ready`.
 - Frontend: `frontend/src/main.ts` -> `frontend/src/app/app.config.ts` -> `frontend/src/app/app.routes.ts`. Algunas áreas agregan rutas en archivos `*.routes.ts` dentro de su feature.
-- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Existen migraciones históricas vigentes en `backend/src/Infrastructure/Migrations` y `backend/src/Infrastructure/Persistence/Migrations`; inspeccionar ambas ubicaciones y no moverlas ni consolidarlas desde un cambio local.
+- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Existen migraciones en `backend/src/Infrastructure/Migrations` y `backend/src/Infrastructure/Persistence/Migrations`; inspeccionar ambas ubicaciones y no moverlas ni consolidarlas desde un cambio local.
 - Dependencias: proyectos `backend/src/*/*.csproj`, solución `backend/InventoryApp.sln`, `frontend/package.json` y `frontend/angular.json`.
 
 ## Mapa operativo por capas
@@ -155,7 +156,7 @@ Angular route/component
 - API: `backend/src/API/Controllers`; composición, middleware y DI en `backend/src/API/Program.cs`.
 - Application: `backend/src/Application/{Services,Interfaces,DTOs,Validators}`.
 - Domain: `backend/src/Domain/{Entities,Enums,Common}`.
-- Infrastructure/DB: `backend/src/Infrastructure/{Repositories,Services,Persistence}` y las dos carpetas históricas de migraciones indicadas arriba.
+- Infrastructure/DB: `backend/src/Infrastructure/{Repositories,Services,Persistence}` y las dos carpetas de migraciones indicadas arriba.
 - Integraciones: contratos en `Application/Interfaces`, adaptadores concretos en `Infrastructure/Services` y registro DI en `Program.cs` (Cloudinary, QuestPDF, SMTP y exportaciones).
 
 ## Mapa por dominio
