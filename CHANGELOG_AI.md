@@ -1,3 +1,10 @@
+## 2026-09-25 — Vercel legacy DEV: variables ambientales auditadas antes de eliminación
+
+- Captura de `variapp-desarrollo -> Environment Variables` confirma `No Environment Variables Added`.
+- El proyecto legacy DEV no contiene variables de entorno de proyecto que deban migrarse o conservarse.
+- Junto con la auditoría previa de dominios (solo `variapp-desarrollo.vercel.app`), el proyecto `variapp-desarrollo` queda autorizado para eliminación manual desde la cuenta personal.
+- `varistorehn` PROD permanece fuera de alcance y no debe tocarse.
+
 ## 2026-09-25 — Vercel legacy DEV: dominios auditados antes de eliminación
 
 - Captura del proyecto personal `variapp-desarrollo` confirma que la sección Domains contiene únicamente `variapp-desarrollo.vercel.app`.

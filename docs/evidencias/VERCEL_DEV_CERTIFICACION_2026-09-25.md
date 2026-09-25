@@ -46,6 +46,12 @@ Evidencia visual recibida el 2026-09-25: el workspace personal `VariApp` muestra
 
 La pantalla `variapp-desarrollo -> Domains` muestra únicamente `variapp-desarrollo.vercel.app`, con configuración válida. No se observan dominios personalizados adicionales. Por tanto, no existe un dominio custom que deba transferirse antes de retirar este proyecto. La eliminación sigue bloqueada únicamente hasta revisar las variables de entorno del proyecto legacy.
 
+### Auditoría de variables de entorno del proyecto legacy DEV
+
+La pantalla `variapp-desarrollo -> Environment Variables` muestra explícitamente `No Environment Variables Added`. No existen variables de entorno de proyecto que deban migrarse o conservarse antes del retiro.
+
+Con dominios y variables ya auditados, el proyecto `variapp-desarrollo` queda **AUTORIZADO PARA ELIMINACIÓN** desde la cuenta personal. Esta autorización aplica únicamente a `variapp-desarrollo`; `varistorehn` PROD continúa congelado.
+
 ## Observación Cloudinary
 
 El catálogo migrado todavía contiene referencias de medios con prefijos históricos como `desarrollo/` y `varistorehn_desarrollo/`. Esto pertenece al siguiente punto Cloudinary; no borrar esos activos hasta completar esa auditoría.
