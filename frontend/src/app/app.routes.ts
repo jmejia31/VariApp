@@ -6,7 +6,7 @@ import { FACTURAS_PROVEEDOR_ROUTES } from './features/compras/facturas-proveedor
 import { PEDIDOS_VENTA_ROUTES } from './features/pedidos-venta/pedidos-venta.routes';
 
 export const routes: Routes = [
-  { path: '', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'varistorehn/productos', loadComponent: () => import('./features/varistorehn/varistorehn-productos.component').then(m => m.VaristorehnProductosComponent) },
   { path: 'varistorehn/ofertas', data: { soloOfertas: true }, loadComponent: () => import('./features/varistorehn/varistorehn-productos.component').then(m => m.VaristorehnProductosComponent) },
   { path: 'varistorehn/producto/:slug', loadComponent: () => import('./features/varistorehn/varistorehn-producto.component').then(m => m.VaristorehnProductoComponent) },

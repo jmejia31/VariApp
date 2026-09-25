@@ -5,12 +5,12 @@ import { EmpresaConfiguracionService } from './empresa-configuracion.service';
 
 const DEFAULT_CONFIG: EmpresaConfiguracion = {
   id: 0,
-  nombreComercial: 'VariStorehn',
-  eslogan: 'Eleva tu mundo digital',
-  nombreVisibleSistema: 'VariStorehn',
-  descripcionSistema: 'Administrativo',
-  mensajeLogin: 'Inicia sesión para administrar VariStorehn',
-  copyright: '© 2026 VariStorehn. Todos los derechos reservados.',
+  nombreComercial: 'SOLQARYN',
+  eslogan: 'Plataforma empresarial',
+  nombreVisibleSistema: 'SOLQARYN',
+  descripcionSistema: 'Plataforma empresarial',
+  mensajeLogin: 'Inicia sesión en SOLQARYN',
+  copyright: '© 2026 SOLQARYN. Todos los derechos reservados.',
   mostrarCopyright: true,
   usarAnioAutomaticoCopyright: true,
   encabezadoActivo: true,
@@ -26,9 +26,9 @@ export class EmpresaIdentidadService {
   private cargada = false;
 
   readonly config = this._config.asReadonly();
-  readonly nombreSistema = computed(() => this._config().nombreVisibleSistema || this._config().nombreComercial || 'VariStorehn');
+  readonly nombreSistema = computed(() => this._config().nombreVisibleSistema || this._config().nombreComercial || 'SOLQARYN');
   readonly descripcionSistema = computed(() => this.normalizarDescripcion(this._config().encabezadoTexto || this._config().descripcionSistema));
-  readonly logoUrl = computed(() => this._config().logoUrl || 'assets/varistorehn-logo.png');
+  readonly logoUrl = computed(() => this._config().logoUrl || '');
   readonly mensajeLogin = computed(() => this._config().mensajeLogin || `Inicia sesión para administrar ${this.nombreSistema()}`);
   readonly mostrarCopyright = computed(() => this._config().mostrarCopyright);
   readonly copyright = computed(() => {

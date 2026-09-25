@@ -1,3 +1,13 @@
+## 2026-09-25 — Shell DEV desacoplado de la identidad de VariStoreHN
+
+- El shell global del frontend ahora identifica a `SOLQARYN` en `index.html` (title, description y Open Graph).
+- Se retiró el favicon global `assets/varistorehn-logo.png`; el activo de VariStoreHN permanece únicamente como activo de su cliente/storefront donde corresponda.
+- La identidad fallback de `EmpresaIdentidadService` ahora es SOLQARYN y ya no cae a VariStoreHN cuando la configuración pública no está disponible.
+- La ruta raíz `/` deja de abrir directamente el storefront de VariStoreHN y redirige a `/login`; el cliente VariStoreHN continúa disponible explícitamente bajo `/varistorehn`.
+- Se actualizó la validación de Fase 11 para exigir que el shell global sea SOLQARYN sin alterar las pruebas SEO específicas del cliente VariStoreHN.
+- Alcance: frontend DEV. No se modificó `main`, Producción, datos, secretos, dominios ni infraestructura productiva.
+- MAPA_ARQUITECTURA: separación de identidad de plataforma vs. cliente en el shell global y fallback frontend; las rutas y SEO específicos de VariStoreHN se preservan como funcionalidad de cliente.
+
 ## 2026-09-23 — Configuración externa SOLQARYN generalizada
 
 - La configuración operativa de GitHub Actions dejó de usar nombres ligados a una fase histórica.

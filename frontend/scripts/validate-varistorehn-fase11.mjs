@@ -47,8 +47,9 @@ const failures = [];
 const expect = (condition, message) => { if (!condition) failures.push(message); };
 
 expect(!/<title>[^<]*administrativ/i.test(indexHtml), 'El shell público no debe titularse como sistema administrativo.');
-expect(indexHtml.includes('VariStoreHN | Tecnología y compras en línea'), 'El shell debe tener un título público de VariStoreHN.');
+expect(indexHtml.includes('SOLQARYN | Plataforma empresarial'), 'El shell base debe identificar a SOLQARYN, no a un cliente.');
 expect(indexHtml.includes('name="description"'), 'El shell debe incluir descripción SEO base.');
+expect(!indexHtml.includes('assets/varistorehn-logo.png'), 'El shell base no debe usar el logo de VariStoreHN como favicon global.');
 expect(indexHtml.includes('name="robots" content="noindex,nofollow,noarchive"'), 'El shell base debe fallar cerrado para indexación.');
 expect(indexHtml.includes('fonts.gstatic.com') && indexHtml.includes('crossorigin'), 'Las fuentes deben usar preconnect a gstatic para reducir bloqueo de render.');
 
