@@ -385,12 +385,14 @@ jobs:
           python3 - "$products" "$categories" "$config" <<'PY'
           import json, sys
           p=json.loads(sys.argv[1]); c=json.loads(sys.argv[2]); cfg=json.loads(sys.argv[3])
-          assert int(p.get("totalCount",0)) > 0, p
-          assert isinstance(c,list) and len(c) > 0, c
+          pdata=p.get("data",p)
+          cdata=c.get("data",c)
           data=cfg.get("data",cfg)
+          assert int(pdata.get("totalCount",0)) > 0, p
+          assert isinstance(cdata,list) and len(cdata) > 0, c
           assert (data.get("nombreComercial") or "").strip(), data
           print("SMOKE_DEV=SUCCESS")
-          print("PRODUCTOS=",p.get("totalCount"))
-          print("CATEGORIAS=",len(c))
+          print("PRODUCTOS=",pdata.get("totalCount"))
+          print("CATEGORIAS=",len(cdata))
           print("EMPRESA=",data.get("nombreComercial"))
           PY

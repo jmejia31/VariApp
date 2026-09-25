@@ -1,0 +1,46 @@
+name: DEV - Certificación post migración VariStoreHN
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - .github/checkpoints/legacy-dev-smoke-request
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-dev:
+    name: Validar API, storefront e identidad DEV
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Validar health, catálogo e identidad
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl --fail --silent --show-error --retry 8 --retry-delay 10 --max-time 120             'https://solqaryn-api-dev-fxx8.onrender.com/health/ready')"
+          products="$(curl --fail --silent --show-error --retry 8 --retry-delay 10 --max-time 120             'https://solqaryn-dev.vercel.app/api/tienda/productos?pagina=1&tamano=1')"
+          categories="$(curl --fail --silent --show-error --retry 8 --retry-delay 10 --max-time 120             'https://solqaryn-dev.vercel.app/api/tienda/categorias')"
+          config="$(curl --fail --silent --show-error --retry 8 --retry-delay 10 --max-time 120             'https://solqaryn-dev.vercel.app/api/empresa-configuracion/publica')"
+          storefront_code="$(curl -L -sS -o /tmp/storefront.html -w '%{http_code}' --max-time 120             'https://solqaryn-dev.vercel.app/varistorehn')"
+          login_code="$(curl -L -sS -o /tmp/login.html -w '%{http_code}' --max-time 120             'https://solqaryn-dev.vercel.app/login')"
+          python3 - "$health" "$products" "$categories" "$config" "$storefront_code" "$login_code" <<'PY'
+          import json, sys
+          health=json.loads(sys.argv[1])
+          p=json.loads(sys.argv[2]); c=json.loads(sys.argv[3]); cfg=json.loads(sys.argv[4])
+          storefront_code=int(sys.argv[5]); login_code=int(sys.argv[6])
+          pdata=p.get("data",p); cdata=c.get("data",c); data=cfg.get("data",cfg)
+          assert storefront_code == 200, storefront_code
+          assert login_code == 200, login_code
+          assert health.get("status") in ("Ready","ready","Healthy","healthy") or health.get("databaseReady") is True or health.get("database") in ("Ready","ready","Healthy","healthy"), health
+          assert int(pdata.get("totalCount",0)) > 0, p
+          assert isinstance(cdata,list) and len(cdata) > 0, c
+          assert (data.get("nombreComercial") or "").strip(), data
+          print("DEV_POST_MIGRATION=SUCCESS")
+          print("PRODUCTOS_PUBLICOS="+str(pdata.get("totalCount")))
+          print("CATEGORIAS_PUBLICAS="+str(len(cdata)))
+          print("EMPRESA="+str(data.get("nombreComercial")))
+          PY
