@@ -38,19 +38,19 @@ Con esto el ownership operativo del Vercel DEV nuevo queda confirmado.
 
 ## Pendiente de retiro legacy
 
-El conector Vercel actual no tiene acceso al team/cuenta personal antigua. El siguiente paso manual es abrir esa cuenta y revisar el proyecto `variapp-desarrollo`; si no contiene dominios/variables/recursos que deban conservarse, se elimina. No se debe tocar `varistorehn` productivo en esta fase DEV.
+El conector Vercel actual no tiene acceso al team/cuenta personal antigua. El siguiente paso manual es abrir esa cuenta y revisar el proyecto `proyecto Vercel DEV legacy retirado`; si no contiene dominios/variables/recursos que deban conservarse, se elimina. No se debe tocar `varistorehn` productivo en esta fase DEV.
 
-Evidencia visual recibida el 2026-09-25: el workspace personal `VariApp` muestra dos proyectos, `variapp-desarrollo` y `varistorehn`. Se confirma así el inventario legacy previo a eliminación. Solo `variapp-desarrollo` pertenece al alcance DEV.
+Evidencia visual recibida el 2026-09-25: el workspace personal `workspace Vercel personal legacy` muestra dos proyectos, `proyecto Vercel DEV legacy retirado` y `varistorehn`. Se confirma así el inventario legacy previo a eliminación. Solo `proyecto Vercel DEV legacy retirado` pertenece al alcance DEV.
 
 ### Auditoría de dominios del proyecto legacy DEV
 
-La pantalla `variapp-desarrollo -> Domains` muestra únicamente `variapp-desarrollo.vercel.app`, con configuración válida. No se observan dominios personalizados adicionales. Por tanto, no existe un dominio custom que deba transferirse antes de retirar este proyecto. La eliminación sigue bloqueada únicamente hasta revisar las variables de entorno del proyecto legacy.
+La pantalla `proyecto Vercel DEV legacy retirado -> Domains` muestra únicamente `alias automático Vercel DEV retirado`, con configuración válida. No se observan dominios personalizados adicionales. Por tanto, no existe un dominio custom que deba transferirse antes de retirar este proyecto. La eliminación sigue bloqueada únicamente hasta revisar las variables de entorno del proyecto legacy.
 
 ### Auditoría de variables de entorno del proyecto legacy DEV
 
-La pantalla `variapp-desarrollo -> Environment Variables` muestra explícitamente `No Environment Variables Added`. No existen variables de entorno de proyecto que deban migrarse o conservarse antes del retiro.
+La pantalla `proyecto Vercel DEV legacy retirado -> Environment Variables` muestra explícitamente `No Environment Variables Added`. No existen variables de entorno de proyecto que deban migrarse o conservarse antes del retiro.
 
-Con dominios y variables ya auditados, el proyecto `variapp-desarrollo` queda **AUTORIZADO PARA ELIMINACIÓN** desde la cuenta personal. Esta autorización aplica únicamente a `variapp-desarrollo`; `varistorehn` PROD continúa congelado.
+Con dominios y variables ya auditados, el proyecto `proyecto Vercel DEV legacy retirado` queda **AUTORIZADO PARA ELIMINACIÓN** desde la cuenta personal. Esta autorización aplica únicamente a `proyecto Vercel DEV legacy retirado`; `varistorehn` PROD continúa congelado.
 
 ## Observación Cloudinary
 
@@ -58,6 +58,6 @@ El catálogo migrado todavía contiene referencias de medios con prefijos histó
 
 ## Retiro final del proyecto legacy DEV
 
-El 2026-09-25 el propietario eliminó `variapp-desarrollo` del workspace personal `VariApp`. Una captura posterior de la lista de proyectos muestra únicamente `varistorehn`, que permanece congelado para PROD.
+El 2026-09-25 el propietario eliminó `proyecto Vercel DEV legacy retirado` del workspace personal `workspace Vercel personal legacy`. Una captura posterior de la lista de proyectos muestra únicamente `varistorehn`, que permanece congelado para PROD.
 
 Estado final del punto Vercel DEV: **CERRADO / LEGACY DEV RETIRADO**.

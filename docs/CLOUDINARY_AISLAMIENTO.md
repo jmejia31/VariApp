@@ -91,3 +91,30 @@ La configuración visible de `solqaryn-api-dev` contiene:
 - `Cloudinary__ApiSecret` con valor oculto.
 
 El redeploy manual `dep-darcsc0jo6nc73fffmtg` terminó `live` y el health posterior respondió HTTP 200. Pendiente final: upload funcional desde la aplicación y validación del locator resultante bajo `riyrzmob/.../solqaryn_dev/`.
+
+
+## Prueba funcional e inventario legacy — 2026-09-25
+
+### Upload funcional
+
+- Render DEV: deploy `dep-darcsc0jo6nc73fffmtg` terminó `live`.
+- Health posterior: `/health/ready` HTTP 200.
+- Upload real desde SOLQARYN DEV: PASS.
+- Cloud destino: `riyrzmob`.
+- Prefijo observado en Media Library: `solqaryn_dev/inventoryapp/productos/empresas/1/`.
+- La API pública de tienda devuelve el asset nuevo desde `res.cloudinary.com/riyrzmob/.../solqaryn_dev/...`.
+
+### Inventario read-only de referencias legacy
+
+GitHub Actions run `36182095589` / artifact `cloudinary-dev-legacy-inventory-36182095589`:
+
+- `ProductoImagenes.Url`: 10 filas;
+- `ProductoImagenes.PublicId`: 10 filas;
+- `CompraDocumentos.Url`: 1 fila;
+- `CompraDocumentos.PublicId`: 1 fila;
+- `Usuarios.FotoPerfilUrl`: 2 filas;
+- `Usuarios.FotoPerfilPublicId`: 2 filas.
+
+Interpretación operacional: 13 filas lógicas de assets continúan enlazadas al Cloudinary legacy. El escaneo fue solo lectura, sobre `solqaryn_dev`, y no tocó Producción.
+
+Estado del punto: **Cloudinary DEV nuevo funcional; cierre global PENDIENTE de migrar 13 assets legacy y volver a escanear hasta cero referencias.**

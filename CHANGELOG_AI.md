@@ -1,3 +1,11 @@
+## 2026-09-25 — Cloudinary DEV: upload canónico validado e inventario legacy cuantificado
+
+- El upload real desde la aplicación DEV creó un asset en el cloud `riyrzmob` bajo `solqaryn_dev/inventoryapp/productos/empresas/1/`; la API pública devuelve la URL nueva.
+- Render DEV quedó `live` después de configurar `Cloudinary__CloudName=riyrzmob`, la key DEV y `Cloudinary__EnvironmentPrefix=solqaryn_dev`.
+- Inventario read-only run `36182095589` / artifact `cloudinary-dev-legacy-inventory-36182095589` detectó 13 filas lógicas aún dependientes del cloud legacy: 10 imágenes de producto, 1 documento de compra y 2 fotos de perfil.
+- No hubo escrituras en el inventario ni se tocó PROD.
+- Decisión: no eliminar todavía el Cloudinary personal. El siguiente subpaso es migrar esas 13 referencias y revalidar cero dependencias.
+
 ## 2026-09-25 — Cloudinary DEV conectado a Render y redeploy validado
 
 - Captura de Render `solqaryn-api-dev` confirma las variables `Cloudinary__ApiKey`, `Cloudinary__ApiSecret`, `Cloudinary__CloudName=riyrzmob` y `Cloudinary__EnvironmentPrefix=solqaryn_dev`.
@@ -32,21 +40,21 @@
 
 ## 2026-09-25 — Vercel DEV legacy eliminado de la cuenta personal
 
-- El propietario eliminó manualmente el proyecto `variapp-desarrollo` del workspace personal `VariApp`.
+- El propietario eliminó manualmente el proyecto `proyecto Vercel DEV legacy retirado` del workspace personal `workspace Vercel personal legacy`.
 - Evidencia visual posterior muestra que en ese workspace ya sólo permanece `varistorehn`.
 - `varistorehn` se mantiene congelado para la futura fase PROD.
 - Resultado: Vercel DEV nuevo `solqaryn-dev` continúa como único DEV canónico bajo SOLQARYN y la dependencia Vercel DEV de la cuenta personal queda retirada.
 
 ## 2026-09-25 — Vercel legacy DEV: variables ambientales auditadas antes de eliminación
 
-- Captura de `variapp-desarrollo -> Environment Variables` confirma `No Environment Variables Added`.
+- Captura de `proyecto Vercel DEV legacy retirado -> Environment Variables` confirma `No Environment Variables Added`.
 - El proyecto legacy DEV no contiene variables de entorno de proyecto que deban migrarse o conservarse.
-- Junto con la auditoría previa de dominios (solo `variapp-desarrollo.vercel.app`), el proyecto `variapp-desarrollo` queda autorizado para eliminación manual desde la cuenta personal.
+- Junto con la auditoría previa de dominios (solo `alias automático Vercel DEV retirado`), el proyecto `proyecto Vercel DEV legacy retirado` queda autorizado para eliminación manual desde la cuenta personal.
 - `varistorehn` PROD permanece fuera de alcance y no debe tocarse.
 
 ## 2026-09-25 — Vercel legacy DEV: dominios auditados antes de eliminación
 
-- Captura del proyecto personal `variapp-desarrollo` confirma que la sección Domains contiene únicamente `variapp-desarrollo.vercel.app`.
+- Captura del proyecto personal `proyecto Vercel DEV legacy retirado` confirma que la sección Domains contiene únicamente `alias automático Vercel DEV retirado`.
 - No se observan dominios personalizados adicionales en ese proyecto.
 - El dominio es el alias automático de Vercel del proyecto legacy y no necesita migración.
 - El proyecto aún NO se elimina hasta revisar Environment Variables.
@@ -54,8 +62,8 @@
 
 ## 2026-09-25 — Vercel legacy personal inventariado antes del retiro DEV
 
-- Captura del propietario confirma que la cuenta/workspace Vercel personal `VariApp` mantiene dos proyectos: `variapp-desarrollo` y `varistorehn`.
-- Alcance de cierre DEV: auditar y retirar únicamente `variapp-desarrollo`.
+- Captura del propietario confirma que la cuenta/workspace Vercel personal `workspace Vercel personal legacy` mantiene dos proyectos: `proyecto Vercel DEV legacy retirado` y `varistorehn`.
+- Alcance de cierre DEV: auditar y retirar únicamente `proyecto Vercel DEV legacy retirado`.
 - `varistorehn` queda explícitamente fuera de alcance y congelado hasta la fase PROD.
 - No se ha eliminado ningún proyecto en este paso.
 
@@ -64,7 +72,7 @@
 - Evidencia visual del dashboard `vercel.com/solqaryn` muestra el workspace/team activo `SOLQARYN` y la sesión `solqarynplatform-5337` asociada a `solqaryn.platform@outlook.com`.
 - Esto completa la comprobación de ownership que el conector Vercel no podía exponer por API.
 - El proyecto nuevo `solqaryn-dev` queda **CERRADO / PASS** en Vercel DEV.
-- Permanece pendiente únicamente retirar `variapp-desarrollo` desde la cuenta Vercel personal antigua, tras inspeccionar que no tenga dominios/variables que deban conservarse.
+- Permanece pendiente únicamente retirar `proyecto Vercel DEV legacy retirado` desde la cuenta Vercel personal antigua, tras inspeccionar que no tenga dominios/variables que deban conservarse.
 - `varistorehn` de Producción no se toca en la fase DEV.
 
 ## 2026-09-25 — Vercel DEV técnicamente certificado; cierre de ownership/legacy requiere panel
@@ -75,7 +83,7 @@
 - Rutas `/`, `/login`, `/dashboard`, `/varistorehn` y `/varistorehn/productos` responden HTTP 200.
 - APIs de identidad, categorías y productos responden HTTP 200 con los datos migrados de VariStoreHN.
 - Vercel reporta cero runtime errors en las últimas 24 horas.
-- El conector no expone el email del owner del team ni tiene acceso al proyecto personal legacy `variapp-desarrollo`; el propietario debe confirmar el email del team y, al final del punto, eliminar el proyecto legacy desde la cuenta personal.
+- El conector no expone el email del owner del team ni tiene acceso al proyecto personal legacy `proyecto Vercel DEV legacy retirado`; el propietario debe confirmar el email del team y, al final del punto, eliminar el proyecto legacy desde la cuenta personal.
 - Se observan URLs Cloudinary históricas en el catálogo; se trasladan al punto Cloudinary y no se borran activos aún.
 
 ## 2026-09-25 — Render DEV certificado bajo SOLQARYN

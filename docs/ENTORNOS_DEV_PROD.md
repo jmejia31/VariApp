@@ -147,11 +147,11 @@ Estado del recurso nuevo: **CERRADO / PASS**.
 
 Ownership visual confirmado por el propietario en el dashboard: la sesión que administra `vercel.com/solqaryn` corresponde a `solqarynplatform-5337` con correo `solqaryn.platform@outlook.com`, mientras el workspace/team activo es `SOLQARYN`.
 
-El recurso nuevo Vercel DEV queda cerrado. El único pendiente de Vercel para retirar la dependencia personal es entrar a la cuenta antigua y eliminar exclusivamente el proyecto `variapp-desarrollo` después de una última inspección de dominios/variables. No tocar `varistorehn` PROD durante esta fase.
+El recurso nuevo Vercel DEV queda cerrado. El único pendiente de Vercel para retirar la dependencia personal es entrar a la cuenta antigua y eliminar exclusivamente el proyecto `proyecto Vercel DEV legacy retirado` después de una última inspección de dominios/variables. No tocar `varistorehn` PROD durante esta fase.
 
-Evidencia visual de la cuenta personal legacy confirmó que el workspace `VariApp` contiene los proyectos `variapp-desarrollo` y `varistorehn`. En el cierre DEV, solo `variapp-desarrollo` entra en alcance de retiro; `varistorehn` permanece congelado para la futura fase PROD.
+Evidencia visual de la cuenta personal legacy confirmó que el workspace `workspace Vercel personal legacy` contiene los proyectos `proyecto Vercel DEV legacy retirado` y `varistorehn`. En el cierre DEV, solo `proyecto Vercel DEV legacy retirado` entra en alcance de retiro; `varistorehn` permanece congelado para la futura fase PROD.
 
-Cierre final: el propietario eliminó `variapp-desarrollo` y una captura posterior del workspace personal muestra únicamente `varistorehn`. Resultado: **VERCEL DEV LEGACY RETIRADO / CERRADO**. `varistorehn` permanece intacto para PROD.
+Cierre final: el propietario eliminó `proyecto Vercel DEV legacy retirado` y una captura posterior del workspace personal muestra únicamente `varistorehn`. Resultado: **VERCEL DEV LEGACY RETIRADO / CERRADO**. `varistorehn` permanece intacto para PROD.
 
 La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
 
@@ -171,7 +171,9 @@ Evidencia visual del panel Cloudinary:
 
 El código DEV exige `Cloudinary__EnvironmentPrefix=solqaryn_dev` y construye nuevas rutas bajo `solqaryn_dev/.../`. Sin embargo, el catálogo migrado conserva URLs históricas de otro cloud/prefijos legacy. Por tanto no se elimina ningún activo o credencial Cloudinary antigua todavía.
 
-Siguiente control obligatorio: certificar la API key DEV del cloud `riyrzmob` y comprobar que Render DEV usa esa credencial; después realizar un upload de prueba y verificar que el PublicId generado empiece por `solqaryn_dev/`.
+Control funcional completado: Render DEV usa el cloud `riyrzmob` con `Cloudinary__EnvironmentPrefix=solqaryn_dev`, el deploy posterior quedó `live`, y un upload real desde la aplicación creó un asset en `solqaryn_dev/inventoryapp/productos/empresas/1/`. La API pública de DEV ya devuelve esa URL nueva.
+
+Inventario read-only canónico: GitHub Actions run `36182095589`, artifact `cloudinary-dev-legacy-inventory-36182095589`. Se detectaron 13 filas lógicas que todavía dependen del cloud legacy: 10 imágenes de producto, 1 documento de compra y 2 fotos de perfil. No hubo escrituras ni contacto con PROD. Cloudinary DEV no se considera cerrado globalmente hasta copiar esos assets al cloud `riyrzmob`, actualizar URL/PublicId en `solqaryn_dev` y obtener un inventario final con cero referencias legacy.
 
 ## 8. Gobierno de acceso GitHub
 
