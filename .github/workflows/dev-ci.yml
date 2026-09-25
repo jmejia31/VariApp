@@ -348,7 +348,7 @@ jobs:
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
           grep -q 'branch: dev' render.yaml
-          grep -q 'name: solqaryn-api-desarrollo' render.yaml
+          grep -q 'name: solqaryn-api-dev' render.yaml
           grep -q 'healthCheckPath: /health/ready' render.yaml
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'solqaryn_dev'

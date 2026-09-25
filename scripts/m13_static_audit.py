@@ -114,7 +114,7 @@ required_render = [
     "name: solqaryn-api-dev",
     "value: solqaryn_dev",
     "value: https://solqaryn-dev.vercel.app",
-    "value: https://solqaryn-api-dev.onrender.com",
+    "value: https://solqaryn-api-dev-fxx8.onrender.com",
 ]
 for token in required_render:
     if token not in render:

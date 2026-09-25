@@ -110,6 +110,8 @@ if (vercel) {
   expect(rewrites.some(item => item.source === '/varistorehn/producto/:slug' && String(item.destination).includes('kind=product')), 'Bots de producto deben recibir HTML OG server-side.');
   expect(rewrites.some(item => item.source === '/varistorehn/categoria/:slug' && String(item.destination).includes('kind=category')), 'Bots de categoría deben recibir HTML SEO server-side.');
   expect(rewrites.some(item => item.source === '/api/:path*'), 'El proxy API existente debe preservarse.');
+  expect(!rewrites.some(item => item.source === '/' && String(item.destination).includes('kind=home')), 'La raiz SOLQARYN no debe reescribirse al SEO del cliente VariStoreHN.');
+  expect(rewrites.some(item => item.source === '/api/:path*' && String(item.destination).includes('solqaryn-api-dev-fxx8.onrender.com')), 'El proxy DEV debe usar el hostname canonico real de Render.');
   expect(rewrites.at(-1)?.source === '/(.*)' && rewrites.at(-1)?.destination === '/index.html', 'El fallback SPA debe permanecer al final.');
 }
 

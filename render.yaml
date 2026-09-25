@@ -15,7 +15,7 @@ services:
       - key: AllowedHosts
         value: solqaryn-api-dev-fxx8.onrender.com
       - key: Database__ServerVersion
-        value: 8.4.3
+        value: 8.4.8
       - key: Database__ApplyMigrationsOnStartup
         value: "true"
       - key: ConnectionStrings__DefaultConnection

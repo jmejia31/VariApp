@@ -1,3 +1,11 @@
+## 2026-09-25 — Auditoría DEV: proxy Vercel, CI y endpoint Render canónico
+
+- Vercel DEV deja de apuntar al hostname inexistente `solqaryn-api-dev.onrender.com` y usa `solqaryn-api-dev-fxx8.onrender.com`.
+- La raíz `/` ya no reescribe bots al SEO de VariStoreHN; SOLQARYN conserva su identidad de plataforma y el cliente vive bajo `/varistorehn`.
+- Se corrigieron gates CI que todavía exigían `solqaryn-api-desarrollo` o el hostname Render anterior.
+- Runbooks operativos y auditoría M13 quedaron alineados al hostname DEV real.
+- `Database__ServerVersion` declarativo se alinea con MySQL 8.4.8 observado en Aiven DEV.
+
 ## 2026-09-25 — Shell DEV desacoplado de la identidad de VariStoreHN
 
 - El storefront obtiene una frontera propia `VaristorehnIdentidadService`: su identidad comercial se carga desde la configuración pública y, ante indisponibilidad, degrada a `Tienda` sin presentar SOLQARYN como si fuera el cliente.

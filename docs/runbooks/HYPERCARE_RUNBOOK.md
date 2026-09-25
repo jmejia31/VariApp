@@ -5,8 +5,8 @@
 Ventana de observación posterior a un cambio o ensayo autorizado de `Desarrollo`. No autoriza cambios de Producción, DNS, certificados, plan, secretos, `main` ni PR #2. Los únicos endpoints públicos usados por este runbook son:
 
 - `https://solqaryn-desarrollo.vercel.app`
-- `https://solqaryn-api-dev.onrender.com/health`
-- `https://solqaryn-api-dev.onrender.com/health/ready`
+- `https://solqaryn-api-dev-fxx8.onrender.com/health`
+- `https://solqaryn-api-dev-fxx8.onrender.com/health/ready`
 
 ## Roles y locks
 
@@ -24,7 +24,7 @@ set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
 git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
 export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
-export BACKEND_URL="https://solqaryn-api-dev.onrender.com"
+export BACKEND_URL="https://solqaryn-api-dev-fxx8.onrender.com"
 git rev-parse HEAD
 date -u +%Y-%m-%dT%H:%M:%SZ
 ```

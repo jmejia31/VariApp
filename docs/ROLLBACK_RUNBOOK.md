@@ -33,7 +33,7 @@ set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
 git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
 export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
-export BACKEND_URL="https://solqaryn-api-dev.onrender.com"
+export BACKEND_URL="https://solqaryn-api-dev-fxx8.onrender.com"
 curl --fail-with-body --silent --show-error --max-time 30 "$BACKEND_URL/health/ready"
 curl --fail-with-body --silent --show-error --max-time 30 -L -o /dev/null "$FRONTEND_URL/"
 ```
@@ -66,10 +66,10 @@ Usar la capacidad autorizada de rollback/redeploy del proveedor hacia PREVIOUS_K
 ```bash
 set -euo pipefail
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://solqaryn-api-dev.onrender.com/health"
+  "https://solqaryn-api-dev-fxx8.onrender.com/health"
 printf '\n'
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://solqaryn-api-dev.onrender.com/health/ready"
+  "https://solqaryn-api-dev-fxx8.onrender.com/health/ready"
 printf '\n'
 ```
 

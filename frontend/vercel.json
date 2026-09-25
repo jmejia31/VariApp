@@ -11,17 +11,6 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(Googlebot|googlebot|Bingbot|bingbot|facebookexternalhit|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Slackbot).*"
-        }
-      ],
-      "destination": "/api/seo?kind=home"
-    },
-    {
       "source": "/varistorehn",
       "has": [
         {
@@ -99,7 +88,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://solqaryn-api-dev.onrender.com/:path*"
+      "destination": "https://solqaryn-api-dev-fxx8.onrender.com/:path*"
     },
     {
       "source": "/(.*)",
