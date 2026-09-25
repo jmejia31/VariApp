@@ -119,28 +119,27 @@ jobs:
           export RESTORE_REPORT_PATH="$RUNNER_TEMP/source-restore-report.json"
           export RESTORE_FILES_DIR="$RUNNER_TEMP/source-restored-files"
           bash scripts/restore_dev.sh
-      - name: Crear dump exclusivo de datos desde el snapshot restaurado
+      - name: Crear dump completo desde el snapshot restaurado
         shell: bash
         run: |
           set -euo pipefail
           export MYSQL_PWD=root
           mkdir -p source-payload
           DB=solqaryn_legacy_source_snapshot
-          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB"             --batch --skip-column-names -e "
+          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB" --batch --skip-column-names -e "
             SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';" | grep -qx '137'
-          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB"             --batch --skip-column-names -e "SELECT COUNT(*) FROM __EFMigrationsHistory;" | grep -qx '107'
-          mysqldump --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED             --no-create-info --skip-triggers --skip-add-locks --skip-disable-keys             --single-transaction --skip-lock-tables --quick --complete-insert --hex-blob             --default-character-set=utf8mb4 --no-tablespaces             --ignore-table="$DB.__EFMigrationsHistory"             "$DB" > source-payload/source-data.sql
-          test -s source-payload/source-data.sql
+          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB" --batch --skip-column-names -e "SELECT COUNT(*) FROM __EFMigrationsHistory;" | grep -qx '107'
+          mysqldump --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED             --single-transaction --skip-lock-tables --quick --hex-blob             --default-character-set=utf8mb4 --no-tablespaces --triggers             --set-gtid-purged=OFF --skip-add-locks --skip-disable-keys             "$DB" > source-payload/source-full.sql
+          test -s source-payload/source-full.sql
           : > source-payload/source-counts.tsv
           while IFS= read -r table_name; do
             test -n "$table_name" || continue
-            count="$(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB"               --batch --skip-column-names -e "SELECT COUNT(*) FROM \`$table_name\`;")"
+            count="$(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB" --batch --skip-column-names -e "SELECT COUNT(*) FROM \`$table_name\`;")"
             printf '%s\t%s\n' "$table_name" "$count" >> source-payload/source-counts.tsv
-          done < <(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB"             --batch --skip-column-names -e "
+          done < <(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED "$DB" --batch --skip-column-names -e "
             SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'
-              AND TABLE_NAME <> '__EFMigrationsHistory'
             ORDER BY TABLE_NAME;")
           cp "$RUNNER_TEMP/source-restore-report.json" source-payload/source-restore-report.json
           tar -czf "$RUNNER_TEMP/source-payload.tar.gz" -C source-payload .
@@ -216,7 +215,7 @@ jobs:
           gpg --batch --import "$RUNNER_TEMP/private.asc"
           gpg --batch --yes --decrypt             --output "$RUNNER_TEMP/source-payload.tar.gz"             encrypted-source/source-payload.tar.gz.gpg
           tar -xzf "$RUNNER_TEMP/source-payload.tar.gz" -C "$RUNNER_TEMP/source"
-          test -s "$RUNNER_TEMP/source/source-data.sql"
+          test -s "$RUNNER_TEMP/source/source-full.sql"
           test -s "$RUNNER_TEMP/source/source-counts.tsv"
           rm -f "$RUNNER_TEMP/private.asc"
       - name: Backup cifrado de solqaryn_dev antes de modificar datos
@@ -276,52 +275,46 @@ jobs:
               (SELECT COUNT(*) FROM OrdenesCompra) +
               (SELECT COUNT(*) FROM MovimientosInventario);")"
           test "$business" = "0" || { echo "ABORT: solqaryn_dev ya contiene datos de negocio ($business filas protegidas)."; exit 41; }
-          "${MYSQL[@]}" -e "CREATE TABLE __solqaryn_migration_probe (Id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB; DROP TABLE __solqaryn_migration_probe;"
+          "${MYSQL[@]}" -e "
+            CREATE TABLE __solqaryn_migration_probe (Id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB;
+            CREATE TRIGGER __solqaryn_migration_probe_bi BEFORE INSERT ON __solqaryn_migration_probe
+              FOR EACH ROW SET NEW.Id = NEW.Id;
+            DROP TRIGGER __solqaryn_migration_probe_bi;
+            DROP TABLE __solqaryn_migration_probe;"
           echo "GUARDAS_DESTINO=PASS"
-      - name: Preparar rollback de datos y ejecutar migración atómica
+      - name: Preparar rollback completo y ejecutar migración
         shell: bash
         run: |
           set -Eeuo pipefail
           export MYSQL_PWD="$DB_PASSWORD"
           MYSQL_BASE=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME")
           MYSQL_BATCH=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names)
-          mysqldump --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED             --no-create-info --skip-triggers --skip-add-locks --skip-disable-keys             --single-transaction --skip-lock-tables --quick --complete-insert --hex-blob             --default-character-set=utf8mb4 --no-tablespaces --set-gtid-purged=OFF             --ignore-table="$DB_NAME.__EFMigrationsHistory"             "$DB_NAME" > "$RUNNER_TEMP/rollback-data.sql"
 
-          "${MYSQL_BATCH[@]}" -e "
-            SELECT CONCAT('DELETE FROM \`', TABLE_NAME, '\`;')
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'
-              AND TABLE_NAME <> '__EFMigrationsHistory'
-            ORDER BY TABLE_NAME;" > "$RUNNER_TEMP/delete-data.sql"
+          mysqldump --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED             --single-transaction --skip-lock-tables --quick --hex-blob             --default-character-set=utf8mb4 --no-tablespaces --triggers             --set-gtid-purged=OFF --skip-add-locks --skip-disable-keys             "$DB_NAME" > "$RUNNER_TEMP/rollback-full.sql"
+
+          cp "$RUNNER_TEMP/source/source-full.sql" "$RUNNER_TEMP/source-ready.sql"
+          cp "$RUNNER_TEMP/rollback-full.sql" "$RUNNER_TEMP/rollback-ready.sql"
+
+          perl -0pi -e 's/DEFINER=`[^`]+`@`[^`]+`/DEFINER=CURRENT_USER/g' "$RUNNER_TEMP/source-ready.sql" "$RUNNER_TEMP/rollback-ready.sql"
+
+          for sql in "$RUNNER_TEMP/source-ready.sql" "$RUNNER_TEMP/rollback-ready.sql"; do
+            if grep -Eiq '^[[:space:]]*(CREATE|DROP)[[:space:]]+DATABASE|^[[:space:]]*USE[[:space:]]+' "$sql"; then
+              echo "ABORT: dump contiene operación a nivel database: $sql"
+              exit 42
+            fi
+          done
 
           rollback() {
             rc=$?
             trap - ERR
-            echo "MIGRATION_FAILURE rc=$rc; restaurando datos previos..."
-            {
-              echo 'SET FOREIGN_KEY_CHECKS=0;'
-              echo 'START TRANSACTION;'
-              cat "$RUNNER_TEMP/delete-data.sql"
-              cat "$RUNNER_TEMP/rollback-data.sql"
-              echo 'COMMIT;'
-              echo 'SET FOREIGN_KEY_CHECKS=1;'
-            } > "$RUNNER_TEMP/rollback.sql"
-            "${MYSQL_BASE[@]}" < "$RUNNER_TEMP/rollback.sql"
-            echo "ROLLBACK_DATOS=SUCCESS"
+            echo "MIGRATION_FAILURE rc=$rc; restaurando snapshot completo previo..."
+            "${MYSQL_BASE[@]}" < "$RUNNER_TEMP/rollback-ready.sql"
+            echo "ROLLBACK_COMPLETO=SUCCESS"
             exit "$rc"
           }
           trap rollback ERR
 
-          {
-            echo 'SET FOREIGN_KEY_CHECKS=0;'
-            echo 'START TRANSACTION;'
-            cat "$RUNNER_TEMP/delete-data.sql"
-            cat "$RUNNER_TEMP/source/source-data.sql"
-            echo 'COMMIT;'
-            echo 'SET FOREIGN_KEY_CHECKS=1;'
-          } > "$RUNNER_TEMP/migrate.sql"
-
-          "${MYSQL_BASE[@]}" < "$RUNNER_TEMP/migrate.sql"
+          "${MYSQL_BASE[@]}" < "$RUNNER_TEMP/source-ready.sql"
 
           while IFS=$'\t' read -r table_name expected; do
             test -n "$table_name" || continue
@@ -332,12 +325,13 @@ jobs:
             }
           done < "$RUNNER_TEMP/source/source-counts.tsv"
 
+          tables="$("${MYSQL_BATCH[@]}" -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';")"
           migrations="$("${MYSQL_BATCH[@]}" -e "SELECT COUNT(*) FROM __EFMigrationsHistory;")"
-          test "$migrations" = "107"
-
           products="$("${MYSQL_BATCH[@]}" -e "SELECT COUNT(*) FROM Productos;")"
           categories="$("${MYSQL_BATCH[@]}" -e "SELECT COUNT(*) FROM Categorias;")"
           users="$("${MYSQL_BATCH[@]}" -e "SELECT COUNT(*) FROM Usuarios;")"
+          test "$tables" = "137"
+          test "$migrations" = "107"
           test "$products" -gt 0
           test "$categories" -gt 0
           test "$users" -ge 4
