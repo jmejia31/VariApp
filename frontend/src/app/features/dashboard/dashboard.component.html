@@ -69,6 +69,22 @@
       </article>
     </div>
 
+    <article class="card automation-compact" aria-labelledby="automation-title">
+      <div>
+        <h2 id="automation-title">Asistente operativo</h2>
+        <p>Ninguna sugerencia modifica datos automáticamente.</p>
+      </div>
+      @if (loadingAutomatizacion()) {
+        <mat-spinner diameter="24"></mat-spinner>
+      } @else if (automatizacion(); as a) {
+        @if (a.sugerencias.length === 0) {
+          <span class="automation-status"><mat-icon>task_alt</mat-icon> Sin pendientes</span>
+        } @else {
+          <span class="automation-status"><strong>{{ a.sugerencias.length }}</strong> recordatorios</span>
+        }
+      }
+    </article>
+
     @if (esAdministrador()) {
       <details class="card dashboard-settings">
         <summary><span><mat-icon>tune</mat-icon> Configurar indicadores del dashboard</span><mat-icon>expand_more</mat-icon></summary>
