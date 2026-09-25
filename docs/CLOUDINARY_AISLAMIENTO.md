@@ -58,3 +58,15 @@ La opción más segura sigue siendo usar un product environment o una cuenta Clo
 - Media Library observada: contenido de ejemplo únicamente
 
 Estado: ownership del Cloudinary nuevo confirmado. Aún falta certificar la API key usada por Render DEV y realizar un upload real que produzca un PublicId bajo `solqaryn_dev/` antes de retirar cualquier recurso Cloudinary legacy.
+
+## Inventario de API keys — 2026-09-25
+
+La evidencia visual del cloud `riyrzmob` muestra una única API key activa llamada `Root`, creada el 2026-09-22. No existe todavía una key dedicada `solqaryn_dev`.
+
+Decisión operativa:
+
+- conservar `Root` sin usarla como credencial de aplicación;
+- crear una API key dedicada denominada `solqaryn_dev`;
+- usar esa key exclusivamente en Render DEV;
+- no revelar ni registrar el API Secret en chat/repositorio/capturas;
+- PROD permanece fuera de alcance.

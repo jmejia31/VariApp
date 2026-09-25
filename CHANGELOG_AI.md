@@ -1,3 +1,11 @@
+## 2026-09-25 — Cloudinary DEV: inventario de API keys
+
+- Captura de `Cloudinary -> Product environment settings -> API Keys` para cloud `riyrzmob` muestra una sola key activa llamada `Root`, creada el 2026-09-22.
+- No existe todavía una key dedicada llamada `solqaryn_dev`.
+- El valor de API Secret no fue revelado ni registrado.
+- Decisión: no reutilizar la key Root como credencial operativa DEV; crear una API key dedicada `solqaryn_dev`, mantener Root para administración/recuperación y luego configurar Render DEV con la key dedicada.
+- PROD no se toca.
+
 ## 2026-09-25 — Cloudinary DEV ownership confirmado
 
 - Capturas del panel confirman perfil `Solqaryn Platform` con correo `solqaryn.platform@outlook.com`.
