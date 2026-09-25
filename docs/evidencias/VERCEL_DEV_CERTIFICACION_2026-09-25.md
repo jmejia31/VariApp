@@ -55,3 +55,9 @@ Con dominios y variables ya auditados, el proyecto `variapp-desarrollo` queda **
 ## Observación Cloudinary
 
 El catálogo migrado todavía contiene referencias de medios con prefijos históricos como `desarrollo/` y `varistorehn_desarrollo/`. Esto pertenece al siguiente punto Cloudinary; no borrar esos activos hasta completar esa auditoría.
+
+## Retiro final del proyecto legacy DEV
+
+El 2026-09-25 el propietario eliminó `variapp-desarrollo` del workspace personal `VariApp`. Una captura posterior de la lista de proyectos muestra únicamente `varistorehn`, que permanece congelado para PROD.
+
+Estado final del punto Vercel DEV: **CERRADO / LEGACY DEV RETIRADO**.

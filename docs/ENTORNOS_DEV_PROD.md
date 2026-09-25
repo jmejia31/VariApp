@@ -151,6 +151,8 @@ El recurso nuevo Vercel DEV queda cerrado. El único pendiente de Vercel para re
 
 Evidencia visual de la cuenta personal legacy confirmó que el workspace `VariApp` contiene los proyectos `variapp-desarrollo` y `varistorehn`. En el cierre DEV, solo `variapp-desarrollo` entra en alcance de retiro; `varistorehn` permanece congelado para la futura fase PROD.
 
+Cierre final: el propietario eliminó `variapp-desarrollo` y una captura posterior del workspace personal muestra únicamente `varistorehn`. Resultado: **VERCEL DEV LEGACY RETIRADO / CERRADO**. `varistorehn` permanece intacto para PROD.
+
 La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
 
 ## 8. Gobierno de acceso GitHub

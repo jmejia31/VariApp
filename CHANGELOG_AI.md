@@ -1,3 +1,10 @@
+## 2026-09-25 — Vercel DEV legacy eliminado de la cuenta personal
+
+- El propietario eliminó manualmente el proyecto `variapp-desarrollo` del workspace personal `VariApp`.
+- Evidencia visual posterior muestra que en ese workspace ya sólo permanece `varistorehn`.
+- `varistorehn` se mantiene congelado para la futura fase PROD.
+- Resultado: Vercel DEV nuevo `solqaryn-dev` continúa como único DEV canónico bajo SOLQARYN y la dependencia Vercel DEV de la cuenta personal queda retirada.
+
 ## 2026-09-25 — Vercel legacy DEV: variables ambientales auditadas antes de eliminación
 
 - Captura de `variapp-desarrollo -> Environment Variables` confirma `No Environment Variables Added`.
