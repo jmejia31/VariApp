@@ -1,3 +1,12 @@
+## 2026-09-25 — Cloudflare DEV/DNS cerrado como N/A runtime
+
+- Vercel DEV canónico `solqaryn-dev` fue leído por API y expone únicamente dominios administrados por Vercel: `solqaryn-dev.vercel.app`, `solqaryn-dev-solqaryn.vercel.app` y `solqaryn-dev-git-dev-solqaryn.vercel.app`.
+- Render DEV canónico expone únicamente `https://solqaryn-api-dev-fxx8.onrender.com`.
+- El repositorio no contiene una integración/configuración Cloudflare ni un dominio `solqaryn.com` activo para DEV.
+- No existe actualmente un CNAME/A/AAAA custom de DEV que deba transferirse para mantener operativa la plataforma.
+- Conclusión: Cloudflare no forma parte de la cadena crítica DEV actual; el punto Cloudflare DEV/DNS queda **N/A / CERRADO** para el cierre de DEV.
+- La titularidad de la cuenta Cloudflare y cualquier zona futura/productiva se auditarán por separado al preparar dominios propios/PROD; no se realizó ningún cambio DNS ni certificado.
+
 ## 2026-09-25 — DEV: reconciliado stock administrativo vs storefront
 
 - Causa confirmada: el listado administrativo proyecta `ProductoVariante.Cantidad` como bridge de compatibilidad; el storefront y checkout usan `ExistenciaVariante.StockDisponible` como autoridad física.

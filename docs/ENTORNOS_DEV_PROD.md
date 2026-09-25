@@ -208,3 +208,18 @@ Controles ejecutados:
 - API pública verificada: Cargador 26, Laptop 15, Funda para samsung 1, UAT Producto 001 10.
 
 Dos variantes asociadas a productos eliminados conservan 5 unidades en campos legacy históricos y permanecen fuera del stock activo y del storefront. No se alteró Producción.
+
+
+### Cloudflare DEV / DNS — 2026-09-25
+
+Estado: **N/A COMO DEPENDENCIA RUNTIME / CERRADO PARA DEV**.
+
+Readback de proveedores canónicos:
+
+- Vercel project: `solqaryn-dev`;
+- dominios DEV: `solqaryn-dev.vercel.app`, `solqaryn-dev-solqaryn.vercel.app`, `solqaryn-dev-git-dev-solqaryn.vercel.app`;
+- no se observan dominios custom asociados al proyecto;
+- Render API DEV: `https://solqaryn-api-dev-fxx8.onrender.com`;
+- no hay configuración Cloudflare en el repositorio ni hostname `solqaryn.com` usado por el runtime DEV.
+
+Conclusión: DEV opera directamente sobre hostnames administrados por Vercel y Render. No existe una dependencia DNS de Cloudflare que deba migrarse antes de retirar recursos personales DEV. La cuenta/zona Cloudflare sigue siendo relevante para dominios propios futuros y/o PROD, pero no es un blocker de cierre DEV y no se tocó en esta fase.
