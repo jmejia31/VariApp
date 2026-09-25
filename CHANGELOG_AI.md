@@ -1,3 +1,11 @@
+## 2026-09-25 — Cloudinary DEV conectado a Render y redeploy validado
+
+- Captura de Render `solqaryn-api-dev` confirma las variables `Cloudinary__ApiKey`, `Cloudinary__ApiSecret`, `Cloudinary__CloudName=riyrzmob` y `Cloudinary__EnvironmentPrefix=solqaryn_dev`.
+- API Key y API Secret permanecen ocultos; la key destinada es `solqaryn_dev`.
+- Render lanzó el deploy manual `dep-darcsc0jo6nc73fffmtg`, que terminó `live` el 2026-09-25T19:41:55Z.
+- El health `/health/ready` del nuevo instance respondió HTTP 200 después del redeploy.
+- Falta únicamente el upload funcional de un activo DEV para demostrar que el PublicId/URL nuevo queda bajo el cloud `riyrzmob` y prefijo `solqaryn_dev/`.
+
 ## 2026-09-25 — Cloudinary keys DEV/PROD creadas
 
 - Evidencia visual confirma tres API keys activas en el cloud `riyrzmob`: `Root`, `solqaryn_dev` y `solqaryn_prod`.

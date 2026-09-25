@@ -80,3 +80,14 @@ Evidencia visual confirma las siguientes keys activas en `riyrzmob`:
 - `solqaryn_prod`: credencial reservada para PROD, aún sin conectar.
 
 No almacenar ni revelar API Secret en Git, documentación, capturas o chat.
+
+## Render DEV conectado — 2026-09-25
+
+La configuración visible de `solqaryn-api-dev` contiene:
+
+- `Cloudinary__CloudName=riyrzmob`;
+- `Cloudinary__EnvironmentPrefix=solqaryn_dev`;
+- `Cloudinary__ApiKey` con valor oculto;
+- `Cloudinary__ApiSecret` con valor oculto.
+
+El redeploy manual `dep-darcsc0jo6nc73fffmtg` terminó `live` y el health posterior respondió HTTP 200. Pendiente final: upload funcional desde la aplicación y validación del locator resultante bajo `riyrzmob/.../solqaryn_dev/`.
