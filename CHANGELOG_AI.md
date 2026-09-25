@@ -1880,3 +1880,13 @@ MAPA_ARQUITECTURA: SIN_CAMBIO — normalización de configuración operativa y c
 - PROD no fue modificado.
 
 MAPA_ARQUITECTURA: SIN_CAMBIO.
+
+
+## 2026-09-25 — Reset canónico de autoridad a CURRENT-STATE ONLY
+
+- `AGENTS.md`, `docs/VAEP_AUTHORITY.md`, `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y la skill local de gobierno fueron alineados a `PROJECT_ID=SOLQARYN`, `REPOSITORY=solqaryn/Solqaryn` y `BRANCH=dev`.
+- El MAESTRO vigente se construye exclusivamente desde objetivos, dependencias y estado vivo actuales.
+- Ninguna fase, fila, gate, secuencia, protocolo o decisión no incorporada expresamente al MAESTRO vigente puede condicionar el nuevo plan maestro.
+- Las diez automatizaciones conservan el modelo `TASKS_ONLY`, leases, REVIEW_FIRST, recovery, tests/gates causales y cierre `LISTO`.
+- La libertad para rediseñar o reemplazar implementación no elimina seguridad, RBAC, tenancy, integridad de datos, trazabilidad, rollback ni autorización explícita para `main`/PROD.
+- No se reescribió historial Git ni se modificó producto, datos o infraestructura.
