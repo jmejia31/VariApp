@@ -149,6 +149,8 @@ Ownership visual confirmado por el propietario en el dashboard: la sesión que a
 
 El recurso nuevo Vercel DEV queda cerrado. El único pendiente de Vercel para retirar la dependencia personal es entrar a la cuenta antigua y eliminar exclusivamente el proyecto `variapp-desarrollo` después de una última inspección de dominios/variables. No tocar `varistorehn` PROD durante esta fase.
 
+Evidencia visual de la cuenta personal legacy confirmó que el workspace `VariApp` contiene los proyectos `variapp-desarrollo` y `varistorehn`. En el cierre DEV, solo `variapp-desarrollo` entra en alcance de retiro; `varistorehn` permanece congelado para la futura fase PROD.
+
 La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
 
 ## 8. Gobierno de acceso GitHub

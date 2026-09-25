@@ -1,3 +1,10 @@
+## 2026-09-25 — Vercel legacy personal inventariado antes del retiro DEV
+
+- Captura del propietario confirma que la cuenta/workspace Vercel personal `VariApp` mantiene dos proyectos: `variapp-desarrollo` y `varistorehn`.
+- Alcance de cierre DEV: auditar y retirar únicamente `variapp-desarrollo`.
+- `varistorehn` queda explícitamente fuera de alcance y congelado hasta la fase PROD.
+- No se ha eliminado ningún proyecto en este paso.
+
 ## 2026-09-25 — Vercel DEV cerrado con ownership corporativo confirmado visualmente
 
 - Evidencia visual del dashboard `vercel.com/solqaryn` muestra el workspace/team activo `SOLQARYN` y la sesión `solqarynplatform-5337` asociada a `solqaryn.platform@outlook.com`.

@@ -40,6 +40,8 @@ Con esto el ownership operativo del Vercel DEV nuevo queda confirmado.
 
 El conector Vercel actual no tiene acceso al team/cuenta personal antigua. El siguiente paso manual es abrir esa cuenta y revisar el proyecto `variapp-desarrollo`; si no contiene dominios/variables/recursos que deban conservarse, se elimina. No se debe tocar `varistorehn` productivo en esta fase DEV.
 
+Evidencia visual recibida el 2026-09-25: el workspace personal `VariApp` muestra dos proyectos, `variapp-desarrollo` y `varistorehn`. Se confirma así el inventario legacy previo a eliminación. Solo `variapp-desarrollo` pertenece al alcance DEV.
+
 ## Observación Cloudinary
 
 El catálogo migrado todavía contiene referencias de medios con prefijos históricos como `desarrollo/` y `varistorehn_desarrollo/`. Esto pertenece al siguiente punto Cloudinary; no borrar esos activos hasta completar esa auditoría.
