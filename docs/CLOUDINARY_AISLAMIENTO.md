@@ -70,3 +70,13 @@ Decisión operativa:
 - usar esa key exclusivamente en Render DEV;
 - no revelar ni registrar el API Secret en chat/repositorio/capturas;
 - PROD permanece fuera de alcance.
+
+## API keys canónicas — 2026-09-25
+
+Evidencia visual confirma las siguientes keys activas en `riyrzmob`:
+
+- `Root`: administración/recuperación únicamente;
+- `solqaryn_dev`: credencial operativa exclusiva de DEV;
+- `solqaryn_prod`: credencial reservada para PROD, aún sin conectar.
+
+No almacenar ni revelar API Secret en Git, documentación, capturas o chat.

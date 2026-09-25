@@ -1,3 +1,11 @@
+## 2026-09-25 — Cloudinary keys DEV/PROD creadas
+
+- Evidencia visual confirma tres API keys activas en el cloud `riyrzmob`: `Root`, `solqaryn_dev` y `solqaryn_prod`.
+- `Root` queda reservada para administración/recuperación.
+- `solqaryn_dev` queda destinada exclusivamente a Render DEV.
+- `solqaryn_prod` queda reservada para la futura fase PROD; no se conecta ni usa todavía.
+- Los API Secret permanecen ocultos y no se registraron en repositorio/chat.
+
 ## 2026-09-25 — Cloudinary DEV: inventario de API keys
 
 - Captura de `Cloudinary -> Product environment settings -> API Keys` para cloud `riyrzmob` muestra una sola key activa llamada `Root`, creada el 2026-09-22.
