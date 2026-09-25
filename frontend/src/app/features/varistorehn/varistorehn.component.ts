@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnService } from './varistorehn.service';
 import { ModoCarrito, VARISTOREHN_CONFIG } from './varistorehn.config';
@@ -36,7 +36,7 @@ export class VaristorehnComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carritoStore = inject(VaristorehnCarritoService);
 

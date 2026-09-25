@@ -67,6 +67,11 @@ export class EmpresaIdentidadService {
     );
   }
 
+  usarPlataforma(): void {
+    this._config.set({ ...DEFAULT_CONFIG });
+    this.cargada = false;
+  }
+
   refrescarDespuesDeGuardar(config: EmpresaConfiguracion): void {
     this._config.set({ ...DEFAULT_CONFIG, ...config });
     this.cargada = true;

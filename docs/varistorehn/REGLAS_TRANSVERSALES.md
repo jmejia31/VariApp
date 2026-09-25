@@ -5,7 +5,7 @@ Estas reglas son obligatorias para cualquier cambio dentro de VariStoreHN en Sol
 | Regla | Criterio verificable |
 | --- | --- |
 | Datos | Nombre, precio, stock, promociones e imagenes parten del contrato publico de `/tienda`; frontend normaliza con `mapearProducto` y calcula el precio visible con `precioVenta`. Checkout revalida precio y stock en servidor. |
-| Diseno | La tienda usa exclusivamente tokens del tema/identidad de VariStoreHN. Ningún SCSS del storefront puede fijar colores hex/RGB/HSL propios; referencias externas solo orientan flujo o funcionalidad y no se copian identidad, paleta ni marca. |
+| Diseno | La tienda usa exclusivamente tokens del tema/identidad de la empresa del storefront. Ningún SCSS puede fijar colores hex/RGB/HSL propios; referencias externas solo orientan flujo o funcionalidad y no se copian identidad, paleta ni marca. SOLQARYN no se usa como fallback comercial de un cliente. |
 | Estado | Toda consulta publica representa loading, error, empty y success. Recursos individuales pueden usar not-found como estado adicional. |
 | Carrito | `VaristorehnCarritoService` es la unica autoridad de carrito en frontend. Persistencia local solo guarda identificadores y unidades; nunca precio, stock o imagen como autoridad. |
 | URLs | Producto y categoria usan slugs publicos. Busqueda, filtros, orden y paginacion del catalogo se conservan en query params. |

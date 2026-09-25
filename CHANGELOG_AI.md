@@ -1,5 +1,10 @@
 ## 2026-09-25 — Shell DEV desacoplado de la identidad de VariStoreHN
 
+- El storefront obtiene una frontera propia `VaristorehnIdentidadService`: su identidad comercial se carga desde la configuración pública y, ante indisponibilidad, degrada a `Tienda` sin presentar SOLQARYN como si fuera el cliente.
+- `/login` y demás rutas públicas de plataforma restablecen la identidad SOLQARYN y eliminan overrides visuales de empresa; una identidad de empresa solo se aplica al storefront o a una sesión autenticada con tenant verificado.
+- Se retiraron fallbacks comerciales hardcodeados de VariStoreHN en header/footers/checkout/SEO; los datos reales persistidos siguen teniendo prioridad.
+- Alcance deliberado: separación de contextos para el primer cliente sin migraciones ni cambios productivos. Antes de publicar un segundo storefront debe existir resolución pública tenant-addressed (dominio/slug -> Empresa) para identidad, tema y catálogo.
+
 - El shell global del frontend ahora identifica a `SOLQARYN` en `index.html` (title, description y Open Graph).
 - Se retiró el favicon global `assets/varistorehn-logo.png`; el activo de VariStoreHN permanece únicamente como activo de su cliente/storefront donde corresponda.
 - La identidad fallback de `EmpresaIdentidadService` ahora es SOLQARYN y ya no cae a VariStoreHN cuando la configuración pública no está disponible.

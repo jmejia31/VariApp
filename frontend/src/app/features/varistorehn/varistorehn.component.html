@@ -203,7 +203,7 @@
   @if (identidad.config().piePaginaActivo) {
     <footer class="store-footer">
       <div class="container footer-grid">
-        <div><strong>{{ (identidad.config().nombreComercial || 'VariStorehn') }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
+        <div><strong>{{ (identidad.config().nombreComercial || 'Tienda') }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
         <div><b>Tienda</b><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.categorias">Categorías</a><a href="#contacto">Contacto</a></div>
         <div><b>Compra</b><a [href]="enlaces.carrito">Carrito</a>@if (permiteWhatsapp()) { <span>WhatsApp habilitado como canal de contacto</span> } @if (permiteTarjeta()) { <span>Tarjeta sujeta a configuración segura</span> }</div>
       </div>

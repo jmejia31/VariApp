@@ -43,20 +43,20 @@ async function loadBrand(req) {
     const payload = await fetchJson(`${apiBase(req)}/empresa-configuracion/publica`, 3500);
     const data = payload && payload.success ? payload.data : null;
     const rawName = String(data?.nombreComercial || '').trim();
-    const name = rawName && !/administrativ[oa]/i.test(rawName) ? rawName : 'VariStoreHN';
+    const name = rawName && !/administrativ[oa]/i.test(rawName) ? rawName : 'Tienda';
     return {
       name,
       slogan: String(data?.eslogan || '').trim(),
-      logo: absoluteUrl(String(data?.logoUrl || 'assets/varistorehn-logo.png'), publicOrigin(req)),
+      logo: absoluteUrl(String(data?.logoUrl || ''), publicOrigin(req)),
       currency: /^[A-Z]{3}$/.test(String(data?.moneda || '').trim().toUpperCase())
         ? String(data.moneda).trim().toUpperCase()
         : 'HNL'
     };
   } catch {
     return {
-      name: 'VariStoreHN',
-      slogan: 'Tecnología y compras en línea',
-      logo: `${publicOrigin(req)}/assets/varistorehn-logo.png`,
+      name: 'Tienda',
+      slogan: '',
+      logo: '',
       currency: 'HNL'
     };
   }
@@ -102,7 +102,7 @@ function sendNoIndex(res, status, message) {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('X-Robots-Tag', 'noindex,nofollow,noarchive');
   res.setHeader('Cache-Control', 'no-store');
-  res.end(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>VariStoreHN</title></head><body><p>${escapeHtml(message)}</p></body></html>`);
+  res.end(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Tienda</title></head><body><p>${escapeHtml(message)}</p></body></html>`);
 }
 
 module.exports = {

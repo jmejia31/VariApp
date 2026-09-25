@@ -38,7 +38,7 @@ export function mensajeWhatsappCompraDirecta(
   producto: ProductoMensajeWhatsApp
 ): string {
   const formato = new Intl.NumberFormat('es-HN', { style: 'currency', currency: moneda || 'HNL' });
-  const marca = limpiarTextoWhatsapp(comercio || 'VariStoreHN');
+  const marca = limpiarTextoWhatsapp(comercio || 'Tienda');
   const nombre = limpiarTextoWhatsapp(producto.nombre);
   const modelo = producto.modelo ? limpiarTextoWhatsapp(producto.modelo) : '';
   const sku = producto.sku ? limpiarTextoWhatsapp(producto.sku) : '';
@@ -71,7 +71,7 @@ export function mensajeWhatsappCheckout(
   enlacesProducto: Readonly<Record<number, string>> = {}
 ): string {
   const formato = new Intl.NumberFormat('es-HN', { style: 'currency', currency: moneda || 'HNL' });
-  const marca = limpiarTextoWhatsapp(comercio || 'VariStoreHN');
+  const marca = limpiarTextoWhatsapp(comercio || 'Tienda');
   const nombreCliente = limpiarTextoWhatsapp(comprador.nombre);
   const referenciaLimpia = limpiarTextoWhatsapp(referencia);
   const bloquesProductos = lineas.map((linea, indice) => {

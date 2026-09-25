@@ -15,7 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
 import { mensajeWhatsappCompraDirecta } from './varistorehn-checkout.rules';
 import {
@@ -67,7 +67,7 @@ export class VaristorehnProductoComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly seo = inject(VaristorehnSeoService);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carritoStore = inject(VaristorehnCarritoService);
   readonly cuentaCliente = inject(VaristorehnCuentaService);
@@ -305,7 +305,7 @@ export class VaristorehnProductoComponent implements OnInit {
     if (!producto || !modelo || !telefono || !this.permiteWhatsapp() || !modelo.disponible || modelo.stock <= 0) return;
     const unidades = Math.max(1, Math.min(this.cantidad() || 1, modelo.stock));
     const subtotal = this.precioActual() * unidades;
-    const marca = this.identidad.config().nombreComercial || 'VariStoreHN';
+    const marca = this.identidad.config().nombreComercial || 'Tienda';
     const sku = this.skuVisible();
     const enlaceProducto = this.enlaceProductoActual();
     const mensaje = mensajeWhatsappCompraDirecta(marca, 'HNL', {
@@ -418,14 +418,14 @@ export class VaristorehnProductoComponent implements OnInit {
     this.modeloClave.set(''); this.cantidad.set(0); this.imagenActiva.set(0); this.cerrarLightbox(false);
     const slug = this.slugSolicitado();
     if (!slug) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
       this.estado.set('not-found');
       return;
     }
     if (!this.utilizarDatosBaseDatos()) {
       const producto = crearCatalogoEjemplo().find(item => item.slug === slug && item.activo) || null;
       if (!producto) {
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
         this.estado.set('not-found');
         return;
       }
@@ -435,11 +435,11 @@ export class VaristorehnProductoComponent implements OnInit {
       next: producto => this.establecerProducto(producto, slug),
       error: error => {
         if (this.esNoEncontrado(error)) {
-          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
           this.estado.set('not-found');
           return;
         }
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
         this.error.set('No pudimos cargar este producto. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
@@ -447,7 +447,7 @@ export class VaristorehnProductoComponent implements OnInit {
   }
   private establecerProducto(producto: ProductoTienda, slugSolicitado: string): void {
     if (!producto.activo) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
       this.estado.set('not-found');
       return;
     }
@@ -459,7 +459,7 @@ export class VaristorehnProductoComponent implements OnInit {
     this.reiniciarCantidad();
     this.seo.aplicarProducto(
       producto,
-      this.identidad.config().nombreComercial || 'VariStoreHN',
+      this.identidad.config().nombreComercial || 'Tienda',
       this.imagenes()[0],
       this.precioActual(),
       this.modeloSeleccionado()?.disponible,

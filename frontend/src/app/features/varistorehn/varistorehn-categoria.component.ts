@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { CategoriaTienda, ModeloTienda, ProductoTienda, crearCatalogoEjemplo, etiquetaDisponibilidad, mapearProducto, precioVenta } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
@@ -31,7 +31,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly seo = inject(VaristorehnSeoService);
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carrito = inject(VaristorehnCarritoService);
 
@@ -179,7 +179,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
     this.estado.set('loading');
     const slug = this.slugSolicitado();
     if (!slug) {
-      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+      this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
       this.estado.set('not-found');
       return;
     }
@@ -188,10 +188,10 @@ export class VaristorehnCategoriaComponent implements OnInit {
       const categoria = crearCategoriasTiendaEjemplo().find(item => item.slug === slug) || null;
       this.categoria.set(categoria);
       if (categoria) {
-        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'Tienda');
         this.estado.set('success');
       } else {
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
         this.estado.set('not-found');
       }
       return;
@@ -203,17 +203,17 @@ export class VaristorehnCategoriaComponent implements OnInit {
     ).subscribe({
       next: categoria => {
         this.categoria.set(categoria);
-        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarCategoria(categoria, this.identidad.config().nombreComercial || 'Tienda');
         this.estado.set('success');
         if (categoria.slug !== slug) void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug), { replaceUrl: true });
       },
       error: error => {
         if (this.esNoEncontrada(error)) {
-          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+          this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
           this.estado.set('not-found');
           return;
         }
-        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'VariStoreHN');
+        this.seo.aplicarNoIndex(this.identidad.config().nombreComercial || 'Tienda');
         this.error.set('No pudimos cargar esta categoría. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }

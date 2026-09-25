@@ -4,7 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { mapearProducto } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnCuentaService } from './varistorehn-cuenta.service';
@@ -27,7 +27,7 @@ export class VaristorehnCuentaComponent implements OnInit {
   private readonly tienda = inject(VaristorehnService);
   private readonly carrito = inject(VaristorehnCarritoService);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly cuenta = inject(VaristorehnCuentaService);
 
   readonly modo = signal<'login' | 'registro'>('login');

@@ -19,6 +19,17 @@ export class ThemeApplierService {
     });
   }
 
+  aplicarTemaPlataforma(): void {
+    const root = document.documentElement;
+    for (const campo of CAMPOS_TEMA) root.style.removeProperty(campo.variableCss);
+    for (const variable of [
+      '--color-on-primary', '--color-on-sidebar', '--color-on-danger',
+      '--color-on-success', '--color-on-warning', '--color-on-info'
+    ]) {
+      root.style.removeProperty(variable);
+    }
+  }
+
   aplicar(tema: TemaVisual): void {
     const root = document.documentElement;
     const surface = tema.fondoTarjetas || '#ffffff';

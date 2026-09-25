@@ -5,7 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
 import { crearCatalogoEjemplo, mapearProducto, telefonoWhatsapp } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
@@ -36,7 +36,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly carrito = inject(VaristorehnCarritoService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
@@ -120,7 +120,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
     const comprador = this.datosComprador();
     const moneda = this.identidad.config().moneda || 'HNL';
     const mensaje = mensajeWhatsappCheckout(
-      this.identidad.config().nombreComercial || 'VariStoreHN',
+      this.identidad.config().nombreComercial || 'Tienda',
       comprador,
       validado.validacionId,
       moneda,

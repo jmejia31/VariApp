@@ -23,7 +23,7 @@ Asegurar que la tienda pública, los datos y las rutas estén preparados antes d
 - `varistorehn.paths.ts`: única fuente de construcción de URLs públicas canónicas.
 - `varistorehn.visual.ts`: ilustraciones/iconos propios reutilizables.
 - `varistorehn.config.ts`: flags técnicos de integración; no define colores ni identidad empresarial.
-- `EmpresaIdentidadService`: identidad/configuración empresarial compartida. La tienda no duplica nombre, logo, WhatsApp, moneda ni tema.
+- `VaristorehnIdentidadService`: frontera de identidad comercial del storefront. Nombre, logo, eslogan, WhatsApp y moneda se cargan desde la configuración pública persistida; nunca usa SOLQARYN como fallback de una empresa cliente.
 
 ### Frontend — refactorizar en fases siguientes
 - `varistorehn.component.ts/.html`: hoy concentran home, catálogo, filtros, detalle, carrito y acciones de cierre. Se dividirán por páginas conforme avance el roadmap.

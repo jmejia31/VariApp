@@ -9,7 +9,7 @@ Este documento conserva la trazabilidad de la Fase 1, pero describe aquí el est
 ## Alcance vigente
 
 - `VaristorehnHeaderComponent` es el header público reutilizable y permanece desacoplado del CRUD administrativo.
-- Identidad, logo, eslogan, moneda y WhatsApp provienen de `EmpresaIdentidadService` y de la configuración pública del sistema/base de datos.
+- Identidad, logo, eslogan, moneda y WhatsApp provienen de `VaristorehnIdentidadService` y de la configuración pública persistida de la tienda; el shell SOLQARYN mantiene una identidad independiente.
 - Las rutas públicas se construyen con `VARISTOREHN_PATHS`.
 - Inicio, Productos y Categorías navegan hoy a sus rutas canónicas ya activadas por las fases posteriores.
 - El buscador mantiene semántica `role="search"`, label accesible, búsqueda por teclado y continuidad con el catálogo público.

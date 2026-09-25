@@ -24,7 +24,7 @@ export class VaristorehnSeoService {
   private readonly title = inject(Title);
   private readonly productionOrigin = 'https://varistorehn.vercel.app';
 
-  aplicarRuta(url: string, nombreMarca = 'VariStoreHN'): void {
+  aplicarRuta(url: string, nombreMarca = 'Tienda'): void {
     const path = this.normalizarPath(url);
     const marca = this.nombreMarca(nombreMarca);
 
@@ -159,7 +159,7 @@ export class VaristorehnSeoService {
     });
   }
 
-  aplicarNoIndex(nombreMarca = 'VariStoreHN'): void {
+  aplicarNoIndex(nombreMarca = 'Tienda'): void {
     const marca = this.nombreMarca(nombreMarca);
     this.title.setTitle(`${marca} | Acceso privado`);
     this.meta.updateTag({ name: 'robots', content: 'noindex,nofollow,noarchive' });
@@ -174,7 +174,7 @@ export class VaristorehnSeoService {
     const indexable = page.indexable && this.entornoIndexable();
     const canonical = this.urlCanonica(page.path);
     const title = this.limitar(page.title, 70);
-    const description = this.descripcion(page.description, 'VariStoreHN');
+    const description = this.descripcion(page.description, 'Tienda');
 
     this.title.setTitle(title);
     this.meta.updateTag({ name: 'description', content: description });
@@ -271,7 +271,7 @@ export class VaristorehnSeoService {
 
   private nombreMarca(nombre: string): string {
     const limpio = nombre.trim();
-    if (!limpio || /administrativ[oa]/i.test(limpio)) return 'VariStoreHN';
+    if (!limpio || /administrativ[oa]/i.test(limpio)) return 'Tienda';
     return this.limitar(limpio, 50);
   }
 

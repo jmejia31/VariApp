@@ -68,7 +68,9 @@ expect(sitemapSource.includes("Retry-After"), 'El sitemap incompleto debe pedir 
 expect(seoService.includes("path === VARISTOREHN_PATHS.productos"), 'Catálogo debe tener metadata propia.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.ofertas"), 'Ofertas debe tener metadata propia.');
 expect(seoService.includes("path === VARISTOREHN_PATHS.categorias"), 'Categorías debe tener metadata propia.');
-expect(appComponent.includes('this.seo.aplicarRuta(event.urlAfterRedirects'), 'El router debe aplicar robots/metadatos en cada navegación.');
+expect(appComponent.includes('this.aplicarContextoRuta(event.urlAfterRedirects)'), 'El router debe aplicar identidad, tema y SEO según el contexto de cada navegación.');
+expect(appComponent.includes('VaristorehnIdentidadService'), 'El storefront debe usar una identidad distinta del shell SOLQARYN.');
+expect(appComponent.includes("this.seo.aplicarNoIndex('SOLQARYN')"), 'Las rutas de plataforma no deben heredar SEO/branding de un cliente.');
 for (const [name, html] of [
   ['header público', headerHtml],
   ['home público', homeHtml],
@@ -184,7 +186,7 @@ try {
   forceMissingCommercial = true;
   const noCommercialRes = responseMock();
   await seoHandler(prodReq, noCommercialRes);
-  expect(noCommercialRes.body.includes('Producto SEO 11 | VariStoreHN'), 'Sin nombre comercial, el SEO debe usar VariStoreHN y nunca el nombre interno.');
+  expect(noCommercialRes.body.includes('Producto SEO 11 | Tienda'), 'Sin nombre comercial, el SEO debe degradar a una identidad neutra y nunca al shell SOLQARYN ni al nombre interno.');
   expect(!noCommercialRes.body.includes('Sistema Interno'), 'El nombre interno no debe filtrarse al HTML SEO.');
   forceMissingCommercial = false;
 

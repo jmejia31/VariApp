@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { EstadoRecursoPublico, ReciboPedidoPublico } from './varistorehn.models';
@@ -24,7 +24,7 @@ export class VaristorehnPedidoComponent implements OnInit {
   private readonly pedidos = inject(VaristorehnPedidoService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly carrito = inject(VaristorehnCarritoService);
   readonly recibo = signal<ReciboPedidoPublico | null>(null);
   readonly estado = signal<EstadoRecursoPublico>('loading');

@@ -102,7 +102,7 @@ expect(cartHtml.includes('Continuar al checkout'), 'Carrito MVP debe conectar co
 expect(checkoutHtml.includes('Confirma tus datos y tu forma de compra'), 'MVP debe conservar checkout público.');
 expect(checkoutTs.includes('prepararWhatsapp()') && checkoutTs.includes('confirmarSalidaWhatsapp'),
   'MVP debe permitir cierre por WhatsApp.');
-expect(checkoutTs.includes("this.identidad.config().nombreComercial || 'VariStoreHN'"),
+expect(checkoutTs.includes("this.identidad.config().nombreComercial || 'Tienda'"),
   'WhatsApp MVP debe usar marca comercial pública.');
 expect(!checkoutTs.includes('VaristorehnCuentaService'), 'Cuenta de cliente no debe ser requisito del checkout MVP.');
 expect(config.includes('endpointCheckoutTarjeta: null'), 'Pasarela debe seguir siendo opcional/fail-closed por defecto.');

@@ -12,7 +12,7 @@ import {
   signal
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { telefonoWhatsapp } from './varistorehn.catalog';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { IconoTiendaComponent } from './varistorehn.visual';
@@ -26,7 +26,7 @@ import { IconoTiendaComponent } from './varistorehn.visual';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VaristorehnHeaderComponent {
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
 
   @Input() busqueda = '';
   @Input() categorias: readonly string[] = [];

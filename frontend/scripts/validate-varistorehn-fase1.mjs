@@ -31,7 +31,7 @@ const failures = [];
 const expect = (condition, message) => { if (!condition) failures.push(message); };
 
 expect(headerTs.includes('VARISTOREHN_PATHS'), 'El header debe construir navegación desde VARISTOREHN_PATHS.');
-expect(headerTs.includes('EmpresaIdentidadService'), 'El header debe consumir la identidad empresarial compartida.');
+expect(headerTs.includes('VaristorehnIdentidadService'), 'El header debe consumir la identidad comercial pública separada del shell.');
 expect(headerTs.includes('showModal()'), 'El menú móvil debe usar un diálogo modal nativo para contener el foco.');
 expect(headerTs.includes('telefonoWhatsapp'), 'WhatsApp debe normalizarse con la regla compartida del escaparate.');
 expect(headerHtml.includes('role="search"'), 'El buscador debe conservar semántica role=search.');
