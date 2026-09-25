@@ -1,3 +1,12 @@
+## 2026-09-25 — Render DEV certificado bajo SOLQARYN
+
+- Workspace leído directamente por el conector Render: `SOLQARYN`, email `solqaryn.platform@outlook.com`.
+- Servicio canónico: `solqaryn-api-dev`, rama `dev`, repositorio `solqaryn/Solqaryn`, auto deploy condicionado a checks, Dockerfile `./backend/Dockerfile`.
+- URL canónica: `https://solqaryn-api-dev-fxx8.onrender.com`; health path `/health/ready`; maintenance OFF; servicio no suspendido.
+- Logs actuales confirman que el backend usa la base `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`.
+- Logs actuales de `/health/ready` responden HTTP 200.
+- Punto Render DEV: **CERRADO**. La eliminación de cualquier Render DEV legacy personal requiere únicamente localizar ese recurso en la cuenta antigua y comprobar cero consumidores.
+
 ## 2026-09-25 — Aiven DEV certificado bajo SOLQARYN
 
 - Run canónico: `36175275439` — `DEV - Certificación canónica Aiven` — SUCCESS.

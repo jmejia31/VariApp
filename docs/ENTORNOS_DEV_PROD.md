@@ -105,6 +105,30 @@ La configuración canónica de DEV se valida con:
 - restore del mismo artifact en MySQL descartable;
 - scope lock de SOLQARYN.
 
+### Certificación Render DEV — 2026-09-25
+
+Estado: **CERRADO / PASS**.
+
+Evidencia leída directamente del workspace y servicio Render:
+
+- workspace: `SOLQARYN`;
+- email del workspace: `solqaryn.platform@outlook.com`;
+- servicio: `solqaryn-api-dev`;
+- ownerId: workspace SOLQARYN;
+- repositorio: `https://github.com/solqaryn/Solqaryn`;
+- rama: `dev`;
+- auto deploy: `checksPass`;
+- runtime: Docker;
+- Dockerfile: `./backend/Dockerfile`;
+- health check: `/health/ready`;
+- URL: `https://solqaryn-api-dev-fxx8.onrender.com`;
+- estado: activo/no suspendido;
+- maintenance: desactivado;
+- logs de arranque actuales: conexión a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`;
+- logs de health actuales: HTTP 200 repetido en `/health/ready`.
+
+Conclusión: Render DEV canónico está bajo la cuenta/workspace SOLQARYN y consume el Aiven DEV nuevo, no el host/base legacy personal. Cualquier servicio Render DEV de la cuenta personal puede retirarse únicamente después de identificarlo en esa cuenta y comprobar que no tiene consumidores restantes.
+
 ## 8. Gobierno de acceso GitHub
 
 - Organización y repositorio canónicos: `solqaryn/Solqaryn`.

@@ -58,6 +58,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 - No tocar PROD ni `main` desde el flujo de DEV.
 - No exponer secretos ni inventar validaciones externas.
 - No force-push.
+- Render DEV certificado el 2026-09-25: workspace `SOLQARYN` bajo `solqaryn.platform@outlook.com`; servicio `solqaryn-api-dev` en rama `dev`, repo `solqaryn/Solqaryn`, health `/health/ready`, URL `https://solqaryn-api-dev-fxx8.onrender.com`; logs actuales confirman conexión a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com` y health HTTP 200.
 - Preservar commits ajenos y reconciliar HEAD antes de publicar.
 
 ## 5. Gobierno colaborativo vigente
