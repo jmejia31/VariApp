@@ -1,0 +1,113 @@
+name: DEV - Certificación funcional final
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/checkpoints/dev-final-functional-certification
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    name: Certificar DEV canónico extremo a extremo
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: DEV
+    env:
+      FRONTEND: https://solqaryn-dev.vercel.app
+      BACKEND: https://solqaryn-api-dev-fxx8.onrender.com
+      DB_HOST: ${{ vars.SOLQARYN_DEV_DB_HOST }}
+      DB_PORT: ${{ vars.SOLQARYN_DEV_DB_PORT }}
+      DB_NAME: ${{ vars.SOLQARYN_DEV_DB_NAME }}
+      DB_USER: ${{ vars.SOLQARYN_DEV_DB_USER }}
+      DB_PASSWORD: ${{ secrets.SOLQARYN_DEV_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar utilidades
+        run: sudo apt-get update && sudo apt-get install -y mysql-client jq
+
+      - name: Rutas y branding HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in /login /dashboard /varistorehn /varistorehn/productos; do
+            code="$(curl -sS -o "/tmp${path//\//_}.html" -w '%{http_code}' "$FRONTEND$path")"
+            test "$code" = "200"
+          done
+          grep -qi "SOLQARYN" /tmp_login.html
+          grep -qi "SOLQARYN" /tmp_dashboard.html
+          ! grep -qi "variapp-desarrollo" /tmp_login.html
+          ! grep -qi "variapp-mysql-variapp.c.aivencloud.com" /tmp_login.html
+          echo "HTTP_ROUTE_CHECK=PASS"
+
+      - name: API identidad, categorías, productos e imágenes
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS "$FRONTEND/api/empresa-configuracion/publica" -o /tmp/identity.json
+          curl -fsS "$FRONTEND/api/tienda/categorias" -o /tmp/categories.json
+          curl -fsS "$FRONTEND/api/tienda/productos?pagina=1&tamano=100" -o /tmp/products.json
+
+          jq -e '.success == true and (.data.nombreComercial | ascii_downcase | contains("varistorehn"))' /tmp/identity.json >/dev/null
+          jq -e '.success == true and (.data | length) >= 1' /tmp/categories.json >/dev/null
+          jq -e '.success == true and (.data.items | length) >= 1' /tmp/products.json >/dev/null
+
+          jq -r '.data.items[] | .imagenPrincipalUrl // empty, (.imagenes[]?.url // empty)' /tmp/products.json | sort -u > /tmp/images.txt
+          test -s /tmp/images.txt
+          if grep -E 'res\.cloudinary\.com/(vyijnqzq|[^/]+/.*/(desarrollo|varistorehn_desarrollo)/)' /tmp/images.txt; then
+            echo "Legacy Cloudinary reference detected" >&2
+            exit 1
+          fi
+          grep -q 'res.cloudinary.com/riyrzmob/' /tmp/images.txt
+          while IFS= read -r url; do
+            code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$url")"
+            test "$code" = "200"
+          done < /tmp/images.txt
+          echo "API_AND_IMAGES=PASS"
+
+      - name: Render health
+        run: |
+          set -euo pipefail
+          test "$(curl -sS -o /tmp/health.json -w '%{http_code}' "$BACKEND/health/ready")" = "200"
+          echo "RENDER_HEALTH=PASS"
+
+      - name: Escritura/lectura efímera en solqaryn_dev
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$DB_NAME" = "solqaryn_dev"
+          export MYSQL_PWD="$DB_PASSWORD"
+          marker="final-cert-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          readback="$(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names <<SQL
+          CREATE TEMPORARY TABLE _solqaryn_dev_final_probe (id VARCHAR(128) PRIMARY KEY, created_at DATETIME(6) NOT NULL);
+          INSERT INTO _solqaryn_dev_final_probe(id,created_at) VALUES ('$marker',UTC_TIMESTAMP(6));
+          SELECT id FROM _solqaryn_dev_final_probe WHERE id='$marker';
+          DROP TEMPORARY TABLE _solqaryn_dev_final_probe;
+          SQL
+          )"
+          test "$readback" = "$marker"
+          echo "DB_TEMP_WRITE_READ=PASS"
+
+      - name: Cero referencias operativas legacy en runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          targets=(frontend/src frontend/server frontend/vercel.json backend/src render.yaml)
+          if grep -RInE 'variapp-desarrollo|variapp-mysql-variapp\.c\.aivencloud\.com' "${targets[@]}"; then
+            echo "Referencia operativa legacy detectada" >&2
+            exit 1
+          fi
+          if grep -RIn 'varistorehn_desarrollo' backend/src frontend/src frontend/server frontend/vercel.json render.yaml; then
+            echo "Referencia operativa a base/prefijo legacy detectada" >&2
+            exit 1
+          fi
+          echo "LEGACY_RUNTIME_REFERENCES=0"
+
+      - name: Resumen
+        run: |
+          echo "FINAL_DEV_CERTIFICATION=PASS"
+          echo "PRODUCTION_TOUCHED=FALSE"
