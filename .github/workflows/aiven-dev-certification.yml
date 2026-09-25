@@ -84,15 +84,30 @@ jobs:
           if not account_id:
               raise SystemExit('Aiven project does not expose account_id')
 
-          users_payload=request(
-              f'/account/{account_id}/users/search',
-              method='POST',
-              body={'limit':100,'order_by':'user_email:asc','query':expected_email}
-          )
-          users=users_payload.get('users', [])
-          matches=[u for u in users if str(u.get('user_email','')).lower()==expected_email]
+          organizations_payload=request('/organizations')
+          organizations=organizations_payload.get('organizations', [])
+          organization=next((o for o in organizations if o.get('account_id')==account_id), None)
+          if not organization:
+              raise SystemExit('Could not map canonical project account to an Aiven organization')
+          organization_id=organization.get('organization_id')
+          if not organization_id:
+              raise SystemExit('Mapped Aiven organization does not expose organization_id')
+
+          users_payload=request(f'/organization/{organization_id}/user')
+          user_records=[]
+          def collect_user_records(v):
+              if isinstance(v, dict):
+                  if 'user_email' in v:
+                      user_records.append(v)
+                  for x in v.values():
+                      collect_user_records(x)
+              elif isinstance(v, list):
+                  for x in v:
+                      collect_user_records(x)
+          collect_user_records(users_payload)
+          matches=[u for u in user_records if str(u.get('user_email','')).lower()==expected_email]
           if not matches:
-              raise SystemExit('Corporate SOLQARYN email is not a member of the Aiven account containing project solqaryn')
+              raise SystemExit('Corporate SOLQARYN email is not a member of the Aiven organization containing project solqaryn')
 
           service_payload=request(f'/project/{expected_project}/service/{expected_service}')
           svc=service_payload.get('service', service_payload)
@@ -130,6 +145,7 @@ jobs:
               'serviceType':svc.get('service_type'),
               'serviceState':svc.get('state'),
               'accountName':project.get('account_name'),
+              'organizationName':organization.get('organization_name'),
               'corporateEmailPresent':True,
               'corporateMembership':role_summary,
               'devEndpointMatchesCanonicalService':True,
