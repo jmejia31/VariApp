@@ -13,7 +13,7 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Development
       - key: AllowedHosts
-        value: solqaryn-api-dev.onrender.com
+        value: solqaryn-api-dev-fxx8.onrender.com
       - key: Database__ServerVersion
         value: 8.4.3
       - key: Database__ApplyMigrationsOnStartup
@@ -41,7 +41,7 @@ services:
       - key: Cors__AllowedOrigins__0
         value: https://solqaryn-dev.vercel.app
       - key: AppSettings__BackendPublicUrl
-        value: https://solqaryn-api-dev.onrender.com
+        value: https://solqaryn-api-dev-fxx8.onrender.com
       - key: AppSettings__LogoPublicUrl
         value: ""
       - key: AppSettings__EnlacePublicoFacturaHorasValidez
