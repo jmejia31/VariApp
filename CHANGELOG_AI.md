@@ -1,3 +1,10 @@
+## 2026-09-25 — Certificación canónica Aiven DEV preparada
+
+- Se añade un gate repetible de solo lectura para certificar que el project `solqaryn` y el service `solqaryn-mysql` corresponden al endpoint DEV configurado.
+- El gate comprueba mediante Aiven API que `solqaryn.platform@outlook.com` pertenece a la cuenta que contiene el proyecto canónico, sin imprimir tokens ni contraseñas.
+- El gate comprueba mediante MySQL real que DEV opera sobre `solqaryn_dev` con el usuario efectivo `solqaryn_dev_user`, además de verificar esquema/migraciones y presencia de catálogo migrado.
+- No realiza escrituras de aplicación ni toca Producción.
+
 ## 2026-09-25 — Ratificación de ownership GitHub y colaboradores canónicos
 
 **Decisión explícita del propietario; supersede la nota operativa anterior que proponía retirar a `jmejia31`.**
