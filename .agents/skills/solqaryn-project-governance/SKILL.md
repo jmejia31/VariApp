@@ -15,6 +15,7 @@ description: "Gobierno tecnico obligatorio y unica skill local de SOLQARYN. Usar
 - `LOCAL_SKILL_COUNT=1`
 - `LOCAL_SKILL=solqaryn-project-governance`
 - `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`
+- `CONTEXT_MODE=CURRENT_STATE_ONLY`
 
 Esta es la unica skill local y la primera puerta de entrada para cualquier chat, agente o automatizacion que trabaje sobre SOLQARYN.
 
@@ -31,7 +32,7 @@ Leer en el orden necesario:
 7. `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md` cuando una tarea requiera guia externa;
 8. documentos especificos del scope y evidencia causal.
 
-Un snapshot historico, chat, receipt o comentario no sustituye al estado vivo ni a la autoridad vigente.
+Toda decision operativa se basa en el estado vivo y en las autoridades vigentes. Fuentes no citadas por el MAESTRO actual no introducen dependencias, prioridades ni gates.
 
 ## 3. Gate de entrada para cualquier agente o chat
 
@@ -74,7 +75,7 @@ Ninguna referencia externa puede imponer un framework, capa, persistencia, mecan
 - Revalidar HEAD antes de escribir/publicar y preservar trabajo concurrente.
 - No force-push, reset destructivo ni reescritura de historia compartida.
 - Cualquier cambio futuro sobre `main`, PROD, datos productivos, dominios, certificados, secretos o infraestructura productiva requiere autorizacion nueva y explicita del propietario y debe respetar la autoridad operativa vigente.
-- Nunca inferir autorizacion productiva a partir de un release historico.
+- Nunca inferir autorizacion productiva sin una orden vigente y explicita del propietario.
 
 ## 6. Impacto antes de editar
 
@@ -122,6 +123,9 @@ El cierre debe demostrar, segun aplique:
 - `CHANGELOG_AI.md` actualizado para changesets intencionales conforme a las reglas vigentes.
 
 ## 9. Prohibiciones
+
+- no reintroducir fases, filas, gates, prioridades o secuencias de planes no vigentes;
+- no tratar evidencia previa como autoridad operativa;
 
 - no crear copias locales de las nueve referencias externas;
 - no consultar mirrors, forks o copias dentro de otros proyectos como sustituto del origen registrado;
