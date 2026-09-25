@@ -1,6 +1,4 @@
-SOLQARYN_CLOUDINARY_DEV_PREMIGRATION_BACKUP=2026-09-25T20:03:00Z
-REASON=cloudinary-legacy-media-migration
+SOLQARYN_DEV_STOCK_RECONCILIATION_BACKUP=2026-09-25T20:53:00Z
+REASON=admin-storefront-stock-authority-reconciliation
 TARGET=solqaryn_dev
 PRODUCTION_IN_SCOPE=FALSE
-ATTEMPT=2
-FIX=canonical-dev-environment-label
