@@ -155,6 +155,24 @@ Cierre final: el propietario eliminó `variapp-desarrollo` y una captura posteri
 
 La presencia de URLs Cloudinary históricas en datos migrados se trata en el punto Cloudinary y no invalida la certificación técnica de Vercel; sí impide cerrar DEV global hasta certificar medios.
 
+### Auditoría Cloudinary DEV — ownership confirmado, credenciales/assets pendientes
+
+Estado parcial: **OWNERSHIP PASS / CREDENCIALES Y ASSETS PENDIENTES**.
+
+Evidencia visual del panel Cloudinary:
+
+- perfil: `Solqaryn Platform`;
+- email: `solqaryn.platform@outlook.com`;
+- Product Environments: 1 (límite actual del plan);
+- cloud name activo: `riyrzmob`;
+- Product Environment ID: `7ab9e3e6de660a0b70eb4a5bacf331`;
+- estado: `Active`;
+- Media Library del nuevo cloud: solo carpeta/activos de ejemplo observados.
+
+El código DEV exige `Cloudinary__EnvironmentPrefix=solqaryn_dev` y construye nuevas rutas bajo `solqaryn_dev/.../`. Sin embargo, el catálogo migrado conserva URLs históricas de otro cloud/prefijos legacy. Por tanto no se elimina ningún activo o credencial Cloudinary antigua todavía.
+
+Siguiente control obligatorio: certificar la API key DEV del cloud `riyrzmob` y comprobar que Render DEV usa esa credencial; después realizar un upload de prueba y verificar que el PublicId generado empiece por `solqaryn_dev/`.
+
 ## 8. Gobierno de acceso GitHub
 
 - Organización y repositorio canónicos: `solqaryn/Solqaryn`.

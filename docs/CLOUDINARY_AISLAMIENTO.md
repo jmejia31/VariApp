@@ -46,3 +46,15 @@ En el entorno real de DEV se debe probar:
 6. verificar almacenamiento, transformaciones y ancho de banda.
 
 La opción más segura sigue siendo usar un product environment o una cuenta Cloudinary completamente separada para DEV. Mientras se comparta el mismo product environment, el prefijo y la clave autorizada son controles obligatorios.
+
+## Evidencia de ownership — 2026-09-25
+
+- Cuenta/perfil: `Solqaryn Platform`
+- Email: `solqaryn.platform@outlook.com`
+- Cloud name: `riyrzmob`
+- Product Environment ID: `7ab9e3e6de660a0b70eb4a5bacf331`
+- Estado: `Active`
+- Product environments observados: 1
+- Media Library observada: contenido de ejemplo únicamente
+
+Estado: ownership del Cloudinary nuevo confirmado. Aún falta certificar la API key usada por Render DEV y realizar un upload real que produzca un PublicId bajo `solqaryn_dev/` antes de retirar cualquier recurso Cloudinary legacy.

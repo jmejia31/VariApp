@@ -1,3 +1,11 @@
+## 2026-09-25 — Cloudinary DEV ownership confirmado
+
+- Capturas del panel confirman perfil `Solqaryn Platform` con correo `solqaryn.platform@outlook.com`.
+- Existe un único Product Environment activo: cloud name `riyrzmob`, ID `7ab9e3e6de660a0b70eb4a5bacf331`.
+- La Media Library del nuevo cloud muestra solo assets de ejemplo; no se consideran migrados los medios históricos de VariStoreHN.
+- Próximo gate: revisar API Keys, certificar la key DEV y demostrar mediante upload que Render DEV escribe bajo `solqaryn_dev/`.
+- No borrar todavía credenciales/assets del Cloudinary legacy.
+
 ## 2026-09-25 — Vercel DEV legacy eliminado de la cuenta personal
 
 - El propietario eliminó manualmente el proyecto `variapp-desarrollo` del workspace personal `VariApp`.
