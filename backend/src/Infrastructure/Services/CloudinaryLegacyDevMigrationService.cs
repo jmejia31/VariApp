@@ -82,6 +82,7 @@ public sealed class CloudinaryLegacyDevMigrationService
             .ToListAsync(cancellationToken);
 
         var purchaseDocuments = await _db.CompraDocumentos
+            .IgnoreQueryFilters()
             .Where(x =>
                 x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
                 x.PublicId.StartsWith("desarrollo/") ||
@@ -230,6 +231,7 @@ public sealed class CloudinaryLegacyDevMigrationService
                 cancellationToken);
 
         var purchases = await _db.CompraDocumentos
+            .IgnoreQueryFilters()
             .AsNoTracking()
             .CountAsync(x =>
                 x.Url.Contains($"res.cloudinary.com/{SourceCloud}/") ||
