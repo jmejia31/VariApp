@@ -1,3 +1,11 @@
+## 2026-09-25 — Vercel legacy DEV: dominios auditados antes de eliminación
+
+- Captura del proyecto personal `variapp-desarrollo` confirma que la sección Domains contiene únicamente `variapp-desarrollo.vercel.app`.
+- No se observan dominios personalizados adicionales en ese proyecto.
+- El dominio es el alias automático de Vercel del proyecto legacy y no necesita migración.
+- El proyecto aún NO se elimina hasta revisar Environment Variables.
+- `varistorehn` PROD permanece fuera de alcance.
+
 ## 2026-09-25 — Vercel legacy personal inventariado antes del retiro DEV
 
 - Captura del propietario confirma que la cuenta/workspace Vercel personal `VariApp` mantiene dos proyectos: `variapp-desarrollo` y `varistorehn`.

@@ -42,6 +42,10 @@ El conector Vercel actual no tiene acceso al team/cuenta personal antigua. El si
 
 Evidencia visual recibida el 2026-09-25: el workspace personal `VariApp` muestra dos proyectos, `variapp-desarrollo` y `varistorehn`. Se confirma así el inventario legacy previo a eliminación. Solo `variapp-desarrollo` pertenece al alcance DEV.
 
+### Auditoría de dominios del proyecto legacy DEV
+
+La pantalla `variapp-desarrollo -> Domains` muestra únicamente `variapp-desarrollo.vercel.app`, con configuración válida. No se observan dominios personalizados adicionales. Por tanto, no existe un dominio custom que deba transferirse antes de retirar este proyecto. La eliminación sigue bloqueada únicamente hasta revisar las variables de entorno del proyecto legacy.
+
 ## Observación Cloudinary
 
 El catálogo migrado todavía contiene referencias de medios con prefijos históricos como `desarrollo/` y `varistorehn_desarrollo/`. Esto pertenece al siguiente punto Cloudinary; no borrar esos activos hasta completar esa auditoría.
