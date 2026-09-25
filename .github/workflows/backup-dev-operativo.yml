@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -q 'Producción' scripts/backup_dev.sh
+          grep -q 'PROD' scripts/backup_dev.sh
           grep -q 'ALLOW_DESTRUCTIVE_RESTORE=YES_SOLQARYN_DISPOSABLE_RESTORE' scripts/restore_dev.sh
           grep -q 'DB_SSL_MODE' scripts/backup_dev.sh
           grep -q 'TARGET_DB_SSL_MODE' scripts/restore_dev.sh
@@ -196,7 +196,7 @@ jobs:
         id: backup
         shell: bash
         env:
-          SOLQARYN_ENVIRONMENT: desarrollo
+          SOLQARYN_ENVIRONMENT: dev
           DB_HOST: ${{ vars.SOLQARYN_DEV_DB_HOST }}
           DB_PORT: ${{ vars.SOLQARYN_DEV_DB_PORT }}
           DB_NAME: ${{ vars.SOLQARYN_DEV_DB_NAME }}
@@ -206,7 +206,7 @@ jobs:
           BACKUP_PASSPHRASE: ${{ secrets.SOLQARYN_DEV_BACKUP_PASSPHRASE }}
           OUTPUT_DIR: ${{ runner.temp }}/solqaryn-backups
           RETENTION_DAYS: ${{ env.RETENTION_DAYS }}
-          BACKUP_LABEL: desarrollo
+          BACKUP_LABEL: dev
         run: |
           set -euo pipefail
           chmod +x scripts/backup_dev.sh
@@ -217,7 +217,7 @@ jobs:
           test -s "$backup_file"
           test -s "$checksum_file"
           test -s "$metadata_file"
-          grep -q '"environment": "desarrollo"' "$metadata_file"
+          grep -q '"environment": "dev"' "$metadata_file"
           grep -q '"encrypted": true' "$metadata_file"
           grep -q '"productionInScope": false' "$metadata_file"
           echo "backup_file=$backup_file" >> "$GITHUB_OUTPUT"
@@ -258,7 +258,7 @@ jobs:
       - name: Publicar evidencia SOLQARYN cifrada y same-artifact drill
         uses: actions/upload-artifact@v4
         with:
-          name: solqaryn-backup-desarrollo-${{ github.run_id }}
+          name: solqaryn-backup-dev-${{ github.run_id }}
           path: |
             ${{ steps.backup.outputs.backup_file }}
             ${{ steps.backup.outputs.checksum_file }}
