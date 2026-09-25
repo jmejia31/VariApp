@@ -76,6 +76,27 @@ Los Environments GitHub antiguos con nombres de proveedor, preview, deployment o
 
 ## 7. Validación operativa
 
+### Certificación Aiven DEV — 2026-09-25
+
+Estado: **CERRADO / PASS**.
+
+Evidencia canónica: GitHub Actions run `36175275439` (`DEV - Certificación canónica Aiven`) y artifact `aiven-dev-certification-36175275439`.
+
+- proyecto Aiven: `solqaryn`;
+- servicio: `solqaryn-mysql`;
+- servicio tipo MySQL y estado `RUNNING`;
+- la organización que contiene el proyecto incluye `solqaryn.platform@outlook.com`;
+- el endpoint configurado en DEV coincide con el servicio canónico;
+- base efectiva: `solqaryn_dev`;
+- usuario MySQL efectivo: `solqaryn_dev_user`;
+- versión observada: MySQL `8.4.8`;
+- esquema migrado: 137 tablas base / 107 migraciones EF;
+- datos de catálogo presentes: 8 productos / 2 categorías;
+- secretos impresos: NO;
+- Producción tocada: NO.
+
+Con esta evidencia, Aiven DEV se considera migrado/certificado en la cuenta canónica. El servicio/base legacy personal no debe eliminarse hasta verificar por separado que ningún recurso PROD legacy lo consume.
+
 La configuración canónica de DEV se valida con:
 
 - prueba de token/alcance Aiven sin exponer secretos;

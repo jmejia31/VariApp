@@ -52,6 +52,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTU
 
 - MySQL mediante EF Core/Pomelo y migraciones forward-only cuando aplique.
 - Aiven canónico: proyecto `solqaryn`, servicio único `solqaryn-mysql`, bases `solqaryn_dev`/`solqaryn_prod` y usuarios aislados `solqaryn_dev_user`/`solqaryn_prod_user`; `avnadmin` queda solo para administración.
+- Aiven DEV certificado el 2026-09-25 por GitHub Actions run `36175275439`: el proyecto `solqaryn` y servicio `solqaryn-mysql` pertenecen a la organización Aiven que incluye `solqaryn.platform@outlook.com`; el endpoint DEV coincide con ese servicio; MySQL efectivo usa `solqaryn_dev` con `solqaryn_dev_user`, MySQL 8.4.8, 137 tablas base, 107 migraciones EF, 8 productos y 2 categorías. No se tocaron secretos ni Producción.
 - Los Environments GitHub canónicos son `DEV` y `PROD`; secretos y variables no se cruzan entre ambos.
 - JWT y permisos relacionales; no reintroducir bypass de administrador legacy.
 - No tocar PROD ni `main` desde el flujo de DEV.

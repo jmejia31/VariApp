@@ -1,3 +1,13 @@
+## 2026-09-25 — Aiven DEV certificado bajo SOLQARYN
+
+- Run canónico: `36175275439` — `DEV - Certificación canónica Aiven` — SUCCESS.
+- Artifact: `aiven-dev-certification-36175275439`.
+- Aiven API confirmó el proyecto `solqaryn`, servicio `solqaryn-mysql`, estado `RUNNING` y que `solqaryn.platform@outlook.com` pertenece a la organización que contiene el proyecto.
+- MySQL real confirmó `DATABASE()=solqaryn_dev` y usuario efectivo `solqaryn_dev_user` sobre MySQL 8.4.8.
+- Inventario observado: 137 tablas base, 107 migraciones EF, 8 productos y 2 categorías.
+- No se imprimieron secretos ni se tocó Producción.
+- Punto Aiven DEV: **CERRADO**. La eliminación de Aiven legacy personal queda condicionada únicamente a comprobar que PROD legacy no lo consume.
+
 ## 2026-09-25 — Certificación canónica Aiven DEV preparada
 
 - Se añade un gate repetible de solo lectura para certificar que el project `solqaryn` y el service `solqaryn-mysql` corresponden al endpoint DEV configurado.
