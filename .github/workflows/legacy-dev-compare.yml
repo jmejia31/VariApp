@@ -1,0 +1,193 @@
+name: LEGACY DEV - Comparar origen contra SOLQARYN DEV
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - .github/checkpoints/legacy-dev-compare-request
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-report:
+    name: Reporte read-only legacy DEV
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: LEGACY_DEV_MIGRATION
+    env:
+      DB_HOST_A: "varia"
+      DB_HOST_B: "pp-mysql-"
+      DB_HOST_C: "varia"
+      DB_HOST_D: "pp.c.aivencloud.com"
+      DB_PORT: "26107"
+      DB_NAME: varistorehn_desarrollo
+      DB_USER: avnadmin
+      DB_PASSWORD: ${{ secrets.LEGACY_DEV_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar cliente MySQL
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: Generar reporte read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MYSQL_PWD="$DB_PASSWORD"
+          DB_HOST="${DB_HOST_A}${DB_HOST_B}${DB_HOST_C}${DB_HOST_D}"
+          mkdir -p report
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT TABLE_NAME, TABLE_ROWS
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'
+            ORDER BY TABLE_NAME;" > report/table-estimates.tsv
+          : > report/table-counts.tsv
+          while IFS=$'\t' read -r table_name _; do
+            test -n "$table_name" || continue
+            count="$(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names -e "SELECT COUNT(*) FROM \`$table_name\`;")"
+            printf '%s\t%s\n' "$table_name" "$count" >> report/table-counts.tsv
+          done < report/table-estimates.tsv
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COALESCE(COLUMN_DEFAULT,'<NULL>'), EXTRA
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA=DATABASE()
+            ORDER BY TABLE_NAME, ORDINAL_POSITION;" > report/schema.tsv
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory ORDER BY MigrationId;"             > report/migrations.tsv || true
+          sha256sum report/schema.tsv > report/schema.sha256
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          counts={}
+          for line in Path('report/table-counts.tsv').read_text().splitlines():
+              if not line.strip(): continue
+              t,c=line.split('\t',1); counts[t]=int(c)
+          summary={
+              "side":"legacy",
+              "tableCount":len(counts),
+              "totalRows":sum(counts.values()),
+              "nonEmptyTables":sum(1 for v in counts.values() if v),
+              "topNonEmpty":sorted(((k,v) for k,v in counts.items() if v), key=lambda x:(-x[1],x[0]))[:40]
+          }
+          Path('report/summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          print(json.dumps(summary))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-dev-compare-source
+          retention-days: 3
+          path: report/
+
+  target-report:
+    name: Reporte read-only SOLQARYN DEV
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: DEV
+    env:
+      DB_HOST: ${{ vars.SOLQARYN_DEV_DB_HOST }}
+      DB_PORT: ${{ vars.SOLQARYN_DEV_DB_PORT }}
+      DB_NAME: ${{ vars.SOLQARYN_DEV_DB_NAME }}
+      DB_USER: ${{ vars.SOLQARYN_DEV_DB_USER }}
+      DB_PASSWORD: ${{ secrets.SOLQARYN_DEV_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar cliente MySQL
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: Generar reporte read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$DB_HOST" && test -n "$DB_PORT" && test -n "$DB_NAME" && test -n "$DB_USER" && test -n "$DB_PASSWORD"
+          export MYSQL_PWD="$DB_PASSWORD"
+          mkdir -p report
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT TABLE_NAME, TABLE_ROWS
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'
+            ORDER BY TABLE_NAME;" > report/table-estimates.tsv
+          : > report/table-counts.tsv
+          while IFS=$'\t' read -r table_name _; do
+            test -n "$table_name" || continue
+            count="$(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME" --batch --skip-column-names -e "SELECT COUNT(*) FROM \`$table_name\`;")"
+            printf '%s\t%s\n' "$table_name" "$count" >> report/table-counts.tsv
+          done < report/table-estimates.tsv
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COALESCE(COLUMN_DEFAULT,'<NULL>'), EXTRA
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA=DATABASE()
+            ORDER BY TABLE_NAME, ORDINAL_POSITION;" > report/schema.tsv
+          mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED "$DB_NAME"             --batch --skip-column-names -e "
+            SELECT MigrationId, ProductVersion FROM __EFMigrationsHistory ORDER BY MigrationId;"             > report/migrations.tsv || true
+          sha256sum report/schema.tsv > report/schema.sha256
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          counts={}
+          for line in Path('report/table-counts.tsv').read_text().splitlines():
+              if not line.strip(): continue
+              t,c=line.split('\t',1); counts[t]=int(c)
+          summary={
+              "side":"target",
+              "tableCount":len(counts),
+              "totalRows":sum(counts.values()),
+              "nonEmptyTables":sum(1 for v in counts.values() if v),
+              "topNonEmpty":sorted(((k,v) for k,v in counts.items() if v), key=lambda x:(-x[1],x[0]))[:40]
+          }
+          Path('report/summary.json').write_text(json.dumps(summary,indent=2),encoding='utf-8')
+          print(json.dumps(summary))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-dev-compare-target
+          retention-days: 3
+          path: report/
+
+  compare:
+    name: Comparar reportes sin tocar datos
+    needs: [legacy-report, target-report]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: legacy-dev-compare-*
+          path: compare
+      - name: Comparar esquema, migraciones y conteos
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          src=Path('compare/legacy-dev-compare-source')
+          dst=Path('compare/legacy-dev-compare-target')
+          def counts(p):
+              out={}
+              for line in (p/'table-counts.tsv').read_text().splitlines():
+                  if line.strip():
+                      t,c=line.split('\t',1); out[t]=int(c)
+              return out
+          sc,dc=counts(src),counts(dst)
+          all_tables=sorted(set(sc)|set(dc))
+          diff=[{"table":t,"legacy":sc.get(t),"target":dc.get(t)} for t in all_tables if sc.get(t)!=dc.get(t)]
+          sm=(src/'migrations.tsv').read_text().splitlines()
+          dm=(dst/'migrations.tsv').read_text().splitlines()
+          schema_equal=(src/'schema.tsv').read_bytes()==(dst/'schema.tsv').read_bytes()
+          report={
+              "schemaEqual":schema_equal,
+              "legacyTables":len(sc),"targetTables":len(dc),
+              "legacyRows":sum(sc.values()),"targetRows":sum(dc.values()),
+              "legacyMigrations":len(sm),"targetMigrations":len(dm),
+              "legacyOnlyTables":sorted(set(sc)-set(dc)),
+              "targetOnlyTables":sorted(set(dc)-set(sc)),
+              "differentTableCounts":diff,
+              "targetNonEmpty":sorted([(k,v) for k,v in dc.items() if v], key=lambda x:(-x[1],x[0]))
+          }
+          Path('compare-report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
+          print(json.dumps(report,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: legacy-dev-compare-result
+          retention-days: 3
+          path: compare-report.json
