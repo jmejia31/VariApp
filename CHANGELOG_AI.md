@@ -1,3 +1,13 @@
+## 2026-09-25 — Retiro DEV personal: auditoría destructiva previa
+
+- Vercel personal DEV `variapp-desarrollo`: ya eliminado previamente; el team corporativo sólo contiene `solqaryn-dev`.
+- Render: workspace corporativo visible = `SOLQARYN`; servicios visibles = `solqaryn-api-dev` y servicio reservado PROD. El DEV histórico `solqaryn-api-desarrollo` / `srv-d9jblq7avr4c73c74jng` no es accesible desde ese workspace y su hostname público ya no resuelve. No se ejecutó delete.
+- Aiven: workflow read-only `DEV - Inventario Aiven para retiro legacy`, run `36193976802`, SUCCESS. El token corporativo ve únicamente proyecto `solqaryn` y servicio `solqaryn-mysql`; `legacyProjectNames=[]`. Esto prueba aislamiento de la cuenta corporativa, pero NO prueba que PROD legacy no consuma el Aiven personal. Borrado Aiven personal queda bloqueado hasta auditoría de PROD legacy desde la cuenta antigua.
+- Cloudinary: el cloud nuevo `riyrzmob` ya sirve DEV; el cloud personal legacy no se elimina hasta confirmar cero consumidores de PROD legacy.
+- Cloudflare corporativo: cuenta `Solqaryn.platform@outlook.com's Account`; zona `solqaryn.com` pending; sólo dos TXT `_acme-challenge`; cero aliases DEV legacy en la zona corporativa.
+- GitHub: permiso efectivo observado `jmejia31=admin`, `morales35alex=write`. Se mantiene la decisión ratificada: `jmejia31` es Owner secundario/de recuperación, no acceso residual.
+- Producción no fue modificada.
+
 ## 2026-09-25 — DEV: certificación funcional final PASS
 
 - Workflow canónico: `DEV - Certificación funcional final`.

@@ -257,3 +257,17 @@ Validaciones funcionales:
 - referencias runtime legacy: 0 para proyecto Vercel DEV antiguo, host Aiven personal y nombre de base legacy.
 
 Los logs de Render observados inmediatamente después muestran conexiones únicamente a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`, y cero coincidencias para el host Aiven personal o el proyecto Vercel DEV retirado.
+
+
+### Retiro DEV personal — auditoría previa a destrucción (2026-09-25)
+
+Estado: **PARCIAL / DESTRUCTIVOS BLOQUEADOS DONDE FALTA EVIDENCIA PROD**.
+
+- Vercel legacy DEV: **ELIMINADO** previamente.
+- Render legacy DEV: referencia histórica `solqaryn-api-desarrollo`, ID `srv-d9jblq7avr4c73c74jng`; no visible/accesible en workspace corporativo y hostname público sin resolución. No se realizó delete.
+- Aiven personal: el token corporativo no ve el proyecto legacy. Run read-only `36193976802` ve únicamente `solqaryn/solqaryn-mysql`. No borrar servicio personal ni bases legacy hasta comprobar desde la cuenta antigua qué consume PROD.
+- Cloudinary personal: no borrar hasta comprobar cero consumidores PROD legacy.
+- Cloudflare corporativo: zona `solqaryn.com` pending con sólo TXT de ACME; no hay DNS/aliases DEV legacy que retirar en la cuenta corporativa.
+- GitHub: `jmejia31` sigue siendo Owner secundario/de recuperación por decisión ratificada; no retirar como parte de limpieza DEV salvo nueva decisión explícita.
+
+PROD touched: **FALSE**.
