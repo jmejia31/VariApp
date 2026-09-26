@@ -81,7 +81,27 @@
       "has": [
         {
           "type": "host",
-          "value": "varistorehn.vercel.app"
+          "value": "solqaryn-prod.vercel.app"
+        }
+      ],
+      "destination": "https://solqaryn-api-prod.onrender.com/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "solqaryn.com"
+        }
+      ],
+      "destination": "https://solqaryn-api-prod.onrender.com/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.solqaryn.com"
         }
       ],
       "destination": "https://solqaryn-api-prod.onrender.com/:path*"
