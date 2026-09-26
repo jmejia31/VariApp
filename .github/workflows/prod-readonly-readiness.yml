@@ -44,10 +44,22 @@ jobs:
           test "$database" = "solqaryn_prod"
 
           tables="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'; COMMIT;")"
-          migrations="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory'),(SELECT COUNT(*) FROM __EFMigrationsHistory),0); COMMIT;")"
-          empresas="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Empresas'),(SELECT COUNT(*) FROM Empresas),0); COMMIT;")"
-          productos="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Productos'),(SELECT COUNT(*) FROM Productos),0); COMMIT;")"
-          usuarios="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Usuarios'),(SELECT COUNT(*) FROM Usuarios),0); COMMIT;")"
+
+          count_if_table_exists() {
+            local table="$1"
+            local exists
+            exists="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='${table}'; COMMIT;")"
+            if [ "$exists" = "1" ]; then
+              "${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT COUNT(*) FROM \`${table}\`; COMMIT;"
+            else
+              printf '0\n'
+            fi
+          }
+
+          migrations="$(count_if_table_exists '__EFMigrationsHistory')"
+          empresas="$(count_if_table_exists 'Empresas')"
+          productos="$(count_if_table_exists 'Productos')"
+          usuarios="$(count_if_table_exists 'Usuarios')"
 
           echo "PROD_DB=solqaryn_prod"
           echo "PROD_BASE_TABLES=$tables"
