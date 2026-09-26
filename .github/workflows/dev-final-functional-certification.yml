@@ -40,8 +40,8 @@ jobs:
           curl --retry 3 --fail --silent --show-error "$FRONTEND/varistorehn/productos" -o "$RUNNER_TEMP/products-page.html"
           grep -qi "SOLQARYN" "$RUNNER_TEMP/login.html"
           grep -qi "SOLQARYN" "$RUNNER_TEMP/dashboard.html"
-          ! grep -qi "variapp-desarrollo" "$RUNNER_TEMP/login.html"
-          ! grep -qi "variapp-mysql-variapp.c.aivencloud.com" "$RUNNER_TEMP/login.html"
+          ! grep -qi "identidad-retirada-desarrollo" "$RUNNER_TEMP/login.html"
+          ! grep -qi "identidad-retirada-mysql-identidad-retirada.c.aivencloud.com" "$RUNNER_TEMP/login.html"
           echo "HTTP_ROUTE_CHECK=PASS"
 
       - name: API identidad, categorías, productos e imágenes
@@ -97,7 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           targets=(frontend/src frontend/server frontend/vercel.json backend/src render.yaml)
-          if grep -RInE 'variapp-desarrollo|variapp-mysql-variapp\.c\.aivencloud\.com' "${targets[@]}"; then
+          if grep -RInE 'identidad-retirada-desarrollo|identidad-retirada-mysql-identidad-retirada\.c\.aivencloud\.com' "${targets[@]}"; then
             echo "Referencia operativa legacy detectada" >&2
             exit 1
           fi
