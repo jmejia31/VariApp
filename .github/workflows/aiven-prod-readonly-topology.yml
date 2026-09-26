@@ -47,28 +47,36 @@ jobs:
 
           svc_payload=get(f'/project/{project}/service/{service}')
           svc=svc_payload.get('service', svc_payload)
-          users_payload=get(f'/project/{project}/service/{service}/user')
-          users=users_payload.get('users', []) if isinstance(users_payload, dict) else []
-
           components=[]
-          for c in (svc.get('components') or []):
+          for comp in (svc.get('components') or []):
               components.append({
-                  'component': c.get('component'),
-                  'host': c.get('host'),
-                  'port': c.get('port'),
-                  'route': c.get('route'),
-                  'usage': c.get('usage'),
+                  'component': comp.get('component'),
+                  'host': comp.get('host'),
+                  'port': comp.get('port'),
+                  'route': comp.get('route'),
+                  'usage': comp.get('usage'),
               })
 
           safe_users=[]
-          for u in users:
-              safe_users.append({
-                  'username': u.get('username'),
-                  'type': u.get('type'),
-                  'mysqlGrants': u.get('mysql_grants'),
-              })
-
-          usernames=sorted(x['username'] for x in safe_users if x.get('username'))
+          usernames=[]
+          for username in ('solqaryn_prod_user','solqaryn_dev_user','avnadmin'):
+              try:
+                  payload=get(f'/project/{project}/service/{service}/user/{username}')
+                  u=payload.get('user', payload) if isinstance(payload, dict) else {}
+                  observed=u.get('username') or username
+                  safe_users.append({
+                      'username': observed,
+                      'type': u.get('type'),
+                      'mysqlGrants': u.get('mysql_grants'),
+                      'exists': True,
+                  })
+                  usernames.append(observed)
+              except urllib.error.HTTPError as exc:
+                  if exc.code == 404:
+                      safe_users.append({'username':username,'exists':False})
+                  else:
+                      raise
+          usernames=sorted(usernames)
           report={
               'status':'PASS',
               'project':project,
