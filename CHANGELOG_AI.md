@@ -1,6 +1,6 @@
 ## 2026-09-25 — Retiro DEV personal: auditoría destructiva previa
 
-- Vercel personal DEV `variapp-desarrollo`: ya eliminado previamente; el team corporativo sólo contiene `solqaryn-dev`.
+- Vercel personal DEV `identidad-retirada-desarrollo`: ya eliminado previamente; el team corporativo sólo contiene `solqaryn-dev`.
 - Render: workspace corporativo visible = `SOLQARYN`; servicios visibles = `solqaryn-api-dev` y servicio reservado PROD. El DEV histórico `solqaryn-api-desarrollo` / `srv-d9jblq7avr4c73c74jng` no es accesible desde ese workspace y su hostname público ya no resuelve. No se ejecutó delete.
 - Aiven: workflow read-only `DEV - Inventario Aiven para retiro legacy`, run `36193976802`, SUCCESS. El token corporativo ve únicamente proyecto `solqaryn` y servicio `solqaryn-mysql`; `legacyProjectNames=[]`. Esto prueba aislamiento de la cuenta corporativa, pero NO prueba que PROD legacy no consuma el Aiven personal. Borrado Aiven personal queda bloqueado hasta auditoría de PROD legacy desde la cuenta antigua.
 - Cloudinary: el cloud nuevo `riyrzmob` ya sirve DEV; el cloud personal legacy no se elimina hasta confirmar cero consumidores de PROD legacy.
@@ -21,7 +21,7 @@
 - Imágenes: URLs canónicas `res.cloudinary.com/riyrzmob/.../solqaryn_dev/...` verificadas con HTTP 200.
 - Render: `/health/ready` HTTP 200.
 - Aiven DEV: escritura + lectura sobre tabla temporal dentro de `solqaryn_dev` → PASS, sin cambio persistente.
-- Runtime source gate: cero referencias a `variapp-desarrollo`, `variapp-mysql-variapp.c.aivencloud.com` y `varistorehn_desarrollo`.
+- Runtime source gate: cero referencias a `identidad-retirada-desarrollo`, `identidad-retirada-mysql-identidad-retirada.c.aivencloud.com` y `varistorehn_desarrollo`.
 - Logs Render actuales: conexiones únicamente a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`; búsqueda del host Aiven personal y del proyecto Vercel legacy devolvió cero logs.
 - PROD touched: FALSE.
 
