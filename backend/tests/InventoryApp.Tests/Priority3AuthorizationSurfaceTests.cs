@@ -16,7 +16,8 @@ public sealed class Priority3AuthorizationSurfaceTests
         "InventoryApp.API.Controllers.FacturasController.DescargarPdfPublico",
         "InventoryApp.API.Controllers.TemaVisualController.Get",
         "InventoryApp.Api.Controllers.InboundWebhooksController.ReceiveAsync",
-        "InventoryApp.API.Controllers.WhatsAppController.Webhook"
+        "InventoryApp.API.Controllers.WhatsAppController.Webhook",
+        "InventoryApp.API.Controllers.WhatsAppController.GetPublicoAsync"
     };
 
     [Fact]
@@ -49,7 +50,12 @@ public sealed class Priority3AuthorizationSurfaceTests
             if (!allowAnonymous)
                 continue;
 
+            // VariStoreHN customer accounts intentionally use their own opaque
+            // X-VaristoreHN-Session boundary instead of the administrative JWT.
+            // Every private action inside this controller resolves the account
+            // server-side before reading customer data.
             var explicitlyAllowed = controller.FullName == "InventoryApp.API.Controllers.TiendaController"
+                || controller.FullName == "InventoryApp.API.Controllers.TiendaCuentaController"
                 || AnonymousMethodAllowlist.Contains(endpointName);
 
             Assert.True(

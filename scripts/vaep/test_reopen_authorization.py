@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 import yaml
 
@@ -23,21 +24,32 @@ class AuthorizationTests(unittest.TestCase):
             if 'certify' in jobs:
                 self.assertIn("needs.authorize.result == 'success'", jobs['certify']['if'])
             script = jobs['authorize']['steps'][0]['run']
-            base = dict(EVENT_NAME='workflow_dispatch', REPOSITORY='jmejia31/VariApp', OWNER='jmejia31',
-                        ACTOR='jmejia31', TRIGGERING_ACTOR='jmejia31', TARGET_REF='refs/heads/Desarrollo',
-                        AUTHORIZATION='AUTORIZADO_REABRIR')
-            for changes, allowed in [({}, True), ({'AUTHORIZATION': ''}, False),
-                                     ({'AUTHORIZATION': 'AUTORIZADO_REABRIR\n'}, False),
-                                     ({'ACTOR': 'collaborator'}, False),
-                                     ({'TRIGGERING_ACTOR': 'collaborator'}, False),
-                                     ({'TARGET_REF': 'refs/heads/main'}, False),
-                                     ({'EVENT_NAME': 'push'}, False),
-                                     ({'REPOSITORY': 'other/VariApp'}, False),
-                                     ({'AUTHORIZATION': '$(exit 0)'}, False)]:
-                with self.subTest(workflow=filename, changes=changes):
-                    result = subprocess.run(['bash', '-c', script], env={**os.environ, **base, **changes},
-                                            capture_output=True)
-                    self.assertEqual(result.returncode == 0, allowed)
+            self.assertNotIn('github.repository_owner', str(jobs['authorize']))
+            base = dict(EVENT_NAME='workflow_dispatch', REPOSITORY='solqaryn/Solqaryn',
+                        ACTOR='repo-admin', TRIGGERING_ACTOR='repo-admin', TARGET_REF='refs/heads/dev',
+                        AUTHORIZATION='AUTORIZADO_REABRIR', MOCK_ADMIN='true')
+            cases = [
+                ({}, True),
+                ({'AUTHORIZATION': ''}, False),
+                ({'AUTHORIZATION': 'AUTORIZADO_REABRIR\n'}, False),
+                ({'ACTOR': 'collaborator'}, False),
+                ({'TRIGGERING_ACTOR': 'collaborator'}, False),
+                ({'ACTOR': 'collaborator', 'TRIGGERING_ACTOR': 'collaborator', 'MOCK_ADMIN': 'false'}, False),
+                ({'TARGET_REF': 'refs/heads/main'}, False),
+                ({'EVENT_NAME': 'push'}, False),
+                ({'REPOSITORY': 'other/Solqaryn'}, False),
+                ({'AUTHORIZATION': '$(exit 0)'}, False),
+            ]
+            with tempfile.TemporaryDirectory() as tmp:
+                gh = Path(tmp) / 'gh'
+                gh.write_text('#!/usr/bin/env sh\nprintf "%s\\n" "${MOCK_ADMIN:-false}"\n')
+                gh.chmod(0o755)
+                for changes, allowed in cases:
+                    with self.subTest(workflow=filename, changes=changes):
+                        env = {**os.environ, **base, **changes}
+                        env['PATH'] = tmp + os.pathsep + os.environ.get('PATH', '')
+                        result = subprocess.run(['bash', '-c', script], env=env, capture_output=True)
+                        self.assertEqual(result.returncode == 0, allowed)
 
 
 if __name__ == '__main__':

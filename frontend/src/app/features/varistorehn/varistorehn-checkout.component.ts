@@ -5,20 +5,19 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { construirEnlaceWhatsApp } from '../../core/services/whatsapp-share.service';
 import { crearCatalogoEjemplo, mapearProducto, telefonoWhatsapp } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { mensajeWhatsappCheckout, normalizarDatosComprador, urlCheckoutPermitida } from './varistorehn-checkout.rules';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
-import { CheckoutItemRequest, CheckoutValidado, DatosCompradorCheckout, ReciboPedidoPublico } from './varistorehn.models';
+import { CheckoutItemRequest, CheckoutValidado, DatosCompradorCheckout, EstadoConsultaPublica, ReciboPedidoPublico } from './varistorehn.models';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnPedidoService } from './varistorehn-pedido.service';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent } from './varistorehn.visual';
 
-type EstadoCheckout = 'loading' | 'ready' | 'empty' | 'error';
 type IdentidadAgrupacion = { modeloNombre: string | null; marcaNombre: string | null };
 
 @Component({
@@ -37,16 +36,17 @@ export class VaristorehnCheckoutComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly carrito = inject(VaristorehnCarritoService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
-  readonly estado = signal<EstadoCheckout>('loading');
+  readonly estado = signal<EstadoConsultaPublica>('loading');
   readonly error = signal('');
   readonly procesando = signal(false);
   readonly validado = signal<CheckoutValidado | null>(null);
   readonly enlaceWhatsapp = signal('');
   readonly aviso = signal('');
+  private readonly slugsProducto = new Map<number, string>();
 
   readonly permiteWhatsapp = computed(() => this.config.modoCarrito !== 'tarjeta');
   readonly permiteTarjeta = computed(() => this.config.modoCarrito !== 'whatsapp');
@@ -120,7 +120,13 @@ export class VaristorehnCheckoutComponent implements OnInit {
     const comprador = this.datosComprador();
     const moneda = this.identidad.config().moneda || 'HNL';
     const mensaje = mensajeWhatsappCheckout(
-      this.identidad.nombreSistema(), comprador, validado.validacionId, moneda, validado.lineas, validado.total
+      this.identidad.config().nombreComercial || 'Tienda',
+      comprador,
+      validado.validacionId,
+      moneda,
+      validado.lineas,
+      validado.total,
+      this.enlacesProductos(validado)
     );
     const enlace = construirEnlaceWhatsApp(destino, mensaje);
     if (!enlace) {
@@ -225,6 +231,11 @@ export class VaristorehnCheckoutComponent implements OnInit {
       : of(crearCatalogoEjemplo());
 
     return catalogo$.pipe(switchMap(productos => {
+      this.slugsProducto.clear();
+      for (const producto of productos) {
+        const slug = producto.slug?.trim();
+        if (slug) this.slugsProducto.set(producto.id, slug);
+      }
       this.carrito.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
       if (this.carrito.vacio()) return of(null);
       return this.utilizarDatosBaseDatos()
@@ -233,13 +244,29 @@ export class VaristorehnCheckoutComponent implements OnInit {
     }));
   }
 
+  private enlacesProductos(validado: CheckoutValidado): Readonly<Record<number, string>> {
+    const origen = this.document.defaultView?.location.origin;
+    if (!origen) return {};
+    const enlaces: Record<number, string> = {};
+    for (const linea of validado.lineas) {
+      const slug = this.slugsProducto.get(linea.productoId);
+      if (!slug || enlaces[linea.productoId]) continue;
+      try {
+        enlaces[linea.productoId] = new URL(VARISTOREHN_PATHS.producto(slug), origen).toString();
+      } catch {
+        // Si el navegador no puede construir una URL absoluta, omitimos el enlace sin bloquear la compra.
+      }
+    }
+    return enlaces;
+  }
+
   private aplicarValidacion(validado: CheckoutValidado | null): void {
     if (!validado) {
       this.estado.set('empty');
       return;
     }
     this.validado.set(validado);
-    this.estado.set('ready');
+    this.estado.set('success');
   }
 
   private fallar(error: unknown): void {
@@ -249,10 +276,14 @@ export class VaristorehnCheckoutComponent implements OnInit {
 
   private referenciasCheckout(): CheckoutItemRequest[] {
     return this.carrito.items().map(item => {
-      const agrupacion = this.identidadAgrupacion(item.modeloClave);
+      const productoVarianteId = item.productoVarianteId ?? null;
+      const agrupacion = productoVarianteId === null
+        ? this.identidadAgrupacion(item.modeloClave)
+        : { modeloNombre: null, marcaNombre: null };
       return {
         productoId: item.productoId,
-        modeloId: item.modeloId,
+        productoVarianteId,
+        modeloId: productoVarianteId === null ? item.modeloId : null,
         modeloNombre: agrupacion.modeloNombre,
         marcaNombre: agrupacion.marcaNombre,
         unidades: item.unidades

@@ -3,7 +3,7 @@
 ```yaml
 openapi: 3.0.1
 info:
-  title: VariApp ERP API - Facturas de Proveedor
+  title: Solqaryn ERP API - Facturas de Proveedor
   version: v1
 paths:
   /facturas-proveedor:

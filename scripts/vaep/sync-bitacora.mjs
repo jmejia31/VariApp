@@ -1,3 +1,11 @@
+// PROJECT_SCOPE_LOCK=STRICT
+// EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+// PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+// PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+// EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+// LOCAL_SKILL_COUNT=1
+// Prohibido usar skills/documentacion/contexto fuera de SOLQARYN sin autorizacion explicita o allowlist ACTIVE.
+
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import process from 'node:process';
@@ -6,8 +14,8 @@ const REQUIRED = ['projectId', 'repository', 'branch', 'taskId', 'parentId', 'co
 function parseArgs(argv) { const result = {}; for (let i = 0; i < argv.length; i += 1) { if (!argv[i].startsWith('--')) continue; const key = argv[i].slice(2); const next = argv[i + 1]; result[key] = next === undefined || next.startsWith('--') ? true : next; if (result[key] !== true) i += 1; } return result; }
 function validate(payload) {
   const errors = REQUIRED.filter((field) => !(field in payload));
-  if (payload.projectId !== 'VARIAPP') errors.push('projectId must be VARIAPP');
-  if (payload.repository !== 'jmejia31/VariApp') errors.push('repository mismatch');
+  if (payload.projectId !== 'SOLQARYN') errors.push('projectId must be SOLQARYN');
+  if (payload.repository !== 'solqaryn/Solqaryn') errors.push('repository mismatch');
   if (payload.branch !== 'Desarrollo') errors.push('branch must be Desarrollo');
   if (!/^[0-9a-f]{40}$/.test(payload.commitSha ?? '')) errors.push('commitSha must be full SHA');
   if (!Number.isInteger(payload.p0) || !Number.isInteger(payload.p1) || payload.p0 < 0 || payload.p1 < 0) errors.push('p0/p1 must be non-negative integers');

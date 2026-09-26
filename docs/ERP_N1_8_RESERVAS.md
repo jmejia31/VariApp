@@ -124,7 +124,7 @@ Superficie HTTP de `ReservasInventarioController`:
 | POST | `/reservas-inventario/{id}/expirar` | expirar compromiso | `MovimientosInventario:CambiarEstado` |
 | POST | `/reservas-inventario/{id}/cancelar` | cancelar | `MovimientosInventario:Anular` |
 
-El controlador requiere autenticación y no expone bypass `AllowAnonymous`. Los errores de dominio se propagan mediante el contrato global de errores/ProblemDetails de VariApp.
+El controlador requiere autenticación y no expone bypass `AllowAnonymous`. Los errores de dominio se propagan mediante el contrato global de errores/ProblemDetails de Solqaryn.
 
 La especificación Swagger/OpenAPI se deriva de los controladores/DTOs de la API; N1.8 no introduce un contrato manual paralelo.
 

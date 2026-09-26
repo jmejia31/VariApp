@@ -1,7 +1,7 @@
-# Fase 6 — Certificación técnica de VariApp
+# Fase 6 — Certificación técnica de Solqaryn
 
 Fecha de certificación: 22 de julio de 2026  
-Rama: `agent/mejoras-variapp`  
+Rama: `agent/mejoras-solqaryn`  
 Pull Request: `#1`  
 Base protegida: `main`
 
@@ -11,7 +11,7 @@ La Fase 6 queda **completa y certificada** en la rama de trabajo. No se aplicaro
 
 ## Ejecución certificada
 
-- Workflow: `VariApp CI`.
+- Workflow: `Solqaryn CI`.
 - Run ID: `29929548226`.
 - Commit evaluado: `d22d0d9fde81c7efd15b9728d4e7fd587f51a2ef`.
 - Resultado del frontend: aprobado.

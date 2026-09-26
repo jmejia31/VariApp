@@ -1,4 +1,4 @@
-# Contribuir a VariApp
+# Contribuir a Solqaryn
 
 ## Gate de inicio — antes de tocar código
 
@@ -13,12 +13,12 @@ powershell -ExecutionPolicy Bypass -File scripts\iniciar-sesion-ia.ps1
 Resultado esperado:
 
 ```text
-PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
+PROJECT_ID=SOLQARYN
+REPOSITORY=solqaryn/Solqaryn
 BRANCH=Desarrollo
 ```
 
-Con acceso remoto, verificar los mismos datos mediante GitHub. Si no coinciden, detenerse: solo el contexto canónico de VariApp autoriza cambios aquí.
+Con acceso remoto, verificar los mismos datos mediante GitHub. Si no coinciden, detenerse: solo el contexto canónico de Solqaryn autoriza cambios aquí.
 
 Después leer únicamente:
 
@@ -35,7 +35,7 @@ No volver a indexar todo el repositorio ni releer archivos ya documentados si no
 - `main`: referencia productiva congelada.
 - `Desarrollo`: **única rama de trabajo e integración autorizada**.
 - No crear ramas temporales sin autorización expresa de Javier Mejía.
-- PR #2 `Desarrollo -> main`: abierto y borrador; no fusionar ni habilitar auto-merge.
+- PR #2 `Desarrollo -> main` es histórico y está `CLOSED + MERGED`; no reabrirlo. Un nuevo PR/merge hacia `main` requiere autorización nueva y explícita de Javier Mejía; auto-merge permanece deshabilitado.
 
 ## Preparación local
 
@@ -57,7 +57,7 @@ Si hay cambios locales ajenos, preservarlos y resolver el conflicto explícitame
 - Evitar refactors no solicitados.
 - No tocar Producción.
 - No subir secretos ni temporales.
-- Usar únicamente contexto canónico y verificable de VariApp.
+- Usar únicamente contexto canónico y verificable de Solqaryn.
 - Actualizar memoria/arquitectura solo cuando el cambio realmente la invalide.
 
 ## Evidencia obligatoria
@@ -70,7 +70,7 @@ Cada changeset debe:
 4. actualizar colaborativos si cambian reglas/accesos/gobierno;
 5. reportar validaciones reales y SHA publicado.
 
-El hook `pre-commit` local bloquea commits fuera de VariApp/`Desarrollo` y commits sin `CHANGELOG_AI.md`.
+El hook `pre-commit` local bloquea commits fuera de Solqaryn/`Desarrollo` y commits sin `CHANGELOG_AI.md`.
 
 ## Validación
 
@@ -95,3 +95,19 @@ Un commit puede usar `[skip ci]` únicamente bajo la regla estricta de cambios a
 - No escanear módulos no relacionados.
 - Tras reconexión, recuperar estado; no reiniciar análisis.
 - Si una tarea puede terminarse con menos archivos/comandos, preferir esa ruta sin sacrificar validación.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+
+

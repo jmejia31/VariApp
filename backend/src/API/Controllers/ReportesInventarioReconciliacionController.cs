@@ -42,11 +42,12 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
         if (error is not null)
             return BadRequest(ApiResponse<object>.Fail("Consulta de reconciliación inválida.", new() { error }));
 
+        var empresaId = await TenantPermissionContext.RequireEmpresaIdAsync(HttpContext, cancellationToken);
         if (!await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(filtro, _usuarioScope))
             return Forbid();
 
-        var resultado = await _reportes.ObtenerReporteReconciliacionAsync(filtro, cancellationToken);
-        var puedeVerFinanzas = await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver);
+        var resultado = await _reportes.ObtenerReporteReconciliacionAsync(empresaId, filtro, cancellationToken);
+        var puedeVerFinanzas = await _permisos.TienePermisoAsync(empresaId, ModuloSistema.Finanzas, AccionPermiso.Ver);
         if (!puedeVerFinanzas)
         {
             foreach (var row in resultado.Items)
@@ -65,6 +66,7 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
             entidad: "ReporteInventarioReconciliacion",
             valoresNuevos: new
             {
+                EmpresaId = empresaId,
                 filtro.ProductoId,
                 filtro.ProductoVarianteId,
                 filtro.AlmacenId,

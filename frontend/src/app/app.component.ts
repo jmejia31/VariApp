@@ -8,7 +8,10 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
 import { ThemeApplierService } from './services/theme-applier.service';
 import { EmpresaIdentidadService } from './services/empresa-identidad.service';
 import { SessionActivityService } from './core/auth/session-activity.service';
+import { TenantContextService } from './core/auth/tenant-context.service';
 import { AppNavigationMenuComponent } from './shared/navigation/app-navigation-menu.component';
+import { VaristorehnSeoService } from './features/varistorehn/varistorehn-seo.service';
+import { VaristorehnIdentidadService } from './features/varistorehn/varistorehn-identidad.service';
 
 @Component({
   selector: 'app-root',
@@ -98,18 +101,21 @@ export class AppComponent implements OnDestroy {
     public permisosRuntime: PermisosRuntimeService,
     public identidad: EmpresaIdentidadService,
     private sessionActivity: SessionActivityService,
+    private tenantContext: TenantContextService,
     private router: Router,
     private themeApplier: ThemeApplierService,
+    private seo: VaristorehnSeoService,
+    private tiendaIdentidad: VaristorehnIdentidadService,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.themeApplier.aplicarTemaGuardado();
-    this.identidad.cargar().subscribe();
+    this.aplicarContextoRuta(this.router.url);
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
       this.sessionActivity.iniciar();
     }
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
+        this.aplicarContextoRuta(event.urlAfterRedirects);
         this.cerrarSidebar();
         this.gestionarFocoTrasNavegacion();
       }
@@ -167,6 +173,31 @@ export class AppComponent implements OnDestroy {
   logout(): void {
     this.cerrarSidebar();
     this.sessionActivity.cerrarManual();
+  }
+
+  private aplicarContextoRuta(url: string): void {
+    if (this.esRutaTienda(url)) {
+      this.themeApplier.aplicarTemaGuardado();
+      this.tiendaIdentidad.cargar().subscribe(() => {
+        this.seo.aplicarRuta(url, this.tiendaIdentidad.config().nombreComercial || 'Tienda');
+      });
+      return;
+    }
+
+    if (this.auth.isAuthenticated() && this.tenantContext.tieneContextoVerificado()) {
+      this.themeApplier.aplicarTemaGuardado();
+      this.identidad.cargar().subscribe();
+    } else {
+      this.themeApplier.aplicarTemaPlataforma();
+      this.identidad.usarPlataforma();
+    }
+
+    this.seo.aplicarNoIndex('SOLQARYN');
+  }
+
+  private esRutaTienda(url: string): boolean {
+    const path = (url || '/').split(/[?#]/, 1)[0].replace(/\/+$/, '') || '/';
+    return path === '/varistorehn' || path.startsWith('/varistorehn/');
   }
 
   private gestionarFocoTrasNavegacion(): void {

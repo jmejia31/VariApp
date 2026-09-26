@@ -15,7 +15,7 @@ HOST = os.environ.get("SMTP_CAPTURE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("SMTP_CAPTURE_PORT", "1025"))
 USERNAME = os.environ.get("SMTP_CAPTURE_USERNAME", "smtp-user")
 PASSWORD = os.environ.get("SMTP_CAPTURE_PASSWORD", "smtp-pass")
-OUTPUT_DIR = Path(os.environ.get("SMTP_CAPTURE_DIR", "/tmp/variapp-smtp"))
+OUTPUT_DIR = Path(os.environ.get("SMTP_CAPTURE_DIR", "/tmp/solqaryn-smtp"))
 FAIL_FIRST = int(os.environ.get("SMTP_FAIL_FIRST_MESSAGES", "1"))
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -58,7 +58,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
     print(f"SMTP connection from {peer}", flush=True)
 
     try:
-        await send(writer, "220 fake-smtp.variapp ESMTP ready")
+        await send(writer, "220 fake-smtp.solqaryn ESMTP ready")
         while True:
             raw = await reader.readline()
             if not raw:
@@ -67,11 +67,11 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
             upper = line.upper()
 
             if upper.startswith("EHLO"):
-                await send(writer, "250-fake-smtp.variapp")
+                await send(writer, "250-fake-smtp.solqaryn")
                 await send(writer, "250-AUTH LOGIN")
                 await send(writer, "250 SIZE 20971520")
             elif upper.startswith("HELO"):
-                await send(writer, "250 fake-smtp.variapp")
+                await send(writer, "250 fake-smtp.solqaryn")
             elif upper.startswith("AUTH LOGIN"):
                 parts = line.split()
                 if len(parts) >= 3:

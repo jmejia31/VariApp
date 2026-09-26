@@ -18,7 +18,7 @@
     "directed_tests": "frontend/src/app/services/pago-online.service.spec.ts verifies contract fields, Idempotency-Key and absence of PAN/CVV",
     "ui": "factura-pagos component provides initiate/list/filter table plus loading/error/empty states and responsive layout",
     "permissions_ui": "existing facturas/:id/pagos route remains guarded by authGuard + permisoGuard Facturacion/Aplicar",
-    "pci_boundary": "UI explicitly states VariApp does not request/store PAN/CVV; no PAN/CVV inputs or DTO fields exist",
+    "pci_boundary": "UI explicitly states Solqaryn does not request/store PAN/CVV; no PAN/CVV inputs or DTO fields exist",
     "delegated_checkout": "only provider-returned absolute HTTPS URLs are exposed as external target=_blank rel=noopener noreferrer links",
     "tenant_boundary": "empresaId is taken from TenantContextService.empresaIdVerificada() for list/initiate",
     "accessibility": "role note/status/alert, aria-live, labels and responsive table wrapper are present"

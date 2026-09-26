@@ -45,7 +45,7 @@ Se revisó y corrigió el flujo completo de envío de facturas por correo:
 - aplica backoff exponencial acotado;
 - limita la cantidad y tamaño total de adjuntos;
 - genera cuerpo `text/plain` y `text/html`;
-- asigna `X-VariApp-Message-Id` para trazabilidad;
+- asigna `X-Solqaryn-Message-Id` para trazabilidad;
 - enmascara destinatario, remitente y host en diagnósticos;
 - no registra contraseñas ni credenciales;
 - devuelve códigos técnicos controlados sin exponer excepciones internas.
@@ -183,7 +183,7 @@ La vista de factura:
 
 ## 7. Configuración declarativa de Desarrollo
 
-`render.yaml` declara exclusivamente para `variapp-api-desarrollo`:
+`render.yaml` declara exclusivamente para `solqaryn-api-desarrollo`:
 
 ```text
 Smtp__Host
@@ -234,7 +234,7 @@ Se añadieron pruebas para:
 
 - destinatario;
 - asunto;
-- `X-VariApp-Message-Id`;
+- `X-Solqaryn-Message-Id`;
 - cuerpo de texto plano;
 - cuerpo HTML;
 - exactamente un PDF;
@@ -308,14 +308,14 @@ El artefacto incluye `.eml`, estado del servidor, resumen de validación, logs, 
 
 La prueba aislada demuestra que el código envía correctamente por SMTP, reintenta y adjunta un PDF válido. No demuestra recepción en un proveedor externo ni reputación del dominio.
 
-Para cerrar completamente la Fase 7, el propietario debe realizar únicamente en el servicio Render de Desarrollo `variapp-api-desarrollo`:
+Para cerrar completamente la Fase 7, el propietario debe realizar únicamente en el servicio Render de Desarrollo `solqaryn-api-desarrollo`:
 
 1. Configurar `Smtp__Host`, `Smtp__Port`, `Smtp__UsuarioSmtp` y `Smtp__PasswordSmtp`.
 2. Usar una contraseña de aplicación o credencial SMTP dedicada; no la contraseña normal de la cuenta.
 3. Configurar `Smtp__CorreoRemitente` y, opcionalmente, `Smtp__CorreoRespuesta`.
 4. Mantener `Smtp__UsarSsl=true` cuando el proveedor utilice STARTTLS/SSL según su puerto.
 5. Desplegar únicamente `Desarrollo`.
-6. Abrir una factura de prueba en `variapp-desarrollo.vercel.app`.
+6. Abrir una factura de prueba en `solqaryn-desarrollo.vercel.app`.
 7. Confirmar que `/facturas/correo/estado` muestra `configurado=true` sin revelar secretos.
 8. Enviar a un buzón controlado.
 9. Verificar bandeja de entrada y spam.

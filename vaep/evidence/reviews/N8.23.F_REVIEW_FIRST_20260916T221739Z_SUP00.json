@@ -42,8 +42,8 @@
     "health": "/health from Program.cs",
     "readiness": "/health/ready from Program.cs with database connectivity",
     "frontend_build": "npm ci + npm run lint + npm run build:prod from package/workflow",
-    "dev_frontend": "https://variapp-desarrollo.vercel.app",
-    "dev_backend": "https://variapp-api-desarrollo.onrender.com"
+    "dev_frontend": "https://solqaryn-desarrollo.vercel.app",
+    "dev_backend": "https://solqaryn-api-desarrollo.onrender.com"
   },
   "recovery_applied_same_run": [
     {

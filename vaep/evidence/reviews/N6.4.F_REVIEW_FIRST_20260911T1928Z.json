@@ -77,7 +77,7 @@
   ],
   "nonCausalStatuses": [
     {
-      "context": "Vercel – variapp-desarrollo",
+      "context": "Vercel – solqaryn-desarrollo",
       "head": "4acdee44b54ebe98fadc6b0807e8589822d181ac",
       "state": "failure",
       "reason": "Deployment rate limited; not a code/test failure and deployment is outside N6.4.F DoD"

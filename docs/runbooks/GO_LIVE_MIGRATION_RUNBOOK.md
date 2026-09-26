@@ -1,4 +1,4 @@
-# GO_LIVE_MIGRATION_RUNBOOK — VariApp Desarrollo
+# GO_LIVE_MIGRATION_RUNBOOK — Solqaryn Desarrollo
 
 ## Alcance obligatorio
 
@@ -22,11 +22,11 @@ Ejecutar desde la raíz del repositorio:
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
 git status --short
 ```
 
-STOP inmediato si la rama no es `Desarrollo`, el remoto no es `jmejia31/VariApp`, existe un proceso de migración concurrente sobre el mismo scope o la cadena de conexión apunta a Producción.
+STOP inmediato si la rama no es `Desarrollo`, el remoto no es `solqaryn/Solqaryn`, existe un proceso de migración concurrente sobre el mismo scope o la cadena de conexión apunta a Producción.
 
 ## Gate 1 — compilación y pruebas antes de datos
 
@@ -49,7 +49,7 @@ Este gate usa credenciales aleatorias de vida de proceso; no imprime ni versiona
 
 ```bash
 set -euo pipefail
-export N823_MYSQL_CONTAINER="variapp-n823-migration"
+export N823_MYSQL_CONTAINER="solqaryn-n823-migration"
 export N823_MYSQL_PORT="33306"
 export N823_MYSQL_ROOT_PASSWORD="$(openssl rand -hex 24)"
 export ASPNETCORE_ENVIRONMENT="Development"
@@ -57,9 +57,9 @@ export Database__ServerVersion="8.4.3"
 export Database__ApplyMigrationsOnStartup="false"
 export ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=${N823_MYSQL_PORT};Database=inventoryapp_n823;User=root;Password=${N823_MYSQL_ROOT_PASSWORD};SslMode=None;AllowPublicKeyRetrieval=True;"
 export Jwt__Secret="$(openssl rand -hex 32)"
-export Jwt__Issuer="VariApp.N823.Runbook"
-export Jwt__Audience="VariApp.N823.Runbook.Frontend"
-export Cors__AllowedOrigins__0="https://variapp-desarrollo.vercel.app"
+export Jwt__Issuer="Solqaryn.N823.Runbook"
+export Jwt__Audience="Solqaryn.N823.Runbook.Frontend"
+export Cors__AllowedOrigins__0="https://solqaryn-desarrollo.vercel.app"
 
 docker rm -f "$N823_MYSQL_CONTAINER" >/dev/null 2>&1 || true
 docker run --rm -d \
@@ -147,3 +147,19 @@ Detener y no promover si ocurre cualquiera de estos eventos:
 ## Evidencia mínima para LISTO
 
 Registrar: HEAD exacto o equivalencia demostrada; versión MySQL; lista de migraciones; tiempo de primera y segunda pasada; conteo de `__EFMigrationsHistory`; pruebas backend; decisión REVIEW_FIRST; P0=0/P1=0; receipt y readback. Ninguna salida debe contener contraseñas, tokens o connection strings completas.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`.
+
+

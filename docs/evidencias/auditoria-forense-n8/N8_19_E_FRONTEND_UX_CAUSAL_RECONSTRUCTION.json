@@ -1,5 +1,5 @@
 {
-  "schema":"vaep-n8.19-e-frontend-forensic/v1","parent":"N8.19.E","macro_parent":"N8.19","stage":"FRONTEND_UX","branch":"Desarrollo","repo":"jmejia31/VariApp","authority":"docs/VAEP_AUTHORITY.md","base_head":"775c2a435a1a44d78f50bb69538c82d2275a638d","scope_source":"docs/evidencias/auditoria-forense-n8/N8_19_A_PRE_SCOPE.json",
+  "schema":"vaep-n8.19-e-frontend-forensic/v1","parent":"N8.19.E","macro_parent":"N8.19","stage":"FRONTEND_UX","branch":"Desarrollo","repo":"jmejia31/Solqaryn","authority":"docs/VAEP_AUTHORITY.md","base_head":"775c2a435a1a44d78f50bb69538c82d2275a638d","scope_source":"docs/evidencias/auditoria-forense-n8/N8_19_A_PRE_SCOPE.json",
   "items":[
     {"task":"N8.7.E","historical_state":"LISTO_REAL","classification":"N_A_JUSTIFIED","evidence":["vaep/evidence/receipts/N8.7.E_LISTO_REAL_20260915T210820Z_SUP48.json"],"verdict":"No proven UI performance gap existed; controlled performance remained deferred to N8.7.G rather than guessing a frontend optimization.","p0":0,"p1":0,"p2":0},
     {"task":"N8.8.E","historical_state":"LISTO_REAL","classification":"N_A_JUSTIFIED","evidence":["vaep/evidence/receipts/N8.8.E_LISTO_REAL_20260915T211212Z_SUP48.json"],"verdict":"Automatic backup is operator/provider control-plane behavior and had no required end-user frontend surface.","p0":0,"p1":0,"p2":0},

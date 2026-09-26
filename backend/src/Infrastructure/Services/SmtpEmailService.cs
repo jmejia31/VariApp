@@ -156,7 +156,7 @@ public sealed class SmtpEmailService : IEmailService
         if (errorAdjuntos is not null)
             return Fallo("ADJUNTOS_INVALIDOS", errorAdjuntos, false, 0);
 
-        var messageId = $"variapp-{Guid.NewGuid():N}";
+        var messageId = $"solqaryn-{Guid.NewGuid():N}";
         Exception? ultimaExcepcion = null;
 
         for (var intento = 1; intento <= configuracion.MaximoIntentos; intento++)
@@ -259,7 +259,7 @@ public sealed class SmtpEmailService : IEmailService
             UsarSsl: _configuration.GetValue<bool?>("Smtp:UsarSsl") ?? true,
             RequiereAutenticacion: _configuration.GetValue<bool?>("Smtp:RequiereAutenticacion") ?? true,
             CorreoRemitente: remitente ?? string.Empty,
-            NombreRemitente: LimpiarEncabezado(_configuration["Smtp:NombreRemitente"] ?? "VariStorehn"),
+            NombreRemitente: LimpiarEncabezado(_configuration["Smtp:NombreRemitente"] ?? "SOLQARYN"),
             CorreoRespuesta: _configuration["Smtp:CorreoRespuesta"]?.Trim(),
             TimeoutSegundos: Math.Clamp(_configuration.GetValue<int?>("Smtp:TimeoutSeconds") ?? 60, 10, 300),
             MaximoIntentos: Math.Clamp(_configuration.GetValue<int?>("Smtp:MaxAttempts") ?? 3, 1, 5),
@@ -269,7 +269,7 @@ public sealed class SmtpEmailService : IEmailService
     private static (string? Error, MailboxAddress? Remitente) ValidarConfiguracion(ConfiguracionSmtp configuracion)
     {
         if (string.IsNullOrWhiteSpace(configuracion.Host) || EsPlaceholder(configuracion.Host))
-            return ("El host SMTP de Desarrollo no está configurado.", null);
+            return ("El host SMTP de DEV no está configurado.", null);
 
         if (configuracion.Puerto is < 1 or > 65535)
             return ("El puerto SMTP configurado no es válido.", null);
@@ -278,7 +278,7 @@ public sealed class SmtpEmailService : IEmailService
             (string.IsNullOrWhiteSpace(configuracion.Usuario) || EsPlaceholder(configuracion.Usuario) ||
              string.IsNullOrWhiteSpace(configuracion.Password) || EsPlaceholder(configuracion.Password)))
         {
-            return ("Las credenciales SMTP de Desarrollo no están configuradas completamente.", null);
+            return ("Las credenciales SMTP de DEV no están configuradas completamente.", null);
         }
 
         if (!MailboxAddress.TryParse(configuracion.CorreoRemitente, out var remitente))
@@ -329,7 +329,7 @@ public sealed class SmtpEmailService : IEmailService
         var mensaje = new MimeMessage
         {
             Subject = asunto,
-            MessageId = MimeUtils.GenerateMessageId("varistorehn.local")
+            MessageId = MimeUtils.GenerateMessageId("solqaryn.local")
         };
 
         mensaje.From.Add(new MailboxAddress(configuracion.NombreRemitente, remitente.Address));
@@ -339,7 +339,7 @@ public sealed class SmtpEmailService : IEmailService
             ? remitente.Address
             : configuracion.CorreoRespuesta;
         mensaje.ReplyTo.Add(new MailboxAddress(configuracion.NombreRemitente, respuesta));
-        mensaje.Headers.Add("X-VariApp-Message-Id", messageId);
+        mensaje.Headers.Add("X-Solqaryn-Message-Id", messageId);
         mensaje.Headers.Add("X-Auto-Response-Suppress", "All");
 
         var bodyBuilder = new BodyBuilder
@@ -462,7 +462,7 @@ public sealed class SmtpEmailService : IEmailService
         {
             var mensaje = EsGmail(configuracion.Host)
                 ? "Gmail rechazó las credenciales. Activa la verificación en dos pasos y usa una contraseña de aplicación nueva de 16 caracteres; no uses la contraseña normal de la cuenta."
-                : "El servidor SMTP rechazó las credenciales de Desarrollo.";
+                : "El servidor SMTP rechazó las credenciales de DEV.";
             return ("SMTP_AUTENTICACION", mensaje, false);
         }
 
@@ -475,7 +475,7 @@ public sealed class SmtpEmailService : IEmailService
             if (status is 534 or 535)
             {
                 var mensaje = EsGmail(configuracion.Host)
-                    ? "Gmail exige una contraseña de aplicación válida. Genera una nueva con la verificación en dos pasos activa y reemplaza Smtp__PasswordSmtp en Render Desarrollo."
+                    ? "Gmail exige una contraseña de aplicación válida. Genera una nueva con la verificación en dos pasos activa y reemplaza Smtp__PasswordSmtp en Render DEV."
                     : "El servidor SMTP rechazó la autenticación.";
                 return ("SMTP_AUTENTICACION", mensaje, false);
             }

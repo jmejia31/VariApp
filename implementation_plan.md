@@ -1,6 +1,6 @@
 # Ciclo funcional complementario — Ajustes técnicos de implementación
 
-Este documento constituye el plan de implementación técnico y de control de regresiones para la fase de estabilidad de VariApp. Detalla los ajustes de diseño requeridos y las acciones para solucionar las regresiones existentes en la rama `Desarrollo`.
+Este documento constituye el plan de implementación técnico y de control de regresiones para la fase de estabilidad de Solqaryn. Detalla los ajustes de diseño requeridos y las acciones para solucionar las regresiones existentes en la rama `Desarrollo`.
 
 ---
 

@@ -3,7 +3,7 @@ name: N7.2.D - Outbox retry exact-head
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - "backend/src/Application/Interfaces/IMensajeOutboxRepository.cs"
       - "backend/src/Application/Services/OutboxRetryPolicy.cs"

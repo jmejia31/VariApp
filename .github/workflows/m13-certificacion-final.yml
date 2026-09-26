@@ -21,11 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Exigir propietario, Desarrollo y token literal
+      - name: Exigir administrador, DEV y token literal
         env:
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
-          OWNER: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ github.token }}
           ACTOR: ${{ github.actor }}
           TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           TARGET_REF: ${{ github.ref }}
@@ -34,11 +34,12 @@ jobs:
         run: |
           set -euo pipefail
           test "$EVENT_NAME" = workflow_dispatch
-          test "$REPOSITORY" = jmejia31/VariApp
-          test "$TARGET_REF" = refs/heads/Desarrollo
-          test "$ACTOR" = "$OWNER"
-          test "$TRIGGERING_ACTOR" = "$OWNER"
+          test "$REPOSITORY" = solqaryn/Solqaryn
+          test "$TARGET_REF" = refs/heads/dev
+          test "$ACTOR" = "$TRIGGERING_ACTOR"
           test "$AUTHORIZATION" = AUTORIZADO_REABRIR
+          admin="$(gh api "repos/$REPOSITORY/collaborators/$ACTOR/permission" --jq '.user.permissions.admin')"
+          test "$admin" = "true"
           echo 'REOPEN_AUTHORIZATION=PASS'
 
   audit:
@@ -117,8 +118,8 @@ jobs:
       Database__ServerVersion: '8.4.0'
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: 'M13-CI-Only-Secret-With-More-Than-32-Characters-2026'
-      Jwt__Issuer: 'VariApp.M13.API'
-      Jwt__Audience: 'VariApp.M13.Frontend'
+      Jwt__Issuer: 'Solqaryn.M13.API'
+      Jwt__Audience: 'Solqaryn.M13.Frontend'
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cloudinary__CloudName: 'm13-not-used'
       Cloudinary__ApiKey: 'm13-not-used'
@@ -316,8 +317,8 @@ jobs:
       Database__ServerVersion: '8.4.0'
       Database__ApplyMigrationsOnStartup: 'true'
       Jwt__Secret: 'M13-E2E-Only-Secret-With-More-Than-32-Characters-2026'
-      Jwt__Issuer: 'VariApp.M13.API'
-      Jwt__Audience: 'VariApp.M13.Frontend'
+      Jwt__Issuer: 'Solqaryn.M13.API'
+      Jwt__Audience: 'Solqaryn.M13.Frontend'
       Jwt__ExpiraMinutos: '120'
       Security__LoginRateLimitPerMinute: '300'
       SeedAdmin__Username: 'e2e_admin'
@@ -325,15 +326,15 @@ jobs:
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cors__AllowedOrigins__1: 'http://localhost:4200'
       Swagger__Enabled: 'false'
-      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
-      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__BackendPublicUrl: 'https://preview.solqaryn.invalid'
+      AppSettings__LogoPublicUrl: ''
       AppSettings__EnlacePublicoFacturaHorasValidez: '1'
       AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
       AppSettings__CorreoFacturaIdempotenciaMinutos: '15'
       Cloudinary__CloudName: 'm13-not-used'
       Cloudinary__ApiKey: 'm13-not-used'
       Cloudinary__ApiSecret: 'm13-not-used'
-      Cloudinary__EnvironmentPrefix: 'varistorehn_desarrollo'
+      Cloudinary__EnvironmentPrefix: 'solqaryn_dev'
       Smtp__Host: '127.0.0.1'
       Smtp__Port: '1025'
       Smtp__UsuarioSmtp: 'smtp-user'
@@ -342,11 +343,11 @@ jobs:
       Smtp__RequiereAutenticacion: 'true'
       Smtp__CorreoRemitente: 'facturas@m13.test'
       Smtp__CorreoRespuesta: 'soporte@m13.test'
-      Smtp__NombreRemitente: 'VariApp M13'
+      Smtp__NombreRemitente: 'Solqaryn M13'
       Smtp__TimeoutSeconds: '10'
       Smtp__MaxAttempts: '3'
       Smtp__RetryBaseDelayMilliseconds: '100'
-      SMTP_CAPTURE_DIR: '/tmp/variapp-m13-smtp'
+      SMTP_CAPTURE_DIR: '/tmp/solqaryn-m13-smtp'
       SMTP_CAPTURE_HOST: '127.0.0.1'
       SMTP_CAPTURE_PORT: '1025'
       SMTP_CAPTURE_USERNAME: 'smtp-user'
@@ -465,30 +466,30 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Configuración de Desarrollo y Docker
+      - name: Configuración de DEV y Docker
         shell: bash
         run: |
           set -euo pipefail
           ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
           node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
-          grep -q 'branch: Desarrollo' render.yaml
-          grep -q 'name: variapp-api-desarrollo' render.yaml
-          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
-          docker build --file backend/Dockerfile --tag variapp-api:m13 .
-      - name: Exigir drill M11 exitoso y vigente
+          grep -q 'branch: dev' render.yaml
+          grep -q 'name: solqaryn-api-dev' render.yaml
+          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'solqaryn_dev'
+          docker build --file backend/Dockerfile --tag solqaryn-api:m13 .
+      - name: Exigir drill de backup/restore exitoso y vigente
         shell: bash
         run: |
           set -euo pipefail
-          run_json="$(gh api 'repos/jmejia31/VariApp/actions/workflows/m11-backup-restore-desarrollo.yml/runs?branch=Desarrollo&status=success&per_page=1')"
+          run_json="$(gh api 'repos/solqaryn/Solqaryn/actions/workflows/m11-backup-restore-dev.yml/runs?branch=dev&status=success&per_page=1')"
           backup_sha="$(jq -r '.workflow_runs[0].head_sha // empty' <<<"$run_json")"
           test -n "$backup_sha"
           git merge-base --is-ancestor "$backup_sha" HEAD
           git diff --quiet "$backup_sha"..HEAD -- \
-            scripts/m11_backup_desarrollo.sh \
-            scripts/m11_restore_desarrollo.sh \
-            .github/workflows/m11-backup-restore-desarrollo.yml \
+            scripts/backup_dev.sh \
+            scripts/restore_dev.sh \
+            .github/workflows/backup-restore-dev.yml \
             backend/src/Infrastructure/Migrations
-          echo "M11 backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
+          echo "SOLQARYN backup/restore vigente: $backup_sha" | tee m13-backup-cert.txt
       - uses: actions/upload-artifact@v4
         with:
           name: m13-infra-backup

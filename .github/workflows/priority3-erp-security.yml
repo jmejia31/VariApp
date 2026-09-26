@@ -2,7 +2,7 @@ name: Priority 3 - ERP security and isolated restore
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/**'
       - 'scripts/security/**'
@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           export_dir="$RUNNER_TEMP/priority3-actions"
           mkdir -p "$export_dir"
-          mapfile -t run_ids < <(gh run list --repo "$GITHUB_REPOSITORY" --branch Desarrollo --limit 20 --json databaseId,status --jq '.[] | select(.status=="completed") | .databaseId' | head -n 5)
+          mapfile -t run_ids < <(gh run list --repo "$GITHUB_REPOSITORY" --branch DEV --limit 20 --json databaseId,status --jq '.[] | select(.status=="completed") | .databaseId' | head -n 5)
           for run_id in "${run_ids[@]}"; do
             gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --log > "$export_dir/run-$run_id.log" 2>/dev/null || true
             mkdir -p "$export_dir/artifacts-$run_id"
@@ -71,7 +71,7 @@ jobs:
         image: mysql:8.4
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: variapp_p3_source
+          MYSQL_DATABASE: solqaryn_p3_source
         ports: ['3306:3306']
         options: >-
           --health-cmd="mysqladmin ping -h localhost -proot"
@@ -80,12 +80,12 @@ jobs:
           --health-retries=12
     env:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=variapp_p3_source;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=solqaryn_p3_source;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: Priority3-CI-Only-Secret-With-More-Than-32-Characters-2026
-      Jwt__Issuer: VariApp.Priority3.CI
-      Jwt__Audience: VariApp.Priority3.CI.Frontend
+      Jwt__Issuer: Solqaryn.Priority3.CI
+      Jwt__Audience: Solqaryn.Priority3.CI.Frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -108,7 +108,7 @@ jobs:
         run: |
           set -euo pipefail
           mysql_container="${{ job.services.mysql.id }}"
-          docker exec "$mysql_container" mysql -uroot -proot variapp_p3_source -e "
+          docker exec "$mysql_container" mysql -uroot -proot solqaryn_p3_source -e "
             CREATE TABLE Priority3BackupProbe (
               Id INT NOT NULL PRIMARY KEY,
               Marker VARCHAR(64) NOT NULL,
@@ -127,10 +127,10 @@ jobs:
           backup="$RUNNER_TEMP/priority3-backup.sql"
           docker exec "$mysql_container" mysqldump -uroot -proot \
             --single-transaction --routines --triggers --events --no-tablespaces \
-            variapp_p3_source > "$backup"
+            solqaryn_p3_source > "$backup"
           test -s "$backup"
-          docker exec "$mysql_container" mysql -uroot -proot -e "DROP DATABASE IF EXISTS variapp_p3_restore; CREATE DATABASE variapp_p3_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-          docker exec -i "$mysql_container" mysql -uroot -proot variapp_p3_restore < "$backup"
+          docker exec "$mysql_container" mysql -uroot -proot -e "DROP DATABASE IF EXISTS solqaryn_p3_restore; CREATE DATABASE solqaryn_p3_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+          docker exec -i "$mysql_container" mysql -uroot -proot solqaryn_p3_restore < "$backup"
           rm -f "$backup"
       - name: Verify restored schema, constraints, indexes, migration history and data
         shell: bash
@@ -143,16 +143,16 @@ jobs:
             q "SELECT $sql FROM information_schema.TABLES WHERE TABLE_SCHEMA='$db';"
           }
 
-          source_tables="$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='variapp_p3_source';")"
-          restore_tables="$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='variapp_p3_restore';")"
-          source_migrations="$(q "SELECT COUNT(*) FROM variapp_p3_source.__EFMigrationsHistory;")"
-          restore_migrations="$(q "SELECT COUNT(*) FROM variapp_p3_restore.__EFMigrationsHistory;")"
-          source_fks="$(q "SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema='variapp_p3_source' AND constraint_type='FOREIGN KEY';")"
-          restore_fks="$(q "SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema='variapp_p3_restore' AND constraint_type='FOREIGN KEY';")"
-          source_indexes="$(q "SELECT COUNT(DISTINCT CONCAT(table_name, ':', index_name)) FROM information_schema.statistics WHERE table_schema='variapp_p3_source';")"
-          restore_indexes="$(q "SELECT COUNT(DISTINCT CONCAT(table_name, ':', index_name)) FROM information_schema.statistics WHERE table_schema='variapp_p3_restore';")"
-          source_probe="$(q "SELECT CONCAT(COUNT(*),':',SUM(Id),':',FORMAT(SUM(Amount),2)) FROM variapp_p3_source.Priority3BackupProbe;")"
-          restore_probe="$(q "SELECT CONCAT(COUNT(*),':',SUM(Id),':',FORMAT(SUM(Amount),2)) FROM variapp_p3_restore.Priority3BackupProbe;")"
+          source_tables="$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='solqaryn_p3_source';")"
+          restore_tables="$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='solqaryn_p3_restore';")"
+          source_migrations="$(q "SELECT COUNT(*) FROM solqaryn_p3_source.__EFMigrationsHistory;")"
+          restore_migrations="$(q "SELECT COUNT(*) FROM solqaryn_p3_restore.__EFMigrationsHistory;")"
+          source_fks="$(q "SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema='solqaryn_p3_source' AND constraint_type='FOREIGN KEY';")"
+          restore_fks="$(q "SELECT COUNT(*) FROM information_schema.table_constraints WHERE constraint_schema='solqaryn_p3_restore' AND constraint_type='FOREIGN KEY';")"
+          source_indexes="$(q "SELECT COUNT(DISTINCT CONCAT(table_name, ':', index_name)) FROM information_schema.statistics WHERE table_schema='solqaryn_p3_source';")"
+          restore_indexes="$(q "SELECT COUNT(DISTINCT CONCAT(table_name, ':', index_name)) FROM information_schema.statistics WHERE table_schema='solqaryn_p3_restore';")"
+          source_probe="$(q "SELECT CONCAT(COUNT(*),':',SUM(Id),':',FORMAT(SUM(Amount),2)) FROM solqaryn_p3_source.Priority3BackupProbe;")"
+          restore_probe="$(q "SELECT CONCAT(COUNT(*),':',SUM(Id),':',FORMAT(SUM(Amount),2)) FROM solqaryn_p3_restore.Priority3BackupProbe;")"
 
           test "$source_tables" -gt 20
           test "$source_migrations" -gt 0
@@ -170,4 +170,4 @@ jobs:
         shell: bash
         run: |
           mysql_container="${{ job.services.mysql.id }}"
-          docker exec "$mysql_container" mysql -uroot -proot -e "DROP DATABASE IF EXISTS variapp_p3_restore; DROP DATABASE IF EXISTS variapp_p3_source;" || true
+          docker exec "$mysql_container" mysql -uroot -proot -e "DROP DATABASE IF EXISTS solqaryn_p3_restore; DROP DATABASE IF EXISTS solqaryn_p3_source;" || true

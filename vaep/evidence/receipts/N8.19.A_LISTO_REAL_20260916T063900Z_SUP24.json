@@ -9,7 +9,7 @@
   "stage_prefix": "A",
   "stage_name": "PRE",
   "branch": "Desarrollo",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "candidate_commit": "fa00b74cb4ccd8322b8b436906c9e5cd61b97ab6",
   "review_first_ref": "vaep/evidence/reviews/N8.19.A_REVIEW_FIRST_20260916T063800Z_SUP24.json",
   "review_first": {"p0":0,"p1":0,"p2":0,"accepted":true,"decision":"PASS"},

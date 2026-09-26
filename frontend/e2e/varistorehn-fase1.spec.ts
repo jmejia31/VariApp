@@ -25,16 +25,14 @@ async function prepararTienda(page: Page, whatsApp = '9876-5432'): Promise<void>
       status: 200,
       contentType: 'application/json',
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({
-        success: true,
-        data: { ...empresaBase, whatsApp }
-      })
+      body: JSON.stringify({ success: true, data: { ...empresaBase, whatsApp } })
     });
   });
 
-  await page.goto('/varistorehn');
+  // Desde Fase 7 el catálogo vive únicamente en su ruta canónica; Fase 1 prueba aquí el header compartido.
+  await page.goto('/varistorehn/productos');
   await expect(page.locator('.storefront')).toBeVisible();
-  await expect(page.getByRole('heading', { name: /Todo lo que buscas/i })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Productos', exact: true })).toBeVisible();
 }
 
 async function esperarCatalogo(page: Page): Promise<void> {
@@ -53,7 +51,6 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     const header = page.locator('app-varistorehn-header');
     await expect(header.getByText('VariStore Audit', { exact: true }).first()).toBeVisible();
     await expect(header.getByText('Compra simple y segura', { exact: true })).toBeVisible();
-
     await expect(header.getByRole('link', { name: 'Inicio', exact: true })).toHaveAttribute('href', '/varistorehn');
     await expect(header.getByRole('link', { name: 'Productos', exact: true })).toHaveAttribute('href', '/varistorehn/productos');
     await expect(header.getByRole('link', { name: 'Categorías', exact: true })).toHaveAttribute('href', '/varistorehn/categorias');
@@ -61,13 +58,11 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     const whatsapp = header.getByRole('link', { name: 'Contactar por WhatsApp' });
     await expect(whatsapp).toBeVisible();
     await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/50498765432');
-
     await expect(header.getByRole('button', { name: 'Abrir carrito con 0 unidades' })).toBeVisible();
 
     const laptop = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
     await expect(laptop).toBeVisible();
     await laptop.getByRole('button', { name: 'Agregar Laptop Pro 14' }).click();
-
     await expect(page.locator('dialog.cart-dialog')).toHaveCount(0);
     await expect(header.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
     await expect(header.locator('.cart-copy small')).toContainText('18,490');
@@ -77,37 +72,145 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito', exact: true })).toBeVisible();
     await expect(page.locator('.cart-item')).toContainText('Laptop Pro 14');
 
-    await page.goto('/varistorehn');
+    await page.goto('/varistorehn/productos');
     await esperarCatalogo(page);
-
-    const homeHeader = page.locator('app-varistorehn-header');
-    const search = homeHeader.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
+    const catalogHeader = page.locator('app-varistorehn-header');
+    const search = catalogHeader.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
     await search.fill('Wireless Studio');
     await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
     await expect(page.locator('article.product-card')).toHaveCount(1);
     await expect(page.locator('article.product-card')).toContainText('Audífonos Wireless Studio');
 
     await search.press('Enter');
+    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Wireless(?:%20|\+)Studio/);
     await expect.poll(
-      () => page.locator('#catalogo').evaluate(element => element.getBoundingClientRect().top),
-      { message: 'El buscador debe desplazar el catálogo a la zona visible.' }
+      () => page.locator('#catalogo-productos').evaluate(element => element.getBoundingClientRect().top),
+      { message: 'El buscador debe mantener visible el catálogo canónico.' }
     ).toBeLessThan(220);
 
     await search.fill('');
+    await search.press('Enter');
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
-    const nav = homeHeader.locator('nav.store-nav');
+    const nav = catalogHeader.locator('nav.store-nav');
     const audio = nav.getByRole('button', { name: 'Audio', exact: true });
     await audio.click();
     await expect(audio).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#catalog-title')).toHaveText('Audio');
+    await expect(page).toHaveURL(/categoria=demo-categoria-2/);
     await expect(page.getByRole('status').filter({ hasText: '3 productos encontrados' })).toBeVisible();
 
     await nav.getByRole('button', { name: /Todas/ }).click();
-    await expect(page.locator('#catalog-title')).toHaveText('Todos los productos');
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
   });
 
-  test('tablet: WhatsApp permanece accesible y sin overflow en toda la franja previa al menú móvil', async ({ page }) => {
+  test('desktop: header y catálogo operan con datos reales de la API pública sin fallback demo', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 });
+    let peticionesCatalogo = 0;
+
+    await page.route('http://localhost:5005/tienda/productos**', async route => {
+      peticionesCatalogo += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: {
+            items: [
+              {
+                id: 701,
+                slug: 'teclado-http-audit-701',
+                nombre: 'Teclado HTTP Audit',
+                descripcion: 'Producto servido por la API pública de auditoría.',
+                categoriaId: 71,
+                categoriaNombre: 'Periféricos',
+                marcaNombre: 'Audit',
+                modeloNombre: 'Base',
+                precio: 1250,
+                precioOferta: null,
+                cantidadDisponible: 4,
+                estaAgotado: false,
+                sku: 'AUD-701',
+                activo: true,
+                esDestacado: false,
+                fechaCreacion: '2026-09-18T00:00:00Z',
+                imagenPrincipalUrl: null,
+                imagenes: [],
+                modelos: []
+              },
+              {
+                id: 702,
+                slug: 'audifonos-http-audit-702',
+                nombre: 'Audífonos HTTP Audit',
+                descripcion: 'Segundo producto servido por la API pública.',
+                categoriaId: 72,
+                categoriaNombre: 'Audio',
+                marcaNombre: 'Audit',
+                modeloNombre: 'Base',
+                precio: 990,
+                precioOferta: null,
+                cantidadDisponible: 3,
+                estaAgotado: false,
+                sku: 'AUD-702',
+                activo: true,
+                esDestacado: false,
+                fechaCreacion: '2026-09-18T00:00:00Z',
+                imagenPrincipalUrl: null,
+                imagenes: [],
+                modelos: []
+              }
+            ],
+            page: 1,
+            pageSize: 96,
+            totalCount: 2
+          }
+        })
+      });
+    });
+
+    await page.route('http://localhost:5005/tienda/categorias**', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: [
+            { id: 71, slug: 'perifericos-real-71', nombre: 'Periféricos', descripcion: 'Categoría real', totalProductos: 1 },
+            { id: 72, slug: 'audio-real-72', nombre: 'Audio', descripcion: 'Categoría real', totalProductos: 1 }
+          ]
+        })
+      });
+    });
+
+    await prepararTienda(page);
+    await page.getByRole('button', { name: 'Base de datos' }).click();
+    await expect(page.getByRole('status').filter({ hasText: '2 productos encontrados' })).toBeVisible();
+    expect(peticionesCatalogo).toBe(1);
+    await expect(page.locator('article.product-card')).toHaveCount(2);
+    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toHaveCount(0);
+
+    const header = page.locator('app-varistorehn-header');
+    const search = header.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
+    await search.fill('Audífonos HTTP');
+    await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
+    await expect(page.locator('article.product-card')).toHaveCount(1);
+    await expect(page.locator('article.product-card')).toContainText('Audífonos HTTP Audit');
+
+    await search.fill('');
+    const audio = header.locator('nav.store-nav').getByRole('button', { name: 'Audio', exact: true });
+    await audio.click();
+    await expect(audio).toHaveAttribute('aria-pressed', 'true');
+    await expect(page).toHaveURL(/categoria=audio-real-72/);
+    await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
+    await expect(page.locator('article.product-card')).toContainText('Audífonos HTTP Audit');
+
+    await header.locator('nav.store-nav').getByRole('button', { name: /Todas/ }).click();
+    const teclado = page.locator('article.product-card').filter({ hasText: 'Teclado HTTP Audit' });
+    await teclado.getByRole('button', { name: 'Agregar Teclado HTTP Audit' }).click();
+    await expect(header.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
+    await expect(header.locator('.cart-copy small')).toContainText('1,250');
+  });
+  test('tablet: header compacto conserva WhatsApp y evita overflow', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 900 });
     await prepararTienda(page);
     await esperarCatalogo(page);
@@ -115,10 +218,16 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     const header = page.locator('app-varistorehn-header');
     for (const width of [1120, 900, 761]) {
       await page.setViewportSize({ width, height: 900 });
-      await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeVisible();
-      await expect(header.getByRole('button', { name: 'Abrir navegación' })).toBeHidden();
+      const toggle = header.getByRole('button', { name: 'Abrir navegación' });
+      await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeHidden();
+      await expect(toggle).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `overflow horizontal a ${width}px`).toBeLessThanOrEqual(0);
+
+      await toggle.click();
+      await expect(header.locator('.mobile-whatsapp')).toBeVisible();
+      await header.getByRole('button', { name: 'Cerrar navegación' }).click();
+      await expect(header.locator('#varistorehn-menu-movil')).not.toBeVisible();
     }
   });
 
@@ -127,9 +236,9 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await prepararTienda(page);
     await esperarCatalogo(page);
 
-    const header = page.locator('app-varistorehn-header');
-    const toggle = header.getByRole('button', { name: 'Abrir navegación' });
-    const dialog = header.locator('#varistorehn-menu-movil');
+    let header = page.locator('app-varistorehn-header');
+    let toggle = header.getByRole('button', { name: 'Abrir navegación' });
+    let dialog = header.locator('#varistorehn-menu-movil');
 
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
@@ -147,14 +256,20 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     const categoriaAudio = dialog.locator('.mobile-categories').getByRole('button', { name: 'Audio', exact: true });
     await categoriaAudio.click();
     await expect(dialog).not.toBeVisible();
-    await expect(page.locator('#catalog-title')).toHaveText('Audio');
+    await expect(page).toHaveURL(/categoria=demo-categoria-2/);
     await expect(page.getByRole('status').filter({ hasText: '3 productos encontrados' })).toBeVisible();
 
     await toggle.click();
     await expect(dialog.locator('a.mobile-whatsapp')).toBeVisible();
     await dialog.getByRole('button', { name: 'Cerrar navegación' }).click();
 
+    // El selector de modo pertenece al home comercial, no al catálogo independiente.
+    await page.goto('/varistorehn');
+    await expect(page.getByRole('heading', { name: /Todo lo que buscas/i })).toBeVisible();
     await page.locator('.preview-panel select').selectOption('tarjeta');
+    header = page.locator('app-varistorehn-header');
+    toggle = header.getByRole('button', { name: 'Abrir navegación' });
+    dialog = header.locator('#varistorehn-menu-movil');
     await toggle.click();
     await expect(dialog.locator('a.mobile-whatsapp')).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Cerrar navegación' }).click();
@@ -168,7 +283,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
         return { selector, width: Math.round(rect.width), height: Math.round(rect.height) };
       });
     });
-    expect(targetAudit.every(item => item.height >= 44)).toBe(true);
+    expect(targetAudit.every(item => item.width >= 44 && item.height >= 44), JSON.stringify(targetAudit)).toBe(true);
 
     for (const width of [760, 390, 320]) {
       await page.setViewportSize({ width, height: 844 });
@@ -182,7 +297,6 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await page.setViewportSize({ width: 1366, height: 900 });
     await prepararTienda(page, 'https://wa.me/50499999999');
     await esperarCatalogo(page);
-
     const header = page.locator('app-varistorehn-header');
     await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toHaveCount(0);
   });

@@ -3,7 +3,7 @@ param(
     [string]$RootPassword,
 
     [string]$RootUser = "root",
-    [string]$AppUser = "VariApp",
+    [string]$AppUser = "Solqaryn",
     [string]$Database = "inventoryapp",
     [string]$Server = "localhost",
     [int]$Port = 3306,
@@ -13,7 +13,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 if ([string]::IsNullOrWhiteSpace($AppPassword)) {
-    $passwordFile = Join-Path $PSScriptRoot "..\..\.dotnet_cli_home\variapp_mysql_password.txt"
+    $passwordFile = Join-Path $PSScriptRoot "..\..\.dotnet_cli_home\solqaryn_mysql_password.txt"
     if (Test-Path $passwordFile) {
         $AppPassword = (Get-Content $passwordFile -Raw).Trim()
     }

@@ -59,6 +59,7 @@ public class ProductoRepository : IProductoRepository
             if (filters.MarcaId.HasValue) query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.MarcaId == filters.MarcaId.Value));
             if (filters.ModeloId.HasValue) query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.ModeloId == filters.ModeloId.Value));
             if (filters.Activo.HasValue) query = query.Where(p => p.Activo == filters.Activo.Value);
+            if (filters.EsDestacado.HasValue) query = query.Where(p => p.EsDestacado == filters.EsDestacado.Value);
             if (filters.Agotado.HasValue)
                 query = filters.Agotado.Value
                     ? query.Where(p => !p.Variantes.Any(v => !v.Eliminado && v.Activo && v.Cantidad > 0))
@@ -92,6 +93,7 @@ public class ProductoRepository : IProductoRepository
             "cantidad" => desc ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Sum(v => v.Cantidad)) : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Sum(v => v.Cantidad)),
             "costo" => desc ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Costo ?? 0m).FirstOrDefault()) : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Costo ?? 0m).FirstOrDefault()),
             "precio" => desc ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Precio ?? 0m).FirstOrDefault()) : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Precio ?? 0m).FirstOrDefault()),
+            "fechacreacion" => desc ? query.OrderByDescending(p => p.FechaCreacion) : query.OrderBy(p => p.FechaCreacion),
             _ => desc ? query.OrderByDescending(p => p.Nombre) : query.OrderBy(p => p.Nombre)
         };
 

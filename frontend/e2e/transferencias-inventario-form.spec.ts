@@ -107,16 +107,40 @@ test.describe('Transferencias de inventario - formulario', () => {
 
   test('crea una transferencia seleccionando almacenes, variante y ubicaciones', async ({ page }) => {
     let payload: unknown;
+    const creada = {
+      id: 41,
+      numero: 'TR-000041',
+      estado: 'Borrador',
+      almacenOrigenId: 1,
+      almacenOrigenNombre: 'Tienda Centro',
+      almacenDestinoId: 2,
+      almacenDestinoNombre: 'Bodega Norte',
+      observaciones: 'Reposición de tienda',
+      fechaSolicitud: null,
+      fechaAprobacion: null,
+      fechaDespacho: null,
+      fechaRecepcion: null,
+      fechaCancelacion: null,
+      motivoCancelacion: null,
+      detalles: []
+    };
+
+    await page.route('**/transferencias-inventario/41', async route => {
+      if (route.request().method() !== 'GET') return route.continue();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, data: creada })
+      });
+    });
+
     await page.route('**/transferencias-inventario', async route => {
       if (route.request().method() !== 'POST') return route.continue();
       payload = route.request().postDataJSON();
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: { id: 41, numero: 'TR-000041', estado: 'Borrador', almacenOrigenId: 1, almacenDestinoId: 2, detalles: [] }
-        })
+        body: JSON.stringify({ success: true, data: creada })
       });
     });
 
@@ -163,5 +187,6 @@ test.describe('Transferencias de inventario - formulario', () => {
       }]
     });
     await expect(page).toHaveURL(/\/inventario\/transferencias\/41$/);
+    await expect(page.getByRole('heading', { name: 'TR-000041' })).toBeVisible();
   });
 });

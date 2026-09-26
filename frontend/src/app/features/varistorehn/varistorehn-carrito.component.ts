@@ -4,17 +4,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { CategoriaTienda, ProductoCatalogoPublico, ProductoTienda, crearCatalogoEjemplo, mapearProducto } from './varistorehn.catalog';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
+import { EstadoConsultaPublica } from './varistorehn.models';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
-
-type EstadoCarritoPublico = 'loading' | 'error' | 'success';
 
 @Component({
   selector: 'app-varistorehn-carrito',
@@ -29,7 +28,7 @@ export class VaristorehnCarritoComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carrito = inject(VaristorehnCarritoService);
 
@@ -37,7 +36,7 @@ export class VaristorehnCarritoComponent implements OnInit {
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
   readonly busqueda = signal('');
   readonly categorias = signal<CategoriaTienda[]>([]);
-  readonly estado = signal<EstadoCarritoPublico>('loading');
+  readonly estado = signal<EstadoConsultaPublica>('loading');
   readonly error = signal('');
   readonly aviso = signal('');
   readonly imagenesFallidas = signal<Set<string>>(new Set());
@@ -52,6 +51,7 @@ export class VaristorehnCarritoComponent implements OnInit {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
+    ofertas: VARISTOREHN_PATHS.ofertas,
     categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
@@ -157,7 +157,7 @@ export class VaristorehnCarritoComponent implements OnInit {
         const productos: ProductoTienda[] = datos === null ? crearCatalogoEjemplo() : datos.map(mapearProducto);
         const resultado = this.carrito.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
         if (resultado.ajustado) this.aviso.set(this.carrito.aviso());
-        this.estado.set('success');
+        this.estado.set(this.carrito.vacio() ? 'empty' : 'success');
       },
       error: () => {
         this.error.set('No pudimos validar el carrito contra el catálogo actual. Tu selección guardada no fue sustituida ni enviada. Intenta de nuevo.');

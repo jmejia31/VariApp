@@ -15,8 +15,16 @@ export interface ModeloCatalogoPublico {
   marcaNombre?: string;
   sku?: string | null;
   precio: number;
+  precioOferta?: number | null;
+  ofertaActiva?: boolean;
+  ofertaNombre?: string | null;
+  ofertaInicioUtc?: string | null;
+  ofertaFinUtc?: string | null;
+  ahorro?: number;
+  porcentajeAhorro?: number;
   cantidadDisponible: number;
   estaAgotado: boolean;
+  estadoDisponibilidad?: string;
   imagenes: ImagenCatalogo[];
 }
 
@@ -32,8 +40,15 @@ export interface ProductoCatalogoPublico {
   modeloNombre?: string;
   precio: number;
   precioOferta?: number | null;
+  ofertaActiva?: boolean;
+  ofertaNombre?: string | null;
+  ofertaInicioUtc?: string | null;
+  ofertaFinUtc?: string | null;
+  ahorro?: number;
+  porcentajeAhorro?: number;
   cantidadDisponible: number;
   estaAgotado: boolean;
+  estadoDisponibilidad?: string;
   sku?: string | null;
   activo?: boolean;
   esDestacado?: boolean;
@@ -60,8 +75,16 @@ export interface ModeloTienda {
   marca: string;
   sku: string;
   precio: number;
+  precioOferta: number | null;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  ofertaInicioUtc: string | null;
+  ofertaFinUtc: string | null;
+  ahorro: number;
+  porcentajeAhorro: number;
   stock: number;
   disponible: boolean;
+  estadoDisponibilidad: EstadoDisponibilidad;
   imagenes: string[];
 }
 
@@ -77,8 +100,15 @@ export interface ProductoTienda {
   sku: string;
   precio: number;
   precioOferta: number | null;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  ofertaInicioUtc: string | null;
+  ofertaFinUtc: string | null;
+  ahorro: number;
+  porcentajeAhorro: number;
   stock: number;
   disponible: boolean;
+  estadoDisponibilidad: EstadoDisponibilidad;
   activo: boolean;
   destacado: boolean;
   fechaCreacion: string | null;
@@ -107,6 +137,11 @@ export interface ItemCarrito {
   nombre: string;
   modelo: string;
   precio: number;
+  precioNormal: number;
+  ahorro: number;
+  ofertaActiva: boolean;
+  ofertaNombre: string;
+  estadoDisponibilidad: EstadoDisponibilidad;
   stock: number;
   unidades: number;
   imagen: string;
@@ -190,16 +225,67 @@ export interface ReciboPedidoPublico {
   lineas: CheckoutLineaValidada[];
 }
 
-export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
+export type OrdenCatalogo = 'destacados' | 'relevancia' | 'precio-asc' | 'precio-desc' | 'recientes' | 'nombre';
 
 export interface FiltrosCatalogo {
   busqueda: string;
   categoria: string;
   soloDisponibles: boolean;
+  soloOfertas: boolean;
+  precioMinimo: number | null;
   precioMaximo: number | null;
   orden: OrdenCatalogo;
 }
 
 export type EstadoConsultaPublica = 'loading' | 'empty' | 'error' | 'success';
+/** Recurso individual: "not-found" es distinto de una colección pública vacía. */
+export type EstadoRecursoPublico = EstadoConsultaPublica | 'not-found';
 export type EstadoDisponibilidad = 'available' | 'lowStock' | 'outOfStock';
 export type EstadoPromocion = 'none' | 'active' | 'expired';
+
+
+export interface TiendaCuentaPerfil {
+  id: number;
+  nombre: string;
+  correo: string;
+}
+
+export interface TiendaCuentaSesion {
+  token: string;
+  expiraUtc: string;
+  perfil: TiendaCuentaPerfil;
+}
+
+export interface TiendaDireccionCliente {
+  id: number;
+  alias: string;
+  recibe: string;
+  telefono: string;
+  direccion: string;
+  predeterminada: boolean;
+}
+
+export interface TiendaPedidoCuentaLinea {
+  productoId: number;
+  productoVarianteId?: number | null;
+  nombre: string;
+  modelo?: string | null;
+  cantidad: number;
+  precioUnitario: number;
+  total: number;
+}
+
+export interface TiendaPedidoCuenta {
+  id: number;
+  estado: string;
+  total: number;
+  fechaUtc: string;
+  lineas: TiendaPedidoCuentaLinea[];
+}
+
+export interface TiendaNotificacionPedido {
+  pedidoId: number;
+  estado: string;
+  mensaje: string;
+  fechaUtc: string;
+}

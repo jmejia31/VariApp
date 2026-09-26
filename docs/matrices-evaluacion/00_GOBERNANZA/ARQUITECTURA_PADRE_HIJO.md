@@ -1,4 +1,4 @@
-# Arquitectura padre → hijo — VariApp
+# Arquitectura padre → hijo — Solqaryn
 
 ## Regla estructural
 Toda capacidad navegable debe pertenecer a una jerarquía inequívoca:

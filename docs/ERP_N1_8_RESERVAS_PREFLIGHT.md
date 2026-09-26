@@ -8,7 +8,7 @@
 
 ## Conclusión ejecutiva
 
-VariApp **ya tiene la base física correcta para reservas**, pero todavía no tiene un agregado ni lifecycle de reserva.
+Solqaryn **ya tiene la base física correcta para reservas**, pero todavía no tiene un agregado ni lifecycle de reserva.
 
 `ExistenciaVariante` es la autoridad de stock vivo por `ProductoVariante + Almacen + Ubicacion` y ya persiste:
 

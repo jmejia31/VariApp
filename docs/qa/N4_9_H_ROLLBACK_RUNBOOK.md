@@ -1,7 +1,7 @@
 # Runbook de Rollback y Recuperación: PeriodoContable (N4.9)
 
 ## 1. Alcance
-Este runbook documenta los procedimientos de recuperación técnica y rollback para la fase N4.9 (Módulo de Contabilidad - PeriodoContable) en VariApp. Está diseñado para mitigar fallos funcionales, caídas de base de datos o regresiones de seguridad relacionadas con el manejo de periodos contables.
+Este runbook documenta los procedimientos de recuperación técnica y rollback para la fase N4.9 (Módulo de Contabilidad - PeriodoContable) en Solqaryn. Está diseñado para mitigar fallos funcionales, caídas de base de datos o regresiones de seguridad relacionadas con el manejo de periodos contables.
 
 ## 2. Niveles de Rollback
 

@@ -71,7 +71,7 @@
     "requiredBeforeCertification": true
   },
   "nonCausalSignals": [
-    "Vercel variapp-desarrollo build-rate-limit status is external deployment quota noise and is not used as a PASS or a blocker for this QA-only branch change"
+    "Vercel solqaryn-desarrollo build-rate-limit status is external deployment quota noise and is not used as a PASS or a blocker for this QA-only branch change"
   ],
   "security": {
     "mainTouched": false,

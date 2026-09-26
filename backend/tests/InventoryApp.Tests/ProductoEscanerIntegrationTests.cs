@@ -80,7 +80,7 @@ public sealed class ProductoEscanerIntegrationTests
         new()
         {
             Nombre = nombre,
-            Marca = "VariApp",
+            Marca = "Solqaryn",
             Modelo = "2C3",
             Cantidad = cantidad,
             Costo = 40m,

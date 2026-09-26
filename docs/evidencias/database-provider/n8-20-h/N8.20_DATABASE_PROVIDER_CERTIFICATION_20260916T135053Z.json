@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.database-provider-certification.v1",
+  "schema": "solqaryn.database-provider-certification.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.20.H",
   "macro_parent": "N8.20",
@@ -11,8 +11,8 @@
     "engine": "MYSQL",
     "server_version": "8.4.8",
     "provider": "AIVEN",
-    "project": "variapp",
-    "service": "variapp-mysql",
+    "project": "solqaryn",
+    "service": "solqaryn-mysql",
     "service_type": "mysql",
     "plan": "free-1-1gb",
     "cloud": "do-sfo",

@@ -63,6 +63,6 @@ public class N410FEstadosFinancierosDiAuthorizationContractTests
             current = current.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the VariApp repository root from the test base directory.");
+        throw new DirectoryNotFoundException("Could not locate the Solqaryn repository root from the test base directory.");
     }
 }

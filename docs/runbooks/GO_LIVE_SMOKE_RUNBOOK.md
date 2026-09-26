@@ -1,14 +1,14 @@
-# GO_LIVE_SMOKE_RUNBOOK — VariApp Desarrollo
+# GO_LIVE_SMOKE_RUNBOOK — Solqaryn Desarrollo
 
 ## Alcance
 
 Smoke operativo exclusivamente para `Desarrollo`. Los destinos canónicos permitidos son:
 
-- Frontend DEV: `https://variapp-desarrollo.vercel.app`
-- Backend DEV: `https://variapp-api-desarrollo.onrender.com`
-- Readiness backend: `https://variapp-api-desarrollo.onrender.com/health/ready`
+- Frontend DEV: `https://solqaryn-desarrollo.vercel.app`
+- Backend DEV: `https://solqaryn-api-dev-fxx8.onrender.com`
+- Readiness backend: `https://solqaryn-api-dev-fxx8.onrender.com/health/ready`
 
-Este runbook no autoriza escribir datos productivos, usar el proyecto Vercel `varistorehn`, usar el servicio Render `variapp-api`, tocar `main`, PR #2, DNS, certificados o secretos.
+Este runbook no autoriza escribir datos productivos, usar el proyecto Vercel `varistorehn`, usar el servicio Render `solqaryn-api`, tocar `main`, PR #2, DNS, certificados o secretos.
 
 ## Roles
 
@@ -21,11 +21,11 @@ Este runbook no autoriza escribir datos productivos, usar el proyecto Vercel `va
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
-export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
-export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
-test "$FRONTEND_URL" = "https://variapp-desarrollo.vercel.app"
-test "$BACKEND_URL" = "https://variapp-api-desarrollo.onrender.com"
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
+export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
+export BACKEND_URL="https://solqaryn-api-dev-fxx8.onrender.com"
+test "$FRONTEND_URL" = "https://solqaryn-desarrollo.vercel.app"
+test "$BACKEND_URL" = "https://solqaryn-api-dev-fxx8.onrender.com"
 ```
 
 STOP si cualquiera de los destinos corresponde a Producción o si la rama/remoto no coinciden. No sustituir estas constantes por un dominio recibido sin validación explícita.
@@ -105,7 +105,7 @@ node --input-type=module <<'NODE'
 import { chromium } from '@playwright/test';
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-const response = await page.goto('https://variapp-desarrollo.vercel.app/varistorehn', { waitUntil: 'domcontentloaded', timeout: 45000 });
+const response = await page.goto('https://solqaryn-desarrollo.vercel.app/varistorehn', { waitUntil: 'domcontentloaded', timeout: 45000 });
 if (!response || response.status() >= 400) throw new Error(`HTTP ${response?.status() ?? 'sin respuesta'}`);
 await page.locator('body').waitFor({ state: 'visible' });
 const title = await page.title();
@@ -154,3 +154,18 @@ Este runbook no hace rollback por sí solo. Ante fallo posterior a una mutación
 ## Evidencia mínima para LISTO
 
 HEAD/equivalencia, timestamps UTC, códigos HTTP, payload sanitizado de `/health/ready`, resultados build/test/lint, resultado del browser smoke público, deployment id/SHA, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Nunca guardar cookies, JWT, passwords, tokens ni valores de variables de entorno.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Este runbook solo puede ejecutarse con contexto de SOLQARYN. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+

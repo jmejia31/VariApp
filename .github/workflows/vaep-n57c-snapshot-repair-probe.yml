@@ -3,7 +3,7 @@ name: VAEP N5.7.C effective EF snapshot exact-head gate
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/vaep-n57c-snapshot-repair-probe.yml
       - backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N43C.cs
@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - name: Checkout exact Desarrollo head
+      - name: Checkout exact DEV head
         uses: actions/checkout@v4
         with:
           fetch-depth: 0

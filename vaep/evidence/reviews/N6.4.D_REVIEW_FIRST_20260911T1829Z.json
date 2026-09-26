@@ -52,7 +52,7 @@
       "37c7926a..5b3f41a3 delta verified as control-plane cleanup/CI-guard only; no backend/application functional file changed"
     ],
     "omitted": [
-      "VariApp CI may be SKIPPED by workflow policy and is not treated as a causal failure",
+      "Solqaryn CI may be SKIPPED by workflow policy and is not treated as a causal failure",
       "Vercel deployment/build-rate-limit status is excluded because deploy is prohibited and non-causal to N6.4.D"
     ]
   },

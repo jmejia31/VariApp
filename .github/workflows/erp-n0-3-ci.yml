@@ -2,7 +2,7 @@ name: ERP-N0.3 - Certificación ProductoVariante autoridad única
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*ProductoVariante*.cs'
       - 'backend/src/**/*TipoCatalogoProducto*.cs'
@@ -54,8 +54,8 @@ jobs:
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: ERP-N0-3-CI-Only-Secret-With-More-Than-32-Characters-2026
-      Jwt__Issuer: VariApp.CI
-      Jwt__Audience: VariApp.CI.Frontend
+      Jwt__Issuer: Solqaryn.CI
+      Jwt__Audience: Solqaryn.CI.Frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

@@ -4,7 +4,7 @@
   "macro_parent": "N8.19",
   "stage": "PRE",
   "branch": "Desarrollo",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "authority": "docs/VAEP_AUTHORITY.md",
   "base_head": "78ba3f7b708d02464e8d8674c23452758536fc74",
   "scope_rule": "Audit every task at or after N8.6.G that had historical or intervention relevance before N8.19.A; receipts are indexes, never sole proof.",
@@ -77,7 +77,7 @@
   ],
   "fresh_sources": {
     "github_head": "78ba3f7b708d02464e8d8674c23452758536fc74",
-    "sheet": "VariApp - PLAN MAESTRO DE AUTOMATIZACIONES / COLA+CONFIG+CONTROL_TOWER",
+    "sheet": "Solqaryn - PLAN MAESTRO DE AUTOMATIZACIONES / COLA+CONFIG+CONTROL_TOWER",
     "receipts_root": "vaep/evidence/receipts/**",
     "reviews_root": "vaep/evidence/reviews/** plus legacy vaep/evidence/*REVIEW*",
     "ci": "GitHub Actions runs/check suites by exact candidate head",

@@ -13,6 +13,15 @@ public class RegistroAuditoria
     public int? UsuarioId { get; set; }
     public string NombreUsuario { get; set; } = string.Empty;
 
+    /// <summary>Empresa/tenant afectado; null para operaciones de plataforma o registros legacy.</summary>
+    public int? EmpresaId { get; set; }
+
+    /// <summary>Plano de autoridad usado por la operación.</summary>
+    public AmbitoAutorizacion? AmbitoAutoridad { get; set; }
+
+    /// <summary>Fuente verificable de la autorización.</summary>
+    public OrigenAutorizacion? OrigenAutorizacion { get; set; }
+
     public ModuloSistema Modulo { get; set; }
     public AccionPermiso Accion { get; set; }
 

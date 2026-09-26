@@ -2,7 +2,7 @@ name: VAEP engine lightweight checks
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - '.github/scripts/vaep-*.sh'
       - '.github/workflows/vaep-*.yml'

@@ -4,9 +4,9 @@ Autoridad operativa: `docs/VAEP_AUTHORITY.md`.
 
 ## Contrato
 
-VariApp `Desarrollo` usa Angular `20.3.27`. Mientras no exista una excepción explícita y versionada en este documento, el frontend soporta el conjunto de navegadores que Angular 20 declara compatible mediante su política Baseline. Para Angular 20, la fecha Baseline publicada es `2025-04-30` y las familias principales son Chrome, Edge, Firefox y Safari.
+Solqaryn `Desarrollo` usa Angular `20.3.27`. Mientras no exista una excepción explícita y versionada en este documento, el frontend soporta el conjunto de navegadores que Angular 20 declara compatible mediante su política Baseline. Para Angular 20, la fecha Baseline publicada es `2025-04-30` y las familias principales son Chrome, Edge, Firefox y Safari.
 
-Este contrato **no amplía** compatibilidad hacia navegadores legacy o versiones fuera de la ventana soportada por Angular 20. Tampoco promete capacidades específicas del shell/vendor que no formen parte de la plataforma web usada por VariApp.
+Este contrato **no amplía** compatibilidad hacia navegadores legacy o versiones fuera de la ventana soportada por Angular 20. Tampoco promete capacidades específicas del shell/vendor que no formen parte de la plataforma web usada por Solqaryn.
 
 ## Evidencia automatizable
 

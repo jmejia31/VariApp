@@ -28,7 +28,7 @@
     "production_untouched": true
   },
   "fresh_provider_readback": {
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "service_id": "srv-d9jblq7avr4c73c74jng",
     "current_deploy_id": "dep-dalcq261egvs73e56jr0",
     "current_commit": "d3e600f13e697614ff75771d155dda8fdfb5febe",

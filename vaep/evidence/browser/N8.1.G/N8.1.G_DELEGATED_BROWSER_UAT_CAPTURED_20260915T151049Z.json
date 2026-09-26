@@ -8,7 +8,7 @@
   "owner": "Javier Mejía",
   "operator": "Codex",
   "delegation": {"mode":"OWNER_AUTHORIZED_DELEGATED_BROWSER_UAT","ownerDelegationPresent":true,"objectiveBrowserEvidencePresent":true,"humanAcceptancePresent":false},
-  "environment": {"deployment":"https://variapp-desarrollo.vercel.app","scope":"Desarrollo/UAT","tenant":"VariStorehn","authenticatedUser":"Javier Mejía","role":"ADMINISTRADOR","productionTouched":false,"mainTouched":false,"secretsRead":false},
+  "environment": {"deployment":"https://solqaryn-desarrollo.vercel.app","scope":"Desarrollo/UAT","tenant":"VariStorehn","authenticatedUser":"Javier Mejía","role":"ADMINISTRADOR","productionTouched":false,"mainTouched":false,"secretsRead":false},
   "browserEvidence": {
     "status": "DELEGATED_OBJECTIVE_UAT_CAPTURED",
     "captureMode": "CUA_REAL_INLINE_SCREENSHOT",

@@ -1,10 +1,10 @@
 name: N8.3 - Compatibilidad de navegadores
 
-# Current-standard revalidation trigger for N8.3.E (Desarrollo only).
+# Current-standard revalidation trigger for N8.3.E (DEV only).
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - .github/workflows/n8-3-browser-compatibility.yml
       - frontend/e2e/n83-browser-compatibility.spec.ts
@@ -33,7 +33,7 @@ jobs:
     env:
       PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
 
       - name: Configurar Node.js

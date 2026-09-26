@@ -406,7 +406,7 @@ Evidencia final del HEAD funcional certificado `98603c21fa4b05b6e6c72565b579ab24
 - `31325383744` — Fase 2 - Auditoría de configuración y dependencias — **success**;
 - `31325383748` — Bloque 2C.1 - Variante técnica y migración — **success**;
 - `31325383772` — Fase 8 - Validación completa automatizada — **success**;
-- `31325383746` — VariApp CI — **skipped** (registrado como tal, no contabilizado como verde).
+- `31325383746` — Solqaryn CI — **skipped** (registrado como tal, no contabilizado como verde).
 
 Dentro de `31325383762` quedaron en **success** backend Release, pruebas unitarias, frontend lint/build de producción, Docker/higiene, historial de migraciones, migraciones actuales, integración MySQL 8.4, verificación de variante legacy/cargas/snapshot y SQL forward.
 
@@ -464,7 +464,7 @@ Para cambiar este estado a **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**, el HEA
 - Fase 8 completa: success;
 - ningún P0/P1 introducido por M2.
 
-`VariApp CI` se reportó como `SKIPPED`, tal como ocurrió en el HEAD certificado, y no se contabiliza como workflow verde.
+`Solqaryn CI` se reportó como `SKIPPED`, tal como ocurrió en el HEAD certificado, y no se contabiliza como workflow verde.
 
 ---
 

@@ -10,7 +10,7 @@
     "vaep/evidence/reconciliations/N8.22.G_OWNER_RENDER_ENV_NAME_INVENTORY_20260916T182900Z.json"
   ],
   "owner_action_reconciliation": {
-    "previous_required_owner_action": "Provide a sanitized provider-authoritative Render DEV environment-variable NAME inventory for variapp-api-desarrollo; names only, never values.",
+    "previous_required_owner_action": "Provide a sanitized provider-authoritative Render DEV environment-variable NAME inventory for solqaryn-api-desarrollo; names only, never values.",
     "fulfilled": true,
     "fulfillment_evidence": "N8.22.G_OWNER_RENDER_ENV_NAME_INVENTORY_20260916T182900Z.json",
     "secret_values_read": false,
@@ -19,7 +19,7 @@
   "render_readback": {
     "dev": {
       "service_id": "srv-d9jblq7avr4c73c74jng",
-      "service": "variapp-api-desarrollo",
+      "service": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "runtime": "docker",
       "region": "oregon",
@@ -28,7 +28,7 @@
     },
     "production_metadata_read_only": {
       "service_id": "srv-d983qti8qa3s73eqqne0",
-      "service": "variapp-api",
+      "service": "solqaryn-api",
       "branch": "main",
       "runtime": "docker",
       "region": "virginia",

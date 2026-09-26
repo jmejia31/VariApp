@@ -1,5 +1,5 @@
 {
-  "schema": "variapp.backup-restore-preflight.v1",
+  "schema": "solqaryn.backup-restore-preflight.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "task": "N8.21.A",
   "branch": "Desarrollo",
@@ -14,7 +14,7 @@
   },
   "source_database": {
     "provider": "AIVEN",
-    "service": "variapp-mysql",
+    "service": "solqaryn-mysql",
     "engine": "MYSQL",
     "server_version": "8.4.8",
     "plan": "free-1-1gb",
@@ -34,7 +34,7 @@
   "isolated_restore_target": {
     "execution_surface": "GitHub Actions ephemeral ubuntu runner",
     "database_runtime": "mysql:8.4 service container",
-    "database_name": "variapp_m11_restore_drill",
+    "database_name": "solqaryn_m11_restore_drill",
     "network_scope": "runner-local 127.0.0.1",
     "destructive_restore_guard": "ALLOW_DESTRUCTIVE_RESTORE=YES_M11",
     "disposable": true,

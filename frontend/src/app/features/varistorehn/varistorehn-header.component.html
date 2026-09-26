@@ -8,6 +8,7 @@
         {{ identidad.config().encabezadoTexto || identidad.config().eslogan }}
       </span>
       <div class="utility-actions">
+        <a [routerLink]="'/varistorehn/cuenta'">Mi cuenta</a>
         <a [href]="enlaces.contacto">Atención y contacto</a>
       </div>
     </div>
@@ -16,14 +17,14 @@
 
 <header class="store-header">
   <div class="container header-main">
-    <a class="brand" [href]="enlaces.inicio" [attr.aria-label]="identidad.nombreSistema() + ', inicio'">
+    <a class="brand" [routerLink]="enlaces.inicio" [attr.aria-label]="(identidad.config().nombreComercial || 'Tienda') + ', inicio'">
       @if (mostrarLogo()) {
         <img [src]="identidad.logoUrl()" alt="" width="46" height="46" (error)="reportarErrorLogo(identidad.logoUrl())">
       } @else {
-        <span class="brand-mark" aria-hidden="true">{{ identidad.nombreSistema().charAt(0) }}</span>
+        <span class="brand-mark" aria-hidden="true">{{ (identidad.config().nombreComercial || 'Tienda').charAt(0) }}</span>
       }
       <span class="brand-copy">
-        <strong>{{ identidad.nombreSistema() }}</strong>
+        <strong>{{ (identidad.config().nombreComercial || 'Tienda') }}</strong>
         <small>{{ identidad.config().eslogan || 'Tu tienda en línea' }}</small>
       </span>
     </a>
@@ -71,9 +72,10 @@
   </div>
 
   <nav class="container store-nav" aria-label="Navegación de tienda">
-    <a [href]="enlaces.inicio">Inicio</a>
-    <a [href]="enlaces.productos">Productos</a>
-    <a [href]="enlaces.categorias">Categorías</a>
+    <a [routerLink]="enlaces.inicio">Inicio</a>
+    <a [routerLink]="enlaces.productos">Productos</a>
+    <a [routerLink]="enlaces.ofertas">Ofertas</a>
+    <a [routerLink]="enlaces.categorias">Categorías</a>
     <span class="nav-divider" aria-hidden="true"></span>
     <button type="button" class="nav-all" [attr.aria-pressed]="!categoriaActiva" (click)="seleccionarCategoria('')"><app-store-icon nombre="rejilla" /> Todas</button>
     @for (categoria of categorias.slice(0, 5); track categoria) {
@@ -93,7 +95,7 @@
     <header>
       <div>
         <small>NAVEGACIÓN</small>
-        <h2 id="menu-movil-title">{{ identidad.nombreSistema() }}</h2>
+        <h2 id="menu-movil-title">{{ (identidad.config().nombreComercial || 'Tienda') }}</h2>
       </div>
       <button type="button" class="mobile-close" aria-label="Cerrar navegación" (click)="cerrarMenuMovil(true)">
         <app-store-icon nombre="cerrar" />
@@ -101,9 +103,11 @@
     </header>
 
     <nav aria-label="Navegación móvil">
-      <a #primerEnlaceMovil [href]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
-      <a [href]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
-      <a [href]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
+      <a #primerEnlaceMovil [routerLink]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
+      <a [routerLink]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
+      <a [routerLink]="enlaces.ofertas" (click)="cerrarMenuMovil(false)">Ofertas</a>
+      <a [routerLink]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
+      <a [routerLink]="'/varistorehn/cuenta'" (click)="cerrarMenuMovil(false)">Mi cuenta</a>
       <a [href]="enlaces.contacto" (click)="cerrarMenuMovil(false)">Contacto</a>
     </nav>
 

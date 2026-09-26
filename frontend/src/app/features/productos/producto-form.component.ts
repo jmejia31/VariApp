@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductoService } from '../../services/producto.service';
@@ -32,7 +33,7 @@ const MAX_IMAGENES = 5;
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule,
-    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule,
+    MatInputModule, MatSelectModule, MatButtonModule, MatCheckboxModule, MatIconModule,
     MatProgressSpinnerModule, ProductoImagenComponent, ProductoCombinationGeneratorComponent
   ],
   templateUrl: './producto-form.component.html',
@@ -69,6 +70,7 @@ export class ProductoFormComponent implements OnInit {
     modeloId: [null as number | null],
     descripcion: [''],
     categoriaId: [null as number | null],
+    esDestacado: [false],
     variantes: this.fb.array<any>([])
   });
 
@@ -272,7 +274,8 @@ export class ProductoFormComponent implements OnInit {
           marcaId,
           modeloId,
           descripcion: p.descripcion,
-          categoriaId: p.categoriaId ?? null
+          categoriaId: p.categoriaId ?? null,
+          esDestacado: p.esDestacado === true
         }, { emitEvent: false });
 
         this.variantes.clear();
@@ -429,6 +432,7 @@ export class ProductoFormComponent implements OnInit {
       colorId: colorComunId,
       tallaId: tallaComunId,
       descripcion: this.form.value.descripcion || undefined,
+      esDestacado: this.form.value.esDestacado === true,
       cantidad: total,
       costo: Math.round(costo * 100) / 100,
       precio,

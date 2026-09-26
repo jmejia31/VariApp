@@ -79,6 +79,7 @@ builder.Services.AddScoped<IPermisoRepository, PermisoRepository>();
 builder.Services.AddScoped<IPermisoCatalogoService, PermisoCatalogoService>();
 builder.Services.AddScoped<IDescuentoRepository, DescuentoRepository>();
 builder.Services.AddScoped<IDescuentoService, DescuentoService>();
+builder.Services.AddScoped<IPromocionPublicaService, PromocionPublicaService>();
 builder.Services.AddScoped<IImpuestoRepository, ImpuestoRepository>();
 builder.Services.AddScoped<IImpuestoService, ImpuestoService>();
 builder.Services.AddScoped<ICostoEnvioRepository, CostoEnvioRepository>();
@@ -98,6 +99,7 @@ builder.Services.AddScoped<ICentroCostoService, CentroCostoService>();
 builder.Services.AddScoped<IAlmacenService, AlmacenService>();
 builder.Services.AddScoped<IUbicacionAlmacenService, UbicacionAlmacenService>();
 builder.Services.AddScoped<IExistenciaVarianteService, ExistenciaVarianteService>();
+builder.Services.AddScoped<IInventarioPublicoService, InventarioPublicoService>();
 builder.Services.AddScoped<IConteoInventarioService, ConteoInventarioService>();
 builder.Services.AddScoped<IExistenciaVarianteConcurrencyService, ExistenciaVarianteConcurrencyService>();
 builder.Services.AddScoped<AjusteInventarioExistenciaCutoverService>();
@@ -237,7 +239,7 @@ if (maintenanceEnabled)
         {
             status = 503,
             title = "Servicio temporalmente en mantenimiento",
-            detail = "VariApp se encuentra temporalmente en mantenimiento programado."
+            detail = "Solqaryn se encuentra temporalmente en mantenimiento programado."
         });
     });
 }

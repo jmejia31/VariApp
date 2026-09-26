@@ -46,7 +46,7 @@
       "developmentHealthHttp": 200,
       "developmentHealthStatus": "ready",
       "developmentDatabase": "connected",
-      "backendTarget": "variapp-api-desarrollo.onrender.com",
+      "backendTarget": "solqaryn-api-desarrollo.onrender.com",
       "readOnly": true
     }
   },

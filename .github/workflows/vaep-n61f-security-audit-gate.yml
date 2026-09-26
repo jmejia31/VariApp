@@ -2,7 +2,7 @@ name: VAEP N6.1.F Empresa Security Audit Exact Head Gate
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - '.github/workflows/vaep-n61f-security-audit-gate.yml'
       - 'backend/src/API/Controllers/EmpresasController.cs'

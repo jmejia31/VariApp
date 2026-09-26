@@ -43,7 +43,7 @@
     "previous_application_schema_compatibility": "DEMONSTRATED_BY_NO_RUNTIME_OR_MIGRATION_DELTA"
   },
   "active_dev_safety": {
-    "render_service": "variapp-api-desarrollo",
+    "render_service": "solqaryn-api-desarrollo",
     "render_service_id": "srv-d9jblq7avr4c73c74jng",
     "service_suspended": false,
     "health_path": "/health/ready",

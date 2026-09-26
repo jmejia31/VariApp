@@ -24,7 +24,10 @@ const [
   pedidoService,
   storefrontService,
   models,
+  empresaIdentity,
+  empresaConfigService,
   backendController,
+  whatsappController,
   backendDto
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
@@ -42,7 +45,10 @@ const [
   readFeature('varistorehn-pedido.service.ts'),
   readFeature('varistorehn.service.ts'),
   readFeature('varistorehn.models.ts'),
+  readFeature('varistorehn-identidad.service.ts'),
+  readFile(path.join(frontendDir, 'src/app/services/empresa-configuracion.service.ts'), 'utf8'),
   readFile(path.join(repoDir, 'backend/src/API/Controllers/TiendaController.cs'), 'utf8'),
+  readFile(path.join(repoDir, 'backend/src/API/Controllers/WhatsAppController.cs'), 'utf8'),
   readFile(path.join(repoDir, 'backend/src/Application/DTOs/TiendaCheckoutDto.cs'), 'utf8')
 ]);
 
@@ -66,6 +72,20 @@ expect(checkoutTs.includes('!environment.production && this.config.mostrarContro
 expect(config.includes("export type ModoCarrito = 'whatsapp' | 'tarjeta' | 'ambos'"), 'La configuración debe conservar los tres modos comerciales.');
 expect(config.includes('endpointCheckoutTarjeta: null'), 'Tarjeta debe permanecer fail-closed por defecto.');
 expect(config.includes('origenesCheckoutPermitidos: []'), 'La allowlist de pago debe estar vacía por defecto.');
+expect(empresaConfigService.includes('getWhatsAppPublico()'), 'La identidad pública debe poder consultar el número operativo de WhatsApp sin secretos.');
+expect(empresaConfigService.includes('/whatsapp/publico'), 'El fallback público de WhatsApp debe usar un endpoint dedicado no administrativo.');
+expect(empresaIdentity.includes('this.empresaService.getWhatsAppPublico()'), 'La identidad debe resolver WhatsApp Business cuando el contacto legacy esté vacío.');
+expect(empresaIdentity.includes('if (config.whatsApp?.trim()) return of(config);'), 'Un WhatsApp público explícito debe conservar prioridad sin consultas innecesarias.');
+expect(whatsappController.includes('[HttpGet("publico")]') && whatsappController.includes('[AllowAnonymous]'), 'WhatsApp debe exponer únicamente un contacto público explícito para el storefront.');
+expect(
+  whatsappController.includes('WhatsAppPublicoResponse')
+    && whatsappController.includes('numeros.Count == 1')
+    && whatsappController.includes('numeros.Count > 1')
+    && whatsappController.includes('coincidencias.Count == 1')
+    && whatsappController.includes('WhatsApp público no expuesto'),
+  'El endpoint público debe resolver un único número inequívoco y fallar cerrado ante múltiples tenants activos.'
+);
+expect(!/TokenSecretoReferencia|WebhookSecretoReferencia/.test((whatsappController.match(/GetPublicoAsync[\s\S]*?\n    }/m)?.[0] || '')), 'El endpoint público de WhatsApp no debe leer ni exponer referencias secretas.');
 
 for (const required of [
   'this.servicio.validarCheckout(this.referenciasCheckout())',
@@ -78,7 +98,10 @@ for (const required of [
   'urlCheckoutPermitida(respuesta.checkoutUrl, this.config.origenesCheckoutPermitidos)',
   "this.guardarRecibo(validado, this.utilizarDatosBaseDatos() ? 'whatsapp-preparado' : 'demo')",
   'this.document.defaultView?.location.assign(segura)',
-  'const agrupacion = this.identidadAgrupacion(item.modeloClave)',
+  'const productoVarianteId = item.productoVarianteId ?? null',
+  'productoVarianteId,',
+  'modeloId: productoVarianteId === null ? item.modeloId : null',
+  'const agrupacion = productoVarianteId === null',
   'modeloNombre: agrupacion.modeloNombre',
   'marcaNombre: agrupacion.marcaNombre',
   'confirmarSalidaWhatsapp(evento: Event)',
@@ -88,6 +111,8 @@ for (const required of [
   expect(checkoutTs.includes(required), `Checkout debe contener la salvaguarda: ${required}.`);
 }
 expect(!checkoutTs.includes('localStorage'), 'Checkout no debe guardar datos del comprador en localStorage.');
+expect(checkoutTs.includes("this.identidad.config().nombreComercial || 'Tienda'"), 'El cierre por WhatsApp debe usar la marca comercial pública.');
+expect(!checkoutTs.includes('mensajeWhatsappCheckout(\n      this.identidad.nombreSistema()'), 'Checkout no debe filtrar el nombre interno del sistema al mensaje de WhatsApp.');
 expect(!checkoutTs.includes('numeroTarjeta') && !checkoutTs.includes('cvv') && !checkoutTs.includes('pinTarjeta'), 'Checkout no debe capturar credenciales de tarjeta.');
 expect(checkoutTs.includes("if (!endpoint || !this.tarjetaConfigurada())"), 'Tarjeta debe bloquearse si falta endpoint/origen seguro.');
 expect(checkoutHtml.includes('confirmarSalidaWhatsapp($event)'), 'El enlace WhatsApp debe poder cancelar la navegación si la validación venció.');
@@ -115,7 +140,7 @@ expect(checkoutRules.includes('encodeURIComponent') === false, 'Las reglas puras
 
 expect(storefrontService.includes("private readonly urlValidarCheckout = `${this.urlTienda}/checkout/validar`"), 'El cliente HTTP debe apuntar a /tienda/checkout/validar.');
 expect(storefrontService.includes('this.http.post<ApiResponse<CheckoutValidado>>'), 'La revalidación debe usar POST tipado.');
-expect(storefrontService.includes("if (!ruta || /^https?:/i.test(ruta) || ruta.includes('..'))"), 'El endpoint configurable de tarjeta debe aceptar solo rutas backend relativas seguras.');
+expect(storefrontService.includes("!ruta.startsWith('tienda/')") && storefrontService.includes("ruta.includes('..')"), 'El endpoint configurable de tarjeta debe permanecer dentro de la frontera publica /tienda y aceptar solo rutas relativas seguras.');
 expect(storefrontService.includes('checkoutValidado(data)'), 'El cliente debe validar estructuralmente la respuesta de checkout.');
 
 const checkoutItemBlock = models.match(/export interface CheckoutItemRequest \{([\s\S]*?)\n\}/)?.[1] || '';
@@ -144,11 +169,13 @@ for (const required of [
   '[HttpPost("checkout/validar")]',
   '_productoService.GetByIdAsync(solicitud.ProductoId)',
   'producto.Variantes.Where(variante => variante.Activo)',
+  'variante.Id == solicitud.ProductoVarianteId.Value',
   'variante.ModeloId == solicitud.ModeloId',
   'string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)',
   'string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal)',
-  'if (stock < solicitud.Unidades)',
-  'Total = precio * solicitud.Unidades',
+  'if (stock <= 0 || stock < solicitud.Unidades)',
+  'var precioVigente = oferta?.PrecioOferta ?? precio;',
+  'Total = precioVigente * solicitud.Unidades',
   'var subtotal = lineas.Sum(linea => linea.Total)',
   'Guid.NewGuid().ToString("N")',
   'TimeSpan.FromMinutes(10)'

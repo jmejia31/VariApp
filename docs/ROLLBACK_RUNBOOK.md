@@ -1,13 +1,13 @@
-# ROLLBACK_RUNBOOK — VariApp Desarrollo
+# ROLLBACK_RUNBOOK — Solqaryn Desarrollo
 
 ## Regla de autorización
 
 Este documento define el procedimiento; no concede por sí mismo permiso para mutar servicios. Dentro de N8.23, las mutaciones reversibles DEV están autorizadas únicamente en los scopes expresamente habilitados por el propietario (`N8.23.D`, `N8.23.E`, `N8.23.G`, `N8.23.H`) y solo sobre:
 
-- Render DEV `variapp-api-desarrollo`;
-- Vercel DEV `variapp-desarrollo`.
+- Render DEV `solqaryn-api-dev`;
+- Vercel DEV `solqaryn-desarrollo`.
 
-Sigue prohibido tocar `main`, Producción, el proyecto Vercel `varistorehn`, Render `variapp-api`, datos/migraciones productivas, DNS, certificados, secretos, compras/upgrades, cambios de plan y PR #2.
+Sigue prohibido tocar `main`, Producción, el proyecto Vercel `varistorehn`, Render `solqaryn-api`, datos/migraciones productivas, DNS, certificados, secretos, compras/upgrades, cambios de plan y PR #2.
 
 ## Secuencia obligatoria
 
@@ -31,9 +31,9 @@ Antes de mutar, leer HEAD, deployment/service actual, previous known good, lease
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
-export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
-export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
+export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
+export BACKEND_URL="https://solqaryn-api-dev-fxx8.onrender.com"
 curl --fail-with-body --silent --show-error --max-time 30 "$BACKEND_URL/health/ready"
 curl --fail-with-body --silent --show-error --max-time 30 -L -o /dev/null "$FRONTEND_URL/"
 ```
@@ -42,7 +42,7 @@ Capturar antes de la mutación: CURRENT deployment id/SHA, PREVIOUS_KNOWN_GOOD i
 
 ## Vercel DEV
 
-Proyecto permitido: `variapp-desarrollo`.
+Proyecto permitido: `solqaryn-desarrollo`.
 
 Ruta preferida: **Instant Rollback** hacia un deployment PREVIOUS_KNOWN_GOOD ya `READY`, sin build nuevo. Luego validar el dominio canónico:
 
@@ -50,7 +50,7 @@ Ruta preferida: **Instant Rollback** hacia un deployment PREVIOUS_KNOWN_GOOD ya 
 set -euo pipefail
 curl --fail-with-body --silent --show-error --max-time 30 -L \
   -o /dev/null -w 'frontend_status=%{http_code} total=%{time_total}\n' \
-  "https://variapp-desarrollo.vercel.app/"
+  "https://solqaryn-desarrollo.vercel.app/"
 ```
 
 Para forward recovery, promover/restaurar el deployment CURRENT original ya `READY`; no crear un build sustituto si existe el deployment original. Repetir el smoke anterior y readback del alias canónico.
@@ -59,17 +59,17 @@ Si la herramienta autorizada no expone Instant Rollback/Promote, STOP: no simula
 
 ## Render DEV
 
-Servicio permitido: `variapp-api-desarrollo`.
+Servicio permitido: `solqaryn-api-dev`.
 
 Usar la capacidad autorizada de rollback/redeploy del proveedor hacia PREVIOUS_KNOWN_GOOD y después recuperar CURRENT. En cada estado `HEALTHY` ejecutar:
 
 ```bash
 set -euo pipefail
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://variapp-api-desarrollo.onrender.com/health"
+  "https://solqaryn-api-dev-fxx8.onrender.com/health"
 printf '\n'
 curl --fail-with-body --silent --show-error --max-time 30 \
-  "https://variapp-api-desarrollo.onrender.com/health/ready"
+  "https://solqaryn-api-dev-fxx8.onrender.com/health/ready"
 printf '\n'
 ```
 
@@ -89,7 +89,7 @@ Para cada transición registrar `start_utc`, `healthy_utc` y duración en segund
 
 ## STOP inmediato
 
-- destino no es `variapp-api-desarrollo` o `variapp-desarrollo`;
+- destino no es `solqaryn-api-dev` o `solqaryn-desarrollo`;
 - rama no es `Desarrollo`;
 - previous known good no está demostrado/READY;
 - se requiere build nuevo para fingir el rollback cuando existe uno previo utilizable;
@@ -109,3 +109,19 @@ Para cada transición registrar `start_utc`, `healthy_utc` y duración en segund
 ## Condición de cierre
 
 Solo `LISTO` cuando la secuencia completa fue materialmente ejecutada en un scope autorizado, REVIEW_FIRST termina P0=0/P1=0, gates causales pasan, CURRENT queda restaurado y healthy, existe exact-head o equivalencia demostrada, receipt persistido y write/readback del control-plane.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+
+

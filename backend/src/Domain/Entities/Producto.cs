@@ -26,6 +26,7 @@ public class Producto : AuditableEntity
     public int UmbralStockBajo { get; set; } = 5;
 
     public bool Activo { get; set; } = true;
+    public bool EsDestacado { get; set; }
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }

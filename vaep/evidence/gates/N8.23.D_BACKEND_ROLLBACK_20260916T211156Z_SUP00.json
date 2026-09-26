@@ -39,7 +39,7 @@
     "NO_PLAN_PURCHASE_UPGRADE": "PASS"
   },
   "provider_evidence": {
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "health_check_path": "/health/ready",
     "rollback_deploy": {
       "id": "dep-dalfo7jl550s73b4crv0",

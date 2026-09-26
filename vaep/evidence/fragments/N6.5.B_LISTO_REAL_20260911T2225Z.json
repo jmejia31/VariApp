@@ -37,7 +37,7 @@
       }
     ],
     "nonCausalExternalStatus": {
-      "context": "Vercel – variapp-desarrollo",
+      "context": "Vercel – solqaryn-desarrollo",
       "state": "failure",
       "reason": "deployment rate limit; deployment is outside the N6.5.B causal gate set and no deploy action is permitted"
     }

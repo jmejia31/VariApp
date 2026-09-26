@@ -2,7 +2,7 @@
 
 ## Backup automático administrado
 
-La evidencia causal previa y obligatoria de N8.20 certificó la instancia DEV real como MySQL 8.4.8 sobre Aiven, servicio `variapp-mysql`, plan `free-1-1gb`, con modo de recovery `pitr`, disponibilidad de PITR, política de retención demostrada y ruta de restore `AIVEN_FORK_AND_RESTORE_CONTROL_PLANE`. Esa prueba proviene de runtime/control-plane evidence de la instancia concreta y no de documentación genérica.
+La evidencia causal previa y obligatoria de N8.20 certificó la instancia DEV real como MySQL 8.4.8 sobre Aiven, servicio `solqaryn-mysql`, plan `free-1-1gb`, con modo de recovery `pitr`, disponibilidad de PITR, política de retención demostrada y ruta de restore `AIVEN_FORK_AND_RESTORE_CONTROL_PLANE`. Esa prueba proviene de runtime/control-plane evidence de la instancia concreta y no de documentación genérica.
 
 Referencia: `vaep/evidence/receipts/N8.20.H_LISTO_REAL_20260916T135053Z_SUP00.json`.
 

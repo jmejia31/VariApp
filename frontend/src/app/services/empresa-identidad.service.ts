@@ -1,16 +1,16 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { EmpresaConfiguracion } from '../core/models/empresa-configuracion.model';
 import { EmpresaConfiguracionService } from './empresa-configuracion.service';
 
 const DEFAULT_CONFIG: EmpresaConfiguracion = {
   id: 0,
-  nombreComercial: 'VariStorehn',
-  eslogan: 'Eleva tu mundo digital',
-  nombreVisibleSistema: 'VariStorehn',
-  descripcionSistema: 'Administrativo',
-  mensajeLogin: 'Inicia sesión para administrar VariStorehn',
-  copyright: '© 2026 VariStorehn. Todos los derechos reservados.',
+  nombreComercial: 'SOLQARYN',
+  eslogan: 'Plataforma empresarial',
+  nombreVisibleSistema: 'SOLQARYN',
+  descripcionSistema: 'Plataforma empresarial',
+  mensajeLogin: 'Inicia sesión en SOLQARYN',
+  copyright: '© 2026 SOLQARYN. Todos los derechos reservados.',
   mostrarCopyright: true,
   usarAnioAutomaticoCopyright: true,
   encabezadoActivo: true,
@@ -26,9 +26,9 @@ export class EmpresaIdentidadService {
   private cargada = false;
 
   readonly config = this._config.asReadonly();
-  readonly nombreSistema = computed(() => this._config().nombreVisibleSistema || this._config().nombreComercial || 'VariStorehn');
+  readonly nombreSistema = computed(() => this._config().nombreVisibleSistema || this._config().nombreComercial || 'SOLQARYN');
   readonly descripcionSistema = computed(() => this.normalizarDescripcion(this._config().encabezadoTexto || this._config().descripcionSistema));
-  readonly logoUrl = computed(() => this._config().logoUrl || 'assets/varistorehn-logo.png');
+  readonly logoUrl = computed(() => this._config().logoUrl || '');
   readonly mensajeLogin = computed(() => this._config().mensajeLogin || `Inicia sesión para administrar ${this.nombreSistema()}`);
   readonly mostrarCopyright = computed(() => this._config().mostrarCopyright);
   readonly copyright = computed(() => {
@@ -42,8 +42,22 @@ export class EmpresaIdentidadService {
   cargar(force = false) {
     if (this.cargada && !force) return of(this._config());
     return this.empresaService.getPublica().pipe(
-      tap((res) => {
-        this._config.set({ ...DEFAULT_CONFIG, ...res.data });
+      switchMap((res) => {
+        const config = { ...DEFAULT_CONFIG, ...res.data };
+        if (config.whatsApp?.trim()) return of(config);
+
+        return this.empresaService.getWhatsAppPublico().pipe(
+          map(contacto => ({
+            ...config,
+            whatsApp: contacto.disponible && contacto.numeroTelefonoE164
+              ? contacto.numeroTelefonoE164
+              : undefined
+          })),
+          catchError(() => of(config))
+        );
+      }),
+      tap((config) => {
+        this._config.set(config);
         this.cargada = true;
       }),
       catchError(() => {
@@ -51,6 +65,11 @@ export class EmpresaIdentidadService {
         return of(this._config());
       })
     );
+  }
+
+  usarPlataforma(): void {
+    this._config.set({ ...DEFAULT_CONFIG });
+    this.cargada = false;
   }
 
   refrescarDespuesDeGuardar(config: EmpresaConfiguracion): void {

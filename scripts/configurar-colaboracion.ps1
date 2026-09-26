@@ -1,11 +1,19 @@
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+# EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+# LOCAL_SKILL_COUNT=1
+# Prohibido usar skills/documentacion/contexto fuera de SOLQARYN sin autorizacion explicita o allowlist ACTIVE.
+
 $ErrorActionPreference = "Stop"
 
-$ExpectedRepo = "jmejia31/VariApp"
+$ExpectedRepo = "solqaryn/Solqaryn"
 $ExpectedOrigins = @(
-    "https://github.com/jmejia31/VariApp",
-    "https://github.com/jmejia31/VariApp.git",
-    "git@github.com:jmejia31/VariApp.git",
-    "ssh://git@github.com/jmejia31/VariApp.git"
+    "https://github.com/solqaryn/Solqaryn",
+    "https://github.com/solqaryn/Solqaryn.git",
+    "git@github.com:solqaryn/Solqaryn.git",
+    "ssh://git@github.com/solqaryn/Solqaryn.git"
 )
 
 function Invoke-Git {
@@ -72,7 +80,7 @@ try {
 
     Write-Host ""
     Write-Host "Colaboración configurada correctamente." -ForegroundColor Green
-    Write-Host "Proyecto confirmado: VARIAPP / $ExpectedRepo"
+    Write-Host "Proyecto confirmado: SOLQARYN / $ExpectedRepo"
     Write-Host "Rama activa: Desarrollo"
     Write-Host "Hooks activos: pre-commit (identidad + evidencia) y post-commit (push seguro)."
     Write-Host "Main permanece congelada y no se fusionará automáticamente."

@@ -86,7 +86,7 @@
     }
   },
   "non_causal_external_status": {
-    "vercel_variapp_desarrollo": "failure__build_rate_limit",
+    "vercel_solqaryn_desarrollo": "failure__build_rate_limit",
     "classification": "NON_CAUSAL_EXTERNAL_QUOTA__NO_DEPLOY_REQUIRED_FOR_N8.5.E__NOT_USED_AS_PASS_OR_BLOCKER"
   },
   "material_gap": 0,

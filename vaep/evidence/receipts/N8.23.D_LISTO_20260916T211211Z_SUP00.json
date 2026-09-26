@@ -32,7 +32,7 @@
     "backend_rollback": "PASS",
     "forward_recovery": "PASS",
     "sequence": "CURRENT -> PREVIOUS_KNOWN_GOOD -> HEALTHY -> CURRENT -> HEALTHY",
-    "service": "variapp-api-desarrollo",
+    "service": "solqaryn-api-desarrollo",
     "health_check_path": "/health/ready",
     "rollback_deploy_id": "dep-dalfo7jl550s73b4crv0",
     "rollback_commit": "eb8f43542a7ad71752e223067f6064350360a91b",

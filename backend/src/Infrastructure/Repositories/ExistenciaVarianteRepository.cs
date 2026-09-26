@@ -1,5 +1,6 @@
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -83,6 +84,33 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
             .Include(e => e.Almacen)
             .Include(e => e.UbicacionAlmacen)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<List<ExistenciaVariante>> GetOperativasPublicasPorVariantesAsync(
+        IReadOnlyCollection<int> productoVarianteIds)
+    {
+        var ids = productoVarianteIds.Where(id => id > 0).Distinct().ToArray();
+        if (ids.Length == 0)
+            return new List<ExistenciaVariante>();
+
+        return await Existencias
+            .AsNoTracking()
+            .Where(e =>
+                ids.Contains(e.ProductoVarianteId)
+                && e.ProductoVariante.Activo
+                && !e.ProductoVariante.Eliminado
+                && e.ProductoVariante.Producto.Activo
+                && !e.ProductoVariante.Producto.Eliminado
+                && e.Almacen.Activo
+                && !e.Almacen.Eliminado
+                && e.Almacen.Sucursal.Activa
+                && !e.Almacen.Sucursal.Eliminado
+                && (e.UbicacionAlmacenId == null
+                    || (e.UbicacionAlmacen != null
+                        && e.UbicacionAlmacen.Activa
+                        && !e.UbicacionAlmacen.Eliminado))
+                && (e.Almacen.Tipo == TipoAlmacen.Tienda || e.Almacen.Tipo == TipoAlmacen.Bodega))
+            .ToListAsync();
     }
 
     public async Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync(

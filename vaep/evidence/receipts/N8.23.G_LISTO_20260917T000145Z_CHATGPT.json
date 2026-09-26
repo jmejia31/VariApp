@@ -38,7 +38,7 @@
   "smoke_runbook": {
     "result": "PASS_BY_PROVIDER_AND_HTTP_READBACK",
     "backend": {
-      "service": "variapp-api-desarrollo",
+      "service": "solqaryn-api-desarrollo",
       "service_id": "srv-d9jblq7avr4c73c74jng",
       "deployment_id": "dep-dali5avqj5pc73e06sng",
       "commit": "026ca8faa743230b819153ce4795b9657913a759",
@@ -46,12 +46,12 @@
       "configured_health_check": "/health/ready"
     },
     "frontend": {
-      "project": "variapp-desarrollo",
+      "project": "solqaryn-desarrollo",
       "project_id": "prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu",
       "deployment_id": "dpl_HWDuYEWUyY1F7bMyosWgqDdxa1ex",
       "commit": "026ca8faa743230b819153ce4795b9657913a759",
       "provider_state": "READY",
-      "canonical_alias": "variapp-desarrollo.vercel.app",
+      "canonical_alias": "solqaryn-desarrollo.vercel.app",
       "canonical_http_status": 200,
       "http_readback_at_utc": "2026-09-17T00:00:44Z"
     }

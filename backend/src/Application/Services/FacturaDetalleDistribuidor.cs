@@ -29,7 +29,7 @@ public static class FacturaDetalleDistribuidor
         if (envio > importeBruto)
             throw new BusinessRuleException("El costo de envío no puede superar el importe bruto de la factura.");
 
-        // El importe bruto actual de VariApp contiene los productos y el envío.
+        // El importe bruto actual de Solqaryn contiene los productos y el envío.
         // El impuesto adicional es exactamente la diferencia que queda fuera del
         // importe bruto después de aplicar el descuento. El resto del impuesto
         // pertenece al precio incluido y, por tanto, ya está dentro del producto.

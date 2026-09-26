@@ -23,6 +23,7 @@ export class VaristorehnService {
   private readonly http = inject(HttpClient);
   private readonly urlTienda = `${environment.apiUrl}/tienda`;
   private readonly urlProductos = `${this.urlTienda}/productos`;
+  private readonly urlDestacados = `${this.urlProductos}/destacados`;
   private readonly urlCategorias = `${this.urlTienda}/categorias`;
   private readonly urlValidarCheckout = `${this.urlTienda}/checkout/validar`;
 
@@ -51,6 +52,15 @@ export class VaristorehnService {
       }, new Map<number, ProductoCatalogoPublico>()),
       map(todos => [...todos.values()])
     );
+  }
+
+  obtenerDestacados(limite = 4): Observable<ProductoCatalogoPublico[]> {
+    const cantidad = Math.max(1, Math.min(4, Math.floor(limite) || 4));
+    const params = new HttpParams().set('limite', cantidad);
+    return this.http.get<ApiResponse<ProductoCatalogoPublico[]>>(this.urlDestacados, { params }).pipe(map(res => {
+      if (!res.success || !Array.isArray(res.data)) throw new Error('Respuesta de destacados no válida.');
+      return res.data.filter(producto => producto.activo !== false && producto.esDestacado === true).slice(0, cantidad);
+    }));
   }
 
   obtenerProductoPorSlug(slug: string): Observable<ProductoCatalogoPublico> {
@@ -104,7 +114,7 @@ export class VaristorehnService {
 
   crearCheckoutTarjeta(endpoint: string, request: CheckoutTarjetaRequest): Observable<CheckoutTarjetaResponse> {
     const ruta = endpoint.trim().replace(/^\/+/, '');
-    if (!ruta || /^https?:/i.test(ruta) || ruta.includes('..')) {
+    if (!ruta || !ruta.startsWith('tienda/') || /^https?:/i.test(ruta) || ruta.includes('..')) {
       return throwError(() => new Error('El endpoint de pago seguro no es válido.'));
     }
     return this.http.post<ApiResponse<CheckoutTarjetaResponse>>(`${environment.apiUrl}/${ruta}`, request).pipe(

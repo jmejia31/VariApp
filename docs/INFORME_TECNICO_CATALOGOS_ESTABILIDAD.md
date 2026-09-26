@@ -89,7 +89,7 @@ El PR `Desarrollo -> main` debe permanecer en borrador. La aprobación aislada n
 - login e interceptor/autenticación.
 - `frontend/package.json`
 - `.github/workflows/desarrollo-ci.yml`
-- `docs/PLAN_CIERRE_VARIAPP.md`
+- `docs/PLAN_CIERRE_SOLQARYN.md`
 
 ## 5. Cambios en base de datos
 

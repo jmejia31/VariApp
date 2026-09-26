@@ -1,7 +1,7 @@
 # ERP-N0.6 — Preflight de referencias polimórficas críticas
 
-**Proyecto:** VARIAPP  
-**Repositorio/rama:** `jmejia31/VariApp` / `Desarrollo`  
+**Proyecto:** SOLQARYN  
+**Repositorio/rama:** `jmejia31/Solqaryn` / `Desarrollo`  
 **Microtarea:** `N0.6.A` — Auditoría y preflight  
 **Baseline inspeccionado:** `11c958ead2a7a8cc5a3b1db4b502cbe63e8efba7`
 

@@ -54,7 +54,7 @@
   },
   "fresh_runtime_and_material_basis": {
     "certification_commit": "f9536599c30fd3db3446f12b31c035a823e4c638",
-    "development_frontend": "variapp-desarrollo.vercel.app",
+    "development_frontend": "solqaryn-desarrollo.vercel.app",
     "development_state": "READY",
     "development_root_http": 200,
     "development_health_ready_http": 200,

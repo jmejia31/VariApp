@@ -297,6 +297,13 @@ public sealed class TiendaControllerCheckoutTests
     private static TiendaController CrearController(Mock<IProductoService> productos)
     {
         var categorias = new Mock<ICategoriaService>(MockBehavior.Strict);
-        return new TiendaController(productos.Object, categorias.Object);
+        var promociones = new Mock<IPromocionPublicaService>();
+        promociones.Setup(service => service.ResolverAsync(
+                It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<decimal>(), It.IsAny<DateTime>()))
+            .ReturnsAsync((OfertaPublicaDto?)null);
+        var inventario = new Mock<IInventarioPublicoService>();
+        inventario.Setup(service => service.ObtenerPorVariantesAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new Dictionary<int, InventarioPublicoVarianteDto>());
+        return new TiendaController(productos.Object, categorias.Object, promociones.Object, inventario.Object);
     }
 }

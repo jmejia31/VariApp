@@ -21,16 +21,17 @@ const empresaBase = {
 };
 
 const referenciaValidada = '0123456789abcdef0123456789abcdef';
+const productoVarianteReal = 95010;
 const modeloClaveReal = JSON.stringify([5010, 'Modelo auditoría', 'Marca real']);
 const modeloClaveDemo = JSON.stringify([101, '8 GB / 256 GB', 'Demo']);
 
-async function prepararEmpresa(page: Page): Promise<void> {
+async function prepararEmpresa(page: Page, whatsApp: string | null = empresaBase.whatsApp): Promise<void> {
   await page.route('http://localhost:5005/empresa-configuracion/publica', async route => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ success: true, data: empresaBase })
+      body: JSON.stringify({ success: true, data: { ...empresaBase, whatsApp } })
     });
   });
 }
@@ -53,6 +54,7 @@ function productoReal(precio = 1750, stock = 3) {
     esDestacado: false,
     imagenes: [],
     modelos: [{
+      productoVarianteId: productoVarianteReal,
       modeloId: 5010,
       modeloNombre: 'Modelo auditoría',
       marcaNombre: 'Marca real',
@@ -92,6 +94,7 @@ async function mockCheckoutValido(page: Page, total = 4200): Promise<void> {
           total,
           lineas: [{
             productoId: 501,
+            productoVarianteId: productoVarianteReal,
             modeloId: 5010,
             nombre: 'Producto Checkout Real',
             modelo: 'Modelo auditoría',
@@ -135,6 +138,122 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByText(/Fase 6/)).toHaveCount(0);
   });
 
+  test('variante física con modelo general llega exacta al checkout y habilita WhatsApp', async ({ page }) => {
+    await prepararEmpresa(page, null);
+    await page.route('**/whatsapp/publico', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ numeroTelefonoE164: '+50498765432', disponible: true })
+    }));
+    const varianteId = 95011;
+    const productoId = 509;
+    const producto = {
+      id: productoId,
+      slug: 'uat-modelo-general-509',
+      nombre: 'UAT Modelo General',
+      descripcion: '',
+      categoriaId: null,
+      categoriaNombre: null,
+      marcaNombre: 'Samsung',
+      modeloNombre: '',
+      precio: 150,
+      precioOferta: null,
+      cantidadDisponible: 10,
+      estaAgotado: false,
+      estadoDisponibilidad: 'Disponible',
+      sku: 'UAT-GENERAL',
+      activo: true,
+      esDestacado: false,
+      imagenes: [],
+      modelos: [{
+        productoVarianteId: varianteId,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: 'Samsung',
+        sku: 'UAT-GENERAL',
+        precio: 150,
+        cantidadDisponible: 10,
+        estaAgotado: false,
+        estadoDisponibilidad: 'Disponible',
+        imagenes: []
+      }]
+    };
+
+    await sembrarCarrito(page, 'bd', `variante:${varianteId}`, productoId, 1);
+    await page.route('**/tienda/productos?*', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ success: true, data: { items: [producto], page: 1, pageSize: 96, totalCount: 1 } })
+    }));
+
+    let requestCheckout: unknown = null;
+    await page.route('**/tienda/checkout/validar', route => {
+      requestCheckout = route.request().postDataJSON();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: {
+            validacionId: referenciaValidada,
+            expiraUtc: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+            subtotal: 150,
+            total: 150,
+            lineas: [{
+              productoId,
+              productoVarianteId: varianteId,
+              modeloId: null,
+              nombre: 'UAT Modelo General',
+              modelo: null,
+              sku: 'UAT-GENERAL',
+              unidades: 1,
+              stockDisponible: 10,
+              precioUnitario: 150,
+              total: 150
+            }]
+          }
+        })
+      });
+    });
+
+    await page.goto('/varistorehn/checkout?fuente=bd');
+    await expect(page.getByRole('heading', { name: 'Tu compra' })).toBeVisible();
+    expect(requestCheckout).toEqual({
+      items: [{
+        productoId,
+        productoVarianteId: varianteId,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: null,
+        unidades: 1
+      }]
+    });
+
+    await llenarComprador(page);
+    await page.getByRole('button', { name: 'Preparar pedido por WhatsApp' }).click();
+    const enlace = page.getByRole('link', { name: 'Abrir WhatsApp y continuar' });
+    await expect(enlace).toBeVisible();
+    const href = await enlace.getAttribute('href');
+    expect(href).toBeTruthy();
+    const destino = new URL(href!);
+    expect(destino.origin).toBe('https://wa.me');
+    expect(destino.pathname).toBe('/50498765432');
+    const mensaje = destino.searchParams.get('text') || '';
+    expect(mensaje).toContain('🛍️ *Nueva solicitud de compra — VariStore Checkout Audit*');
+    expect(mensaje).toContain('📦 *Producto 1*');
+    expect(mensaje).toContain('*UAT Modelo General*');
+    expect(mensaje).toContain('SKU: UAT-GENERAL');
+    expect(mensaje).toMatch(/🔗 Ver producto: http:\/\/(?:localhost|127\.0\.0\.1):4200\/varistorehn\/producto\/uat-modelo-general-509/);
+    expect(mensaje).toContain('Cantidad: 1');
+    expect(mensaje).toContain('Precio unitario:');
+    expect(mensaje).toContain('💰 *TOTAL:');
+    expect(mensaje).toContain('📝 *Nota del cliente*');
+    expect(mensaje).toContain('✅ Solicitud generada desde *VariStore Checkout Audit*.');
+  });
+
   test('fuente real revalida en servidor sin enviar precio/stock y WhatsApp usa el total autoritativo', async ({ page }) => {
     await prepararEmpresa(page);
     await sembrarCarrito(page, 'bd', modeloClaveReal, 501, 2);
@@ -175,9 +294,10 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(requestCheckout).toEqual({
       items: [{
         productoId: 501,
-        modeloId: 5010,
-        modeloNombre: 'Modelo auditoría',
-        marcaNombre: 'Marca real',
+        productoVarianteId: productoVarianteReal,
+        modeloId: null,
+        modeloNombre: null,
+        marcaNombre: null,
         unidades: 2
       }]
     });
@@ -200,10 +320,23 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(destino.origin).toBe('https://wa.me');
     expect(destino.pathname).toBe('/50498765432');
     const mensaje = destino.searchParams.get('text') || '';
-    expect(mensaje).toContain(`Referencia: ${referenciaValidada}`);
+    expect(mensaje).toContain(`🔖 *Referencia:* ${referenciaValidada}`);
     expect(mensaje).toContain('Producto Checkout Real');
-    expect(mensaje).toContain('Total validado');
+    expect(mensaje).toContain('🛍️ *Nueva solicitud de compra — VariStore Checkout Audit*');
+    expect(mensaje).toContain('👤 *Cliente*');
+    expect(mensaje).toContain('Cliente Auditoría');
+    expect(mensaje).toContain('📱 *Teléfono:* 50499991111');
+    expect(mensaje).toContain('✉️ *Correo:* cliente@example.com');
+    expect(mensaje).toContain('SKU: SKU-501-A');
+    expect(mensaje).toMatch(/🔗 Ver producto: http:\/\/(?:localhost|127\.0\.0\.1):4200\/varistorehn\/producto\/producto-checkout-real-501/);
+    expect(mensaje).toContain('Cantidad: 2');
+    expect(mensaje).toContain('Precio unitario:');
+    expect(mensaje).toContain('Subtotal:');
+    expect(mensaje).toContain('💰 *TOTAL:');
     expect(mensaje).toContain('4,200');
+    expect(mensaje).toContain('📝 *Nota del cliente*');
+    expect(mensaje).toContain('Entregar por la tarde.');
+    expect(mensaje).toContain('La tienda confirmará disponibilidad, entrega y condiciones antes de finalizar la compra.');
 
     const piiAntes = await page.evaluate(() => ({
       local: Object.entries(localStorage).filter(([key]) => key.startsWith('varistorehn:')).map(([, value]) => value).join('\n'),
@@ -283,7 +416,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByRole('button', { name: 'Ir al pago seguro' })).toHaveCount(0);
 
     const carrito = await page.evaluate(() => JSON.parse(localStorage.getItem('varistorehn:carrito:v2:905:bd') || '[]'));
-    expect(carrito).toEqual([{ productoId: 501, modeloClave: modeloClaveReal, unidades: 2 }]);
+    expect(carrito).toEqual([{ productoId: 501, modeloClave: `variante:${productoVarianteReal}`, unidades: 2 }]);
   });
 
   test('demo valida formulario y finaliza en recibo efímero sin datos personales', async ({ page }) => {

@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       persist_evidence:
-        description: Persist sanitized evidence back to Desarrollo
+        description: Persist sanitized evidence back to DEV
         required: true
         default: true
         type: boolean
@@ -27,25 +27,27 @@ jobs:
   prove-aiven-dev-capabilities:
     name: Prove Aiven DEV plan/backups/PITR/restore without secrets
     runs-on: ubuntu-latest
+    environment: DEV
     timeout-minutes: 10
     steps:
-      - name: Checkout exact Desarrollo head
+      - name: Checkout exact DEV head
         uses: actions/checkout@v4
         with:
-          ref: Desarrollo
+          ref: dev
           fetch-depth: 1
 
       - name: Guard inputs and secrets
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
           set -euo pipefail
-          test -n "$AIVEN_TOKEN" || { echo 'AIVEN_TOKEN secret is missing'; exit 20; }
-          test -n "$DEV_DB" || { echo 'VARIAPP_DEV_DB_CONNECTION secret is missing'; exit 21; }
+          test -n "$SOLQARYN_AIVEN_TOKEN" || { echo 'SOLQARYN_AIVEN_TOKEN secret is missing'; exit 20; }
+          test -n "${{ vars.SOLQARYN_DEV_DB_HOST }}" || { echo 'SOLQARYN_DEV_DB_HOST variable is missing'; exit 21; }
+          test -n "${{ secrets.SOLQARYN_DEV_DB_PASSWORD }}" || { echo 'SOLQARYN_DEV_DB_PASSWORD secret is missing'; exit 22; }
           test -n "$PROJECT" || { echo 'aiven_project input is missing'; exit 22; }
           test -n "$SERVICE" || { echo 'aiven_service input is missing'; exit 23; }
           echo 'Required values are present; secret values are not printed.'
@@ -57,8 +59,8 @@ jobs:
       - name: Capture and certify actual Aiven DEV control-plane metadata
         shell: bash
         env:
-          AIVEN_TOKEN: ${{ secrets.AIVEN_TOKEN }}
-          DEV_DB: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+          DEV_DB: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
           PROJECT: ${{ inputs.aiven_project }}
           SERVICE: ${{ inputs.aiven_service }}
         run: |
@@ -67,14 +69,14 @@ jobs:
           mkdir -p "$RUN_DIR"
           export RUN_DIR
 
-          avn --auth-token "$AIVEN_TOKEN" user info --json > /tmp/aiven-user.json
+          avn --auth-token "$SOLQARYN_AIVEN_TOKEN" user info --json > /tmp/aiven-user.json
 
           python3 - <<'PY'
           import hashlib, json, os, re, urllib.request, urllib.error
           from urllib.parse import quote
           from datetime import datetime, timezone
 
-          token=os.environ['AIVEN_TOKEN']
+          token=os.environ['SOLQARYN_AIVEN_TOKEN']
           conn=os.environ['DEV_DB']
           project=os.environ['PROJECT']
           service=os.environ['SERVICE']
@@ -91,7 +93,7 @@ jobs:
               req=urllib.request.Request(root+path, headers={
                   'Authorization': f'aivenv1 {token}',
                   'Accept':'application/json',
-                  'User-Agent':'VariApp-N8.20.F-proof/5.0'})
+                  'User-Agent':'Solqaryn-N8.20.F-proof/5.0'})
               try:
                   with urllib.request.urlopen(req, timeout=30) as r:
                       return json.load(r)
@@ -101,7 +103,7 @@ jobs:
           cs=parse_conn(conn)
           dev_host=cs.get('server') or cs.get('host') or cs.get('data source')
           if not dev_host:
-              raise SystemExit('Could not parse DEV DB host from VARIAPP_DEV_DB_CONNECTION')
+              raise SystemExit('Could not parse DEV DB host from canonical DEV configuration')
           dev_host_hash=hashlib.sha256(dev_host.lower().encode()).hexdigest()
 
           svc_payload=get(f'/project/{quote(project, safe="")}/service/{quote(service, safe="")}')
@@ -228,12 +230,12 @@ jobs:
           ])
 
           evidence={
-            'schema':'variapp.aiven-capabilities-proof.v5',
+            'schema':'solqaryn.aiven-capabilities-proof.v5',
             'authority':'docs/VAEP_AUTHORITY.md',
             'task':'N8.20.F',
             'status':'PASS_AIVEN_CAPABILITIES_IDENTIFIED' if pass_ok else 'NOT_CERTIFIED',
             'capturedAtUtc':datetime.now(timezone.utc).isoformat(),
-            'branch':'Desarrollo',
+            'branch':'dev',
             'functionalHead':os.environ.get('GITHUB_SHA'),
             'githubActions':{'runId':os.environ.get('GITHUB_RUN_ID'),'attempt':os.environ.get('GITHUB_RUN_ATTEMPT')},
             'service':{
@@ -327,7 +329,7 @@ jobs:
           path: ${{ env.EVIDENCE_ROOT }}/${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: warn
 
-      - name: Persist sanitized evidence to Desarrollo
+      - name: Persist sanitized evidence to DEV
         if: ${{ success() && inputs.persist_evidence }}
         shell: bash
         run: |
@@ -337,4 +339,4 @@ jobs:
           git add "$EVIDENCE_ROOT/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git diff --cached --check
           git commit -m 'evidence(n8.20.f): certify Aiven DEV capabilities read-only' || exit 0
-          git push origin HEAD:Desarrollo
+          git push origin HEAD:dev

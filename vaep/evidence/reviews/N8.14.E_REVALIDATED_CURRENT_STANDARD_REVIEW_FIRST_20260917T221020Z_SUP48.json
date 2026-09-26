@@ -37,8 +37,8 @@
   },
   "runtimeSupport": {
     "source": "vaep/evidence/reviews/N8.13.G_REVALIDATED_CURRENT_STANDARD_REVIEW_FIRST_20260917T205226Z_VAEP48.json",
-    "developmentProject": "variapp-desarrollo",
-    "canonicalAlias": "variapp-desarrollo.vercel.app",
+    "developmentProject": "solqaryn-desarrollo",
+    "canonicalAlias": "solqaryn-desarrollo.vercel.app",
     "developmentState": "READY",
     "rootHttp": 200,
     "securityHeadersPresent": true,

@@ -1,7 +1,7 @@
 # N8.19 — Auditoría forense final
 
 Autoridad única: `docs/VAEP_AUTHORITY.md`  
-Repositorio/branch: `jmejia31/VariApp` / `Desarrollo`  
+Repositorio/branch: `jmejia31/Solqaryn` / `Desarrollo`  
 Scope congelado por N8.19.A: **98 microtareas** desde `N8.6.G` en adelante, incluyendo el histórico `N8.6.G..N8.14.H` y la intervención ejecutada `N8.15.A..N8.18.H`.
 
 ## Regla de dictamen

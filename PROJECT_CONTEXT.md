@@ -1,91 +1,102 @@
-# PROJECT_CONTEXT — VariApp
+# PROJECT_CONTEXT — SOLQARYN
 
-> Fuente principal de contexto técnico compartido para ChatGPT/VAEP, Chat B, Codex cuando sea autorizado y cualquier colaborador futuro. No reconstruir el proyecto desde cero ni confiar en snapshots antiguos.
+> Contexto técnico canónico de estado actual. Este archivo describe únicamente la realidad vigente necesaria para trabajar sobre SOLQARYN.
 
-## 1. Estado canónico
+## 1. Identidad y repositorio
 
-- PROJECT_ID: VARIAPP
-- Repositorio: `jmejia31/VariApp`
-- Rama de trabajo: `Desarrollo`
-- `main`: congelada; no tocar sin autorización expresa.
-- PR oficial `Desarrollo -> main`: #2, abierto y Draft; no merge automático.
-- Entornos lógicos: `varistorehn_producción` y `varistorehn_desarrollo`.
-- Plan rector: **Plan Maestro ERP V5 — VariApp**.
-- Orden estricto: ERP-N0 -> N1 -> N2 -> N3 -> N4 -> N5 -> N6 -> N7 -> N8 -> N9.
-- Tracks obligatorios: T0–T12.
+- PROJECT_ID: `SOLQARYN`
+- PROJECT_SCOPE_LOCK: `STRICT`
+- `PROJECT_SCOPE_LOCK=STRICT`
+- Plataforma: SOLQARYN.
+- Repositorio: `solqaryn/Solqaryn`.
+- Rama ordinaria de trabajo: `dev`.
+- Rama productiva: `main`; cualquier cambio requiere autorización explícita vigente.
+- GitHub Environments canónicos: `DEV` y `PROD`.
+- Identidad corporativa operativa: `solqaryn.platform@outlook.com`.
+- VariStoreHN es una empresa cliente alojada en SOLQARYN; no define la identidad de la plataforma.
 
-Plan rector en Drive:
-https://docs.google.com/document/d/1rWGOP_Z64kM4Q2NZbrTvge3ReqJkJ_vJmhByogbPbR8/edit
+## 2. Regla de estado vivo
 
-Tablero operativo:
-https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
+Antes de actuar:
 
-## 2. Regla de lectura del estado vivo
+1. leer `docs/VAEP_AUTHORITY.md`;
+2. releer HEAD vivo de `dev`;
+3. consultar sólo el estado operativo necesario para la tarea;
+4. validar dependencias técnicas reales del scope;
+5. usar CI/tests/readbacks causales cuando corresponda.
 
-Ningún colaborador debe tomar este archivo, un prompt viejo, una conversación, un Issue, una fila de Sheet o un artifact como prueba suficiente de estado actual.
+Ningún plan, fila, gate, fase o secuencia que no esté incorporado al MAESTRO vigente puede condicionar trabajo nuevo.
 
-Antes de actuar, releer en este orden:
+## 3. Arquitectura vigente
 
-1. `docs/VAEP_AUTHORITY.md` — autoridad única de reglas.
-2. HEAD vivo de `Desarrollo`.
-3. `vaep/control/jules-autorefill-catalog.json` — `currentParent`, `lastClosedParent`, `closureReceipts`, lanes y `throughputPlan`.
-4. `vaep/control/dispatch-admission.json` — contrato global **OPEN_ONLY**. `newDispatchAdmission` debe ser exactamente `OPEN`; cualquier otro valor es corrupción operativa que se repara a `OPEN` antes de decidir dispatch. Los bloqueos reales viven en tarea/lane (`dispatchEligible=false`, hold causal, cuarentena o REVIEW_FIRST/QA_TAKEOVER).
-5. Recibo `LISTO_REAL` del parent recién cerrado y sus `runId/headSha` causales.
-6. GitHub Actions del HEAD/control relevante y el último `VAEP scheduled checkpoints`.
-7. `COLA`, `PLAN_MAESTRO`, `CONFIG`, `DASHBOARD`, `TAREAS_PROGRAMADAS` y `CONTROL_TOWER` en el Sheet cuando se necesite estado operativo o extender roadmap.
+SOLQARYN es una plataforma empresarial multiempresa.
 
-Si dos superficies difieren, GitHub/CI prueba actividad técnica real y el Sheet debe reconciliarse; no se inventa un PASS/LISTO para hacer coincidir reportes. Ningún snapshot histórico puede reintroducir un estado global distinto de `OPEN`.
+- Frontend: Angular 20 standalone, Signals y Angular Material.
+- Backend: ASP.NET Core 8 Web API.
+- Capas: Domain <- Application <- Infrastructure; API compone y expone.
+- Persistencia: MySQL con EF Core 8/Pomelo.
+- Seguridad: JWT, BCrypt, RBAC relacional, auditoría, CORS explícito, rate limiting y security headers.
+- Integraciones vigentes: Cloudinary, QuestPDF y SMTP.
+- E2E/browser: Playwright/Chromium.
+- La autorización del backend es la autoridad; la UI nunca sustituye controles de seguridad.
+- Tenancy, integridad transaccional y trazabilidad deben preservarse en cambios de negocio.
 
-## 3. Arquitectura resumida
+Consultar `ARCHITECTURE.md` para cambios estructurales y `PROJECT_INDEX.md` para navegación dirigida.
 
-VariApp/VariStorehn evoluciona hacia un ERP empresarial. Backend ASP.NET Core 8 Web API con capas Domain/Application/Infrastructure/API, EF Core 8 + Pomelo/MySQL, JWT/BCrypt, RBAC relacional, auditoría e integraciones Cloudinary/QuestPDF/SMTP. Frontend Angular 20 standalone con Signals, Angular Material, guards de autenticación/permisos, servicios y features lazy. E2E con Playwright.
+## 4. Infraestructura canónica
 
-Áreas principales: productos/variantes/catálogos, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, descuentos, impuestos, envíos, cargas masivas, auditoría, reportes y tienda pública VariStorehn.
+### GitHub
+- Repositorio: `solqaryn/Solqaryn`.
+- Trabajo: `dev`.
+- Environments: `DEV` y `PROD`.
 
-Consultar `PROJECT_INDEX.md` para localizar responsabilidades. Abrir `ARCHITECTURE.md` solo ante cambio estructural/transversal; cambios del mapa se registran en `ARCHITECTURE_CHANGELOG.md`.
+### Render
+- Servicio DEV: `solqaryn-api-dev`.
+- Health: `/health/ready`.
 
-## 4. Persistencia, seguridad e invariantes
+### Vercel
+- Proyecto DEV: `solqaryn-dev`.
 
-- MySQL mediante EF Core/Pomelo y migraciones forward-only cuando aplique.
-- JWT y permisos relacionales; no reintroducir bypass de administrador legacy.
-- No tocar Producción ni `main` desde el flujo de Desarrollo.
-- No exponer secretos ni inventar validaciones externas.
+### Aiven
+- Proyecto: `solqaryn`.
+- Servicio MySQL: `solqaryn-mysql`.
+- Bases: `solqaryn_dev` y `solqaryn_prod`.
+- Usuarios de aplicación separados por entorno.
+
+### Cloudflare
+- La gestión de DNS/domino se trata como infraestructura de plataforma y no se asume requisito de DEV salvo que una tarea vigente lo necesite.
+
+## 5. Dominios funcionales
+
+Áreas principales:
+
+- empresas y configuración empresarial;
+- autenticación, usuarios, roles y permisos;
+- productos, variantes, catálogos e imágenes;
+- inventario, almacenes, ubicaciones, reservas y movimientos;
+- compras, proveedores y cuentas por pagar;
+- ventas, clientes, cotizaciones, pedidos y facturación;
+- finanzas;
+- descuentos e impuestos;
+- auditoría;
+- reportes;
+- tienda pública de empresas cliente;
+- automatizaciones de operación y control.
+
+## 6. Invariantes
+
+- No exponer secretos.
+- No mezclar datos entre empresas.
+- No confiar en permisos visuales como sustituto del backend.
+- Migraciones y cambios de datos deben ser explícitos, verificables y recuperables.
 - No force-push.
-- Preservar commits ajenos y reconciliar HEAD antes de publicar.
+- Revalidar HEAD antes de publicar.
+- Cambios en `main`, PROD o infraestructura productiva requieren autorización explícita vigente.
 
-## 5. Gobierno colaborativo vigente
+## 7. Plan maestro vigente
 
-`AGENTS.md` es vinculante. ChatGPT/VAEP y Chat B operan como controller/QA bajo el MAESTRO. El runtime canónico de implementación/autorefill es **J1–J6**; referencias Jules A/B/C/D son legado/histórico y no deben usarse para crear trabajo nuevo. Codex participa solo por orden explícita del usuario. AntiG/Antigravity permanece `RESERVED_INACTIVE`: puede leer este handoff, pero no tiene scheduler, procesamiento de handoffs ni autoridad `LISTO_REAL` hasta autorización explícita futura.
+El plan maestro que ejecutan las diez automatizaciones se define únicamente por objetivos, prioridades y dependencias actuales de SOLQARYN.
 
-Todo changeset intencional deja evidencia en `CHANGELOG_AI.md`. `TASKS.md` cambia cuando cambia el estado operativo. Índice/arquitectura/contexto solo cambian cuando cambia la realidad que describen.
+No hereda restricciones, numeraciones, fases, filas, gates ni prioridades que no hayan sido incorporadas expresamente a la versión vigente del MAESTRO.
 
-## 6. VAEP — ejecución autónoma integral
-
-Protocolo: `PLAN_EJECUCION_AUTONOMA.md`.
-
-Autoridad operativa única: `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`). Toda regla se edita allí; no se seleccionan protocolos por etiquetas históricas.
-
-El Sheet representa el Plan Maestro ERP V5 completo y lo traduce a `COLA` granular. GitHub/CI prueban actividad real; el Sheet describe y reconcilia estado operativo.
-
-Reglas esenciales: `PARENT_CLOSE_FIRST`, `REVIEW_FIRST`, `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY`, causalidad real, P0/P1=0 antes de `LISTO_REAL`, trabajo material no duplicado, no busywork, máximo ATTEMPT1+R2 y R3 prohibido salvo cambio explícito de política.
-
-Los gates `GATE-N0` ... `GATE-N9` hacen cumplir orden de fases y DoD. Una tarea `BLOQUEADO` no paraliza toda la cola: solo puede saltarse hacia una tarea sin dependencia directa/transitiva de la bloqueada. Ningún gate de tarea, review o hardening puede cerrar la admisión global.
-
-## 7. Handoffs históricos
-
-Los snapshots y handoffs fechados anteriores se conservan únicamente en Git history, receipts, artifacts y BITACORA como **EVIDENCIA_NO_EJECUTABLE**. No se duplica aquí ningún `currentParent`, HEAD, admission, sesión ni asignación de lane, porque esos valores caducan y podían contaminar decisiones posteriores.
-
-Para reanudar trabajo, usar exclusivamente la secuencia de lectura viva de la sección 2. El estado global de admisión vigente se deriva únicamente del MAESTRO `OPEN_ONLY` y del JSON actual, nunca de una captura histórica.
-
-## 8. Qué debe buscar cualquier colaborador al reanudar
-
-- Localizar el `currentParent` directamente en el catálogo vivo y comprobar su último recibo de cierre/promoción.
-- Exigir `newDispatchAdmission=OPEN`. Cualquier otro valor global es inválido y debe repararse a `OPEN`; la causa técnica se conserva únicamente en la tarea/lane afectada.
-- Si `VAEP_CLOSE=BLOCKED`, buscar el diagnóstico causal exacto en el job, no generar trabajo para ocultar el bloqueo.
-- Si no hay scope material seguro, detener refill y extender roadmap solo desde Plan/COLA frescos; nunca por orden léxico ni por llenar J1–J6.
-- Verificar que PR #2 siga `open + draft + unmerged` y que `main` no haya cambiado por este flujo.
-- Mantener visibles como deuda no-P0/P1 los gaps aceptados de N5.1 (B4, C1–C4, D1–D2, E4–E5); no convertirlos silenciosamente en PASS.
-
-## 9. Regla de actualización
-
-Actualizar este archivo ante cambio real de arquitectura, gobierno transversal, fuente de verdad, roadmap rector o flujo autónomo. Para avances ordinarios usar `TASKS.md`, `CHANGELOG_AI.md` y el tablero VAEP; si un avance cambia el handoff que otros agentes necesitan para operar sin ambigüedad, actualizar también esta sección de estado compartido.
+La implementación existente puede ser modificada, reemplazada o retirada cuando el objetivo vigente lo requiera, siempre bajo controles de seguridad, integridad, trazabilidad, revisión y rollback proporcionales.

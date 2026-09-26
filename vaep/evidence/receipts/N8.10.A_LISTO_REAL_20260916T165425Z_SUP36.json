@@ -1,7 +1,7 @@
 {
   "schema":"vaep-listo-real-receipt/v1",
   "authority":"docs/VAEP_AUTHORITY.md",
-  "repo":"jmejia31/VariApp",
+  "repo":"jmejia31/Solqaryn",
   "branch":"Desarrollo",
   "scope":"N8.10.A",
   "parent":"N8.10",

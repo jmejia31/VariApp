@@ -1,7 +1,7 @@
 {
   "schema": "vaep-listo-real/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "parent": "N8.20.H",
   "macro_parent": "N8.20",
@@ -21,7 +21,7 @@
     "engine": "MYSQL",
     "server_version": "8.4.8",
     "provider": "AIVEN",
-    "service": "variapp-mysql",
+    "service": "solqaryn-mysql",
     "plan": "free-1-1gb",
     "backup_recovery_mode": "pitr",
     "pitr_available": true,

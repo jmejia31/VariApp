@@ -47,7 +47,7 @@ El subtree `docs/` contiene, entre otros assets de gobierno de la intervención,
 - HEAD fue releído inmediatamente antes de publicar y permaneció en el baseline congelado.
 - El control-plane fue releído y `N8.15.A` estaba dependency-valid por `N8.3.A`.
 - Lease exclusivo adquirido con read-before-write y readback antes de la escritura.
-- Las diez automatizaciones canónicas de VariApp estaban habilitadas; no se rearmó ninguna por `last_run_time`/`next_run_time`.
+- Las diez automatizaciones canónicas de Solqaryn estaban habilitadas; no se rearmó ninguna por `last_run_time`/`next_run_time`.
 - No se tocaron `main`, Producción, deploy, secretos ni PR #2.
 
 ## Resultado

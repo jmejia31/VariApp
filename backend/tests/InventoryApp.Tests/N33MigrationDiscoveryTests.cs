@@ -16,7 +16,7 @@ public sealed class N33MigrationDiscoveryTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseMySql(
-                "Server=localhost;Database=variapp_n33_discovery;User=root;Password=test;",
+                "Server=localhost;Database=solqaryn_n33_discovery;User=root;Password=test;",
                 ServerVersion.Parse("8.0.36-mysql"))
             .Options;
 

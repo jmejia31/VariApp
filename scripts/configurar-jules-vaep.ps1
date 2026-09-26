@@ -1,6 +1,14 @@
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+# EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+# LOCAL_SKILL_COUNT=1
+# Prohibido usar skills/documentacion/contexto fuera de SOLQARYN sin autorizacion explicita o allowlist ACTIVE.
+
 [CmdletBinding()]
 param(
-    [string]$Repository = "jmejia31/VariApp",
+    [string]$Repository = "solqaryn/Solqaryn",
     [string]$Branch = "Desarrollo",
     [ValidateSet("ALL", "J1", "J2", "J3", "J4", "J5", "J6")]
     [string]$Worker = "ALL"
@@ -23,20 +31,20 @@ function Test-JulesCredential([string]$WorkerId, [string]$PlainKey) {
     $headers = @{ "x-goog-api-key" = $PlainKey }
     $sources = Invoke-RestMethod -Uri "https://jules.googleapis.com/v1alpha/sources?pageSize=100" -Headers $headers -Method Get
     $source = @($sources.sources) | Where-Object {
-        $_.githubRepo.owner -eq "jmejia31" -and $_.githubRepo.repo -eq "VariApp"
+        $_.githubRepo.owner -eq "solqaryn" -and $_.githubRepo.repo -eq "Solqaryn"
     } | Select-Object -First 1
     if (-not $source) {
-        throw "$WorkerId: la credencial es valida para la API, pero VariApp no aparece como source de Jules."
+        throw "$WorkerId: la credencial es valida para la API, pero Solqaryn no aparece como source de Jules."
     }
     $hasBranch = @($source.githubRepo.branches) | Where-Object { $_.displayName -eq $Branch }
     if (-not $hasBranch) {
-        throw "$WorkerId: Jules ve VariApp, pero no expone la rama '$Branch'."
+        throw "$WorkerId: Jules ve Solqaryn, pero no expone la rama '$Branch'."
     }
-    Write-Host "$WorkerId readiness OK: VariApp / $Branch" -ForegroundColor Green
+    Write-Host "$WorkerId readiness OK: Solqaryn / $Branch" -ForegroundColor Green
 }
 
-Write-Step "Validando identidad VariApp"
-if ($Repository -ne "jmejia31/VariApp") {
+Write-Step "Validando identidad Solqaryn"
+if ($Repository -ne "solqaryn/Solqaryn") {
     throw "Repositorio no autorizado para este script: $Repository"
 }
 if ($Branch -ne "Desarrollo") {

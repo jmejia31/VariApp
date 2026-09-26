@@ -131,6 +131,7 @@ export class ProductoService {
     formData.append('Modelo', value.modelo);
     if (value.descripcion) formData.append('Descripcion', value.descripcion);
     formData.append('TipoInventario', String(value.tipoInventario ?? TipoInventario.MercaderiaVenta));
+    formData.append('EsDestacado', String(Boolean(value.esDestacado)));
     formData.append('Cantidad', String(value.cantidad));
     formData.append('Costo', String(value.costo));
     formData.append('Precio', String(value.precio));

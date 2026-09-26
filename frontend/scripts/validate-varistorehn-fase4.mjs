@@ -13,6 +13,7 @@ const [
   paths,
   service,
   catalog,
+  models,
   productTs,
   productHtml,
   productScss,
@@ -26,6 +27,7 @@ const [
   readFeature('varistorehn.paths.ts'),
   readFeature('varistorehn.service.ts'),
   readFeature('varistorehn.catalog.ts'),
+  readFeature('varistorehn.models.ts'),
   readFeature('varistorehn-producto.component.ts'),
   readFeature('varistorehn-producto.component.html'),
   readFeature('varistorehn-producto.component.scss'),
@@ -66,7 +68,7 @@ for (const required of [
   expect(productTs.includes(required), `El detalle público debe integrar ${required}.`);
 }
 
-expect(productTs.includes("type EstadoProductoPublico = 'loading' | 'error' | 'not-found' | 'success'"), 'El detalle debe modelar loading/error/not-found/success.');
+expect(productTs.includes('EstadoRecursoPublico') && models.includes("EstadoRecursoPublico = EstadoConsultaPublica | 'not-found'"), 'El detalle debe usar el contrato compartido loading/error/empty/success + not-found.');
 expect(productTs.includes("this.error.set('No pudimos cargar este producto"), 'Una falla real debe quedar visible y no sustituirse por demo.');
 expect(productTs.includes("if (!this.utilizarDatosBaseDatos())"), 'Demo y fuente real deben estar separados de forma explícita.');
 expect(productTs.includes('this.stockSeleccionado()'), 'La cantidad debe depender del stock de la variante seleccionada.');
@@ -108,8 +110,12 @@ expect(productHtml.indexOf('class="product-layout"') < productHtml.indexOf('<dia
 expect(!productHtml.includes('class="detail-dialog"'), 'El detalle independiente no puede reutilizar el modal legado del home.');
 expect(productsHtml.includes('Ver producto'), 'Las tarjetas del catálogo deben ofrecer Ver producto.');
 expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver producto debe navegar por slug a la página independiente.');
-expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
-expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'Los accesos de producto del home deben navegar al detalle canónico por slug.');
+expect(productsHtml.includes('tieneOferta(modelo)') && productsHtml.includes('precioActual(producto, modelo)'), 'El catálogo debe mostrar la misma oferta vigente por variante que el detalle.');
+expect(
+  homeTs.includes('abrirDetalle(producto: ProductoTienda)')
+    && homeTs.includes('VARISTOREHN_PATHS.producto(producto.slug)'),
+  'Si el home expone un producto destacado, debe navegar al detalle canónico por slug.'
+);
 expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como experiencia principal de detalle de producto.');
 expect(!homeTs.includes("@ViewChild('detalleDialog')"), 'El home no debe conservar el ViewChild del modal legado de detalle.');
 expect(!homeTs.includes('productoDetalle = signal'), 'El home no debe conservar estado muerto del modal legado de detalle.');

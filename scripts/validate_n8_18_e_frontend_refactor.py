@@ -32,7 +32,7 @@ def main() -> None:
     toast_text = read(TOAST)
     shell_text = read(SHELL)
 
-    if contract.get("schema") != "variapp-navigation-contract/v1":
+    if contract.get("schema") != "solqaryn-navigation-contract/v1":
         fail("unexpected navigation contract schema")
     if contract.get("remove_safe_deletions") != 0:
         fail("N8.18.E must not claim REMOVE_SAFE deletions")

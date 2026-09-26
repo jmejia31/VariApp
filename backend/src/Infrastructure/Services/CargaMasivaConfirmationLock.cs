@@ -23,7 +23,7 @@ public static class CargaMasivaConfirmationLock
             command.CommandText = "SELECT GET_LOCK(@lockName, 0);";
             var parameter = command.CreateParameter();
             parameter.ParameterName = "@lockName";
-            parameter.Value = $"variapp:carga:{cargaId}";
+            parameter.Value = $"solqaryn:carga:{cargaId}";
             command.Parameters.Add(parameter);
 
             var result = await command.ExecuteScalarAsync(cancellationToken);
@@ -34,7 +34,7 @@ public static class CargaMasivaConfirmationLock
                 return null;
             }
 
-            return new Lease(connection, $"variapp:carga:{cargaId}", openedHere);
+            return new Lease(connection, $"solqaryn:carga:{cargaId}", openedHere);
         }
         catch
         {

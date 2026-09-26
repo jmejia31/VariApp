@@ -1,4 +1,4 @@
-# Contrato de preparación para Producción — VariApp
+# Contrato de preparación para Producción — Solqaryn
 
 Autoridad operativa: `docs/VAEP_AUTHORITY.md`.
 

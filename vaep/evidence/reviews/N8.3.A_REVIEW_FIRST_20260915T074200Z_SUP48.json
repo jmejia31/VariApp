@@ -15,7 +15,7 @@
   "candidateHead": "957567c3b26d6b8dd3a96ca29249ee09a95a13e1",
   "preflight": {
     "objective": "Probar navegadores soportados",
-    "planAuthority": "Plan Maestro ERP V5 — VariApp — FUENTE RECTORA VAEP / N8.3 Navegadores",
+    "planAuthority": "Plan Maestro ERP V5 — Solqaryn — FUENTE RECTORA VAEP / N8.3 Navegadores",
     "repositoryFacts": {
       "framework": "Angular 20.3.27",
       "packageBrowserslistOverride": "ABSENT",

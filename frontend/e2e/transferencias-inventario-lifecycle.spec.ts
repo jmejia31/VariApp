@@ -46,6 +46,11 @@ const transferenciaEnTransito = () => ({
   }))
 });
 
+async function confirmarAlerta(page: import('@playwright/test').Page, titulo: string, confirmarTexto: string): Promise<void> {
+  await expect(page.getByRole('heading', { name: titulo })).toBeVisible();
+  await page.locator('.app-alert__confirm').filter({ hasText: confirmarTexto }).click();
+}
+
 test.describe('Transferencias de inventario - lifecycle UI', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -112,8 +117,8 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
     await expect(page).toHaveURL(/\/inventario\/transferencias\/41$/);
     await expect(page.getByRole('heading', { name: 'TR-000041' })).toBeVisible();
 
-    page.once('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Solicitar' }).click();
+    await confirmarAlerta(page, 'Solicitar transferencia', 'Solicitar');
 
     await expect.poll(() => solicitudRegistrada).toBe(true);
     await expect(page.getByRole('strong').filter({ hasText: /^Solicitada$/ })).toBeVisible();
@@ -163,8 +168,8 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
     await cantidades.nth(3).fill('2');
     await expect(recepcion.getByText('Cuadra', { exact: true })).toBeVisible();
 
-    page.once('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Registrar recepción' }).click();
+    await confirmarAlerta(page, 'Registrar recepción', 'Registrar recepción');
 
     await expect.poll(() => payload).toEqual({
       detalles: [{

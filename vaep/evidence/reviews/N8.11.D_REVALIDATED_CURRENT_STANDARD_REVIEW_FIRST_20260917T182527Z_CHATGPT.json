@@ -19,7 +19,7 @@
     "nonIntegrationTests":"SUCCESS",
     "frontendLintBuild":"SUCCESS",
     "dockerBuild":"SUCCESS",
-    "developmentDeploy":"variapp-api-desarrollo LIVE at 6ce3ec581adb4c2c3ccf21e6a6d32ccebc86e080",
+    "developmentDeploy":"solqaryn-api-desarrollo LIVE at 6ce3ec581adb4c2c3ccf21e6a6d32ccebc86e080",
     "currentRuntimeEquivalenceBase":"4a22f3ebb2945b83acba8715d5a020621c995fec",
     "currentHeadBeforeReview":"4841f6641aaeb94053404487673d43c6482b41d4",
     "runtimeDeltaSinceEquivalenceBase":false

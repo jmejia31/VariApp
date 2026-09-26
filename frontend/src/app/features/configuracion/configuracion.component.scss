@@ -78,6 +78,15 @@
   }
 }
 
+/* La vista de 1024 px conserva el sidebar de escritorio, por lo que el ancho
+   efectivo de contenido es menor que el viewport. Colapsamos el layout del
+   panel de correo antes de que sus filtros mínimos desborden el documento. */
+@media (max-width: 1100px) {
+  :host ::ng-deep app-email-empresarial-card .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 600px) {
   .form-card { padding: 16px; max-width: 100%; }
   .fields-grid { grid-template-columns: 1fr; }

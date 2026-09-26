@@ -1,4 +1,4 @@
-# Plan Maestro de Mejoras Empresariales — VariApp
+# Plan Maestro de Mejoras Empresariales — Solqaryn
 
 Versión: 4.0 — Saneamiento relacional integral + variantes multidimensionales
 Fecha: 2026-08-08
@@ -25,7 +25,7 @@ Producción: congelada
 
 ## 2. Resultado de la auditoría estructural de base de datos
 
-La base versionada de VariApp es funcional y tiene varias decisiones correctas, pero NO se considera todavía una base relacional final suficientemente saneada para construir encima el motor multidimensional de variantes.
+La base versionada de Solqaryn es funcional y tiene varias decisiones correctas, pero NO se considera todavía una base relacional final suficientemente saneada para construir encima el motor multidimensional de variantes.
 
 La auditoría se realizó sobre:
 
@@ -44,7 +44,7 @@ Esta auditoría describe el esquema que el código de `Desarrollo` pretende apli
 
 Marca, Modelo, Color y Talla comparten actualmente una tabla genérica con discriminador `Tipo` y Modelo usa `CatalogoPadreId` para representar su Marca.
 
-Aunque una tabla genérica con discriminador no constituye por sí sola una violación automática de 3FN, en VariApp impide expresar con suficiente fuerza semántica el dominio objetivo y obliga a FKs genéricas. Para el modelo empresarial aprobado se reemplazará como fuente de verdad por:
+Aunque una tabla genérica con discriminador no constituye por sí sola una violación automática de 3FN, en Solqaryn impide expresar con suficiente fuerza semántica el dominio objetivo y obliga a FKs genéricas. Para el modelo empresarial aprobado se reemplazará como fuente de verdad por:
 
 - `Marcas`;
 - `Modelos`;

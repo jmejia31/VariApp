@@ -80,7 +80,7 @@
             <article class="cart-item">
               <div class="item-media">
                 @if (imagenValida(item.imagen)) {
-                  <img [src]="item.imagen" [alt]="item.nombre" loading="lazy" (error)="errorImagen(item.imagen)">
+                  <img [src]="item.imagen" [alt]="item.nombre" width="320" height="240" loading="lazy" decoding="async" (error)="errorImagen(item.imagen)">
                 } @else {
                   <app-store-art [tipo]="item.ilustracion" />
                 }
@@ -98,7 +98,12 @@
                 </div>
 
                 <div class="item-details">
-                  <div class="item-price"><small>Precio unitario</small><strong>{{ moneda(item.precio) }}</strong></div>
+                  <div class="item-price">
+                    <small>{{ item.ofertaActiva ? (item.ofertaNombre || 'Oferta vigente') : 'Precio unitario' }}</small>
+                    @if (item.ofertaActiva) { <del>{{ moneda(item.precioNormal) }}</del> }
+                    <strong>{{ moneda(item.precio) }}</strong>
+                    @if (item.ofertaActiva) { <span>Ahorras {{ moneda(item.ahorro) }} por unidad</span> }
+                  </div>
                   <div class="quantity-field">
                     <label [for]="'cantidad-' + $index">Cantidad</label>
                     <div class="quantity-control">
@@ -106,7 +111,7 @@
                       <input #cantidadInput [id]="'cantidad-' + $index" type="number" min="1" [max]="item.stock" [value]="item.unidades" (change)="establecerCantidad(item.clave, cantidadInput.value)" [attr.aria-label]="'Cantidad de ' + item.nombre">
                       <button type="button" [disabled]="item.unidades >= item.stock" [attr.aria-label]="'Aumentar cantidad de ' + item.nombre" (click)="incrementar(item.clave)">+</button>
                     </div>
-                    <small>Máximo disponible: {{ item.stock }}</small>
+                    <small>{{ item.estadoDisponibilidad === 'lowStock' ? 'Últimas unidades' : 'Disponible' }} · máximo {{ item.stock }}</small>
                   </div>
                   <div class="item-total"><small>Total de línea</small><strong>{{ moneda(item.precio * item.unidades) }}</strong></div>
                 </div>
@@ -138,7 +143,7 @@
     <footer class="store-footer">
       <div class="container footer-grid">
         <div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
-        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.categorias">Categorías</a></div>
+        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.ofertas">Ofertas</a><a [href]="enlaces.categorias">Categorías</a></div>
         <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a><span>Tu selección se conserva mientras revisas el catálogo.</span></div>
       </div>
       <div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div>

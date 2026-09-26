@@ -6,7 +6,7 @@ Alcance: ERP-N8 / N8.10 Disaster Recovery
 
 ## Resultado
 
-N8.10 define y prueba un modelo operativo de recuperación ante desastres para VariApp sin alterar `main`, Producción, despliegues, secretos ni PR #2.
+N8.10 define y prueba un modelo operativo de recuperación ante desastres para Solqaryn sin alterar `main`, Producción, despliegues, secretos ni PR #2.
 
 El contrato operativo canónico está en `docs/evidencias/dr-runbook.md` y define:
 

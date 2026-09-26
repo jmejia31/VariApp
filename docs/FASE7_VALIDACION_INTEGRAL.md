@@ -10,7 +10,7 @@ Esta fase pertenece al **ciclo funcional complementario 2026**. No sustituye ni 
 
 ## Objetivo
 
-Ejecutar una validación transversal de VariApp sobre una base MySQL 8.4 temporal y descartable, verificando conjuntamente facturación, impuestos, descuentos, envío, variantes, inventario, compras, ventas, pagos, PDF, correo, cargas masivas, permisos, auditoría, responsive, sesión, migraciones y concurrencia.
+Ejecutar una validación transversal de Solqaryn sobre una base MySQL 8.4 temporal y descartable, verificando conjuntamente facturación, impuestos, descuentos, envío, variantes, inventario, compras, ventas, pagos, PDF, correo, cargas masivas, permisos, auditoría, responsive, sesión, migraciones y concurrencia.
 
 ## Correcciones funcionales cerradas
 

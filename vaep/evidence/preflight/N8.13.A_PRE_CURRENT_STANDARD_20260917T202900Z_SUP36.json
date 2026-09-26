@@ -32,7 +32,7 @@
     "render_workspace_count": 1,
     "render_workspace": "My Workspace",
     "render_development": {
-      "service": "variapp-api-desarrollo",
+      "service": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "runtime": "docker",
       "plan": "free",
@@ -42,7 +42,7 @@
       "latest_deploy_commit": "902681942ecbac2f1578ff1daf399ef925f802d7"
     },
     "render_production_reference": {
-      "service": "variapp-api",
+      "service": "solqaryn-api",
       "branch": "main",
       "runtime": "docker",
       "plan": "free",
@@ -53,10 +53,10 @@
       "writes_performed": false
     },
     "vercel_team_count": 1,
-    "vercel_team": "VariApp",
+    "vercel_team": "Solqaryn",
     "vercel_development_project": {
       "id": "prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu",
-      "name": "variapp-desarrollo",
+      "name": "solqaryn-desarrollo",
       "latest_returned_ready_deployment": "dpl_6viE8NfrpbkVRhvAPmEnQvXRBuqN",
       "latest_returned_ready_commit": "f9616799a4c7d68451af42a1785bcd381fcf7ab6",
       "latest_returned_branch": "Desarrollo",
@@ -70,8 +70,8 @@
     }
   },
   "current_repo_contract": {
-    "development_backend": "render.yaml binds variapp-api-desarrollo to Desarrollo/Oregon/free, /health/ready, Staging environment and DEV URLs; secret values remain sync:false/generated and were not read.",
-    "frontend_routing": "frontend/vercel.json routes varistorehn.vercel.app API traffic to variapp-api.onrender.com and all other API traffic to variapp-api-desarrollo.onrender.com; security headers remain configured.",
+    "development_backend": "render.yaml binds solqaryn-api-desarrollo to Desarrollo/Oregon/free, /health/ready, Staging environment and DEV URLs; secret values remain sync:false/generated and were not read.",
+    "frontend_routing": "frontend/vercel.json routes varistorehn.vercel.app API traffic to solqaryn-api.onrender.com and all other API traffic to solqaryn-api-desarrollo.onrender.com; security headers remain configured.",
     "production_write": false,
     "main_write": false,
     "secret_values_read": false

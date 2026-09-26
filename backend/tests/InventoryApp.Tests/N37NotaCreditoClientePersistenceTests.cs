@@ -46,7 +46,7 @@ public sealed class N37NotaCreditoClientePersistenceTests
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql("Server=localhost;Database=variapp_n37_model;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
+            .UseMySql("Server=localhost;Database=solqaryn_n37_model;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
             .Options;
         return new AppDbContext(options);
     }

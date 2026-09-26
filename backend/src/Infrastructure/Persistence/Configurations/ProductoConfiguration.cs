@@ -21,6 +21,7 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Property(p => p.Costo).HasColumnType("decimal(18,2)");
         builder.Property(p => p.Precio).HasColumnType("decimal(18,2)");
         builder.Property(p => p.Activo).HasDefaultValue(true);
+        builder.Property(p => p.EsDestacado).HasDefaultValue(false);
         builder.Property(p => p.Eliminado).HasDefaultValue(false);
 
         builder.HasQueryFilter(p => !p.Eliminado);
@@ -38,6 +39,7 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.HasIndex(p => p.TallaId).HasDatabaseName("IX_Productos_TallaId");
         builder.HasIndex(p => p.MarcaId).HasDatabaseName("IX_Productos_MarcaId");
         builder.HasIndex(p => p.ModeloId).HasDatabaseName("IX_Productos_ModeloId");
+        builder.HasIndex(p => new { p.EsDestacado, p.Activo }).HasDatabaseName("IX_Productos_EsDestacado_Activo");
         builder.HasIndex(p => new { p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_Estado");
         builder.HasIndex(p => new { p.TipoInventario, p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_TipoInventario_Estado");
 

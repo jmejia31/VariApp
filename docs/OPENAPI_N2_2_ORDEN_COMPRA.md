@@ -4,7 +4,7 @@
 
 Base path: `/ordenes-compra`.
 
-Todos los endpoints requieren autenticación y permisos relacionales mediante `RequierePermiso`. Las respuestas exitosas usan el envelope común `ApiResponse<T>`; los errores de recurso/regla usan la infraestructura ProblemDetails de VariApp.
+Todos los endpoints requieren autenticación y permisos relacionales mediante `RequierePermiso`. Las respuestas exitosas usan el envelope común `ApiResponse<T>`; los errores de recurso/regla usan la infraestructura ProblemDetails de Solqaryn.
 
 La aprobación de OrdenCompra es documental: ningún endpoint de este contrato materializa recepción, stock, Kardex, costeo o finanzas.
 

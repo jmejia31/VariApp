@@ -1,7 +1,7 @@
 {
   "schema": "vaep-database-provider-evidence/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "observed_at": "2026-09-16T07:39:24Z",
   "base_head": "2631ba4b98947c866cff25f9e0ee89ea7fb78ec4",
@@ -16,7 +16,7 @@
     "paid_action": false
   },
   "dev_runtime": {
-    "render_service": "variapp-api-desarrollo",
+    "render_service": "solqaryn-api-desarrollo",
     "render_service_id": "srv-d9jblq7avr4c73c74jng",
     "render_branch": "Desarrollo",
     "render_region": "oregon",

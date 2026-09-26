@@ -20,7 +20,7 @@ public sealed class N67CConfiguracionEmpresaPersistenceTests
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseMySql(
-                "Server=localhost;Database=variapp_n67c_discovery;User=root;Password=test;",
+                "Server=localhost;Database=solqaryn_n67c_discovery;User=root;Password=test;",
                 ServerVersion.Parse("8.0.36-mysql"))
             .Options;
 

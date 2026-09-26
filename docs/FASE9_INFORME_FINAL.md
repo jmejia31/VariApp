@@ -1,14 +1,14 @@
-# Fase 9 — Informe final de VariApp / VariStorehn
+# Fase 9 — Informe final de Solqaryn / VariStorehn
 
 Fecha: 2026-07-29  
-Repositorio: `jmejia31/VariApp`  
+Repositorio: `jmejia31/Solqaryn`  
 Rama evaluada: `Desarrollo`  
 Pull Request oficial: `#2 — Desarrollo -> main`  
 Base congelada: `85b4e02814823e9671803c23798a6ff0bf05c8f6`
 
 ## 1. Resumen ejecutivo
 
-VariApp fue sometido a un ciclo de corrección, ampliación y certificación técnica sobre la rama exclusiva `Desarrollo`.
+Solqaryn fue sometido a un ciclo de corrección, ampliación y certificación técnica sobre la rama exclusiva `Desarrollo`.
 
 El trabajo incluyó seguridad, interfaz, responsive, imágenes, facturación, impresión, correo, variantes por color, inventario, cargas masivas, permisos, auditoría, reportes administrativos y validación integral.
 

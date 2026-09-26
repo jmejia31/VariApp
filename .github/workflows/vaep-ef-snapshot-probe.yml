@@ -2,7 +2,7 @@ name: VAEP EF Snapshot Probe
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - '.github/workflows/vaep-ef-snapshot-probe.yml'
 
@@ -53,4 +53,4 @@ jobs:
           test "$(printf '%s\n' "$cached" | sed '/^$/d' | wc -l | tr -d ' ')" = '1'
           printf '%s\n' "$cached" | grep -Eq '(^|/)AppDbContextModelSnapshot\.cs$'
           git commit -m 'fix(vaep): align canonical EF snapshot for N5.7.C'
-          git push origin HEAD:Desarrollo
+          git push origin HEAD:dev

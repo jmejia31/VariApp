@@ -3,7 +3,7 @@ name: VariStoreHn Fase 3 - regresion catalogo
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
       - chatgpt/varistorehn-fase3-catalogo
     paths:
       - 'frontend/src/app/features/varistorehn/**'
@@ -19,7 +19,7 @@ on:
       - '.github/workflows/varistorehn-fase3-regression.yml'
   pull_request:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'

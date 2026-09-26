@@ -3,7 +3,7 @@
   "review_first": true,
   "timestamp_utc": "2026-09-16T22:09:02Z",
   "reviewed_head": "2cfda5b6d06c8ab76d78384bdf8b8cb79e149d3d",
-  "scope": "Vercel DEV project variapp-desarrollo only",
+  "scope": "Vercel DEV project solqaryn-desarrollo only",
   "authority": "docs/VAEP_AUTHORITY.md",
   "acceptance": "Execute frontend DEV CURRENT -> PREVIOUS_KNOWN_GOOD -> HEALTHY -> CURRENT -> HEALTHY using existing READY deployments, validate route/smoke, restore current, no productive varistorehn/main/PR2 changes.",
   "evidence": {
@@ -14,8 +14,8 @@
     "previous_known_good_deployment_id": "dpl_3opgmr8C7PKpnmYHUCSyiSxa2B8E",
     "previous_runtime_commit": "738fdf1dd202c9eed72d53a6ee297c76d5533e90",
     "provider_readback_current_state": "READY",
-    "provider_readback_canonical_alias": "variapp-desarrollo.vercel.app -> dpl_4yGzfFqgmNahG4vNcEAmw7ncMiq1",
-    "provider_readback_smoke": "HTTP 200 on https://variapp-desarrollo.vercel.app/",
+    "provider_readback_canonical_alias": "solqaryn-desarrollo.vercel.app -> dpl_4yGzfFqgmNahG4vNcEAmw7ncMiq1",
+    "provider_readback_smoke": "HTTP 200 on https://solqaryn-desarrollo.vercel.app/",
     "rollback_mechanism": "Vercel Instant Rollback of existing READY deployment; owner-executed, no rebuild",
     "forward_recovery_mechanism": "Promote original existing READY current deployment; owner-executed, no rebuild"
   },

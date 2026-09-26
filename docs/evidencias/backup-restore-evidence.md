@@ -14,7 +14,7 @@ N8.20 established read-only provider facts for the Desarrollo MySQL service:
 
 - engine/version: MySQL 8.4.8;
 - provider: Aiven;
-- service: `variapp-mysql`;
+- service: `solqaryn-mysql`;
 - plan: `free-1-1gb`;
 - recovery mode: PITR;
 - provider backup interval observed: 24 hours;

@@ -68,7 +68,7 @@ Transición controlada a baja. Permiso `Anular`.
 
 ## Errores
 
-Las reglas de negocio se traducen mediante el pipeline global de errores de VariApp. Una petición inválida o una carrera de unicidad no debe degradarse a éxito parcial. Las operaciones críticas se ejecutan transaccionalmente y su auditoría estricta forma parte del mismo resultado.
+Las reglas de negocio se traducen mediante el pipeline global de errores de Solqaryn. Una petición inválida o una carrera de unicidad no debe degradarse a éxito parcial. Las operaciones críticas se ejecutan transaccionalmente y su auditoría estricta forma parte del mismo resultado.
 
 ## Seguridad
 

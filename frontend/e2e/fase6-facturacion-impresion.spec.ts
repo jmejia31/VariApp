@@ -57,7 +57,7 @@ async function crearProducto(
     headers: authHeaders(),
     multipart: {
       Nombre: `Producto impresión Fase 6 número ${indice} con descripción extensa`,
-      Marca: 'VariApp Printing',
+      Marca: 'Solqaryn Printing',
       Modelo: `Modelo-PDF-${indice}`,
       Descripcion: 'Producto temporal para validar ajuste de líneas, tablas y rollos térmicos.',
       Cantidad: '40',

@@ -268,7 +268,7 @@ test.describe('Fase 7 — permisos exactos y aislamiento por UsuarioId', () => {
       headers: authHeaders(adminToken),
       multipart: {
         Nombre: 'Producto Aislamiento E2E',
-        Marca: 'VariApp',
+        Marca: 'Solqaryn',
         Modelo: 'ISO-USER',
         Descripcion: 'Producto temporal para comprobar aislamiento por UsuarioId.',
         Cantidad: '50',

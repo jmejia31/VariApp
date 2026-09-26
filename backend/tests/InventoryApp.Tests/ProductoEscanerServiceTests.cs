@@ -202,7 +202,7 @@ public sealed class ProductoEscanerServiceTests
             {
                 Id = 1,
                 Nombre = "Producto de prueba",
-                Marca = "VariApp",
+                Marca = "Solqaryn",
                 Modelo = "2C3",
                 Costo = 35m,
                 Precio = 80m,

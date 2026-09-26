@@ -11,6 +11,7 @@ export class IconoTiendaComponent {
     bolsa: 'M5 7h14l1 14H4L5 7ZM9 8V5a3 3 0 0 1 6 0v3',
     buscar: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
     flecha: 'M4 12h16m-6-6 6 6-6 6',
+    volver: 'M20 12H4m6-6-6 6 6 6',
     cerrar: 'm6 6 12 12M6 18 18 6',
     mas: 'M12 5v14M5 12h14',
     menos: 'M5 12h14',

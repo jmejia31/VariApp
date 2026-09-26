@@ -8,13 +8,13 @@ Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 ## 1. Objetivo
 
-Consolidar la UI de VariApp como una interfaz empresarial consistente, responsive y accesible, convirtiendo prácticas visuales y de accesibilidad ya existentes en un contrato transversal verificable y protegido contra regresiones.
+Consolidar la UI de Solqaryn como una interfaz empresarial consistente, responsive y accesible, convirtiendo prácticas visuales y de accesibilidad ya existentes en un contrato transversal verificable y protegido contra regresiones.
 
 M10 no reemplaza el tema administrable ni duplica componentes. Extiende el design system existente y fija estándares permanentes de tipografía, geometría, estados, reflow, navegación por teclado, foco, contraste, movimiento reducido y compatibilidad con modos de alto contraste.
 
 ## 2. Preflight real
 
-Antes de modificar código se comprobó que VariApp ya disponía de una base avanzada:
+Antes de modificar código se comprobó que Solqaryn ya disponía de una base avanzada:
 
 - `frontend/src/styles/_enterprise-design-system.scss` con tokens semánticos;
 - objetivos táctiles mínimos de 44px;
@@ -119,7 +119,7 @@ La primera versión de la nueva hoja M10 utilizó internamente `outline: none` p
 
 ## 7. Contraste WCAG AA y tema administrable
 
-VariApp mantiene `ColorContrastService.normalTextRatio = 4.5` para texto normal.
+Solqaryn mantiene `ColorContrastService.normalTextRatio = 4.5` para texto normal.
 
 El gate M10 verifica en runtime combinaciones semánticas como:
 

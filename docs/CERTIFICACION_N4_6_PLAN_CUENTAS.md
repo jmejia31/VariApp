@@ -2,7 +2,7 @@
 
 ## Alcance y autoridad
 
-Esta certificación documenta el cierre del plan de cuentas jerárquico de VariApp
+Esta certificación documenta el cierre del plan de cuentas jerárquico de Solqaryn
 en la rama `Desarrollo`. El exact-head funcional evaluado fue
 `9d649bbbb4279e41e8cf5b7f5f9b84c26cc362bf`.
 
@@ -24,7 +24,7 @@ legal especulativo ni modifica producción.
 | N4.6.G | LISTO_REAL | Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`: todos `SUCCESS`. |
 | N4.6.H | LISTO_REAL | Esta certificación append-only, con operación y rollback documentados; P0/P1 atribuibles al alcance: `0/0`. |
 
-`VariApp CI` quedó `SKIPPED` y no se usa como PASS. Fase 2 terminó con un
+`Solqaryn CI` quedó `SKIPPED` y no se usa como PASS. Fase 2 terminó con un
 fallo externo de `npm audit` por HTTP 503 de `registry.npmjs.org`; no fue una
 regresión causal del changeset y no se altera el código para ocultarlo.
 

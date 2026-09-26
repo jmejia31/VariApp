@@ -13,7 +13,7 @@
     "reason": "The connected CUA tabs were at /login after the Desarrollo redeploy and no authenticated UAT session was available to the operator."
   },
   "environment": {
-    "deployment": "https://variapp-desarrollo.vercel.app",
+    "deployment": "https://solqaryn-desarrollo.vercel.app",
     "scope": "Desarrollo/UAT",
     "tenant": "VariStorehn",
     "productionTouched": false,
@@ -24,7 +24,7 @@
     "status": "BLOCKED_AUTHENTICATED_SESSION_REQUIRED",
     "screenshots": [],
     "observedAtUtc": "2026-09-15T15:03:59Z",
-    "authSurface": "https://variapp-desarrollo.vercel.app/login"
+    "authSurface": "https://solqaryn-desarrollo.vercel.app/login"
   },
   "scenarioGroups": [
     {"name":"Inventory","status":"HUMAN_PASS_EXISTING","evidence":"vaep/evidence/reviews/N8.1.G_HUMAN_UAT_INVENTORY_PASS_20260915T064700Z.json"},

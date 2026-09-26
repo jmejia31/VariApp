@@ -73,6 +73,7 @@ export interface Producto {
   estaAgotado: boolean;
   estadoInventario: string;
   activo: boolean;
+  esDestacado?: boolean;
   categoriaId?: number;
   categoriaNombre?: string;
   colorId?: number;
@@ -131,6 +132,7 @@ export interface ProductoFormValue {
   modelo: string;
   descripcion?: string;
   tipoInventario: TipoInventario;
+  esDestacado?: boolean;
   cantidad: number;
   costo: number;
   precio: number;

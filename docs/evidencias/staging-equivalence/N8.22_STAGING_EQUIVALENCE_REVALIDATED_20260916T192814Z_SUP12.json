@@ -1,5 +1,5 @@
 {
-  "schema":"variapp-staging-equivalence-cert/v2",
+  "schema":"solqaryn-staging-equivalence-cert/v2",
   "parent":"N8.22",
   "task":"N8.22.H",
   "stage":"DOC_CERT",

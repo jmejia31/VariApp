@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://variapp.local/schemas/antig-review-result.schema.json",
-  "title": "VariApp AntiG automated review result",
+  "$id": "https://solqaryn.local/schemas/antig-review-result.schema.json",
+  "title": "Solqaryn AntiG automated review result",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion","projectId","repository","branch","issueNumber","taskId","parentId","dispatchId","taskAttempt","decision","readyForVaep","scopeAssessment","summary","filesChanged","validations","p0","p1","blockers"],
   "properties": {
     "schemaVersion": {"const": "1.0"},
-    "projectId": {"const": "VARIAPP"},
-    "repository": {"const": "jmejia31/VariApp"},
+    "projectId": {"const": "SOLQARYN"},
+    "repository": {"const": "solqaryn/Solqaryn"},
     "branch": {"const": "Desarrollo"},
     "issueNumber": {"type": "integer", "minimum": 1},
     "taskId": {"type": "string", "minLength": 1},

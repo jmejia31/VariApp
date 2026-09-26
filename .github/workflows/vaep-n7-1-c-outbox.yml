@@ -3,7 +3,7 @@ name: VAEP N7.1.C outbox exact-head gate
 on:
   push:
     branches:
-      - Desarrollo
+      - dev
     paths:
       - 'backend/src/Domain/Entities/MensajeOutbox.cs'
       - 'backend/src/Domain/Enums/EstadoMensajeOutbox.cs'

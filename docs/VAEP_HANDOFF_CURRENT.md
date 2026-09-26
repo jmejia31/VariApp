@@ -1,47 +1,42 @@
 # VAEP HANDOFF CURRENT
 
 Authority: `docs/VAEP_AUTHORITY.md` is the only operational master.
-This file is a live-source navigation guide, never a cached runtime authority.
 
-## Execution model
+This file is only a navigation aid for the live SOLQARYN state.
 
-Current architecture is `TASKS_ONLY`.
+## Current execution model
 
+- Repository: `solqaryn/Solqaryn`.
+- Branch: `dev`.
+- Runtime: `TASKS_ONLY`.
 - Ten scheduled automations are the complete autonomous executor/controller set.
 - Primaries are builder/closers.
 - Supervisors are verifier/recovery/secondary-builders.
-- Direct execution is the only runtime path.
-- No external worker pool, lane, manifest, dispatcher or offload mechanism belongs to current VAEP runtime.
+- Direct execution is the runtime path.
 
-## Resolve current state before acting
+## Resolve live state before acting
 
-1. Read fresh `Desarrollo` HEAD and pin repository reads to it.
-2. Read `docs/VAEP_AUTHORITY.md`; historical prompts/rules have no authority.
-3. Read `vaep/control/dispatch-admission.json`; global admission remains OPEN_ONLY.
-4. Read the Plan Maestro Sheet `19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY`: CONFIG/COLA plus task tables. CONTROL_TOWER and DASHBOARD are derived views, never independent writers.
-5. Reconcile the active task-scope lease. Respect a physically live owner with material progress; a terminated/stale owner does not retain ownership.
-6. Revalidate HEAD immediately before any publication; if it changed, rebuild the delta from fresh inputs and preserve concurrent work.
+1. Read `docs/VAEP_AUTHORITY.md`.
+2. Read fresh `dev` HEAD and pin repository reads to it.
+3. Read only the current plan-master surfaces required for the task.
+4. Reconcile the active task-scope lease.
+5. Validate current dependencies, tests, security and data invariants.
+6. Revalidate HEAD immediately before publication.
+
+No plan, phase, row, gate, sequence or protocol outside the current MAESTRO is allowed to constrain or reprioritize work.
 
 ## Direct execution
 
-For every active slot:
+`fresh state -> lease -> material work -> tests -> REVIEW_FIRST -> causal gates -> LISTO -> promotion`
 
-`fresh state -> lease -> shortest material gap -> tests -> REVIEW_FIRST -> causal gates -> LISTO_REAL -> promotion -> direct NEXT_SAFE prearm`
+A checkpoint is a trigger, not a reason to abandon material work in progress.
 
-A checkpoint is a trigger, never a reason to abandon material work in progress. If the previous physical invocation ended before closure, the next eligible automation resumes the same parent from existing evidence rather than restarting diagnosis.
+## Evidence
 
-## Evidence and telemetry
+`ACTIVE_REAL` requires identifiable execution + fresh exclusive lease + recent useful material activity.
 
-`ACTIVE_REAL` requires identifiable direct execution + fresh exclusive lease + recent useful/material activity.
+`LISTO` requires the MAESTRO evidence, REVIEW_FIRST, applicable tests/gates, P0/P1=0 and exact-head/equivalence evidence.
 
-An enabled automation, planner, workflow or lease without progress is not ACTIVE_REAL.
+## Safety
 
-`LISTO_REAL` requires full MAESTRO evidence, REVIEW_FIRST, DoD, applicable causal tests/gates, P0/P1=0 and exact-head/equivalence evidence.
-
-Execution, material-action, synchronization and supervision clocks are separate. Never convert a sync timestamp into proof of work.
-
-## Historical compatibility
-
-Previous J1–J6/Jules manifests, receipts, sessions, recoveries and commits remain historical evidence only. They do not reactivate any worker, credential, workflow, queue, lane or dispatch path. Late historical results are evidence-only and cannot enter runtime automatically.
-
-Work only on `Desarrollo`. Preserve `main`, Production, secrets and PR #2 OPEN+DRAFT.
+Work ordinarily on `dev`. Any change to `main`, PROD, productive data, secrets, domains, certificates or productive infrastructure requires explicit current owner authorization.

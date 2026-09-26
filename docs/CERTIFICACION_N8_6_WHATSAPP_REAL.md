@@ -6,7 +6,7 @@ Rama certificada: `Desarrollo`
 
 ## Alcance vigente
 
-N8.6 valida el flujo de salida a WhatsApp que realmente implementa VariApp en Desarrollo. La arquitectura vigente no implementa un envío server-side mediante Meta Cloud API, Twilio u otro proveedor con credenciales propias del backend. El comportamiento real es un handoff desde la factura hacia el endpoint público `https://wa.me/<telefono>?text=...`, después de validar permiso, teléfono y mensaje, y registrar únicamente la auditoría local del handoff.
+N8.6 valida el flujo de salida a WhatsApp que realmente implementa Solqaryn en Desarrollo. La arquitectura vigente no implementa un envío server-side mediante Meta Cloud API, Twilio u otro proveedor con credenciales propias del backend. El comportamiento real es un handoff desde la factura hacia el endpoint público `https://wa.me/<telefono>?text=...`, después de validar permiso, teléfono y mensaje, y registrar únicamente la auditoría local del handoff.
 
 La certificación no afirma `sent`, `delivered` ni `read` porque esos estados no son observables por la aplicación actual. Tampoco inventa una sesión, QR, token de proveedor, credencial ni envío automático inexistente. La automatización de revalidación no envió mensajes a destinatarios externos.
 

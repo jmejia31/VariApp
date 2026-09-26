@@ -2,8 +2,8 @@
 
 ## Estado
 
-- Proyecto: `VARIAPP`
-- Repositorio: `jmejia31/VariApp`
+- Proyecto: `SOLQARYN`
+- Repositorio: `jmejia31/Solqaryn`
 - Rama exclusiva: `Desarrollo`
 - Punto: `N2.3.A — Auditoría y preflight`
 - Dependencia: `N2.2.H — OrdenCompra` cerrada.

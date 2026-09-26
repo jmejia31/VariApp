@@ -31,10 +31,10 @@
     "M10 UI UX empresarial y accesibilidad": "SUCCESS@77b5df2d0c9b570e8608ea15239f3e4252a1975e"
   },
   "nonCausalStatuses": {
-    "Vercel variapp-desarrollo": "FAILURE_BUILD_RATE_LIMIT_EXTERNAL",
+    "Vercel solqaryn-desarrollo": "FAILURE_BUILD_RATE_LIMIT_EXTERNAL",
     "N2.3 RecepcionCompra unit frontend": "FAILURE_OUTSIDE_N5.1.E_SCOPE",
     "N4.4 CxC regression": "FAILURE_OUTSIDE_N5.1.E_SCOPE",
-    "VariApp CI": "SKIPPED_ON_CONTROL_PLANE_ONLY_EXACT_HEAD"
+    "Solqaryn CI": "SKIPPED_ON_CONTROL_PLANE_ONLY_EXACT_HEAD"
   },
   "p0": 0,
   "p1": 0,

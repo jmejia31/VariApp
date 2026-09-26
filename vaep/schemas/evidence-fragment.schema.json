@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://variapp.local/schemas/evidence-fragment.schema.json",
-  "title": "VariApp VAEP evidence fragment",
+  "$id": "https://solqaryn.local/schemas/evidence-fragment.schema.json",
+  "title": "Solqaryn VAEP evidence fragment",
   "type": "object",
   "additionalProperties": false,
   "required": ["taskId", "parentId", "worker", "dispatchId", "baseHead", "resultHead", "status", "evidence", "tests", "workflows", "artifacts", "p0", "p1", "timestamp", "blockers", "attempt", "fileScope", "notes"],

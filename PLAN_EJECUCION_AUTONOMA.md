@@ -1,11 +1,11 @@
 # PLAN DE EJECUCIÓN AUTÓNOMA — CONSUMIDOR DEL MAESTRO
 
-> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `jmejia31/VariApp`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
+> Fuente rectora funcional: Plan Maestro ERP V5. Fuente operativa: Google Sheets. Evidencia técnica: GitHub `solqaryn/Solqaryn`, rama `Desarrollo`. Reglas operativas: `docs/VAEP_AUTHORITY.md`.
 
 ## Identidad
 
-- PROJECT_ID: `VARIAPP`
-- Repositorio: `jmejia31/VariApp`
+- PROJECT_ID: `SOLQARYN`
+- Repositorio: `solqaryn/Solqaryn`
 - Rama: `Desarrollo`
 - PR #2: OPEN + DRAFT
 - AUTOMATION_AUTHORITY: `MASTER`
@@ -34,3 +34,19 @@ Este documento no crea reglas alternativas. Cuando cambie una regla de automatiz
 - CONFIG/COLA/PLAN_MAESTRO/BITACORA/EJECUCION_MANUAL = estado/control fresco.
 - GitHub HEAD/CI/código/pruebas = evidencia técnica.
 - Historial = evidencia, nunca autoridad.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Regla vinculante: este archivo solo puede interpretarse con contexto de SOLQARYN. Está prohibido consultar o usar skills, documentación, chats, repositorios, memorias o reglas fuera de SOLQARYN salvo autorización explícita del propietario para la fuente/alcance concreto o una entrada `ACTIVE` en la allowlist versionada. La disponibilidad técnica no equivale a permiso. Ante duda, aplicar fail-closed y permanecer dentro de `solqaryn/Solqaryn`. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+
+

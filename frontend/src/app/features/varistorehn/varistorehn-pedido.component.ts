@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
-import { ReciboPedidoPublico } from './varistorehn.models';
+import { EstadoRecursoPublico, ReciboPedidoPublico } from './varistorehn.models';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { VaristorehnPedidoService } from './varistorehn-pedido.service';
 import { IconoTiendaComponent } from './varistorehn.visual';
@@ -21,11 +22,14 @@ export class VaristorehnPedidoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly pedidos = inject(VaristorehnPedidoService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
   readonly carrito = inject(VaristorehnCarritoService);
   readonly recibo = signal<ReciboPedidoPublico | null>(null);
-  readonly cargando = signal(true);
+  readonly estado = signal<EstadoRecursoPublico>('loading');
+  readonly error = signal('');
+  readonly cargando = computed(() => this.estado() === 'loading');
   readonly totalUnidades = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
   readonly subtotal = computed<number | null>(() => this.carrito.listo() ? this.carrito.subtotal() : null);
 
@@ -36,10 +40,17 @@ export class VaristorehnPedidoComponent implements OnInit {
   } as const;
 
   ngOnInit(): void {
-    this.identidad.cargar().subscribe(() => {
-      const referencia = this.route.snapshot.paramMap.get('id') || '';
-      this.recibo.set(this.pedidos.obtener(referencia));
-      this.cargando.set(false);
+    this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        const referencia = this.route.snapshot.paramMap.get('id') || '';
+        const recibo = this.pedidos.obtener(referencia);
+        this.recibo.set(recibo);
+        this.estado.set(recibo ? 'success' : 'not-found');
+      },
+      error: () => {
+        this.error.set('No pudimos cargar la confirmación en este momento. Intenta nuevamente.');
+        this.estado.set('error');
+      }
     });
   }
 

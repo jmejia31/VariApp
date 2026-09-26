@@ -1,13 +1,318 @@
+## 2026-09-25 — Retiro DEV personal: auditoría destructiva previa
+
+- Vercel personal DEV `identidad-retirada-desarrollo`: ya eliminado previamente; el team corporativo sólo contiene `solqaryn-dev`.
+- Render: workspace corporativo visible = `SOLQARYN`; servicios visibles = `solqaryn-api-dev` y servicio reservado PROD. El DEV histórico `solqaryn-api-desarrollo` / `srv-d9jblq7avr4c73c74jng` no es accesible desde ese workspace y su hostname público ya no resuelve. No se ejecutó delete.
+- Aiven: workflow read-only `DEV - Inventario Aiven para retiro legacy`, run `36193976802`, SUCCESS. El token corporativo ve únicamente proyecto `solqaryn` y servicio `solqaryn-mysql`; `legacyProjectNames=[]`. Esto prueba aislamiento de la cuenta corporativa, pero NO prueba que PROD legacy no consuma el Aiven personal. Borrado Aiven personal queda bloqueado hasta auditoría de PROD legacy desde la cuenta antigua.
+- Cloudinary: el cloud nuevo `riyrzmob` ya sirve DEV; el cloud personal legacy no se elimina hasta confirmar cero consumidores de PROD legacy.
+- Cloudflare corporativo: cuenta `Solqaryn.platform@outlook.com's Account`; zona `solqaryn.com` pending; sólo dos TXT `_acme-challenge`; cero aliases DEV legacy en la zona corporativa.
+- GitHub: permiso efectivo observado `jmejia31=admin`, `morales35alex=write`. Se mantiene la decisión ratificada: `jmejia31` es Owner secundario/de recuperación, no acceso residual.
+- Producción no fue modificada.
+
+## 2026-09-25 — DEV: certificación funcional final PASS
+
+- Workflow canónico: `DEV - Certificación funcional final`.
+- Run: `36192919335` → SUCCESS.
+- `/login`: HTTP 200 y shell/SEO SOLQARYN.
+- `/dashboard`: HTTP 200 y shell/SEO SOLQARYN; la evidencia visual autenticada del propietario muestra el administrativo SOLQARYN operativo.
+- `/varistorehn` y `/varistorehn/productos`: HTTP 200.
+- API identidad: VariStorehn / “Eleva tu mundo digital”.
+- API categorías: 2 categorías.
+- API productos: 4 productos públicos migrados y stock reconciliado.
+- Imágenes: URLs canónicas `res.cloudinary.com/riyrzmob/.../solqaryn_dev/...` verificadas con HTTP 200.
+- Render: `/health/ready` HTTP 200.
+- Aiven DEV: escritura + lectura sobre tabla temporal dentro de `solqaryn_dev` → PASS, sin cambio persistente.
+- Runtime source gate: cero referencias a `identidad-retirada-desarrollo`, `identidad-retirada-mysql-identidad-retirada.c.aivencloud.com` y `varistorehn_desarrollo`.
+- Logs Render actuales: conexiones únicamente a `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`; búsqueda del host Aiven personal y del proyecto Vercel legacy devolvió cero logs.
+- PROD touched: FALSE.
+
+## 2026-09-25 — Cloudflare DEV/DNS cerrado como N/A runtime
+
+- Vercel DEV canónico `solqaryn-dev` fue leído por API y expone únicamente dominios administrados por Vercel: `solqaryn-dev.vercel.app`, `solqaryn-dev-solqaryn.vercel.app` y `solqaryn-dev-git-dev-solqaryn.vercel.app`.
+- Render DEV canónico expone únicamente `https://solqaryn-api-dev-fxx8.onrender.com`.
+- El repositorio no contiene una integración/configuración Cloudflare ni un dominio `solqaryn.com` activo para DEV.
+- No existe actualmente un CNAME/A/AAAA custom de DEV que deba transferirse para mantener operativa la plataforma.
+- Conclusión: Cloudflare no forma parte de la cadena crítica DEV actual; el punto Cloudflare DEV/DNS queda **N/A / CERRADO** para el cierre de DEV.
+- La titularidad de la cuenta Cloudflare y cualquier zona futura/productiva se auditarán por separado al preparar dominios propios/PROD; no se realizó ningún cambio DNS ni certificado.
+
+## 2026-09-25 — DEV: reconciliado stock administrativo vs storefront
+
+- Causa confirmada: el listado administrativo proyecta `ProductoVariante.Cantidad` como bridge de compatibilidad; el storefront y checkout usan `ExistenciaVariante.StockDisponible` como autoridad física.
+- Diagnóstico read-only run `36188235798`: 9 variantes legacy, una sola existencia física, 8 variantes legacy con stock positivo y 7 de ellas sin existencia; total bridge 57 vs stock físico 10. En productos activos/no eliminados, el desfase era 52 vs 10.
+- Antes de escribir se ejecutó backup cifrado real + restore drill del mismo artifact: run `36188392969` SUCCESS.
+- Reconciliación fail-closed run `36190745792`: único almacén operativo activo `UAT-ALM-001`; 6 filas `ExistenciaVariante` creadas para productos activos, sin sobrescribir la existencia ya correcta del UAT.
+- Postcheck transaccional: stock activo `ProductoVariante.Cantidad=52` y `ExistenciaVariante.StockFisico=52`; 0 variantes activas sin existencia; 0 diferencias.
+- Verificación API pública posterior: Cargador 26, Laptop 15, Funda para samsung 1, UAT Producto 001 10; todos con disponibilidad coherente.
+- Se dejaron fuera dos variantes de productos eliminados que suman 5 unidades legacy; no se reactivaron ni se convirtieron en stock público.
+- PROD no fue tocado.
+
+## 2026-09-25 — Cloudinary DEV: upload canónico validado e inventario legacy cuantificado
+
+- El upload real desde la aplicación DEV creó un asset en el cloud `riyrzmob` bajo `solqaryn_dev/inventoryapp/productos/empresas/1/`; la API pública devuelve la URL nueva.
+- Render DEV quedó `live` después de configurar `Cloudinary__CloudName=riyrzmob`, la key DEV y `Cloudinary__EnvironmentPrefix=solqaryn_dev`.
+- Inventario read-only run `36182095589` / artifact `cloudinary-dev-legacy-inventory-36182095589` detectó 13 filas lógicas aún dependientes del cloud legacy: 10 imágenes de producto, 1 documento de compra y 2 fotos de perfil.
+- No hubo escrituras en el inventario ni se tocó PROD.
+- Decisión: no eliminar todavía el Cloudinary personal. El siguiente subpaso es migrar esas 13 referencias y revalidar cero dependencias.
+
+## 2026-09-25 — Cloudinary DEV conectado a Render y redeploy validado
+
+- Captura de Render `solqaryn-api-dev` confirma las variables `Cloudinary__ApiKey`, `Cloudinary__ApiSecret`, `Cloudinary__CloudName=riyrzmob` y `Cloudinary__EnvironmentPrefix=solqaryn_dev`.
+- API Key y API Secret permanecen ocultos; la key destinada es `solqaryn_dev`.
+- Render lanzó el deploy manual `dep-darcsc0jo6nc73fffmtg`, que terminó `live` el 2026-09-25T19:41:55Z.
+- El health `/health/ready` del nuevo instance respondió HTTP 200 después del redeploy.
+- Falta únicamente el upload funcional de un activo DEV para demostrar que el PublicId/URL nuevo queda bajo el cloud `riyrzmob` y prefijo `solqaryn_dev/`.
+
+## 2026-09-25 — Cloudinary keys DEV/PROD creadas
+
+- Evidencia visual confirma tres API keys activas en el cloud `riyrzmob`: `Root`, `solqaryn_dev` y `solqaryn_prod`.
+- `Root` queda reservada para administración/recuperación.
+- `solqaryn_dev` queda destinada exclusivamente a Render DEV.
+- `solqaryn_prod` queda reservada para la futura fase PROD; no se conecta ni usa todavía.
+- Los API Secret permanecen ocultos y no se registraron en repositorio/chat.
+
+## 2026-09-25 — Cloudinary DEV: inventario de API keys
+
+- Captura de `Cloudinary -> Product environment settings -> API Keys` para cloud `riyrzmob` muestra una sola key activa llamada `Root`, creada el 2026-09-22.
+- No existe todavía una key dedicada llamada `solqaryn_dev`.
+- El valor de API Secret no fue revelado ni registrado.
+- Decisión: no reutilizar la key Root como credencial operativa DEV; crear una API key dedicada `solqaryn_dev`, mantener Root para administración/recuperación y luego configurar Render DEV con la key dedicada.
+- PROD no se toca.
+
+## 2026-09-25 — Cloudinary DEV ownership confirmado
+
+- Capturas del panel confirman perfil `Solqaryn Platform` con correo `solqaryn.platform@outlook.com`.
+- Existe un único Product Environment activo: cloud name `riyrzmob`, ID `7ab9e3e6de660a0b70eb4a5bacf331`.
+- La Media Library del nuevo cloud muestra solo assets de ejemplo; no se consideran migrados los medios históricos de VariStoreHN.
+- Próximo gate: revisar API Keys, certificar la key DEV y demostrar mediante upload que Render DEV escribe bajo `solqaryn_dev/`.
+- No borrar todavía credenciales/assets del Cloudinary legacy.
+
+## 2026-09-25 — Vercel DEV legacy eliminado de la cuenta personal
+
+- El propietario eliminó manualmente el proyecto `proyecto Vercel DEV legacy retirado` del workspace personal `workspace Vercel personal legacy`.
+- Evidencia visual posterior muestra que en ese workspace ya sólo permanece `varistorehn`.
+- `varistorehn` se mantiene congelado para la futura fase PROD.
+- Resultado: Vercel DEV nuevo `solqaryn-dev` continúa como único DEV canónico bajo SOLQARYN y la dependencia Vercel DEV de la cuenta personal queda retirada.
+
+## 2026-09-25 — Vercel legacy DEV: variables ambientales auditadas antes de eliminación
+
+- Captura de `proyecto Vercel DEV legacy retirado -> Environment Variables` confirma `No Environment Variables Added`.
+- El proyecto legacy DEV no contiene variables de entorno de proyecto que deban migrarse o conservarse.
+- Junto con la auditoría previa de dominios (solo `alias automático Vercel DEV retirado`), el proyecto `proyecto Vercel DEV legacy retirado` queda autorizado para eliminación manual desde la cuenta personal.
+- `varistorehn` PROD permanece fuera de alcance y no debe tocarse.
+
+## 2026-09-25 — Vercel legacy DEV: dominios auditados antes de eliminación
+
+- Captura del proyecto personal `proyecto Vercel DEV legacy retirado` confirma que la sección Domains contiene únicamente `alias automático Vercel DEV retirado`.
+- No se observan dominios personalizados adicionales en ese proyecto.
+- El dominio es el alias automático de Vercel del proyecto legacy y no necesita migración.
+- El proyecto aún NO se elimina hasta revisar Environment Variables.
+- `varistorehn` PROD permanece fuera de alcance.
+
+## 2026-09-25 — Vercel legacy personal inventariado antes del retiro DEV
+
+- Captura del propietario confirma que la cuenta/workspace Vercel personal `workspace Vercel personal legacy` mantiene dos proyectos: `proyecto Vercel DEV legacy retirado` y `varistorehn`.
+- Alcance de cierre DEV: auditar y retirar únicamente `proyecto Vercel DEV legacy retirado`.
+- `varistorehn` queda explícitamente fuera de alcance y congelado hasta la fase PROD.
+- No se ha eliminado ningún proyecto en este paso.
+
+## 2026-09-25 — Vercel DEV cerrado con ownership corporativo confirmado visualmente
+
+- Evidencia visual del dashboard `vercel.com/solqaryn` muestra el workspace/team activo `SOLQARYN` y la sesión `solqarynplatform-5337` asociada a `solqaryn.platform@outlook.com`.
+- Esto completa la comprobación de ownership que el conector Vercel no podía exponer por API.
+- El proyecto nuevo `solqaryn-dev` queda **CERRADO / PASS** en Vercel DEV.
+- Permanece pendiente únicamente retirar `proyecto Vercel DEV legacy retirado` desde la cuenta Vercel personal antigua, tras inspeccionar que no tenga dominios/variables que deban conservarse.
+- `varistorehn` de Producción no se toca en la fase DEV.
+
+## 2026-09-25 — Vercel DEV técnicamente certificado; cierre de ownership/legacy requiere panel
+
+- Team leído por el conector: `SOLQARYN` / `team_owJ2SudSPWiEzeiDthSVV063`.
+- Único proyecto visible: `solqaryn-dev` / `prj_1Anhx5mWyXEBX89lWC24Py6JXe7A`.
+- Dominio canónico: `solqaryn-dev.vercel.app`; deployments `READY` desde `solqaryn/Solqaryn`, rama `dev`.
+- Rutas `/`, `/login`, `/dashboard`, `/varistorehn` y `/varistorehn/productos` responden HTTP 200.
+- APIs de identidad, categorías y productos responden HTTP 200 con los datos migrados de VariStoreHN.
+- Vercel reporta cero runtime errors en las últimas 24 horas.
+- El conector no expone el email del owner del team ni tiene acceso al proyecto personal legacy `proyecto Vercel DEV legacy retirado`; el propietario debe confirmar el email del team y, al final del punto, eliminar el proyecto legacy desde la cuenta personal.
+- Se observan URLs Cloudinary históricas en el catálogo; se trasladan al punto Cloudinary y no se borran activos aún.
+
+## 2026-09-25 — Render DEV certificado bajo SOLQARYN
+
+- Workspace leído directamente por el conector Render: `SOLQARYN`, email `solqaryn.platform@outlook.com`.
+- Servicio canónico: `solqaryn-api-dev`, rama `dev`, repositorio `solqaryn/Solqaryn`, auto deploy condicionado a checks, Dockerfile `./backend/Dockerfile`.
+- URL canónica: `https://solqaryn-api-dev-fxx8.onrender.com`; health path `/health/ready`; maintenance OFF; servicio no suspendido.
+- Logs actuales confirman que el backend usa la base `solqaryn_dev` en `solqaryn-mysql-solqaryn.h.aivencloud.com`.
+- Logs actuales de `/health/ready` responden HTTP 200.
+- Punto Render DEV: **CERRADO**. La eliminación de cualquier Render DEV legacy personal requiere únicamente localizar ese recurso en la cuenta antigua y comprobar cero consumidores.
+
+## 2026-09-25 — Aiven DEV certificado bajo SOLQARYN
+
+- Run canónico: `36175275439` — `DEV - Certificación canónica Aiven` — SUCCESS.
+- Artifact: `aiven-dev-certification-36175275439`.
+- Aiven API confirmó el proyecto `solqaryn`, servicio `solqaryn-mysql`, estado `RUNNING` y que `solqaryn.platform@outlook.com` pertenece a la organización que contiene el proyecto.
+- MySQL real confirmó `DATABASE()=solqaryn_dev` y usuario efectivo `solqaryn_dev_user` sobre MySQL 8.4.8.
+- Inventario observado: 137 tablas base, 107 migraciones EF, 8 productos y 2 categorías.
+- No se imprimieron secretos ni se tocó Producción.
+- Punto Aiven DEV: **CERRADO**. La eliminación de Aiven legacy personal queda condicionada únicamente a comprobar que PROD legacy no lo consume.
+
+## 2026-09-25 — Certificación canónica Aiven DEV preparada
+
+- Se añade un gate repetible de solo lectura para certificar que el project `solqaryn` y el service `solqaryn-mysql` corresponden al endpoint DEV configurado.
+- El gate comprueba mediante Aiven API que `solqaryn.platform@outlook.com` pertenece a la cuenta que contiene el proyecto canónico, sin imprimir tokens ni contraseñas.
+- El gate comprueba mediante MySQL real que DEV opera sobre `solqaryn_dev` con el usuario efectivo `solqaryn_dev_user`, además de verificar esquema/migraciones y presencia de catálogo migrado.
+- No realiza escrituras de aplicación ni toca Producción.
+
+## 2026-09-25 — Ratificación de ownership GitHub y colaboradores canónicos
+
+**Decisión explícita del propietario; supersede la nota operativa anterior que proponía retirar a `jmejia31`.**
+
+- Repositorio canónico: `solqaryn/Solqaryn`, dentro de la organización `solqaryn`; no se regresa a un repositorio personal.
+- Identidad corporativa primaria para cuentas/proveedores de SOLQARYN: `solqaryn.platform@outlook.com`.
+- `jmejia31` permanece intencionalmente como **Owner secundario/de recuperación** de la organización. Su permiso efectivo `admin` sobre el repositorio es esperado y no constituye deuda de migración.
+- `morales35alex` permanece como colaborador externo con permiso `write`.
+- No remover, degradar ni tratar a `jmejia31` como acceso residual sin una nueva autorización explícita del propietario.
+- Esta decisión queda documentada en `PROJECT_CONTEXT.md`, `docs/ENTORNOS_DEV_PROD.md` y `docs/COLABORATIVO.md` para que cualquier conversación/agente nuevo recupere el criterio correcto desde el repositorio.
+
+## 2026-09-25 — Inicio controlado de migración DEV legacy de VariStoreHN
+
+- Se añade un workflow aislado que usa el environment `LEGACY_DEV_MIGRATION` para extraer únicamente `varistorehn_desarrollo` desde el Aiven legacy.
+- El backup se cifra antes de publicarse como artifact, incluye SHA-256, conteos por tabla, metadata y referencias externas, y se restaura en MySQL 8.4 descartable para verificar integridad.
+- El workflow no toca `defaultdb`, Producción, `solqaryn_dev`, `solqaryn_prod` ni recursos legacy de Vercel/Render.
+- No se versionan passwords ni passphrases; los valores viven únicamente en GitHub Environment secrets.
+
+## 2026-09-25 — Auditoría DEV: proxy Vercel, CI y endpoint Render canónico
+
+- Vercel DEV deja de apuntar al hostname inexistente `solqaryn-api-dev.onrender.com` y usa `solqaryn-api-dev-fxx8.onrender.com`.
+- La raíz `/` ya no reescribe bots al SEO de VariStoreHN; SOLQARYN conserva su identidad de plataforma y el cliente vive bajo `/varistorehn`.
+- Se corrigieron gates CI que todavía exigían `solqaryn-api-desarrollo` o el hostname Render anterior.
+- Runbooks operativos y auditoría M13 quedaron alineados al hostname DEV real.
+- `Database__ServerVersion` declarativo se alinea con MySQL 8.4.8 observado en Aiven DEV.
+
+## 2026-09-25 — Shell DEV desacoplado de la identidad de VariStoreHN
+
+- El storefront obtiene una frontera propia `VaristorehnIdentidadService`: su identidad comercial se carga desde la configuración pública y, ante indisponibilidad, degrada a `Tienda` sin presentar SOLQARYN como si fuera el cliente.
+- `/login` y demás rutas públicas de plataforma restablecen la identidad SOLQARYN y eliminan overrides visuales de empresa; una identidad de empresa solo se aplica al storefront o a una sesión autenticada con tenant verificado.
+- Se retiraron fallbacks comerciales hardcodeados de VariStoreHN en header/footers/checkout/SEO; los datos reales persistidos siguen teniendo prioridad.
+- Alcance deliberado: separación de contextos para el primer cliente sin migraciones ni cambios productivos. Antes de publicar un segundo storefront debe existir resolución pública tenant-addressed (dominio/slug -> Empresa) para identidad, tema y catálogo.
+
+- El shell global del frontend ahora identifica a `SOLQARYN` en `index.html` (title, description y Open Graph).
+- Se retiró el favicon global `assets/varistorehn-logo.png`; el activo de VariStoreHN permanece únicamente como activo de su cliente/storefront donde corresponda.
+- La identidad fallback de `EmpresaIdentidadService` ahora es SOLQARYN y ya no cae a VariStoreHN cuando la configuración pública no está disponible.
+- La ruta raíz `/` deja de abrir directamente el storefront de VariStoreHN y redirige a `/login`; el cliente VariStoreHN continúa disponible explícitamente bajo `/varistorehn`.
+- Se actualizó la validación de Fase 11 para exigir que el shell global sea SOLQARYN sin alterar las pruebas SEO específicas del cliente VariStoreHN.
+- Alcance: frontend DEV. No se modificó `main`, Producción, datos, secretos, dominios ni infraestructura productiva.
+- MAPA_ARQUITECTURA: separación de identidad de plataforma vs. cliente en el shell global y fallback frontend; las rutas y SEO específicos de VariStoreHN se preservan como funcionalidad de cliente.
+
+## 2026-09-23 — Configuración externa SOLQARYN generalizada
+
+- La configuración operativa de GitHub Actions dejó de usar nombres ligados a una fase histórica.
+- Environment canónico: `Desarrollo`.
+- Variables canónicas: `SOLQARYN_DESARROLLO_BACKUP_SCHEDULE_ENABLED`, `SOLQARYN_DESARROLLO_DB_HOST`, `SOLQARYN_DESARROLLO_DB_PORT`, `SOLQARYN_DESARROLLO_DB_NAME`, `SOLQARYN_DESARROLLO_DB_USER`.
+- Secrets canónicos: `SOLQARYN_DESARROLLO_DB_PASSWORD`, `SOLQARYN_DESARROLLO_BACKUP_PASSPHRASE`, `SOLQARYN_AIVEN_TOKEN`, `SOLQARYN_DESARROLLO_DB_CONNECTION`.
+- Los scripts y workflows activos de backup/restore se renombraron por propósito; la documentación de la fase histórica quedó marcada como evidencia histórica.
+- Se eliminaron dependencias operativas restantes a `jmejia31/Solqaryn` en workflows activos.
+- Los valores secretos no fueron leídos ni copiados; la migración de valores debe completarse desde GitHub Settings/Aiven y validarse antes de retirar los nombres antiguos.
+- MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/gobierno de configuración operativa, sin cambio de dominio ni persistencia de producto.
+
+## 2026-09-23 — Identidad canónica SOLQARYN consolidada
+
+- Repositorio canónico: `solqaryn/Solqaryn`.
+- Identidad de proyecto: `PROJECT_ID=SOLQARYN`.
+- Se normalizaron rutas, namespaces, scripts, documentación, guards y referencias operativas a SOLQARYN.
+- La rama canónica continúa siendo `Desarrollo`.
+- La migración no reescribe el historial Git; el árbol vigente queda gobernado únicamente por SOLQARYN.
+- MAPA_ARQUITECTURA: identidad/namespaces actualizados sin cambiar las fronteras funcionales del dominio.
+
+## 2026-09-23 — Modelo definitivo: una skill local + nueve referencias originales
+
+- SOLQARYN mantiene exactamente una skill local: `.agents/skills/solqaryn-project-governance/SKILL.md`.
+- Las nueve capacidades adicionales no se copian ni instalan como skills locales; quedan registradas como referencias externas autorizadas a sus fuentes originales.
+- Registro canónico: `docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md`.
+- Allowlist canónica: `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md`.
+- Se verificó la existencia de los ocho repositorios externos y sus pins fijados; las rutas oficiales de especificación/`SKILL.md` quedaron registradas.
+- La referencia oficial de autoría integrada se resuelve directamente en ChatGPT/OpenAI cuando la tarea de skills la requiere.
+- Queda prohibido sustituir una fuente original por una copia, fork, mirror o reutilización alojada dentro de otro proyecto.
+- Se retiraron las nueve copias locales creadas durante la iteración previa; el gate ahora exige `LOCAL_SKILL_COUNT=1`.
+- Los 18 puntos operativos declaran el registro externo y la única skill local.
+- `scripts/verify-project-scope.mjs` valida una sola skill local, nueve fuentes originales autorizadas y sus pins/resoluciones.
+- Consultar una referencia externa no autoriza instalar dependencias, ejecutar scripts/binarios ni modificar arquitectura, seguridad o Producción.
+- MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno de skills y fuentes; no modifica dominio, persistencia, tenancy ni deployment.
+
+## 2026-09-23 — Namespace exclusivo de skills SOLQARYN
+
+- La única skill de gobierno activa del proyecto queda identificada como `.agents/skills/solqaryn-project-governance/SKILL.md`.
+- Convención obligatoria: directorio y frontmatter de toda skill deben comenzar por `solqaryn-`; el nombre visible debe comenzar por `SOLQARYN`.
+- Se eliminó la ruta anterior de la skill y no se conserva alias.
+- Los 18 archivos operativos de gobierno apuntan exclusivamente a la skill SOLQARYN.
+- `scripts/verify-project-scope.mjs` rechaza skills sin namespace SOLQARYN, identidades de proyecto no canónicas, repositorios no autorizados y URIs externas de skills.
+- `docs/PROJECT_SCOPE_LOCK.md` y `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` quedaron vinculados a SOLQARYN.
+- Auditoría de referencias de proyecto ajenas en el repositorio: sin coincidencias detectadas para los identificadores previamente contaminantes ni para URIs externas de skills.
+- Paquete de la skill SOLQARYN validado correctamente.
+
+`PROJECT_SCOPE_LOCK=STRICT`  
+`SKILL_NAMESPACE=solqaryn-`
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno y aislamiento de contexto; no modifica dominio, datos, tenancy ni deployment de la aplicación.
+
+## 2026-09-23 — Blindaje estricto de aislamiento de proyecto y skill propia de Solqaryn
+
+**Objetivo:** impedir que chats, agentes, automatizaciones o scripts de Solqaryn consulten o utilicen skills, documentación, repositorios, chats, memorias o gobierno de otros proyectos sin autorización explícita del propietario.
+
+- Se creó la política canónica `docs/PROJECT_SCOPE_LOCK.md`.
+- Se creó `docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md` con estado inicial sin excepciones activas.
+- Se creó la skill propia `.agents/skills/solqaryn-project-governance/SKILL.md`, exclusiva de `solqaryn/Solqaryn`.
+- Se agregó `scripts/verify-project-scope.mjs` como gate fail-closed.
+- Se agregó `.github/workflows/project-scope-lock.yml` para validar el aislamiento en push/PR.
+- Los 18 archivos operativos solicitados declaran `PROJECT_SCOPE_LOCK=STRICT` y `EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT`.
+- `.githooks/pre-commit` ejecuta el scope validator y bloquea el commit si falla.
+- `.githooks/post-commit` bloquea el auto-push cuando el scope validator falla.
+- Se verificó mediante lectura remota que los 18 archivos, la política, la allowlist y la skill contienen el lock y no contienen referencias conocidas al gobierno FUENTE_EXTERNA_RETIRADA.
+- Un permiso externo persistente solo existe si queda versionado como `ACTIVE` en la allowlist; en caso contrario, el default es DENY.
+
+`PROJECT_ID=SOLQARYN`  
+`REPOSITORY=solqaryn/Solqaryn`  
+`PROJECT_SCOPE_LOCK=STRICT`
+
+- El validador fue endurecido para rechazar cualquier `PROJECT_ID` distinto de `SOLQARYN`, cualquier `REPOSITORY` distinto de `solqaryn/Solqaryn`, URIs `skills://` en gobierno del proyecto y referencias GitHub a repositorios ajenos en la superficie canónica.
+- La política declara explícitamente que cada chat/sesión nueva nace con el scope lock activo y no debe descubrir skills específicas de otros proyectos.
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de gobierno, aislamiento de contexto y controles de repositorio; no modifica arquitectura funcional, datos, tenancy ni deployment de la aplicación.
+
+## 2026-09-23 — Migración operativa GitHub a organización solqaryn
+
+**Objetivo:** cerrar la dependencia operativa del repositorio respecto a la cuenta personal `jmejia31`.
+
+- Propietario canónico del repositorio: `solqaryn/Solqaryn`.
+- Rama de trabajo: `Desarrollo`.
+- Se actualizaron gates, hooks, scripts de sesión, documentación canónica, autoridad VAEP y runbooks activos para usar `solqaryn/Solqaryn`.
+- `.github/CODEOWNERS` dejó de exigir a `@jmejia31` como aprobador obligatorio.
+- La evidencia histórica conserva referencias antiguas cuando corresponden a hechos pasados; no constituye autoridad operativa.
+- La instalación GitHub de la organización `solqaryn` existe para este repositorio.
+- La cuenta autenticada actual `jmejia31` todavía conserva permiso `admin`; esto es acceso personal residual y debe retirarse desde la configuración de la organización cuando exista al menos otro owner/admin organizacional confirmado.
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de ownership/gobernanza GitHub, sin modificación de arquitectura de aplicación.
+
 ## 2026-09-15 — Cierre visual SMTP — materialización de capturas
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
 
-Se materializaron como PNG las pantallas reales de Render (servicio Live, Environment con secretos ocultos, arranque y logs del envío) y VariApp (facturación, FAC-000003, historial y evidencia persistente posterior al único envío). Se incorporaron la captura de recepción, el PDF A4 y la captura final del inventario de la carpeta en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`. No hubo cambios de código, nuevas ventas, nuevos correos, cambios de variables, Producción ni WhatsApp. La única reapertura diagnóstica permitida mostró un fallo transitorio y quedó descrita sin fabricar un PASS.
-# CHANGELOG_AI — VariApp
+Se materializaron como PNG las pantallas reales de Render (servicio Live, Environment con secretos ocultos, arranque y logs del envío) y Solqaryn (facturación, FAC-000003, historial y evidencia persistente posterior al único envío). Se incorporaron la captura de recepción, el PDF A4 y la captura final del inventario de la carpeta en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`. No hubo cambios de código, nuevas ventas, nuevos correos, cambios de variables, Producción ni WhatsApp. La única reapertura diagnóstica permitida mostró un fallo transitorio y quedó descrita sin fabricar un PASS.
+# CHANGELOG_AI — Solqaryn
 
 Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Chat B (ChatGPT Business) y futuros agentes autorizados.
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
+
+
+## 2026-09-24 — Cierre de configuración Aiven/GitHub canónica DEV/PROD
+
+**Responsable:** ChatGPT/VAEP con autorización expresa del propietario.
+
+- Aiven quedó normalizado al proyecto `solqaryn`, servicio MySQL Free único `solqaryn-mysql`, bases `solqaryn_dev` y `solqaryn_prod`.
+- Los usuarios `solqaryn_dev_user` y `solqaryn_prod_user` fueron limitados exclusivamente a su base; las pruebas cruzadas devolvieron Access denied en el entorno opuesto.
+- GitHub recibió los Environments canónicos `Desarrollo` y `Produccion` con variables/secrets separados y tokens Aiven independientes.
+- La prueba `N8.8.G - Aiven DEV Environment Token Scope Proof` pasó en el run `35959515163`.
+- El primer backup real detectó un defecto legítimo del script al consultar `__EFMigrationsHistory` sobre una base nueva sin esquema. Se corrigieron backup/restore para soportar una base canónica vacía sin degradar integridad: tabla de migraciones opcional y archivo de conteos vacío permitido solo cuando `baseTableCount=0`.
+- El run `35959731072` terminó con provider proof, backup cifrado real y restore same-artifact descartable en SUCCESS; artifact `solqaryn-backup-desarrollo-35959731072` generado.
+- Se actualizaron `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md`, `ARCHITECTURE_CHANGELOG.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md` para reflejar la topología real.
+- No se desplegó Produccion, no se modificó `main`, no se escribieron datos productivos y no se expusieron secretos.
 
 ## 2026-09-15 — Reconciliación de cola N8.5/N8.6
 
@@ -105,7 +410,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Drive compartido:** se reconciliaron CONFIG, DASHBOARD, COLA, PLAN_MAESTRO, TAREAS_PROGRAMADAS, EJECUCION_MANUAL y LEYENDA. El estado vigente es `CURRENT_PARENT=N4.11.H`, `FUNCTIONAL_HEAD=b30b949e`, `HEAD=5ed9b3d6` como descendiente de control-plane, `dispatch-admission=FROZEN`, `N4.11.B–G=LISTO_REAL` con evidencia, y `N4.11.H=VALIDANDO` por REVIEW_FIRST/QA_TAKEOVER pendiente. No se despachó ningún Jules manual ni se fabricó backlog.
 
-**Documento rector compartido:** se añadió un bloque de vigencia al inicio de `Plan Maestro ERP V5 — VariApp — FUENTE RECTORA VAEP`, con chip nativo de fecha y precedencia explícita del MAESTRO versionado sobre contenido histórico.
+**Documento rector compartido:** se añadió un bloque de vigencia al inicio de `Plan Maestro ERP V5 — Solqaryn — FUENTE RECTORA VAEP`, con chip nativo de fecha y precedencia explícita del MAESTRO versionado sobre contenido histórico.
 
 **Verificación:** readback de todas las celdas objetivo, readback nativo del documento (incluido `dateElement` y estilos), `git diff --check`, rama default GitHub `Desarrollo`, `main` sin cambios. Pendiente externo: no se concedió una cuenta GitHub/Drive adicional porque no existe un email/login verificable de Chat B; el rol operativo quedó registrado sin inventar credenciales.
 
@@ -154,7 +459,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 ## 2026-08-24 — Codex — contexto ChatGPT/VAEP
 
-- Se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` como referencia histórica/operativa de VariApp.
+- Se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` como referencia histórica/operativa de Solqaryn.
 - Se enlazó desde `PROJECT_INDEX.md` y se registró en `ARCHITECTURE_CHANGELOG.md`.
 - Se documentaron VAEP, validación causal, cadena compras-recepciones-reservas-facturación, no duplicación y consulta selectiva sin presentarlos como estado no verificado.
 - Cambio exclusivamente documental; no se ejecutó ni modificó código de producción.
@@ -163,7 +468,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 - Se consolidó `PROJECT_INDEX.md` como mapa rápido con índice de decisión, puntos de entrada y comandos verificados.
 - Se creó `ARCHITECTURE_CHANGELOG.md` y se enlazó la convención de mantenimiento desde el contexto y la arquitectura canónicos.
-- Se alineó la declaración `PROJECT_ID: VARIAPP` con el guard obligatorio de inicio de sesión.
+- Se alineó la declaración `PROJECT_ID: SOLQARYN` con el guard obligatorio de inicio de sesión.
 - Cambio exclusivamente documental; no se ejecutó ni modificó código de producción.
 
 ## 2026-08-23 — ERP-N3.1 Cotizaciones — CIERRE FORMAL
@@ -396,7 +701,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive + Programación.
 
-**Objetivo/alcance:** corregir la selección que permitía dejar `N0.5` parcialmente abierto mientras el runner avanzaba `N0.6`. Se alinea `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG` y el prompt de `VariApp VAEP v2 Runner` para priorizar el punto padre más antiguo ya iniciado y terminar todos sus hijos/subhijos antes de abrir un hermano.
+**Objetivo/alcance:** corregir la selección que permitía dejar `N0.5` parcialmente abierto mientras el runner avanzaba `N0.6`. Se alinea `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG` y el prompt de `Solqaryn VAEP v2 Runner` para priorizar el punto padre más antiguo ya iniciado y terminar todos sus hijos/subhijos antes de abrir un hermano.
 
 **Cambios de gobierno:** `MAX_MICROTAREAS_POR_CORRIDA=SIN_TOPE_FIJO`; `REGLA_BLOQUEO=NO_SALTAR_ARBOL_FOCO`; política `RUNNER_SELECTION_POLICY=FINISH_FIRST`; locks propios stale deben reconciliarse/recuperarse; padres deben reflejar estado de hijos; un bloqueo real conserva el foco y detiene la corrida en vez de saltarlo. `RUNNER_CURRENT_RECOVERY_TARGET=N0.5` congela nuevas aperturas de N0.6 hasta cerrar N0.5, preservando intacto todo lo ya certificado en N0.6.
 
@@ -616,7 +921,7 @@ Estados estrictos, selección por prioridad/dependencias, lock lógico y bloqueo
 
 ## 2026-08-11 — Gobierno colaborativo v2
 
-Gate `PROJECT_ID=VARIAPP`, aislamiento entre proyectos, lectura mínima, evidencia obligatoria y hardening de publicación.
+Gate `PROJECT_ID=SOLQARYN`, aislamiento entre proyectos, lectura mínima, evidencia obligatoria y hardening de publicación.
 
 ## 2026-08-11 — Gobierno colaborativo y memoria canónica
 
@@ -743,7 +1048,7 @@ Alcance: auditoría de los 43 workflows existentes, sin eliminar workflows ni ev
 
 Playwright: se agregó `actions/cache@v4` para `~/.cache/ms-playwright`, versionado mediante `hashFiles('frontend/package-lock.json')`, a los 12 workflows que ejecutan `npx playwright install --with-deps chromium`. Se conserva `--with-deps` para las dependencias Linux; no se afirma ahorro cuantitativo sin medición histórica comparable. No se implementó build-once entre jobs porque los jobs de base e integración tienen restores, bases MySQL y artefactos separados; hacerlo en este cambio ampliaría el riesgo.
 
-Vercel: `frontend/vercel.json` usa un `ignoreCommand` local fail-open que solo omite build cuando la comparación Git confirma que todos los archivos son documentación, gobierno, `.github` o `vaep`; cualquier cambio frontend, backend o no clasificado fuerza build. No se modificó el dashboard ni la separación externa de ramas/proyectos (`variapp-desarrollo` para `Desarrollo`, `varistorehn` para producción); esa configuración queda pendiente de verificación/ajuste externo seguro.
+Vercel: `frontend/vercel.json` usa un `ignoreCommand` local fail-open que solo omite build cuando la comparación Git confirma que todos los archivos son documentación, gobierno, `.github` o `vaep`; cualquier cambio frontend, backend o no clasificado fuerza build. No se modificó el dashboard ni la separación externa de ramas/proyectos (`solqaryn-desarrollo` para `Desarrollo`, `varistorehn` para producción); esa configuración queda pendiente de verificación/ajuste externo seguro.
 
 Validaciones realizadas: `git diff --check` sin errores; inspección de diff/stat/status; comprobación de que los workflows históricos conservan `workflow_dispatch`; comprobación estática de que los filtros N0.2-N0.5 ya no contienen los comodines genéricos; comprobación de los 12 caches Playwright y de la conservación de sus instalaciones; sintaxis JavaScript del script Vercel y pruebas de comportamiento fail-open/path-based con SHA document-only y SHA con cambios de código. No se ejecutaron builds o suites completas porque el changeset solo modifica workflows/configuración de CI y Vercel.
 
@@ -751,29 +1056,29 @@ Riesgos y pendientes: GitHub Actions debe confirmar en el siguiente run que los 
 
 ## 2026-09-03 15:07:51 -06:00 - RCA P0 Vercel y aislamiento Desarrollo/Producción
 
-Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cb227f11ea65f42bef13`. La consulta read-only del equipo `VariApp` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/VariApp`: `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
+Responsable: Codex local autorizado en `Desarrollo`; HEAD inicial de esta auditoría `2658d5b0139e85957463cb227f11ea65f42bef13`. La consulta read-only del equipo `Solqaryn` confirmó dos proyectos Vercel vinculados al mismo repositorio GitHub `jmejia31/Solqaryn`: `solqaryn-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`).
 
 RCA confirmado: `varistorehn` acepta pushes de `Desarrollo` mediante Git Integration y crea deployments de fuente `git` con `githubCommitRef=Desarrollo`, `target=null` y alias `varistorehn-git-desarrollo-vari-app.vercel.app`. Ocurrió para `eaacb832dfc78723ad9cb7d119d88a32c62a0047` y nuevamente para `2658d5b0139e85957463cb227f11ea65f42bef13`. Por tanto, fijar solamente `Production Branch=main` no basta: debe deshabilitarse la creación de Preview Deployments de `Desarrollo` en el proyecto `varistorehn` mediante la configuración de Git Integration/Preview Branches, conservando producción en `main`. El conector read-only no expone ni permite editar esos campos; no se realizó cambio externo.
 
-Estado observado: para `2658d5b...`, `Vercel - variapp-desarrollo` quedó `FAILURE` con `Deployment rate limited - retry in 24 hours`; `Vercel - varistorehn` quedó `SUCCESS`. `variapp-desarrollo` sí generó su deployment para `Desarrollo` (`target=production`, alias `variapp-desarrollo-git-desarrollo-vari-app.vercel.app`), consistente con el diseño documentado. La duplicación real de builds/deployments quedó probada en ambos proyectos.
+Estado observado: para `2658d5b...`, `Vercel - solqaryn-desarrollo` quedó `FAILURE` con `Deployment rate limited - retry in 24 hours`; `Vercel - varistorehn` quedó `SUCCESS`. `solqaryn-desarrollo` sí generó su deployment para `Desarrollo` (`target=production`, alias `solqaryn-desarrollo-git-desarrollo-vari-app.vercel.app`), consistente con el diseño documentado. La duplicación real de builds/deployments quedó probada en ambos proyectos.
 
 La configuración local `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs` no se modificó en esta toma: JSON y JavaScript válidos; pruebas del ignore: solo documentación=`exit 0`, frontend/runtime=`exit 1`, diff no clasificable=`exit 1`. El mecanismo es fail-open y basado en paths, pero no puede impedir que un segundo proyecto Git cree el deployment antes de evaluar el ignore; además, un deployment cancelado puede seguir consumiendo cuota.
 
-Ajuste externo pendiente, seguro y reversible: en `varistorehn`, confirmar `Production Branch=main`, desactivar Preview Deployments para la rama `Desarrollo` (o excluir explícitamente `Desarrollo` en la regla de ramas de preview), conservar root `frontend` y no cambiar dominio, secrets ni producción. En `variapp-desarrollo`, confirmar `Production Branch=Desarrollo`, root `frontend` y que sus previews/runtime apunten únicamente a Desarrollo. La aplicación debe registrar estado antes/después y no usar deploy manual. No se relanzaron workflows, no se cambió `main`, no se tocó N0.2-N0.5, y no se modificó el commit concurrente N4.6.B.
+Ajuste externo pendiente, seguro y reversible: en `varistorehn`, confirmar `Production Branch=main`, desactivar Preview Deployments para la rama `Desarrollo` (o excluir explícitamente `Desarrollo` en la regla de ramas de preview), conservar root `frontend` y no cambiar dominio, secrets ni producción. En `solqaryn-desarrollo`, confirmar `Production Branch=Desarrollo`, root `frontend` y que sus previews/runtime apunten únicamente a Desarrollo. La aplicación debe registrar estado antes/después y no usar deploy manual. No se relanzaron workflows, no se cambió `main`, no se tocó N0.2-N0.5, y no se modificó el commit concurrente N4.6.B.
 
 ## 2026-09-03 15:33:53 -06:00 - Certificación read-only del aislamiento Vercel
 
-Responsable: Codex local autorizado; HEAD inicial `e5d48ef2f5dfdfabe0866f957beef4b744f9ac33`, repositorio `jmejia31/VariApp`, rama `Desarrollo`. El preflight confirmó árbol limpio, `HEAD=origin/Desarrollo` y no hubo fast-forward adicional.
+Responsable: Codex local autorizado; HEAD inicial `e5d48ef2f5dfdfabe0866f957beef4b744f9ac33`, repositorio `jmejia31/Solqaryn`, rama `Desarrollo`. El preflight confirmó árbol limpio, `HEAD=origin/Desarrollo` y no hubo fast-forward adicional.
 
-Ajuste externo manual reportado y verificado por el operador: `varistorehn` queda con Production Branch/tracking `main` y Preview/Avance `Disabled`; `variapp-desarrollo` queda con Production Branch/tracking `Desarrollo` y Preview/Avance `Disabled`. Codex no modificó Vercel, no hizo deployment, rollback, cambio de Git Integration, dominio ni secreto.
+Ajuste externo manual reportado y verificado por el operador: `varistorehn` queda con Production Branch/tracking `main` y Preview/Avance `Disabled`; `solqaryn-desarrollo` queda con Production Branch/tracking `Desarrollo` y Preview/Avance `Disabled`. Codex no modificó Vercel, no hizo deployment, rollback, cambio de Git Integration, dominio ni secreto.
 
-Evidencia read-only: el equipo `VariApp` mantiene exactamente los proyectos `variapp-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`), ambos vinculados a `jmejia31/VariApp`. Desde el commit documental anterior `e5d48ef2` no aparecen deployments nuevos en ninguno. El último evento de `varistorehn` es el Preview de `Desarrollo` cancelado por `Ignored Build Step`; no existe evidencia posterior que contradiga el ajuste manual.
+Evidencia read-only: el equipo `Solqaryn` mantiene exactamente los proyectos `solqaryn-desarrollo` (`prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu`) y `varistorehn` (`prj_djMCand2yYeY3AvaUWsjwHDDJDkM`), ambos vinculados a `jmejia31/Solqaryn`. Desde el commit documental anterior `e5d48ef2` no aparecen deployments nuevos en ninguno. El último evento de `varistorehn` es el Preview de `Desarrollo` cancelado por `Ignored Build Step`; no existe evidencia posterior que contradiga el ajuste manual.
 
-RCA previo: antes del ajuste, ambos proyectos reaccionaban al mismo repositorio y `varistorehn` creaba Preview Deployments desde `Desarrollo`; el ignore podía cancelar el build, pero el deployment ya consumía cuota. El estado manual actual asigna `Desarrollo` únicamente a `variapp-desarrollo` y `main` únicamente a `varistorehn`, desactivando Preview tracking automático en ambos proyectos.
+RCA previo: antes del ajuste, ambos proyectos reaccionaban al mismo repositorio y `varistorehn` creaba Preview Deployments desde `Desarrollo`; el ignore podía cancelar el build, pero el deployment ya consumía cuota. El estado manual actual asigna `Desarrollo` únicamente a `solqaryn-desarrollo` y `main` únicamente a `varistorehn`, desactivando Preview tracking automático en ambos proyectos.
 
-Limitación de certificación: el conector read-only no expone los campos Production Branch/Preview Tracking y todavía no existe un push legítimo posterior al cambio manual. Por ello, la configuración final se registra como verificada manualmente por el operador y respaldada por ausencia de deployments posteriores, pero la prueba natural definitiva queda pendiente del próximo push legítimo de `Desarrollo`. El resultado esperado es deployment solo en `variapp-desarrollo` cuando corresponda y ningún Preview en `varistorehn`.
+Limitación de certificación: el conector read-only no expone los campos Production Branch/Preview Tracking y todavía no existe un push legítimo posterior al cambio manual. Por ello, la configuración final se registra como verificada manualmente por el operador y respaldada por ausencia de deployments posteriores, pero la prueba natural definitiva queda pendiente del próximo push legítimo de `Desarrollo`. El resultado esperado es deployment solo en `solqaryn-desarrollo` cuando corresponda y ningún Preview en `varistorehn`.
 
-El estado `build-rate-limit` queda documentado como limitación previa de `variapp-desarrollo`; no se relanzó ningún workflow/deployment para intentar evadir la cuota. No se modificaron `main`, PR #2, Producción, secretos, BD, dominios, N0.2-N0.5, `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
+El estado `build-rate-limit` queda documentado como limitación previa de `solqaryn-desarrollo`; no se relanzó ningún workflow/deployment para intentar evadir la cuota. No se modificaron `main`, PR #2, Producción, secretos, BD, dominios, N0.2-N0.5, `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
 
 ## 2026-09-03 16:10:00 - N4.6.C persistencia de plan de cuentas
 
@@ -797,7 +1102,7 @@ Validación real: `npm.cmd run lint` PASS; `npm.cmd run build -- --configuration
 
 Responsable: Codex local autorizado en `Desarrollo`; cierre documental append-only sobre el exact-head funcional `9d649bbbb4279e41e8cf5b7f5f9b84c26cc362bf`.
 
-N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `VariApp CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
+N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `Solqaryn CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
 
 La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.npmjs.org` durante `npm audit`; se clasifica `EXTERNAL_INFRA`, sin evidencia de regresión causal y sin rerun artificial. No se modificaron producción, secretos, dominios, Vercel ni workflows históricos N0.2-N0.5. El siguiente parent dependency-valid es `N4.7.A`; este changeset no inicia su scope.
 
@@ -805,7 +1110,7 @@ La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.np
 
 Responsable: Codex local autorizado en `Desarrollo`; changeset preparado sobre el cierre N4.6 `d6ca66fd790eb3446d028f84f57bd03ccc5647bf`.
 
-Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
+Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad Solqaryn, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
 
 Validación real: JSON schema parseable, `node --check` en ambos scripts y `node scripts/vaep/dispatch-preflight-self-test.mjs` con 9/9 casos PASS. No se modifican manifests históricos, código de producto, Producción ni `main`.
 
@@ -827,9 +1132,9 @@ Se añadió el workflow liviano `.github/workflows/vaep-engine-ci.yml`, limitado
 
 Responsable: ChatGPT remoto autorizado en `Desarrollo`.
 
-Se materializó la integración repo-side de Antigravity como reviewer/fixer automático entre Jules y VAEP. Componentes: Custom Agent `.agents/agents/variapp-reviewer/agent.md`, contrato `vaep/schemas/antig-review-result.schema.json`, worker `scripts/antig/antig-review-worker.ps1`, instalador `scripts/antig/install-antig-automation.ps1`, self-test `scripts/antig/antig-self-test.ps1` y runbook `docs/ANTIGRAVITY_AUTOMATION.md`.
+Se materializó la integración repo-side de Antigravity como reviewer/fixer automático entre Jules y VAEP. Componentes: Custom Agent `.agents/agents/solqaryn-reviewer/agent.md`, contrato `vaep/schemas/antig-review-result.schema.json`, worker `scripts/antig/antig-review-worker.ps1`, instalador `scripts/antig/install-antig-automation.ps1`, self-test `scripts/antig/antig-self-test.ps1` y runbook `docs/ANTIGRAVITY_AUTOMATION.md`.
 
-El worker consume únicamente Issues terminales `[VAEP-JULES*] ... result`, resuelve el workflow causal, descarga su artifact, valida task/dispatch/attempt/scope, invoca Antigravity CLI headless con el agente `variapp-reviewer`, permite correcciones menores/medias dentro del mismo scope y produce exclusivamente `READY_FOR_VAEP`, `RETURN_TO_JULES`, `BLOCKED_QA_TAKEOVER` o `NO_ACTION`. `LISTO_REAL` no existe en el schema de decisión AntiG.
+El worker consume únicamente Issues terminales `[VAEP-JULES*] ... result`, resuelve el workflow causal, descarga su artifact, valida task/dispatch/attempt/scope, invoca Antigravity CLI headless con el agente `solqaryn-reviewer`, permite correcciones menores/medias dentro del mismo scope y produce exclusivamente `READY_FOR_VAEP`, `RETURN_TO_JULES`, `BLOCKED_QA_TAKEOVER` o `NO_ACTION`. `LISTO_REAL` no existe en el schema de decisión AntiG.
 
 La publicación queda separada del agente: el Custom Agent tiene prohibidos commit/push/merge/rebase/reset/checkout/switch. El wrapper solo integra cuando el checkout comenzó limpio y sincronizado, la salida estructurada reporta P0=0/P1=0, no hay blocker ni scope leak, `git diff --check` pasa y `origin/Desarrollo` conserva el exact-head inicial. Nunca se usa force-push ni rebase automático. Si el remoto cambia, falla cerrado y preserva los commits locales para reconciliación humana/controller.
 
@@ -837,7 +1142,7 @@ Gobernanza actualizada: ATTEMPT=1 con defecto estructural puede regresar al úni
 
 CI: `.github/workflows/vaep-engine-ci.yml` ahora incluye paths AntiG, parsea el schema estructurado y ejecuta `scripts/antig/antig-self-test.ps1 -StaticOnly`.
 
-Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `VariApp-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
+Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `Solqaryn-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
 
 ## 2026-09-03 — Hardening P1 AntiG posterior a auditoría Codex
 
@@ -865,7 +1170,7 @@ La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\
 
 **Objetivo/alcance:** reconciliar de forma aditiva/history-preserving el cierre documental de N4.7 sin modificar producto ni adelantar N4.8. La certificación canónica es `docs/CERTIFICACION_N4_7_ASIENTOS.md`; el baseline funcional certificado de A-G es `c8d1e373ba8ea008bf773e69afa10f5f18d6de8b`.
 
-**Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `VariApp CI=SKIPPED` excluido; P0=0/P1=0.
+**Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `Solqaryn CI=SKIPPED` excluido; P0=0/P1=0.
 
 **Control fail-closed:** este changeset completa exclusivamente el rollup documental `TASKS.md` + `CHANGELOG_AI.md`. `N4.7.H` no se declara `LISTO_REAL` por este texto: permanece pendiente de gates aplicables terminales y revalidación P0/P1=0 sobre el exact-head resultante del rollup. Solo después VAEP puede cerrar H y promover `N4.8.A`. No se modifica `main`, Producción, secretos, deploy, ramas ni PR #2.
 
@@ -900,7 +1205,7 @@ REVIEW_FIRST posterior al handoff AntiG detectó que la primera publicación de 
 
 El commit `dd518b608f0404f249a6315b10793da1c500226c` elimina esos gaps sin ampliar scope: master/worker capturan primero la salida del parser y abortan fail-closed si este falla; los self-tests dejan de duplicar los valores canónicos; retry validation, prompts, logs e Issues consumen `JULES_MAX_ATTEMPTS`/`JULES_REWORK_MAX` desde MASTER; los artifacts/resultados incluyen `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH`.
 
-La evidencia causal del exact-head de código corregido es `VAEP engine lightweight checks #33909740182 = SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS. Los ocho workflows Jules continúan sin overrides de budget y conservan solo `timeout-minutes: 25` como safety-net externo.
+La evidencia causal del exact-head de código corregido es `VAEP engine lightweight checks #33909740182 = SUCCESS`. `Solqaryn CI=SKIPPED` queda explícitamente excluido como PASS. Los ocho workflows Jules continúan sin overrides de budget y conservan solo `timeout-minutes: 25` como safety-net externo.
 
 Cierre corregido: `MIGRATION_PHASE_2=CLOSED/PASS`; `RUNTIME_POLICY_DUPLICATES=0`; `POLICY_BLOCK_COUNT=1`; `PARSER_FAIL_CLOSED=PASS`; `MASTER_SHA_POLICY_HASH_EVIDENCE=PASS`; `ACTIVE_NUMERIC_PROTOCOL_AUTHORITIES=0`; `FASE_3=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -914,7 +1219,7 @@ El worker persiste estado causal de la sesión antes y después de adquirir sesi
 
 El worker consulta el ledger de supersession antes de crear/reanudar sesión y nuevamente antes de publicar un resultado. Un resultado tardío superseded se convierte en `LATE_RESULT_SUPERSEDED`, queda `lateResultAutoIntegrationDenied=true` y no puede terminar como COMPLETED integrable.
 
-Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícitamente a MASTER. Se corrigió además el heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el run PR `33911803009` volvió a ejecutar job y terminó SUCCESS. El gate causal del runtime `VAEP engine lightweight checks` push `33911698939` terminó SUCCESS con Validate VAEP/Jules MASTER y todos los VAEP self-tests en SUCCESS. `VariApp CI=SKIPPED` queda excluido como PASS.
+Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícitamente a MASTER. Se corrigió además el heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el run PR `33911803009` volvió a ejecutar job y terminó SUCCESS. El gate causal del runtime `VAEP engine lightweight checks` push `33911698939` terminó SUCCESS con Validate VAEP/Jules MASTER y todos los VAEP self-tests en SUCCESS. `Solqaryn CI=SKIPPED` queda excluido como PASS.
 
 Resultado: `MIGRATION_PHASE_3=CLOSED/PASS`; `NO_OP=PASS`; `MULTI_MANIFEST_FAIL_CLOSED=PASS`; `TIMEOUT_SUPERSESSION=PASS`; `LATE_RESULT_GUARD=PASS`; `DURABLE_TIMEOUT_EVIDENCE=PASS`; `FASE_4=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -924,11 +1229,11 @@ Responsable: ChatGPT/VAEP sobre `Desarrollo`.
 
 Se retiraron los siete writers históricos aprobados de Fase 4: `vaep-control-plane-ci-guard.yml`, `vaep-n36h-exact-publish.yml`, `vaep-n37h-exact-publish.yml`, `vaep-n38h-exact-publish.yml`, `vaep-n39h-exact-publish.yml`, `vaep-n310h-exact-publish.yml` y `vaep-n311h-exact-changelog-publisher.yml`. Todos contenían autoridad de escritura histórica sobre `Desarrollo` mediante `contents: write`, `git commit`, `git push` y/o `git reset --hard`.
 
-`.github/workflows/ci.yml` fue auditado por separado. Se preservaron sus jobs de backend, frontend y aceptación, sus builds/tests, MySQL temporal, Playwright y artifacts. Se redujo `permissions.contents` de `write` a `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-variapp`.
+`.github/workflows/ci.yml` fue auditado por separado. Se preservaron sus jobs de backend, frontend y aceptación, sus builds/tests, MySQL temporal, Playwright y artifacts. Se redujo `permissions.contents` de `write` a `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-solqaryn`.
 
 Después del changeset se auditaron los 38 workflows restantes. Resultado: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`. El CI de producto permanece presente; no se eliminó ninguna validación funcional de backend/frontend/acceptance.
 
-Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS` y `VAEP Jules Diagnostic #33912398627=SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS.
+Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS` y `VAEP Jules Diagnostic #33912398627=SUCCESS`. `Solqaryn CI=SKIPPED` queda explícitamente excluido como PASS.
 
 Resultado: `MIGRATION_PHASE_4=CLOSED/PASS`; `HISTORICAL_GIT_WRITERS=0`; `UNAUTHORIZED_COMMIT_PUSH_RESET=0`; `PRODUCT_CI_PRESERVED=PASS`; `FASE_5=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
@@ -964,7 +1269,7 @@ Responsable: ChatGPT/VAEP sobre `Desarrollo`.
 
 Se certifica el cierre integral de la migración F0-F7 hacia el MAESTRO único `docs/VAEP_AUTHORITY.md`. Durante REVIEW_FIRST final se detectó y corrigió una regresión real: el control técnico `vaep/control/dispatch-admission.json` había sido retirado porque no estaba definido por MASTER. La corrección de Fase 7 incorpora la semántica de admisión dentro del mismo MAESTRO y reintroduce el state machine como consumidor subordinado, eliminando la contradicción de autoridad.
 
-El commit de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6` dejó admisión `FROZEN` y pasó `VAEP engine lightweight checks #33917014608=SUCCESS` y `VAEP Jules Diagnostic #33917014756=SUCCESS`. El self-test cubre `NO_OP`, multi-manifest fail-closed, `FROZEN`, `OPEN`, state inválido, clave desconocida y state ausente; el rechazo `FROZEN` ocurre antes de sesión/attempt/ownership/recovery. `VariApp CI=SKIPPED` no se usa como PASS.
+El commit de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6` dejó admisión `FROZEN` y pasó `VAEP engine lightweight checks #33917014608=SUCCESS` y `VAEP Jules Diagnostic #33917014756=SUCCESS`. El self-test cubre `NO_OP`, multi-manifest fail-closed, `FROZEN`, `OPEN`, state inválido, clave desconocida y state ausente; el rechazo `FROZEN` ocurre antes de sesión/attempt/ownership/recovery. `Solqaryn CI=SKIPPED` no se usa como PASS.
 
 La certificación integral revalida: un único bloque de política machine-readable; parser fail-closed sin `source`/`eval`; `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` en evidencia; runtime Jules con timeout/supersession/late-result guard; cero protocol docs versionados activos; cero manifests históricos en rutas activas; cero historical Git writers; CI de producto preservado; AntiG `RESERVED_INACTIVE`; cinco tareas `VAEP MASTER 00/15/30/45/55` enabled con telemetría reciente y prompts MASTER-bound.
 
@@ -984,7 +1289,7 @@ Se eliminó del árbol activo la ruta legacy `vaep/jules-a/dispatch/` con sus 54
 
 El bloque `BEGIN_AUTOMATION_POLICY` conserva una sola instancia y pasa de 6 a 9 claves, incorporando `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE` y `VAEP_CHECKPOINTS`. El parser fail-closed, `vaep-jules-master.sh` y `vaep-jules-worker.sh` fueron actualizados para consumir esas claves; se retiró el literal runtime de checkpoints.
 
-Evidencia causal del hardening: `VAEP engine lightweight checks #33920294318=SUCCESS` y `VAEP Jules Diagnostic #33920294338=SUCCESS` sobre `09ee682712ba29d79d235a62415de20c308db7c9`. `VariApp CI=SKIPPED` queda excluido como PASS.
+Evidencia causal del hardening: `VAEP engine lightweight checks #33920294318=SUCCESS` y `VAEP Jules Diagnostic #33920294338=SUCCESS` sobre `09ee682712ba29d79d235a62415de20c308db7c9`. `Solqaryn CI=SKIPPED` queda excluido como PASS.
 
 El punto de Codex sobre las cinco automatizaciones era una limitación de auditoría Git-only, no una ausencia operativa: `VAEP MASTER 00/15/30/45/55` están presentes y habilitadas en el control-plane externo. La imposibilidad local de ejecutar Bash en su entorno Windows tampoco se usa como PASS; la validación causal proviene de GitHub Actions.
 
@@ -1211,7 +1516,7 @@ Este registro es histórico y no falsea H: N8.3.H sólo es `LISTO_REAL` cuando e
 
 **Responsable:** Codex, ejecución autorizada por Javier Mejía en `Desarrollo`.
 
-Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en VariApp, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
+Se ejecutó el flujo real con la factura UAT `FAC-000003`: diagnóstico `SMTP_OK` con STARTTLS y autenticación, un único envío desde la interfaz a un buzón de prueba controlado (destinatario enmascarado), confirmación visible en Solqaryn, un registro `Enviado` en historial y logs Render con un intento exitoso y MessageId. El propietario aportó la captura de recepción en Gmail y `FAC-000003.pdf`; el PDF fue renderizado y verificado visualmente como A4, legible y coherente.
 
 No se tocaron Producción, `main`, secretos ni WhatsApp. Las capturas tomadas por CUA quedaron observadas inline; como CUA no expone una ruta local para sus bytes, no se fabricaron PNG para completar los nombres restantes. La matriz y los archivos aportados están en `docs/evidencias/cierre-correo-smtp/2026-09-15_1048/`.
 
@@ -1408,3 +1713,191 @@ Feature freeze: no se aceptan nuevas features sobre este candidato. Un cambio de
 Se revalidó N9.3 de extremo a extremo. El gate material fue M11 run `35288756204`: validación de definición/protecciones, certificación segura del proveedor y backup cifrado real de Desarrollo + restore drill del mismo artifact concluyeron `success`. El artifact `10525951057` quedó con digest `sha256:ca09e80bba0cc44196f97f5a3afc42141be0471f65dd5c3c17dcbb4349171e7d`; el restore aislado verificó checksums y row-counts para 132 tablas base y 104 migraciones EF, con `productionTouched=false`.
 
 N9.3.B/D/E se mantuvieron como N/A grounded donde el backup no exige cambios de dominio, API o UI; N9.3.C/F/G certificaron backup/restore, seguridad y gates causales. P0=0/P1=0 antes del cierre final. Este append es estrictamente aditivo y forma parte de N9.3.H; `LISTO` sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar este writer temporal y persistir receipt/readback. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
+
+
+## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18
+
+La liberación productiva autorizada fue ejecutada bajo ventana de mantenimiento. La base MySQL fue migrada hasta 20260914232400_N7_10_C_DocumentoFiscalPersistencia; el incidente N0.4 por duplicados RBAC legacy se resolvió con migración retry-safe y certificación causal exact-head 35304697573/105474385670 SUCCESS (2328/2328 tests y guards/postchecks completos). Producción quedó LIVE sobre 7f140442d598aaea36b39952bad5ebd9ab4f2613, deploy dep-damb4lqjnfac73efl1pg, maintenance OFF, EF sin migraciones pendientes y sin hard errors/503 posteriores en el corte validado. N9.4.D/E quedaron N/A grounded; F/G certificados P0=0/P1=0. El cierre H exige todavía verificación byte-safe de este append, REVIEW_FIRST, receipt y readback.
+
+
+## 2026-09-18 — ERP-N9.5 — Smoke test current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+La revalidación current-standard de N9.5 corrigió same-run los defects causales encontrados en N9.5.G y congeló como functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`. El admission exact-head `35316302522` y la aceptación integral `35316302603` terminaron `SUCCESS`; Playwright reportó `100/100` pruebas PASS y la validación SMTP/PDF también concluyó correctamente. El artifact de aceptación es `10535867520` con digest `sha256:5b073d44217948a3cafd2938d6a1ed24f3c36e5b3234450ec1e1ab09085fd85a`.
+
+El REVIEW_FIRST de N9.5.G quedó en `vaep/evidence/reviews/N9.5.G_REVIEW_FIRST_20260918T070531Z_SUP24.json` y su receipt en `vaep/evidence/receipts/N9.5.G_RECEIPT_20260918T070609Z_SUP24.json`, con `P0=0/P1=0`. La certificación canónica del parent se materializó en `docs/CERTIFICACION_N9_5_SMOKE_TEST.md`. Los commits posteriores al functional head que sólo añaden evidencia/documentación son equivalentes por construcción y no modifican producto/runtime.
+
+Este bloque forma parte de N9.5.H y se añade de forma estrictamente aditiva junto con `TASKS.md`; `LISTO` para H y para el parent N9.5 sólo se declara después de verificar prefijo histórico exacto, `additions>0/deletions=0`, retirar el writer temporal, ejecutar REVIEW_FIRST final, persistir receipt y hacer write/readback de COLA/CONFIG/PLAN_MAESTRO. No se modificaron `main`, Producción, PR #2, secretos, DNS ni certificados.
+
+
+## 2026-09-18 — ERP-N9.6 — Hypercare current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+N9.6 fue revalidado bajo el estándar current-standard. En N9.6.A se detectó y corrigió same-run un probe temporal que apuntaba a URLs de Producción, incompatible con la autoridad vigente. El probe se retiró y se sustituyó por un one-shot estrictamente Desarrollo-only contra `solqaryn-api-desarrollo.onrender.com` y `solqaryn-desarrollo.vercel.app`; el run `35319732966` terminó `SUCCESS` y validó health/readiness/latencia del backend DEV, shell/latencia del frontend DEV y comportamiento fail-closed anónimo de superficies críticas. El proyecto Vercel `solqaryn-desarrollo` no mostró runtime errors en la ventana fresca consultada.
+
+N9.6.B–E resultaron N/A materiales porque Hypercare no introdujo cambios de dominio, contratos, persistencia, migraciones, backend/API ni frontend/UX. N9.6.F confirmó los controles anónimos fail-closed y N9.6.G conservó como causal la aceptación exact-product `35316302603` (`100/100` Playwright + SMTP/PDF) por equivalencia demostrada con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`, complementada por el gate Hypercare DEV fresco.
+
+La certificación canónica quedó en `docs/CERTIFICACION_N9_6_HYPERCARE.md`. No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se añade de forma estrictamente append-only junto con `TASKS.md`; el cierre `LISTO` de N9.6.H y del parent N9.6 requiere todavía el readback final, REVIE_FIRST P0=0/P1=0 y receipt posterior al append.
+
+
+## 2026-09-18 — ERP-N9.7 — Postmortem current-standard
+
+**Responsable:** Tarea Supervisión :24, `Desarrollo` únicamente.
+
+Se completó la revalidación current-standard de N9.7. El PRE quedó materializado en `docs/POSTMORTEM_N9_7.md` y la certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`. Se documentaron exclusivamente incidencias observadas y recuperaciones demostradas: un probe temporal de Hypercare con alcance de entorno incorrecto, un primer writer append-only con error de construcción y el riesgo de drift temporal repo/control-plane durante cierres encadenados. Los defectos internos accionables fueron corregidos same-run y no permanecen como blockers.
+
+N9.7.B–E resultaron N/A materiales por ausencia demostrada de cambios de dominio, contratos, persistencia/schema/migraciones, backend/API y frontend/UX. N9.7.F revalidó que no existe delta de seguridad/RBAC de producto ni exposición de secretos. N9.7.G conservó como evidencia causal la aceptación exact-product `35316302603` en SUCCESS con `100/100` Playwright más SMTP/PDF y el gate Hypercare DEV `35319732966` en SUCCESS, sustentados por equivalencia de producto con el functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+
+No se modificaron `main`, Producción, PR #2, secretos, DNS, certificados ni datos/infraestructura productiva. Este bloque se agrega exclusivamente mediante append byte-safe junto con `TASKS.md`; el cierre LISTO de N9.7.H y del parent N9.7 requiere todavía el readback final, REVIEW_FIRST P0=0/P1=0 y receipt posterior al append.
+
+
+## 2026-09-18 — VariStoreHN Fase 8: búsqueda, filtros y ordenamiento
+- Alcance: catálogo público `/varistorehn/productos`, sin modificar Fases 0–7 ni superficies administrativas.
+- Se incorporó rango de precio mínimo/máximo, disponibilidad, categoría, búsqueda normalizada y orden por relevancia, precio, recientes y nombre.
+- `q`, `categoria`, `disponible`, `precioMin`, `precioMax`, `orden` y `pagina` se hidratan desde URL y se sincronizan para compartir/recargar el estado.
+- La búsqueda conserva normalización de acentos y mayúsculas mediante la regla pura del catálogo.
+- En móvil los filtros siguen cerrados por defecto y el panel abierto queda acotado al viewport.
+- Se preservó deliberadamente `obtenerCatalogo()` para rehidratar el carrito contra el catálogo completo: sustituirlo por una página remota parcial podría eliminar referencias persistidas de otras páginas.
+- El filtro de ofertas no se fabrica en Fase 8: el contrato público vigente no posee autoridad temporal de promociones; queda para Fase 9, tal como prevé el Plan Maestro con “si aplica”.
+- Añadidos validador estático, Playwright Fase 8 y workflow acumulado Fases 1–8.
+- MAPA_ARQUITECTURA: NO_APLICA — se amplía comportamiento dentro del catálogo público existente, sin cambiar capas, datos, tenancy, seguridad, jobs ni ownership.
+
+
+## 2026-09-18 — Auditoría quirúrgica VariStoreHN Fase 8
+- Hallazgo corregido: una URL compartida con `pagina` mayor al total podía dejar el grid vacío y mostrar un estado de paginación incoherente.
+- La página ahora se acota al rango válido después de cargar catálogo/categorías y también ante navegación por historial.
+- Hardening adicional: el alias histórico `orden=destacados` se normaliza a `relevancia` y se limpia de la URL para que el `select` no quede con un valor sin opción visible.
+- Playwright Fase 8 cubre ambos casos y el validador estático impide retirar estas protecciones accidentalmente.
+- MAPA_ARQUITECTURA: NO_APLICA — corrección local de estado/URL en el catálogo público; no cambia capas, datos, tenancy, seguridad ni contratos HTTP.
+
+
+## 2026-09-18 — VariStoreHN Fase 9: ofertas e inventario
+- Promociones públicas reutilizan la autoridad administrable de `Descuento` (vigencia, prioridad y alcance); no se crearon columnas/tablas promocionales paralelas.
+- `IPromocionPublicaService` proyecta únicamente descuentos automáticos reproducibles como precio unitario público: porcentuales, vigentes, sin código/cliente/rol/aprobación y sin condiciones que cambien por cantidad o comprador.
+- Catálogo público y variantes exponen precio normal, precio oferta vigente, ahorro, porcentaje, nombre/vigencia y estado de disponibilidad.
+- Checkout recalcula el mismo precio promocional y bloquea explícitamente stock 0.
+- Frontend usa la promoción por variante, habilita `/varistorehn/ofertas`, navegación global y filtro compartible `oferta=1`.
+- Estados canónicos: `Disponible`, `Últimas unidades`, `Agotado`; se elimina el umbral visual hardcodeado.
+- Carrito rehidrata precio/stock desde catálogo vivo y muestra precio normal, promocional y ahorro sin persistir importes confiables en localStorage.
+- Inventario por sucursal: NO_APLICA. El ERP posee sucursales/almacenes/existencias, pero la tienda pública no tiene selección de sucursal ni requisito comercial que autorice inventarla.
+- Skills aplicadas: gobierno, arquitectura-impacto, calidad UI y QA.
+- MAPA_ARQUITECTURA: NO_APLICA — se mantiene el patrón existente API -> servicio Application -> repositorio; sin nueva capa, esquema, tenancy o deployment.
+
+
+## 2026-09-18 — Auditoría quirúrgica post-cierre VariStoreHN Fase 9
+- Hallazgo material corregido: Fase 9 seguía proyectando y validando stock desde `ProductoVariante.Cantidad`, aunque ERP-N1.4 define `ExistenciaVariante` como autoridad de stock vivo.
+- Se añadió `InventarioPublicoService`: agrega `StockDisponible = StockFisico - StockReservado` de existencias operativas `Tienda/Bodega`, incluyendo raíz y ubicaciones internas como buckets físicos distintos, y excluyendo tránsito, devolución, cuarentena y almacenes/sucursales inactivas.
+- Una variante sin existencia operativa autoritativa falla cerrada con stock 0; no hereda silenciosamente el contador legacy en runtime real.
+- Catálogo, detalle y checkout consumen la misma autoridad pública de inventario. El stock reservado deja de exponerse como vendible.
+- Se añadieron regresiones dirigidas del servicio/controlador y el workflow Fase 9 observa las nuevas superficies.
+- Inventario por sucursal sigue NO_APLICA: sin selección pública de sucursal, VariStoreHN agrega stock vendible de raíces operativas.
+- MAPA_ARQUITECTURA: NO_APLICA — se conecta la tienda a la autoridad de inventario ya existente sin nueva persistencia ni migración.
+## 2026-09-24 — Normalización canónica de GitHub post-transferencia
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+Se auditó el estado vivo de GitHub después de consolidar el repositorio bajo la organización `solqaryn`. La identidad canónica queda en `solqaryn/Solqaryn`, con `Desarrollo` como rama de trabajo y los únicos GitHub Environments canónicos `Desarrollo` y `Produccion`.
+
+Se reconciliaron fuentes operativas que todavía describían PR #2 como abierto/borrador: el estado vivo y el MAESTRO confirman que PR #2 es histórico, `CLOSED + MERGED`, no debe reabrirse y cualquier nuevo cambio de `main` o Producción requiere autorización fresca del propietario. El baseline observado de `main` se actualiza a `6ad48116a93bb1d02a85b941994395ba7382dc93`. También se normalizaron dos contratos AntiG dormidos para que apunten a `solqaryn/Solqaryn` sin reactivar AntiG.
+
+Como barrido administrativo one-shot se incorpora temporalmente `.github/workflows/github-post-transfer-cleanup.yml`, activable únicamente por un Issue administrativo exacto del propietario. Su alcance es cerrar Issues históricos abiertos salvo el Issue funcional vigente #3410 y eliminar todas las ramas remotas salvo `Desarrollo` y `main`. El workflow debe retirarse inmediatamente después de validar el barrido.
+
+No se toca `main`, no se despliega Producción, no se leen/modifican secretos y no se reescribe historial Git.
+
+
+## 2026-09-24 — Recovery del barrido administrativo GitHub
+
+El primer intento one-shot del barrido post-transferencia falló por un HTTP 502 de GitHub GraphQL antes de alcanzar la fase de ramas. Se aplicó recovery same-run: el workflow temporal reduce los lotes de mutación, incorpora reintentos con backoff, elimina primero referencias de ramas históricas y revalida fail-closed antes de cerrar Issues históricos. El Issue funcional vigente #3410 continúa preservado. No se toca `main`, Producción, secretos ni historial Git.
+
+
+## 2026-09-24 — Cierre de control GitHub post-transfer a SOLQARYN
+
+- Repositorio canónico confirmado bajo la organización `solqaryn/Solqaryn`; rama ordinaria `Desarrollo` y baseline productivo `main`.
+- La limpieza administrativa post-transfer eliminó 40 ramas históricas y cerró la deuda histórica de Issues; #3410 fue revalidado contra el código actual y cerrado como resuelto.
+- `docs/VAEP_HANDOFF_CURRENT.md` se reconcilió con la autoridad vigente: PR #2 es evidencia histórica `CLOSED + MERGED` del release ERP-N9 autorizado y no debe reabrirse.
+- Se retira el workflow temporal `.github/workflows/github-post-transfer-cleanup.yml` después de cumplir su función para no dejar una superficie administrativa residual.
+- Los triggers administrativos #3414/#3415 se usaron exclusivamente durante el cierre y quedan cerrados.
+- Este changeset no modifica producto, `main`, `Produccion`, secretos, datos productivos, dominios ni certificados.
+
+## 2026-09-24 — Autorización GitHub org-safe post-transfer
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+Durante la auditoría final post-transfer se detectó deuda operativa real en dos workflows manuales cerrados: su guard comparaba `github.actor` con `github.repository_owner`. Tras la transferencia, el owner es la organización `solqaryn`, por lo que ningún usuario humano podía satisfacer esa condición y el test offline todavía simulaba `jmejia31/Solqaryn`.
+
+Se elimina esa dependencia personal. `fase8-validacion-completa.yml` y `m13-certificacion-final.yml` conservan `workflow_dispatch`, el repositorio exacto `solqaryn/Solqaryn`, la rama exacta `Desarrollo` y el token literal `AUTORIZADO_REABRIR`, pero ahora exigen que actor y triggering actor coincidan y que GitHub confirme dinámicamente permiso administrativo del actor sobre el repositorio. `test_reopen_authorization.py` pasa a usar la identidad canónica y un stub local de la consulta de permisos para verificar PASS/FAIL sin depender de una cuenta personal.
+
+No se modifica `main`, Producción, secretos, datos productivos, dominios ni certificados.
+
+
+## 2026-09-24 — Cutover canónico de Render DEV hacia solqaryn-api-dev
+
+**Responsable:** ChatGPT/VAEP remoto, `Desarrollo` únicamente.
+
+- Se normalizó la configuración declarativa de Render DEV para usar el nombre canónico `solqaryn-api-dev` y el objetivo público `https://solqaryn-api-dev.onrender.com`.
+- Durante el cutover, el servicio existente conserva temporalmente compatibilidad con el hostname histórico `solqaryn-api-desarrollo.onrender.com` para no romper el health check mientras se crea y valida el servicio con el slug canónico.
+- `.github/workflows/fase2-auditoria.yml` y `scripts/m13_static_audit.py` fueron alineados al naming canónico; la auditoría permite transitoriamente ambos hostnames DEV hasta completar el reemplazo.
+- Producción no fue modificada. No se tocaron `main`, datos productivos, secretos ni credenciales.
+
+MAPA_ARQUITECTURA: NO_APLICA — cambio de naming/configuración de infraestructura DEV sin modificar dominio, persistencia, contratos funcionales ni Producción.
+
+
+## 2026-09-24 — Cutover canónico GitHub a dev / DEV / PROD
+
+**Responsable:** ChatGPT/VAEP remoto, rama `dev`.
+
+- La rama ordinaria canónica pasa a ser `dev`; `main` continúa reservada para PROD.
+- Los GitHub Environments canónicos pasan a ser exclusivamente `DEV` y `PROD`.
+- Workflows activos fueron migrados desde referencias antiguas de rama/environment a `dev`, `DEV` y `PROD`.
+- Variables y secretos operativos pasan a los prefijos `SOLQARYN_DEV_*` y `SOLQARYN_PROD_*`; no se persisten connection strings completas como secretos duplicados.
+- Scripts operativos de backup/restore fueron renombrados a `scripts/backup_dev.sh` y `scripts/restore_dev.sh`.
+- El documento canónico de topología fue renombrado a `docs/ENTORNOS_DEV_PROD.md`.
+- VariStoreHN permanece como cliente/módulo funcional: sus pruebas de regresión pueden conservar el nombre del cliente, pero sus triggers operan sobre la rama `dev` y no definen infraestructura de plataforma.
+- El Project Scope Lock fue ajustado para el nuevo naming y continúa actuando fail-closed contra identificadores operativos retirados.
+- Antes de eliminar los environments antiguos, GitHub debe quedar con default branch `dev` y ruleset activo apuntando a `dev`.
+
+MAPA_ARQUITECTURA: ACTUALIZADO — normalización transversal de gobierno, CI y topología GitHub; no modifica datos de PROD.
+
+
+## 2026-09-24 — Normalización operativa del endpoint Render DEV
+
+- Se reemplazó el endpoint operativo retirado `https://solqaryn-api-desarrollo.onrender.com` por `https://solqaryn-api-dev.onrender.com` en los consumidores frontend activos.
+- Se alineó la auditoría M13 con la topología canónica `dev` / `DEV`, el prefijo `solqaryn_dev` y el endpoint Render DEV canónico.
+- Se retiró del gate M13 la expectativa del nombre de servicio `solqaryn-api-desarrollo`.
+- No se modificó `main`, el servicio Render PROD, secretos ni datos productivos.
+- El control-plane Render conectado muestra actualmente `solqaryn-api-prod` como único servicio existente; la recreación de `solqaryn-api-dev` queda como paso de infraestructura DEV.
+
+MAPA_ARQUITECTURA: SIN_CAMBIO — normalización de configuración operativa y consumidores DEV.
+
+
+## 2026-09-24 — Retiro de referencias operativas Render Desarrollo
+
+- Runbooks operativos de rollback, smoke e hypercare ya apuntan a `solqaryn-api-dev` en lugar del servicio retirado `solqaryn-api-desarrollo`.
+- La guía de aislamiento Cloudinary fue alineada con el prefijo canónico `solqaryn_dev`.
+- Se preserva la evidencia histórica inmutable que documenta estados anteriores; solo se corrigieron superficies operativas vigentes.
+- PROD no fue modificado.
+
+MAPA_ARQUITECTURA: SIN_CAMBIO.
+
+
+## 2026-09-25 — Reset canónico de autoridad a CURRENT-STATE ONLY
+
+- `AGENTS.md`, `docs/VAEP_AUTHORITY.md`, `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y la skill local de gobierno fueron alineados a `PROJECT_ID=SOLQARYN`, `REPOSITORY=solqaryn/Solqaryn` y `BRANCH=dev`.
+- El MAESTRO vigente se construye exclusivamente desde objetivos, dependencias y estado vivo actuales.
+- Ninguna fase, fila, gate, secuencia, protocolo o decisión no incorporada expresamente al MAESTRO vigente puede condicionar el nuevo plan maestro.
+- Las diez automatizaciones conservan el modelo `TASKS_ONLY`, leases, REVIEW_FIRST, recovery, tests/gates causales y cierre `LISTO`.
+- La libertad para rediseñar o reemplazar implementación no elimina seguridad, RBAC, tenancy, integridad de datos, trazabilidad, rollback ni autorización explícita para `main`/PROD.
+- No se reescribió historial Git ni se modificó producto, datos o infraestructura.
+
+
+## 2026-09-26 — Descarga de imágenes y galería por variante
+
+- Corregida la descarga de imágenes de producto desde Cloudinary: el backend ya no devuelve un stream ligado a una conexión HTTP que se cierra al abandonar el método; ahora materializa el contenido antes de responder al navegador.
+- El contrato de descarga compatible con imágenes existentes valida origen HTTPS, host `res.cloudinary.com`, cloud configurado y folder administrado de productos; el ownership continúa comprobándose contra el producto tenant-scoped antes de descargar.
+- Se mantiene el límite general existente de 5 imágenes de producto.
+- Se confirma y conserva el límite de 5 imágenes propias por variante comercial tanto en backend como en frontend.
+- Las variantes sin imágenes propias continúan mostrando la galería general como respaldo.
+- La galería de variantes ahora permite descargar tanto imágenes específicas como imágenes generales mostradas como fallback, respetando el permiso `Productos/Exportar`.
+- Sin cambios de esquema ni migraciones. Sin cambios en `main` ni PROD.

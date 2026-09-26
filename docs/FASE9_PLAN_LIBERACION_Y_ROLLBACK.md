@@ -1,12 +1,12 @@
 # Fase 9 — Plan de liberación y rollback
 
-Estado: documento preparatorio  
-Ejecución autorizada: **No**  
-Producción: congelada
+Estado: liberación productiva ejecutada y estabilizada  
+Ejecución autorizada: **Sí — autorización expresa del propietario en la ventana 2026-09-17/18**  
+Producción: **LIVE**
 
 ## 1. Objetivo
 
-Definir una secuencia segura para una liberación futura de VariApp sin ejecutarla durante la Fase 9.
+Definir una secuencia segura para una liberación futura de Solqaryn sin ejecutarla durante la Fase 9.
 
 Este documento no autoriza:
 
@@ -264,7 +264,27 @@ Aprobación de Javier Mejía:
 ## 15. Estado actual
 
 ```text
-PLAN DOCUMENTADO
-EJECUCIÓN NO AUTORIZADA
-PRODUCCIÓN CONGELADA
+LIBERACIÓN EJECUTADA
+PRODUCCIÓN LIVE
+MIGRACIONES COMPLETAS
+MAINTENANCE OFF
+POSTCHECK PASS
 ```
+
+## 16. Registro de la ventana ejecutada — 2026-09-17/18
+
+- Autorización: expresa del propietario para continuar hasta completar la liberación productiva.
+- Respaldo productivo: confirmado por el propietario antes del APPLY.
+- Commit productivo estabilizado: `7f140442d598aaea36b39952bad5ebd9ab4f2613`.
+- Servicio backend: `solqaryn-api` en Render.
+- Deploy final de reapertura: `dep-damb4lqjnfac73efl1pg` — `live`.
+- Maintenance gate: activado antes del APPLY y desactivado después del postcheck.
+- Migración final observada: `20260914232400_N7_10_C_DocumentoFiscalPersistencia`.
+- Reinicio final: EF informó que no había migraciones pendientes y que la base estaba al día.
+- Incidente controlado: N0.4 detectó duplicidad RBAC legacy durante el primer APPLY; el tráfico permaneció cerrado, se corrigió de forma retry-safe y se recertificó.
+- Certificación exact-head N0.4: run `35304697573`, job `105474385670`, `SUCCESS`; backend `2328/2328`, preflight, APPLY exacto, aislamiento, deduplicación, guards fail-closed y snapshot EF en PASS.
+- Post-reapertura: servicio escuchando en puerto 10000, Application started, Render LIVE; sin excepciones MySQL/EF ni respuestas 503 detectadas en el corte de validación.
+- Rollback: no ejecutado; no se activó criterio de suspensión tras el hotfix.
+- Estado final: producción abierta y estable según health/deploy/logs observados.
+
+La evidencia current-standard de N9.4 está en `vaep/evidence/reviews/` y `vaep/evidence/receipts/`.

@@ -17,7 +17,7 @@
     "backend_causal_conclusion":"success",
     "smtp_directed_tests":"PASS by exact test blobs and causal gate",
     "security_audit":"PASS via N8.5.F",
-    "render_dev_service":"variapp-api-desarrollo",
+    "render_dev_service":"solqaryn-api-desarrollo",
     "render_dev_service_id":"srv-d9jblq7avr4c73c74jng",
     "render_latest_deploy":"dep-dalo3snhdrls73b9kc5g",
     "render_latest_deploy_status":"live",
@@ -26,7 +26,7 @@
   "real_provider_evidence": {
     "provider":"smtp.gmail.com",
     "diagnostic_success_observed":{"timestamp":"2026-09-16T16:52:52.297776661Z","port":465,"security":"SSL/TLS directo","authenticated":true,"duration_ms":36735,"render_log_id":"a8f1ff80-2ed3-40ca-b186-aa9411ccb0e6"},
-    "real_send_attempt":{"message_id":"variapp-107693e007ac4b9e9a653911d8cba4d9","recipient":"masked_by_application","attempts":3,"port":465,"security":"SSL/TLS directo","final_result":"SMTP_TIMEOUT","final_timestamp":"2026-09-16T16:56:14.919623009Z","render_log_id":"c0729317-724d-46de-816e-96234f209832"},
+    "real_send_attempt":{"message_id":"solqaryn-107693e007ac4b9e9a653911d8cba4d9","recipient":"masked_by_application","attempts":3,"port":465,"security":"SSL/TLS directo","final_result":"SMTP_TIMEOUT","final_timestamp":"2026-09-16T16:56:14.919623009Z","render_log_id":"c0729317-724d-46de-816e-96234f209832"},
     "latest_diagnostic_observed":{"timestamp":"2026-09-17T02:40:35.402737288Z","port":587,"security":"STARTTLS obligatorio","result":"SMTP_TIMEOUT","duration_ms":60008,"render_log_id":"8c98056a-0406-49c5-8114-dc60a8368c27"},
     "successful_real_send_observed":false,
     "fresh_successful_connectivity_observed":false

@@ -2,7 +2,7 @@ name: N4.4 - CxC regression
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/API/Controllers/CuentasPorCobrarController.cs'
       - 'backend/tests/InventoryApp.Tests/API/Controllers/CuentasPorCobrarControllerTests.cs'

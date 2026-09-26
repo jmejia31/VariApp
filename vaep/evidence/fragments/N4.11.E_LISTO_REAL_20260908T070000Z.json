@@ -10,7 +10,7 @@
     "N4.11.E focused tests cover component loading/empty/error/fail-closed form behavior, canonical HTTP search/activate/deactivate/delete contract, and authGuard+permisoGuard route protection",
     "GitHub causal check-runs for functionalHead eb1130adbf71509f60fe030bfd7de6bd57968a8e are terminal without in-progress or failed causal checks",
     "P0 open issues=0 and P1 open issues=0",
-    "Vercel variapp-desarrollo rate-limit status is excluded from causal closure because deployment is explicitly prohibited by VAEP authority"
+    "Vercel solqaryn-desarrollo rate-limit status is excluded from causal closure because deployment is explicitly prohibited by VAEP authority"
   ],
   "causalGates": "TERMINAL_SUCCESS_APPLICABLE",
   "combinedStatus": "SUCCESS",

@@ -12,7 +12,7 @@
     "authorizedHumanContext": "Javier Mejia authenticated in VariStorehn Desarrollo/UAT"
   },
   "environment": {
-    "deployment": "https://variapp-desarrollo.vercel.app",
+    "deployment": "https://solqaryn-desarrollo.vercel.app",
     "tenantCompany": "VariStorehn",
     "scope": "Desarrollo/UAT",
     "secretsRead": false,
@@ -44,8 +44,8 @@
         "Included CompraServiceTests, CompraMetodoPagoResolverTests, CompraValorizacionSnapshotTests, N21SolicitudCompra*, N22OrdenCompra*, N23Recepcion*, N24FacturaProveedor*, N15 Kardex contracts and invalid-state guards."
       ],
       "references": [
-        "https://variapp-desarrollo.vercel.app/ordenes-compra",
-        "https://variapp-desarrollo.vercel.app/compras/3"
+        "https://solqaryn-desarrollo.vercel.app/ordenes-compra",
+        "https://solqaryn-desarrollo.vercel.app/compras/3"
       ],
       "defectsFound": []
     },
@@ -74,9 +74,9 @@
         "Included VentaServiceTests, VentaFiscalSnapshotTests, VentaMetodoPago*, VentaPrecisionMonetariaValidatorTests, FacturaServicePagosTests, N32/N34, Kardex contracts and fiscal security/domain tests."
       ],
       "references": [
-        "https://variapp-desarrollo.vercel.app/ventas/3",
-        "https://variapp-desarrollo.vercel.app/facturas/3",
-        "https://variapp-desarrollo.vercel.app/facturas/3/pagos"
+        "https://solqaryn-desarrollo.vercel.app/ventas/3",
+        "https://solqaryn-desarrollo.vercel.app/facturas/3",
+        "https://solqaryn-desarrollo.vercel.app/facturas/3/pagos"
       ],
       "defectsFound": [
         "Fiscal external authorization is intentionally unavailable in Desarrollo; covered as BLOCKED_EXTERNAL under Integrations rather than reported as a false PASS."
@@ -105,8 +105,8 @@
         "Complete backend non-integration filter Category!=Integration: 2269 passed, 0 failed."
       ],
       "references": [
-        "https://variapp-desarrollo.vercel.app/facturas/3/pagos",
-        "https://variapp-desarrollo.vercel.app/finanzas"
+        "https://solqaryn-desarrollo.vercel.app/facturas/3/pagos",
+        "https://solqaryn-desarrollo.vercel.app/finanzas"
       ],
       "defectsFound": [
         {
@@ -140,8 +140,8 @@
         "Included N410D/N410F, ReportesCompras, ReportesVentas, ReporteComprasServiceTests and N58ExportSecurityTests."
       ],
       "references": [
-        "https://variapp-desarrollo.vercel.app/centro-reportes/ventas",
-        "https://variapp-desarrollo.vercel.app/centro-reportes/compras"
+        "https://solqaryn-desarrollo.vercel.app/centro-reportes/ventas",
+        "https://solqaryn-desarrollo.vercel.app/centro-reportes/compras"
       ],
       "defectsFound": []
     },
@@ -166,9 +166,9 @@
         "Included N61B/N61D/N61F/N61G/N65F/N610, TenantAwareDataModelPersistenceTests, Cloudinary tenant ownership/isolation tests and N71-N710 security suites."
       ],
       "references": [
-        "https://variapp-desarrollo.vercel.app/auditoria",
-        "https://variapp-desarrollo.vercel.app/usuarios",
-        "https://variapp-desarrollo.vercel.app/roles"
+        "https://solqaryn-desarrollo.vercel.app/auditoria",
+        "https://solqaryn-desarrollo.vercel.app/usuarios",
+        "https://solqaryn-desarrollo.vercel.app/roles"
       ],
       "defectsFound": []
     },
@@ -197,8 +197,8 @@
         "singleRequiredAction": "Provision approved Desarrollo/UAT sandbox credentials/endpoints, then rerun the authorized provider UAT."
       },
       "references": [
-        "https://variapp-desarrollo.vercel.app/facturas/3",
-        "https://variapp-desarrollo.vercel.app/facturas/3/pagos"
+        "https://solqaryn-desarrollo.vercel.app/facturas/3",
+        "https://solqaryn-desarrollo.vercel.app/facturas/3/pagos"
       ],
       "defectsFound": []
     }

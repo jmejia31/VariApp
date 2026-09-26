@@ -7,7 +7,7 @@ Alcance del roadmap: soportar Excel (`xlsx`), PDF y CSV sin inventar una segunda
 
 ## Estado vivo inspeccionado
 
-VariApp ya contiene dos primitivas maduras que deben reutilizarse en lugar de crear un subsistema paralelo:
+Solqaryn ya contiene dos primitivas maduras que deben reutilizarse en lugar de crear un subsistema paralelo:
 
 1. `ReporteAdministrativoService.ExportarAsync` ya genera CSV y XLSX desde datos source-backed de usuarios/roles/auditoría. El endpoint autenticado de `ReportesAdministrativosController` delega en ese servicio y registra auditoría. El servicio limita hoy `formato` a `csv|xlsx`.
 2. Infrastructure ya incluye `ClosedXML` para XLSX y `QuestPDF` para PDF. `QuestPdfFacturaPerfilesService` demuestra generación PDF real; no se autoriza convertir HTML/print en un sustituto de PDF.

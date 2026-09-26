@@ -1,7 +1,7 @@
 {
   "schema": "vaep-blocker/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "task": "N8.20.C",
   "parent": "N8.20",
@@ -18,7 +18,7 @@
   },
   "tool_rechecks": {
     "render_dev_service_metadata": "PASS",
-    "render_dev_service": "variapp-api-desarrollo",
+    "render_dev_service": "solqaryn-api-desarrollo",
     "render_branch": "Desarrollo",
     "render_health_path": "/health/ready",
     "render_runtime_db_version_query": "UNAVAILABLE",

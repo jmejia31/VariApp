@@ -1,8 +1,8 @@
 # ERP-N1.3.A — Ubicaciones internas — Auditoría y preflight
 
 Fecha: 2026-08-14  
-Proyecto: VariApp  
-Repositorio: `jmejia31/VariApp`  
+Proyecto: Solqaryn  
+Repositorio: `jmejia31/Solqaryn`  
 Rama: `Desarrollo`  
 Baseline inspeccionado: `d25752bfc7a9727e1fc531ed849b8fd61344bc24`  
 Estado: **PRELIGHT COMPLETADO — SIN CAMBIOS FUNCIONALES**

@@ -6,7 +6,7 @@ Autoridad: `docs/VAEP_AUTHORITY.md`
 
 ## 1. Decisión
 
-VariApp tendrá una configuración explícita y aislada por empresa. La autoridad de tenant se resolverá en backend a partir de la identidad autenticada y de la membresía autorizada; ningún `empresaId` recibido desde UI, query string, ruta o body es autoridad suficiente por sí solo.
+Solqaryn tendrá una configuración explícita y aislada por empresa. La autoridad de tenant se resolverá en backend a partir de la identidad autenticada y de la membresía autorizada; ningún `empresaId` recibido desde UI, query string, ruta o body es autoridad suficiente por sí solo.
 
 La configuración se separa conceptualmente en dos grupos:
 

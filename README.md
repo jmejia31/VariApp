@@ -1,6 +1,6 @@
-# VariApp — ERP para la operación de VariStorehn
+# Solqaryn — ERP para la operación de VariStorehn
 
-VariApp es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
+Solqaryn es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
 
 La factura actual se considera comprobante comercial interno mientras no exista habilitación fiscal SAR/CAI aplicable.
 
@@ -67,12 +67,12 @@ Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componen
 
 ## Preparación local
 
-El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity. ChatGPT/VAEP y Chat B (ChatGPT Business) operan como controladores/QA remotos full-access sobre `Desarrollo`, bajo el MAESTRO, salvo cambio explícito documentado por Javier.
+El acceso local y la participación de agentes se rigen por `AGENTS.md`: Javier Mejía conserva la decisión final; Codex participa solo por orden explícita y AntiG/Antigravity permanece `RESERVED_INACTIVE`. ChatGPT/VAEP y Chat B operan como controladores/QA remotos sobre `dev` bajo el MAESTRO.
 
 ```powershell
 git fetch origin
-git switch Desarrollo
-git pull --rebase origin Desarrollo
+git switch dev
+git pull --rebase origin dev
 ```
 
 Backend:
@@ -170,9 +170,9 @@ scripts/
 
 ## Flujo de publicación
 
-1. Trabajar **únicamente en `Desarrollo`**.
+1. Trabajar **únicamente en `dev`**.
 2. No crear ramas adicionales sin autorización expresa.
-3. Mantener el PR `Desarrollo -> main` en borrador.
+3. PR #2 es histórico y está cerrado/fusionado; no reabrirlo. No abrir ni fusionar un nuevo PR hacia `main` sin autorización nueva y explícita de Javier Mejía.
 4. Ejecutar validación proporcional y CI cuando aplique.
 5. No tocar Producción.
 6. Fusionar a `main` únicamente cuando Javier Mejía lo autorice expresamente.

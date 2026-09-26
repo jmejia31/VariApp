@@ -1,16 +1,24 @@
+# PROJECT_SCOPE_LOCK=STRICT
+# EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+# PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+# PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+# EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+# LOCAL_SKILL_COUNT=1
+# Prohibido usar skills/documentacion/contexto fuera de SOLQARYN sin autorizacion explicita o allowlist ACTIVE.
+
 [CmdletBinding()]
 param(
     [switch]$NoFetch
 )
 
 $ErrorActionPreference = "Stop"
-$ExpectedRepo = "jmejia31/VariApp"
+$ExpectedRepo = "solqaryn/Solqaryn"
 $ExpectedBranch = "Desarrollo"
 $ExpectedOrigins = @(
-    "https://github.com/jmejia31/VariApp",
-    "https://github.com/jmejia31/VariApp.git",
-    "git@github.com:jmejia31/VariApp.git",
-    "ssh://git@github.com/jmejia31/VariApp.git"
+    "https://github.com/solqaryn/Solqaryn",
+    "https://github.com/solqaryn/Solqaryn.git",
+    "git@github.com:solqaryn/Solqaryn.git",
+    "ssh://git@github.com/solqaryn/Solqaryn.git"
 )
 
 function Invoke-GitCapture {
@@ -50,8 +58,8 @@ try {
         }
     }
 
-    if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch "PROJECT_ID: VARIAPP" -Quiet)) {
-        throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma PROJECT_ID=VARIAPP."
+    if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch "PROJECT_ID: SOLQARYN" -Quiet)) {
+        throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma PROJECT_ID=SOLQARYN."
     }
     if (-not (Select-String -Path "PROJECT_CONTEXT.md" -SimpleMatch $ExpectedRepo -Quiet)) {
         throw "PROJECT GUARD: PROJECT_CONTEXT.md no confirma '$ExpectedRepo'."
@@ -79,8 +87,8 @@ try {
     $dirty = -not [string]::IsNullOrWhiteSpace($status)
 
     Write-Host ""
-    Write-Host "=== VARIAPP / SESSION GATE ===" -ForegroundColor Cyan
-    Write-Host "PROJECT_ID=VARIAPP"
+    Write-Host "=== SOLQARYN / SESSION GATE ===" -ForegroundColor Cyan
+    Write-Host "PROJECT_ID=SOLQARYN"
     Write-Host "REPOSITORY=$ExpectedRepo"
     Write-Host "BRANCH=$branch"
     Write-Host "HEAD=$head"

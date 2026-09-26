@@ -45,7 +45,7 @@ expect(!productsRouteLine.includes('authGuard') && !productsRouteLine.includes('
 
 expect(paths.includes("productos: '/varistorehn/productos'"), 'El mapa canónico debe conservar VARISTOREHN_PATHS.productos.');
 expect(models.includes('export interface ProductoTienda'), 'Fase 3 debe usar ProductoTienda como modelo visual canónico.');
-expect(models.includes("export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre'"), 'El orden canónico del catálogo debe conservar sus cuatro opciones.');
+expect(models.includes("export type OrdenCatalogo = 'destacados' | 'relevancia' | 'precio-asc' | 'precio-desc' | 'recientes' | 'nombre'"), 'El orden canónico del catálogo debe conservar compatibilidad y añadir relevancia/recientes.');
 expect(service.includes('obtenerCatalogo()'), 'La página de productos debe consumir la frontera pública del catálogo.');
 expect(service.includes('expand(datos => datos.page < datos.totalPages'), 'La frontera pública debe leer todas las páginas HTTP antes de filtrar localmente.');
 expect(catalog.includes('export function filtrarProductos'), 'Los filtros deben reutilizar la regla pura canónica.');
@@ -88,8 +88,9 @@ for (const state of ['loading', 'error', 'empty']) {
 expect(productsHtml.includes('[attr.aria-busy]="estadoCatalogo() === \'loading\'"'), 'El catálogo debe exponer la carga mediante aria-busy.');
 expect(productsHtml.includes('No encontramos coincidencias'), 'Debe distinguir catálogo vacío de filtros sin coincidencias.');
 expect(productsHtml.includes('Solo disponibles'), 'Debe existir filtro de disponibilidad.');
+expect(productsHtml.includes('Precio mínimo'), 'Debe existir filtro de precio mínimo.');
 expect(productsHtml.includes('Precio máximo'), 'Debe existir filtro de precio máximo.');
-for (const order of ['destacados', 'precio-asc', 'precio-desc', 'nombre']) {
+for (const order of ['relevancia', 'precio-asc', 'precio-desc', 'recientes', 'nombre']) {
   expect(productsHtml.includes(`value="${order}"`), `Debe existir la opción de orden ${order}.`);
 }
 expect(productsHtml.includes('Paginación del catálogo'), 'La página independiente debe exponer paginación accesible.');
@@ -98,7 +99,7 @@ expect(productsHtml.includes("[attr.aria-label]=\"'Agregar ' + producto.nombre\"
 expect(productsHtml.includes('destinoSaltar="#catalogo-productos"'), 'El header compartido debe saltar al contenido real de Fase 3.');
 expect(productsHtml.includes("[href]=\"'/varistorehn/producto/' + producto.slug\""), 'Ver producto debe navegar por slug al detalle público cuando Fase 4 está activa.');
 expect(productsHtml.includes('Ver producto'), 'La tarjeta debe conservar una acción explícita Ver producto.');
-expect(productsHtml.includes('producto.precioOferta'), 'La tarjeta debe diferenciar un precio promocional público cuando aplique.');
+expect(productsHtml.includes('tieneOferta(modelo)') && productsHtml.includes('precioActual(producto, modelo)'), 'La tarjeta debe diferenciar el precio promocional autoritativo por variante cuando aplique.');
 
 expect(!/#[0-9a-f]{3,8}\b/i.test(productsScss), 'Fase 3 no debe introducir colores hexadecimales fuera del tema global.');
 expect(!/\brgb(?:a)?\s*\(/i.test(productsScss), 'Fase 3 no debe introducir colores RGB paralelos al tema.');

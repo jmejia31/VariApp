@@ -155,7 +155,7 @@ public class QuestPdfFacturaPerfilesServiceTests
         EmpresaNombre = "VariStorehn Desarrollo",
         EmpresaRTN = "08019000000000",
         EmpresaTelefono = "+504 9999-9999",
-        EmpresaCorreo = "desarrollo@variapp.invalid",
+        EmpresaCorreo = "desarrollo@solqaryn.invalid",
         EmpresaDireccion = "Dirección de prueba extensa para validar ajuste de texto y perfiles de impresión.",
         EmpresaEslogan = "Tecnología y accesorios",
         EmpresaTextoFactura = "Gracias por su compra.",

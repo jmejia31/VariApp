@@ -29,7 +29,7 @@
     "p0p1": "PASS"
   },
   "nonCausalStatuses": [
-    {"context":"Vercel – variapp-desarrollo","head":"4acdee44b54ebe98fadc6b0807e8589822d181ac","state":"failure","reason":"Deployment rate limited; non-causal and outside N6.4.F DoD"}
+    {"context":"Vercel – solqaryn-desarrollo","head":"4acdee44b54ebe98fadc6b0807e8589822d181ac","state":"failure","reason":"Deployment rate limited; non-causal and outside N6.4.F DoD"}
   ],
   "nextParent": "N6.4.G",
   "nextParentState": "DEPENDENCY_VALID_AFTER_THIS_RECEIPT",

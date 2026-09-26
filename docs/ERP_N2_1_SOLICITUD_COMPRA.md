@@ -65,7 +65,7 @@ N2.1.D cerró el servicio/API en `01770a23cbf9a50e7d21a0a7913f32e31ce6070a`.
 
 Update, Enviar, Aprobar y Rechazar se serializan con `IUnitOfWork` y bloqueo pesimista `SELECT ... FOR UPDATE`, evitando decisiones concurrentes y stale writes sobre el mismo documento.
 
-La API expone operaciones de consulta/paginación/filtros y lifecycle separadas de la Compra transaccional. Los errores de negocio se mantienen fail-closed y el contrato HTTP usa la infraestructura común de errores de VariApp.
+La API expone operaciones de consulta/paginación/filtros y lifecycle separadas de la Compra transaccional. Los errores de negocio se mantienen fail-closed y el contrato HTTP usa la infraestructura común de errores de Solqaryn.
 
 ## 5. Frontend y UX
 
@@ -102,7 +102,7 @@ Cobertura específica relevante:
 
 Cierre G: `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`, CI `32172981351` SUCCESS y 994/994 pruebas backend.
 
-El check de Vercel `variapp-desarrollo` puede aparecer limitado por build-rate-limit externo; no es el gate de compilación backend/MySQL/Angular utilizado para certificar N2.1.G. La aplicación `varistorehn` sí reportó status success en el baseline consultado.
+El check de Vercel `solqaryn-desarrollo` puede aparecer limitado por build-rate-limit externo; no es el gate de compilación backend/MySQL/Angular utilizado para certificar N2.1.G. La aplicación `varistorehn` sí reportó status success en el baseline consultado.
 
 ## 8. Trazabilidad A-H
 

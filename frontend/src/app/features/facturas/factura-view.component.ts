@@ -24,7 +24,7 @@ import { ejecutarFacturaWhatsAppHandoff, normalizarTelefonoWhatsApp, WhatsAppSha
 import { descargarBlobSeguro } from '../../shared/descarga-segura';
 import { FacturaFiscalEmisionComponent } from './factura-fiscal-emision.component';
 
-const FORMATO_STORAGE_KEY = 'variapp_factura_formato_pdf';
+const FORMATO_STORAGE_KEY = 'solqaryn_factura_formato_pdf';
 const FORMATOS_FALLBACK: FacturaFormatoPdf[] = [
   { codigo: 'a4', nombre: 'A4', descripcion: '210 × 297 mm', anchoMm: 210, altoMm: 297, esContinuo: false, usoRecomendado: 'Impresoras convencionales y archivo digital' },
   { codigo: 'carta', nombre: 'Carta', descripcion: '8.5 × 11 pulgadas', anchoMm: 215.9, altoMm: 279.4, esContinuo: false, usoRecomendado: 'Impresoras de oficina' },
@@ -499,9 +499,9 @@ export class FacturaViewComponent implements OnInit {
 <body>
   <main>
     <h1>Ticket térmico listo</h1>
-    <p>VariApp generó <strong>${numero}</strong> con tamaño real:</p>
+    <p>Solqaryn generó <strong>${numero}</strong> con tamaño real:</p>
     <p class="medida">${ancho} × ${alto} mm</p>
-    <div class="aviso"><strong>Importante:</strong> si el diálogo de impresión muestra 80 × 297 mm, ese largo lo está imponiendo el controlador de la impresora, no el PDF de VariApp.</div>
+    <div class="aviso"><strong>Importante:</strong> si el diálogo de impresión muestra 80 × 297 mm, ese largo lo está imponiendo el controlador de la impresora, no el PDF de Solqaryn.</div>
     <ol>
       <li>Abre el PDF con el botón inferior.</li>
       <li>En el diálogo usa papel <strong>Receipt / Rollo / Continuous</strong>, escala 100 % y márgenes desactivados.</li>

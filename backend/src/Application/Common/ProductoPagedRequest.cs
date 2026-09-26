@@ -12,5 +12,6 @@ public sealed class ProductoPagedRequest : PagedRequest
     public int? MarcaId { get; set; }
     public int? ModeloId { get; set; }
     public bool? Activo { get; set; }
+    public bool? EsDestacado { get; set; }
     public bool? Agotado { get; set; }
 }

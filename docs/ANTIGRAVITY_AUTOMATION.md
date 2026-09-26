@@ -1,4 +1,4 @@
-# Antigravity Automation — VariApp
+# Antigravity Automation — Solqaryn
 
 > [!WARNING]
 > **ESTADO ACTUAL: RESERVED_INACTIVE**
@@ -25,7 +25,7 @@ El instalador `scripts/antig/install-antig-automation.ps1` no contiene una ruta 
 
 ## Componentes preservados
 
-- `.agents/agents/variapp-reviewer/agent.md`
+- `.agents/agents/solqaryn-reviewer/agent.md`
 - `docs/ANTIGRAVITY_AUTOMATION.md`
 - `scripts/antig/antig-review-worker.ps1`
 - `scripts/antig/antig-self-test.ps1`

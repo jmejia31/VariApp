@@ -213,7 +213,7 @@ Gates oficiales sobre ese HEAD:
 - `31348315366` — Fase 2 - Auditoría de configuración y dependencias — **SUCCESS**;
 - `31348315388` — Bloque 2C.1 - Variante técnica y migración — **SUCCESS**;
 - `31348315404` — Fase 8 - Validación completa automatizada — **SUCCESS**;
-- `31348315372` — VariApp CI — **SKIPPED** esperado por su configuración actual.
+- `31348315372` — Solqaryn CI — **SKIPPED** esperado por su configuración actual.
 
 La ejecución `31348315383` validó adicionalmente:
 

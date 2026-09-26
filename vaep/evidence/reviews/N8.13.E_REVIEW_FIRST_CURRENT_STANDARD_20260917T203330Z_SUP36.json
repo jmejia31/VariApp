@@ -19,10 +19,10 @@
     "vercel_json_blob": "33f4f9687731b191a4ed8f1722bcb0761d17c960"
   },
   "fresh_vercel_read_only": {
-    "team": "VariApp",
+    "team": "Solqaryn",
     "development_project": {
       "id": "prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu",
-      "name": "variapp-desarrollo",
+      "name": "solqaryn-desarrollo",
       "latest_returned_ready_deployment": "dpl_6viE8NfrpbkVRhvAPmEnQvXRBuqN",
       "branch": "Desarrollo",
       "commit": "f9616799a4c7d68451af42a1785bcd381fcf7ab6",
@@ -36,8 +36,8 @@
     }
   },
   "routing_contract": {
-    "production_host_api_rewrite": "varistorehn.vercel.app -> https://variapp-api.onrender.com/:path*",
-    "default_development_api_rewrite": "https://variapp-api-desarrollo.onrender.com/:path*",
+    "production_host_api_rewrite": "varistorehn.vercel.app -> https://solqaryn-api.onrender.com/:path*",
+    "default_development_api_rewrite": "https://solqaryn-api-desarrollo.onrender.com/:path*",
     "spa_fallback": true,
     "security_headers_present": true
   },

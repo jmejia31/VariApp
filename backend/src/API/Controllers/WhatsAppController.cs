@@ -68,6 +68,63 @@ public sealed class WhatsAppController : ControllerBase
         return Ok(new WhatsAppWebhookResponse("accepted"));
     }
 
+    [HttpGet("publico")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublicoAsync(CancellationToken cancellationToken)
+    {
+        var configuraciones = await _db.Set<ConfiguracionWhatsAppEmpresa>()
+            .AsNoTracking()
+            .Where(x => x.Activa)
+            .Select(x => new
+            {
+                x.NumeroTelefonoE164,
+                EmpresaNombre = x.Empresa.Nombre
+            })
+            .ToListAsync(cancellationToken);
+
+        var numeros = configuraciones
+            .Select(x => x.NumeroTelefonoE164)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        if (numeros.Count == 1)
+            return Ok(new WhatsAppPublicoResponse(numeros[0], true));
+
+        if (numeros.Count > 1)
+        {
+            var identidadPublica = await _db.Set<EmpresaConfiguracion>()
+                .AsNoTracking()
+                .Where(x => x.Activa)
+                .Select(x => new { x.NombreComercial, x.NombreVisibleSistema })
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (identidadPublica is not null)
+            {
+                var nombresPublicos = new[] { identidadPublica.NombreComercial, identidadPublica.NombreVisibleSistema }
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => x.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                var coincidencias = configuraciones
+                    .Where(x => nombresPublicos.Any(nombre =>
+                        string.Equals(nombre, x.EmpresaNombre?.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    .Select(x => x.NumeroTelefonoE164)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToList();
+
+                if (coincidencias.Count == 1)
+                    return Ok(new WhatsAppPublicoResponse(coincidencias[0], true));
+            }
+
+            _logger.LogWarning(
+                "WhatsApp público no expuesto: existen varias configuraciones activas y ninguna coincide de forma inequívoca con la identidad pública. Correlación {CorrelationId}",
+                HttpContext.TraceIdentifier);
+        }
+
+        return Ok(new WhatsAppPublicoResponse(null, false));
+    }
+
     [HttpPost("iniciar-whatsapp")]
     [Authorize]
     [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
@@ -129,6 +186,7 @@ public sealed class WhatsAppController : ControllerBase
     }
 }
 
+public sealed record WhatsAppPublicoResponse(string? NumeroTelefonoE164, bool Disponible);
 public sealed record IniciarWhatsAppRequest(int EmpresaId);
 public sealed record IniciarWhatsAppResponse(
     string Status,

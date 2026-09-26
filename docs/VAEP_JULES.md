@@ -1,4 +1,4 @@
-# Jules — consumidor del MAESTRO de VariApp
+# Jules — consumidor del MAESTRO de Solqaryn
 
 Este archivo **no define un protocolo independiente** y no contiene reglas operativas propias.
 

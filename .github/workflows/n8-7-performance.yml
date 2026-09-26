@@ -2,7 +2,7 @@ name: N8.7.G - Performance proof
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/scripts/performance/n8_7_g_auth_perf.py'
       - '.github/workflows/n8-7-performance.yml'
@@ -40,8 +40,8 @@ jobs:
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: N87-Performance-CI-Only-Secret-More-Than-32-Characters-2026
-      Jwt__Issuer: VariApp.CI
-      Jwt__Audience: VariApp.CI.Frontend
+      Jwt__Issuer: Solqaryn.CI
+      Jwt__Audience: Solqaryn.CI.Frontend
       Jwt__ExpiraMinutos: '35'
       N87_PERF_USER: n87_perf_ci
       N87_PERF_PASSWORD: N87PerfOnly-2026!

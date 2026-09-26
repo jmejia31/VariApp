@@ -2,7 +2,7 @@ name: VAEP scheduled checkpoint guards
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'vaep/control/dispatch-admission.json'
       - 'docs/VAEP_AUTHORITY.md'
@@ -36,10 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout Desarrollo
+      - name: Checkout DEV
         uses: actions/checkout@v4
         with:
-          ref: Desarrollo
+          ref: dev
           fetch-depth: 1
 
       - name: Validate Tasks-only authority and checkpoint guard

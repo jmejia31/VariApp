@@ -47,14 +47,14 @@ public sealed class N61DEmpresaApplicationApiTests
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var result = await _service.CreateAsync(new CreateEmpresaDto { Nombre = "  VariApp Honduras  " });
+        var result = await _service.CreateAsync(new CreateEmpresaDto { Nombre = "  Solqaryn Honduras  " });
 
         Assert.NotNull(persisted);
-        Assert.Equal("VariApp Honduras", persisted!.Nombre);
+        Assert.Equal("Solqaryn Honduras", persisted!.Nombre);
         Assert.True(persisted.Activa);
         Assert.Equal(17, persisted.CreadoPorUsuarioId);
         Assert.Equal("vaep-n61d", persisted.CreadoPorNombreUsuario);
-        Assert.Equal("VariApp Honduras", result.Nombre);
+        Assert.Equal("Solqaryn Honduras", result.Nombre);
         Assert.True(result.Activa);
         _repository.Verify(x => x.AddAsync(persisted, It.IsAny<CancellationToken>()), Times.Once);
         _repository.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

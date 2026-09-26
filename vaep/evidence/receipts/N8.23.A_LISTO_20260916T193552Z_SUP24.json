@@ -42,7 +42,7 @@
   "rollback_targets": {
     "render_dev": {
       "service_id": "srv-d9jblq7avr4c73c74jng",
-      "service_name": "variapp-api-desarrollo",
+      "service_name": "solqaryn-api-desarrollo",
       "branch": "Desarrollo",
       "health_check_path": "/health/ready",
       "current_deploy_id": "dep-dalcq261egvs73e56jr0",
@@ -54,7 +54,7 @@
     },
     "vercel_dev": {
       "project_id": "prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu",
-      "project_name": "variapp-desarrollo",
+      "project_name": "solqaryn-desarrollo",
       "branch": "Desarrollo",
       "current_deployment_id": "dpl_GAsApuet5Ec9VTQ5qDLKyHanTS65",
       "current_commit": "4752468e85ab0604cdf0de0fb9588f2269696638",

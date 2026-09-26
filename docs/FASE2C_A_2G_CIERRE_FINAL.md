@@ -4,7 +4,7 @@ Fecha: 2026-08-07
 
 ## Alcance
 
-Este documento consolida el cierre técnico de las fases 2C, 2D, 2E, 2F y 2G del ciclo funcional complementario de VariApp.
+Este documento consolida el cierre técnico de las fases 2C, 2D, 2E, 2F y 2G del ciclo funcional complementario de Solqaryn.
 
 La revisión se realizó exclusivamente sobre la rama `Desarrollo`. `main` permanece congelada y Producción no forma parte de este cierre.
 
@@ -275,7 +275,7 @@ Desarrollo - aceptación funcional integral: success
 Fase 2 - Auditoría de configuración y dependencias: success
 Fase 8 - Validación completa automatizada: success
 Bloque 2C.1 - Variante técnica y migración: success
-VariApp CI: skipped por condición del workflow
+Solqaryn CI: skipped por condición del workflow
 ```
 
 Un workflow omitido por condición no se registra como ejecución aprobada ni como fallo.

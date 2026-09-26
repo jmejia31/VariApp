@@ -31,6 +31,8 @@ function productoReal(
 ) {
   const precio = opciones.precio ?? 1499;
   const stock = opciones.stock ?? 4;
+  const oferta = opciones.oferta ?? null;
+  const ofertaActiva = oferta !== null && oferta >= 0 && oferta < precio;
   const imagenes = opciones.imagenes ?? [];
   const imagenesDto = imagenes.map((url, index) => ({ url, orden: index + 1, esPrincipal: index === 0 }));
   return {
@@ -42,9 +44,14 @@ function productoReal(
     categoriaNombre: opciones.categoria ?? 'Computadoras',
     marcaNombre: 'Marca real',
     precio,
-    precioOferta: opciones.oferta ?? null,
+    precioOferta: ofertaActiva ? oferta : null,
+    ofertaActiva,
+    ofertaNombre: ofertaActiva ? 'Oferta de auditoría' : null,
+    ahorro: ofertaActiva ? precio - oferta! : 0,
+    porcentajeAhorro: ofertaActiva ? Math.round((precio - oferta!) * 100 / precio) : 0,
     cantidadDisponible: stock,
     estaAgotado: stock <= 0,
+    estadoDisponibilidad: stock <= 0 ? 'Agotado' : stock <= 3 ? 'Últimas unidades' : 'Disponible',
     sku: `SKU-${id}`,
     activo: true,
     esDestacado: false,
@@ -55,8 +62,14 @@ function productoReal(
       marcaNombre: 'Marca real',
       sku: `SKU-${id}-A`,
       precio,
+      precioOferta: ofertaActiva ? oferta : null,
+      ofertaActiva,
+      ofertaNombre: ofertaActiva ? 'Oferta de auditoría' : null,
+      ahorro: ofertaActiva ? precio - oferta! : 0,
+      porcentajeAhorro: ofertaActiva ? Math.round((precio - oferta!) * 100 / precio) : 0,
       cantidadDisponible: stock,
       estaAgotado: stock <= 0,
+      estadoDisponibilidad: stock <= 0 ? 'Agotado' : stock <= 3 ? 'Últimas unidades' : 'Disponible',
       imagenes: imagenesDto
     }]
   };
@@ -170,21 +183,43 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     expect(persistido[0].unidades).toBe(5);
   });
 
-  test('Ver producto navega desde catálogo por slug y Atrás devuelve al catálogo', async ({ page }) => {
+  test('botón icono volver restaura exactamente búsqueda, variante y posición del catálogo', async ({ page }) => {
     await prepararEmpresa(page);
-    await page.goto('/varistorehn/productos?q=Laptop');
-    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
-
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/varistorehn/productos?q=Laptop&orden=precio-desc');
     const tarjeta = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
+    await expect(tarjeta).toBeVisible();
+
+    const modeloCatalogo = tarjeta.getByLabel('Modelo de Laptop Pro 14');
+    await modeloCatalogo.selectOption({ label: '16 GB / 512 GB' });
+    const modeloAntes = await modeloCatalogo.inputValue();
+
+    await tarjeta.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, 90));
+    const scrollAntes = await page.evaluate(() => Math.round(window.scrollY));
+
     const verProducto = tarjeta.getByRole('link', { name: 'Ver producto' });
     await expect(verProducto).toHaveAttribute('href', '/varistorehn/producto/demo-producto-1');
     await verProducto.click();
     await esperarDetalleDemo(page);
     await expect(page).toHaveURL(/\/varistorehn\/producto\/demo-producto-1$/);
+    const retornoGuardado = await page.evaluate(() => sessionStorage.getItem('varistorehn:retorno-catalogo:v1'));
+    expect(retornoGuardado).toContain(modeloAntes);
 
-    await page.goBack();
-    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Laptop$/);
-    await expect(page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
+    const volver = page.getByRole('button', { name: 'Volver a la pantalla anterior' });
+    await expect(volver).toBeVisible();
+    await expect(volver.locator('app-store-icon')).toHaveCount(1);
+    await expect(volver).toHaveText('');
+    await volver.click();
+
+    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Laptop&orden=precio-desc$/);
+    await expect(page.locator('app-varistorehn-header').getByRole('searchbox')).toHaveValue('Laptop');
+    await expect(tarjeta).toBeVisible();
+    await expect(modeloCatalogo).toHaveValue(modeloAntes);
+    await expect.poll(async () => Math.abs((await page.evaluate(() => Math.round(window.scrollY))) - scrollAntes))
+      .toBeLessThanOrEqual(4);
+    await expect.poll(() => page.evaluate(() => sessionStorage.getItem('varistorehn:retorno-catalogo:v1')))
+      .toBeNull();
   });
 
   test('fuente real muestra galería, SKU, promoción y relacionados sin inventar datos', async ({ page }) => {
@@ -350,7 +385,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await activarBaseDatos(page);
     const barra = page.locator('.mobile-buy-bar');
     await expect(barra).toBeVisible();
-    await expect(barra).toContainText('Últimas 3 unidades');
+    await expect(barra).toContainText('Últimas unidades · 3 unidades');
     const cta = barra.getByRole('button', { name: 'Agregar' });
     expect(await cta.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBeGreaterThanOrEqual(44);
 
@@ -390,7 +425,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     const preview = page.getByRole('region', { name: 'Vista previa de WhatsApp' });
     await expect(preview).toContainText('VISTA PREVIA — NO ENVIADO');
     await expect(preview).toContainText('Laptop Pro 14');
-    await expect(preview).toContainText('Cantidad: 2');
+    await expect(preview).toContainText('Cantidad: *2*');
     await expect(preview).toContainText('36,980');
   });
 });

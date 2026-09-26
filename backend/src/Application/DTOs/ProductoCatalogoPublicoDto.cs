@@ -18,8 +18,15 @@ public sealed class ProductoCatalogoPublicoDto
     public string? ModeloNombre { get; init; }
     public decimal Precio { get; init; }
     public decimal? PrecioOferta { get; init; }
+    public bool OfertaActiva { get; init; }
+    public string? OfertaNombre { get; init; }
+    public DateTime? OfertaInicioUtc { get; init; }
+    public DateTime? OfertaFinUtc { get; init; }
+    public decimal Ahorro { get; init; }
+    public decimal PorcentajeAhorro { get; init; }
     public int CantidadDisponible { get; init; }
     public bool EstaAgotado { get; init; }
+    public string EstadoDisponibilidad { get; init; } = "Agotado";
     public string? Sku { get; init; }
     public bool Activo { get; init; }
     public bool EsDestacado { get; init; }
@@ -44,7 +51,15 @@ public sealed class ModeloCatalogoPublicoDto
     public string? MarcaNombre { get; init; }
     public string? Sku { get; init; }
     public decimal Precio { get; init; }
+    public decimal? PrecioOferta { get; init; }
+    public bool OfertaActiva { get; init; }
+    public string? OfertaNombre { get; init; }
+    public DateTime? OfertaInicioUtc { get; init; }
+    public DateTime? OfertaFinUtc { get; init; }
+    public decimal Ahorro { get; init; }
+    public decimal PorcentajeAhorro { get; init; }
     public int CantidadDisponible { get; init; }
     public bool EstaAgotado { get; init; }
+    public string EstadoDisponibilidad { get; init; } = "Agotado";
     public List<ProductoImagenPublicaDto> Imagenes { get; init; } = new();
 }

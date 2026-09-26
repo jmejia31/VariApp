@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       persist_evidence:
-        description: Persist sanitized evidence back to Desarrollo
+        description: Persist sanitized evidence back to DEV
         required: true
         default: true
         type: boolean
@@ -20,14 +20,15 @@ jobs:
   prove-dev-db-runtime:
     name: Prove DEV DB runtime/provider without secrets
     runs-on: ubuntu-latest
+    environment: DEV
     timeout-minutes: 15
-    if: github.ref_name == 'Desarrollo'
+    if: github.ref_name == 'dev'
 
     steps:
-      - name: Checkout Desarrollo exact dispatch head
+      - name: Checkout DEV exact dispatch head
         uses: actions/checkout@v4
         with:
-          ref: Desarrollo
+          ref: dev
           fetch-depth: 0
 
       - name: Configure .NET 8
@@ -38,15 +39,15 @@ jobs:
       - name: Guard branch and required secret
         shell: bash
         env:
-          VARIAPP_DEV_DB_CONNECTION: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
         run: |
           set -euo pipefail
-          test "${GITHUB_REF_NAME}" = "Desarrollo"
-          if [ -z "${VARIAPP_DEV_DB_CONNECTION:-}" ]; then
-            echo "::error::Missing repository secret VARIAPP_DEV_DB_CONNECTION"
+          test "${GITHUB_REF_NAME}" = "dev"
+          if [ -z "${SOLQARYN_DB_CONNECTION:-}" ]; then
+            echo "::error::Missing DEV database configuration"
             exit 21
           fi
-          echo "Branch guard PASS: Desarrollo"
+          echo "Branch guard PASS: DEV"
           echo "Required DEV DB secret is present. Value is not printed."
 
       - name: Restore probe dependencies
@@ -59,7 +60,7 @@ jobs:
         id: probe
         shell: bash
         env:
-          VARIAPP_DEV_DB_CONNECTION: ${{ secrets.VARIAPP_DEV_DB_CONNECTION }}
+          SOLQARYN_DB_CONNECTION: Server=${{ vars.SOLQARYN_DEV_DB_HOST }};Port=${{ vars.SOLQARYN_DEV_DB_PORT }};Database=${{ vars.SOLQARYN_DEV_DB_NAME }};User Id=${{ vars.SOLQARYN_DEV_DB_USER }};Password=${{ secrets.SOLQARYN_DEV_DB_PASSWORD }};SslMode=Required;
           OUT_DIR: .n820c-proof/${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
@@ -86,7 +87,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Persist sanitized PASS evidence to Desarrollo
+      - name: Persist sanitized PASS evidence to DEV
         if: success() && inputs.persist_evidence
         shell: bash
         env:
@@ -114,9 +115,9 @@ jobs:
 
           pushed=0
           for attempt in 1 2 3; do
-            git fetch origin Desarrollo
-            git rebase origin/Desarrollo
-            if git push origin HEAD:Desarrollo; then
+            git fetch origin DEV
+            git rebase origin/dev
+            if git push origin HEAD:dev; then
               pushed=1
               break
             fi

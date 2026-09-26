@@ -17,6 +17,8 @@ import { CatalogoProductoService } from '../../services/catalogo-producto.servic
 import { ProductoService } from '../../services/producto.service';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { descargarBlobSeguro } from '../../shared/descarga-segura';
 
 const MAX_IMAGENES_VARIANTE = 5;
 
@@ -38,6 +40,7 @@ export class ProductoVariantesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly alerts = inject(AppAlertService);
+  private readonly permisosRuntime = inject(PermisosRuntimeService);
 
   readonly producto = signal<Producto | null>(null);
   readonly variantes = signal<ProductoVariante[]>([]);
@@ -54,6 +57,8 @@ export class ProductoVariantesComponent implements OnInit {
   readonly imagenesVariante = signal<ProductoImagen[]>([]);
   readonly cargandoImagenes = signal(false);
   readonly subiendoImagenes = signal(false);
+  readonly descargandoImagenId = signal<number | null>(null);
+  readonly puedeExportar = signal(false);
   readonly displayedColumns = ['variante', 'sku', 'codigoBarras', 'stock', 'costo', 'precio', 'estado', 'acciones'];
   readonly maxImagenesVariante = MAX_IMAGENES_VARIANTE;
   productoId = 0;
@@ -72,6 +77,7 @@ export class ProductoVariantesComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.puedeExportar.set(this.permisosRuntime.puede('Productos', 'Exportar'));
     this.productoId = Number(this.route.snapshot.paramMap.get('id'));
     forkJoin({
       marcas: this.catalogoService.getActivos('Marca'),
@@ -375,6 +381,30 @@ export class ProductoVariantesComponent implements OnInit {
       error: (err) => {
         this.subiendoImagenes.set(false);
         this.errorMessage.set(err.error?.message ?? 'No se pudieron subir las imágenes de la variante.');
+      }
+    });
+  }
+
+  descargarImagenVariante(imagen: ProductoImagen): void {
+    const producto = this.producto();
+    const variante = this.imagenVariante();
+    if (!producto || !variante || !this.puedeExportar() || this.descargandoImagenId() !== null) return;
+
+    this.descargandoImagenId.set(imagen.id);
+    this.productoService.descargarImagen(this.productoId, imagen.id).subscribe({
+      next: (blob) => {
+        this.descargandoImagenId.set(null);
+        const etiqueta = (variante.etiqueta || variante.sku || 'variante')
+          .replace(/[^a-zA-Z0-9_-]+/g, '_');
+        const extension = blob.type.includes('png') ? 'png' : blob.type.includes('webp') ? 'webp' : 'jpg';
+        const nombre = `${producto.nombre}-${etiqueta}-${imagen.orden + 1}.${extension}`;
+        if (!descargarBlobSeguro(blob, nombre, 'imagen-variante')) {
+          this.snackBar.open('El archivo descargado está vacío.', 'Cerrar', { duration: 5000 });
+        }
+      },
+      error: () => {
+        this.descargandoImagenId.set(null);
+        this.snackBar.open('No se pudo descargar la imagen de la variante.', 'Cerrar', { duration: 5000 });
       }
     });
   }

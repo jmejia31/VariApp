@@ -1,12 +1,12 @@
-# HYPERCARE_RUNBOOK — VariApp Desarrollo
+# HYPERCARE_RUNBOOK — Solqaryn Desarrollo
 
 ## Propósito y alcance
 
 Ventana de observación posterior a un cambio o ensayo autorizado de `Desarrollo`. No autoriza cambios de Producción, DNS, certificados, plan, secretos, `main` ni PR #2. Los únicos endpoints públicos usados por este runbook son:
 
-- `https://variapp-desarrollo.vercel.app`
-- `https://variapp-api-desarrollo.onrender.com/health`
-- `https://variapp-api-desarrollo.onrender.com/health/ready`
+- `https://solqaryn-desarrollo.vercel.app`
+- `https://solqaryn-api-dev-fxx8.onrender.com/health`
+- `https://solqaryn-api-dev-fxx8.onrender.com/health/ready`
 
 ## Roles y locks
 
@@ -22,9 +22,9 @@ Regla single-writer: un scope con writer vivo y progreso material fresco no reci
 ```bash
 set -euo pipefail
 test "$(git branch --show-current)" = "Desarrollo"
-git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)jmejia31/VariApp(\.git)?$'
-export FRONTEND_URL="https://variapp-desarrollo.vercel.app"
-export BACKEND_URL="https://variapp-api-desarrollo.onrender.com"
+git remote get-url origin | grep -Eq '(^git@github.com:|^https://github.com/)solqaryn/Solqaryn(\.git)?$'
+export FRONTEND_URL="https://solqaryn-desarrollo.vercel.app"
+export BACKEND_URL="https://solqaryn-api-dev-fxx8.onrender.com"
 git rev-parse HEAD
 date -u +%Y-%m-%dT%H:%M:%SZ
 ```
@@ -117,3 +117,18 @@ Recovery de servicios DEV se rige por `docs/ROLLBACK_RUNBOOK.md`. Después de re
 ## Evidencia mínima
 
 HEAD o equivalencia, deployment ids/SHA, archivo TSV de 15 muestras sanitizado, resultado de readiness final, revisión de logs autorizada, tiempos de recovery si aplica, REVIEW_FIRST, P0=0/P1=0, receipt y readback. Los archivos temporales `.vaep-hypercare/` son evidencia local de ejecución y no deben versionarse si contienen respuestas operativas sin revisar.
+
+## Bloqueo estricto de alcance del proyecto
+
+```text
+PROJECT_SCOPE_LOCK=STRICT
+EXTERNAL_PROJECT_CONTEXT=DENY_BY_DEFAULT
+PROJECT_SCOPE_POLICY=docs/PROJECT_SCOPE_LOCK.md
+EXTERNAL_CONTEXT_ALLOWLIST=docs/PROJECT_EXTERNAL_CONTEXT_ALLOWLIST.md
+PROJECT_SKILL=.agents/skills/solqaryn-project-governance/SKILL.md
+EXTERNAL_SKILL_REGISTRY=docs/REGISTRO_REFERENCIAS_SKILLS_SOLQARYN.md
+LOCAL_SKILL_COUNT=1
+```
+
+Este runbook solo puede ejecutarse con contexto de SOLQARYN. No consultar ni utilizar skills, documentación, chats, repositorios, memorias o reglas de otro proyecto salvo autorización explícita del propietario o allowlist `ACTIVE`. Ante duda, fail-closed. La única skill local es `solqaryn-project-governance`; las nueve referencias externas solo se consultan en su origen original, pin y ruta registrados.
+

@@ -2,7 +2,7 @@
   "task": "N7.5.H",
   "kind": "RECOVERY_SURFACE_RECHECK",
   "observedAtUtc": "2026-09-14T06:12:45Z",
-  "repository": "jmejia31/VariApp",
+  "repository": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "authority": "docs/VAEP_AUTHORITY.md",
   "baseHead": "233a380e11c9f3b9a663a517ba82e7d3251604d6",

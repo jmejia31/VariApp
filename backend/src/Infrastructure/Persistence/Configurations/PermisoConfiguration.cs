@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,15 +9,24 @@ public class PermisoConfiguration : IEntityTypeConfiguration<Permiso>
 {
     public void Configure(EntityTypeBuilder<Permiso> builder)
     {
-        builder.ToTable("Permisos");
-        builder.HasKey(p => p.Id);
+        builder.ToTable("Permisos", table =>
+        {
+            table.HasCheckConstraint("CK_Permisos_Ambito", "`Ambito` IN (1, 2)");
+        });
 
+        builder.HasKey(p => p.Id);
         builder.Property(p => p.Codigo).IsRequired().HasMaxLength(120);
         builder.Property(p => p.Nombre).IsRequired().HasMaxLength(150);
         builder.Property(p => p.Descripcion).HasMaxLength(300);
+        builder.Property(p => p.Ambito)
+            .HasConversion<int>()
+            .IsRequired()
+            .HasDefaultValue(AmbitoAutorizacion.Empresa);
 
         builder.HasIndex(p => p.Codigo).IsUnique();
         builder.HasIndex(p => new { p.Modulo, p.Accion }).IsUnique();
+        builder.HasIndex(p => new { p.Ambito, p.Activo })
+            .HasDatabaseName("IX_Permisos_Ambito_Activo");
 
         builder.Navigation(p => p.Asignaciones).AutoInclude(false);
     }

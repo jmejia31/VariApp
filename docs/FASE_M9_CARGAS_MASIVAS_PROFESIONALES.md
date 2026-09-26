@@ -8,13 +8,13 @@ Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 ## 1. Objetivo
 
-Profesionalizar la infraestructura de cargas masivas existente en VariApp sin crear un segundo motor paralelo y sin debilitar las garantías ya certificadas de seguridad, idempotencia, concurrencia y atomicidad.
+Profesionalizar la infraestructura de cargas masivas existente en Solqaryn sin crear un segundo motor paralelo y sin debilitar las garantías ya certificadas de seguridad, idempotencia, concurrencia y atomicidad.
 
 M9 conserva como fuente única de verdad el subsistema existente `CargasMasivas` y agrega contrato versionado, seguimiento por etapas, métricas operativas, vista previa controlada, regresión permanente y un gate CI específico.
 
 ## 2. Preflight real
 
-Antes de modificar código se comprobó que VariApp ya disponía de:
+Antes de modificar código se comprobó que Solqaryn ya disponía de:
 
 - `CargasMasivasController`;
 - `ICargaMasivaService` / `CargaMasivaService`;
@@ -223,7 +223,7 @@ Artifact:
 - `Fase 8 - Validación completa automatizada` run `31388228755` — **SUCCESS**;
 - `Bloque 2C.1 - Variante técnica y migración` run `31388228723` — **SUCCESS**;
 - `Fase 2 - Auditoría de configuración y dependencias` run `31388228793` — **SUCCESS**;
-- `VariApp CI` run `31388228732` — **SKIPPED** por condición propia del workflow; no se contabiliza como fallo.
+- `Solqaryn CI` run `31388228732` — **SKIPPED** por condición propia del workflow; no se contabiliza como fallo.
 
 ## 11. Archivos principales de M9
 

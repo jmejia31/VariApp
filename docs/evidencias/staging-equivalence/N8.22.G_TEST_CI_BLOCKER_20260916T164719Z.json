@@ -11,10 +11,10 @@
   "dependency":{"scope":"N8.22.F","status":"LISTO_REAL","receipt":"vaep/evidence/receipts/N8.22.F_LISTO_REAL_20260916T164432Z_SUP36.json"},
   "acceptance":{"staging_equivalent_requires_zero_material_gap":true,"staging_equivalent_requires_zero_unknown":true,"P0_required":0,"P1_required":0},
   "provider_readback":{
-    "render_dev":{"service":"variapp-api-desarrollo","branch":"Desarrollo","region":"oregon","plan":"free","healthCheckPath":"/health/ready"},
-    "render_prod":{"service":"variapp-api","branch":"main","region":"virginia","plan":"free","healthCheckPath":""},
-    "vercel_team":"VariApp",
-    "vercel_visible_projects":[{"name":"variapp-desarrollo","id":"prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu"},{"name":"varistorehn","id":"prj_djMCand2yYeY3AvaUWsjwHDDJDkM"}],
+    "render_dev":{"service":"solqaryn-api-desarrollo","branch":"Desarrollo","region":"oregon","plan":"free","healthCheckPath":"/health/ready"},
+    "render_prod":{"service":"solqaryn-api","branch":"main","region":"virginia","plan":"free","healthCheckPath":""},
+    "vercel_team":"Solqaryn",
+    "vercel_visible_projects":[{"name":"solqaryn-desarrollo","id":"prj_JkRGpdSnGlMQ4Qc3eqw4bscY4Flu"},{"name":"varistorehn","id":"prj_djMCand2yYeY3AvaUWsjwHDDJDkM"}],
     "vercel_varistorehn_recent_deployments_observed":"recent connector-visible deployments are GitHub ref Desarrollo / PR #2 / target null; therefore they are not accepted as authoritative production-frontend parity evidence"
   },
   "matrix_gate":{

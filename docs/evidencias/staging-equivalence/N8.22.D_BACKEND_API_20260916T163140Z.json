@@ -6,7 +6,7 @@
   "lease_token":"SUP00-N822D-CLOSER-20260916T163105Z",
   "sources":{"provider":"Render","workspace":"My Workspace","dev_service_id":"srv-d9jblq7avr4c73c74jng","prod_service_id":"srv-d983qti8qa3s73eqqne0","metadata_only":true},
   "matrix":[
-    {"dimension":"repo","dev":"jmejia31/VariApp","prod":"jmejia31/VariApp","classification":"EQUIVALENT"},
+    {"dimension":"repo","dev":"jmejia31/Solqaryn","prod":"jmejia31/Solqaryn","classification":"EQUIVALENT"},
     {"dimension":"runtime","dev":"docker","prod":"docker","classification":"EQUIVALENT"},
     {"dimension":"service_plan","dev":"free","prod":"free","classification":"EQUIVALENT"},
     {"dimension":"build_plan","dev":"starter","prod":"starter","classification":"EQUIVALENT"},

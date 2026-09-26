@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { plan } from './bundles.mjs';
 
 const root = process.cwd();
-const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'variapp-vaep-block2-'));
+const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'solqaryn-vaep-block2-'));
 const fragments = path.join(temp, 'fragments');
 fs.mkdirSync(fragments, { recursive: true });
 const sha = '0123456789abcdef0123456789abcdef01234567';

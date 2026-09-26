@@ -2,7 +2,7 @@ name: ERP-N0.4 - Certificación RBAC relacional
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*RbacN04*.cs'
       - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
@@ -50,8 +50,8 @@ jobs:
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: ERP-N0-4-CI-Only-Secret-With-More-Than-32-Characters-2026
-      Jwt__Issuer: VariApp.CI
-      Jwt__Audience: VariApp.CI.Frontend
+      Jwt__Issuer: Solqaryn.CI
+      Jwt__Audience: Solqaryn.CI.Frontend
 
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
 
-      - name: Sembrar caso representativo RBAC legacy
+      - name: Sembrar legacy, duplicados retry-safe y denegación
         shell: bash
         run: |
           set -euo pipefail
@@ -86,10 +86,35 @@ jobs:
           docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -e "
             DELETE FROM Permisos WHERE Modulo=23 AND Accion=27;
 
+            INSERT INTO Permisos
+              (Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
+            SELECT
+              'CI.N04.DUP.22.26','CI N0.4 duplicate','Permiso CI para duplicate mapped-vs-legacy.',22,26,1,1,0,UTC_TIMESTAMP(6)
+            WHERE NOT EXISTS (SELECT 1 FROM Permisos WHERE Modulo=22 AND Accion=26);
+
+            INSERT INTO Roles
+              (Nombre,NombreNormalizado,Descripcion,EsSistema,EsAdministrador,Activo,Eliminado,FechaCreacion)
+            SELECT
+              'Administrador','ADMINISTRADOR','Rol CI pre-N0.4 para duplicate mapped-vs-legacy.',1,1,1,0,UTC_TIMESTAMP(6)
+            WHERE NOT EXISTS (SELECT 1 FROM Roles WHERE NombreNormalizado='ADMINISTRADOR');
+
+            SET @admin_role_id := (SELECT Id FROM Roles WHERE NombreNormalizado='ADMINISTRADOR' ORDER BY Id LIMIT 1);
+            SET @dup_perm_id := (SELECT Id FROM Permisos WHERE Modulo=22 AND Accion=26 ORDER BY Id LIMIT 1);
+
             INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido,RolId,PermisoId)
             VALUES
               (9410,1,23,27,1,NULL,NULL),
-              (9411,2,23,27,0,NULL,NULL);
+              (9411,2,23,27,0,NULL,NULL),
+              (9420,0,22,26,1,@admin_role_id,@dup_perm_id),
+              (9421,1,22,26,1,NULL,NULL);
+
+            ALTER TABLE RolPermisos DROP INDEX IX_RolPermisos_Rol_Modulo_Accion;
+            CREATE INDEX IX_RolPermisos_Rol_Modulo_Accion ON RolPermisos (Rol,Modulo,Accion);
+
+            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido,RolId,PermisoId)
+            VALUES
+              (9430,1,21,25,1,NULL,NULL),
+              (9431,1,21,25,1,NULL,NULL);
           "
 
       - name: Preflight N0.4
@@ -120,7 +145,7 @@ jobs:
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${n04}';")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId > '${n04}';")" = '0'
 
-      - name: Postcheck N0.4 y preservación
+      - name: Postcheck N0.4, preservación y deduplicación
         shell: bash
         run: |
           set -euo pipefail
@@ -128,14 +153,94 @@ jobs:
           resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n04_ci --batch --skip-column-names < backend/scripts/postdeploy-erp-n0-4-rbac.sql | tail -n 1)"
           test "$resultado" = '0'
 
-          # El usuario administrador histórico debe sobrevivir; N0.4 no puede borrarlo.
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Usuarios u JOIN Roles r ON r.Id=u.RolId WHERE u.Id=1 AND r.NombreNormalizado='ADMINISTRADOR';")" = '1'
 
-          # El grant permitido se transforma a relación explícita, incluso si
-          # el catálogo Permisos no tenía todavía ese par, y la denegación desaparece.
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Permisos WHERE Modulo=23 AND Accion=27 AND Codigo='LEGACY.N04.23.27';")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos rp JOIN Roles r ON r.Id=rp.RolId JOIN Permisos p ON p.Id=rp.PermisoId WHERE r.NombreNormalizado='ADMINISTRADOR' AND p.Modulo=23 AND p.Accion=27;")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9411;")" = '0'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9420;")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9421;")" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9430;")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9431;")" = '0'
+
+      - name: Guard fail-closed N0.4 ante grant legacy inválido
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot -e "
+            DROP DATABASE IF EXISTS inventoryapp_n04_negative;
+            CREATE DATABASE inventoryapp_n04_negative CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+          "
+
+          export ConnectionStrings__DefaultConnection='Server=127.0.0.1;Port=3306;Database=inventoryapp_n04_negative;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+          dotnet ef database update 20260811032000_N0_3_ConsolidarProductoVariante \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n04_negative -e "
+            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido)
+            VALUES (9499,1,999,999,1);
+          "
+
+          set +e
+          salida="$(dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext 2>&1)"
+          status=$?
+          set -e
+
+          printf '%s\n' "$salida"
+          test "$status" -ne 0
+          printf '%s\n' "$salida" | grep -Fq 'BAD_GRANT:id=9499'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_negative -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260811174745_N0_4_ConsolidarRbacRelacional';")" = '0'
+
+      - name: Guard fail-closed de downgrade N0.4
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot -e "
+            DROP DATABASE IF EXISTS inventoryapp_n04_down_negative;
+            CREATE DATABASE inventoryapp_n04_down_negative CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+          "
+
+          export ConnectionStrings__DefaultConnection='Server=127.0.0.1;Port=3306;Database=inventoryapp_n04_down_negative;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+          dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n04_down_negative -e "
+            INSERT INTO Permisos
+              (Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
+            SELECT 'CI.N04.DOWN.31.29','CI N0.4 downgrade','Permiso CI para guard de downgrade.',31,29,1,1,0,UTC_TIMESTAMP(6)
+            WHERE NOT EXISTS (SELECT 1 FROM Permisos WHERE Modulo=31 AND Accion=29);
+
+            INSERT INTO Roles (Nombre,NombreNormalizado,Descripcion,EsSistema,EsAdministrador,Activo,Eliminado,FechaCreacion)
+            VALUES ('CI Dynamic','CI_DYNAMIC','Rol CI no representable en formato legacy.',0,0,1,0,UTC_TIMESTAMP(6));
+            SET @dynamic_role_id := LAST_INSERT_ID();
+            SET @perm_id := (SELECT Id FROM Permisos WHERE Modulo=31 AND Accion=29 ORDER BY Id LIMIT 1);
+            INSERT INTO RolPermisos (RolId,PermisoId) VALUES (@dynamic_role_id,@perm_id);
+          "
+
+          set +e
+          salida="$(dotnet ef database update 20260811032000_N0_3_ConsolidarProductoVariante \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext 2>&1)"
+          status=$?
+          set -e
+
+          printf '%s\n' "$salida"
+          test "$status" -ne 0
+          printf '%s\n' "$salida" | grep -Fq 'BAD_DOWNGRADE:rolId='
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_down_negative -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260811174745_N0_4_ConsolidarRbacRelacional';")" = '1'
 
       - name: Snapshot EF consistente
         working-directory: backend
@@ -151,14 +256,14 @@ jobs:
           fi
 
           echo '::group::Diagnóstico EF del drift detectado'
-          rm -rf /tmp/variapp-ef-diagnostic
+          rm -rf /tmp/solqaryn-ef-diagnostic
           dotnet ef migrations add __CI_ModelDiff \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext \
-            --output-dir /tmp/variapp-ef-diagnostic
+            --output-dir /tmp/solqaryn-ef-diagnostic
 
-          find /tmp/variapp-ef-diagnostic -maxdepth 1 -type f -name '*.cs' -print -exec sed -n '1,260p' {} \;
+          find /tmp/solqaryn-ef-diagnostic -maxdepth 1 -type f -name '*.cs' -print -exec sed -n '1,260p' {} \;
           echo '::endgroup::'
           echo 'Snapshot EF inconsistente: el bloque anterior contiene la migración diagnóstica efímera.' >&2
           exit 1

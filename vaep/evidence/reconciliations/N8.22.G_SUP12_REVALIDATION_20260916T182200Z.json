@@ -29,7 +29,7 @@
   "provider_revalidation": {
     "render_workspace_id": "tea-d97f0k28qa3s73ejqhtg",
     "dev_service_id": "srv-d9jblq7avr4c73c74jng",
-    "dev_service": "variapp-api-desarrollo",
+    "dev_service": "solqaryn-api-desarrollo",
     "dev_branch": "Desarrollo",
     "dev_runtime": "docker",
     "dev_health_check_path": "/health/ready",
@@ -41,7 +41,7 @@
     "secret_values_persisted": false
   },
   "evidence_discovery": {
-    "drive_search_query": "variapp-api-desarrollo environment variable",
+    "drive_search_query": "solqaryn-api-desarrollo environment variable",
     "authoritative_new_dev_env_name_inventory_found": false,
     "production_env_name_inventory_reference": "vaep/evidence/reconciliations/N8.22.G_OWNER_CONTROL_PLANE_EVIDENCE_20260916T172800Z.json",
     "production_env_values": "MASKED_NOT_CAPTURED"
@@ -79,7 +79,7 @@
     "material_gap_count": 0,
     "unknown_count": 1,
     "classification": "BLOCKER_EXTERNAL_CAUSAL",
-    "required_owner_action": "Provide or authorize a sanitized provider-authoritative Render DEV environment-variable NAME inventory for variapp-api-desarrollo; names only, never values."
+    "required_owner_action": "Provide or authorize a sanitized provider-authoritative Render DEV environment-variable NAME inventory for solqaryn-api-desarrollo; names only, never values."
   },
   "guards": {
     "main_write": 0,

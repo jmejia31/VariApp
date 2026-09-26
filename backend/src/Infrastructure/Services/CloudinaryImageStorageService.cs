@@ -157,10 +157,17 @@ public class CloudinaryImageStorageService : IImageStorageService
         await _cloudinary.DestroyAsync(deleteParams);
     }
 
-    public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
+    public Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
     {
-        var tenant = await ResolverTenantActualAsync();
-        return await DownloadAsync(tenant, url, RequestAborted);
+        if (string.IsNullOrWhiteSpace(url))
+            throw new ArgumentException("La URL de almacenamiento es obligatoria.", nameof(url));
+
+        // Este contrato se usa únicamente cuando el llamador ya comprobó ownership
+        // contra una entidad cargada desde el repositorio tenant-scoped (por ejemplo,
+        // Producto -> ProductoImagen). Permite imágenes válidas previas a la carpeta
+        // /empresas/{id}/ sin aceptar orígenes, cuentas o folders arbitrarios.
+        ExigirLocatorProductoAdministrado(url);
+        return DownloadInternalAsync(url, RequestAborted);
     }
 
     public Task<(Stream Contenido, string ContentType)?> DownloadAsync(
@@ -182,20 +189,23 @@ public class CloudinaryImageStorageService : IImageStorageService
         string url,
         CancellationToken cancellationToken)
     {
-        // Streaming server-side en vez de redirigir a la URL de Cloudinary
-        // directamente: el backend controla la autorización real de la descarga.
+        // La respuesta de Cloudinary se materializa antes de liberar HttpClient/HttpResponseMessage.
+        // Devolver directamente response.Content.ReadAsStreamAsync() dejaba al controlador con
+        // un stream cuya conexión podía cerrarse al salir de este método.
         using var httpClient = new HttpClient();
         try
         {
-            var response = await httpClient.GetAsync(
+            using var response = await httpClient.GetAsync(
                 url,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken);
             if (!response.IsSuccessStatusCode) return null;
 
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return (stream, contentType);
+            var memory = new MemoryStream();
+            await response.Content.CopyToAsync(memory, cancellationToken);
+            memory.Position = 0;
+            return (memory, contentType);
         }
         catch (OperationCanceledException)
         {
@@ -204,6 +214,39 @@ public class CloudinaryImageStorageService : IImageStorageService
         catch
         {
             return null;
+        }
+    }
+
+    private void ExigirLocatorProductoAdministrado(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(uri.Host, "res.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.IsDefaultPort ||
+            !string.IsNullOrEmpty(uri.UserInfo))
+        {
+            throw new BusinessRuleException(
+                "La URL de la imagen no pertenece al almacenamiento administrado por SOLQARYN.");
+        }
+
+        var segments = uri!.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length < 4 ||
+            !string.Equals(Uri.UnescapeDataString(segments[0]), _cloudName, StringComparison.Ordinal) ||
+            !string.Equals(segments[1], "image", StringComparison.Ordinal) ||
+            !string.Equals(segments[2], "upload", StringComparison.Ordinal))
+        {
+            throw new BusinessRuleException(
+                "La URL de la imagen no pertenece a la cuenta Cloudinary configurada.");
+        }
+
+        var configuredFolder = _folder.Trim('/');
+        var decodedPath = Uri.UnescapeDataString(uri.AbsolutePath);
+        var marker = $"/{configuredFolder}/";
+        if (!decodedPath.Contains(marker, StringComparison.Ordinal))
+        {
+            throw new BusinessRuleException(
+                "La URL de la imagen no pertenece al folder administrado de productos.");
         }
     }
 

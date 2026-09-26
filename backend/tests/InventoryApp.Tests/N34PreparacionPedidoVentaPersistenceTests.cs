@@ -46,7 +46,7 @@ public sealed class N34PreparacionPedidoVentaPersistenceTests
     private static AppDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql("Server=localhost;Database=variapp_n34_model;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
+            .UseMySql("Server=localhost;Database=solqaryn_n34_model;User=root;Password=test;", ServerVersion.Parse("8.0.36-mysql"))
             .Options;
         return new AppDbContext(options);
     }

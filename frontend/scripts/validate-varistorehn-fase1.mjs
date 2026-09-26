@@ -14,7 +14,8 @@ const [
   storefrontTs,
   storefrontHtml,
   storefrontScss,
-  storefrontResponsiveScss
+  storefrontResponsiveScss,
+  appRoutes
 ] = await Promise.all([
   read('varistorehn-header.component.ts'),
   read('varistorehn-header.component.html'),
@@ -22,14 +23,15 @@ const [
   read('varistorehn.component.ts'),
   read('varistorehn.component.html'),
   read('varistorehn.component.scss'),
-  read('varistorehn.responsive.scss')
+  read('varistorehn.responsive.scss'),
+  readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8')
 ]);
 
 const failures = [];
 const expect = (condition, message) => { if (!condition) failures.push(message); };
 
 expect(headerTs.includes('VARISTOREHN_PATHS'), 'El header debe construir navegación desde VARISTOREHN_PATHS.');
-expect(headerTs.includes('EmpresaIdentidadService'), 'El header debe consumir la identidad empresarial compartida.');
+expect(headerTs.includes('VaristorehnIdentidadService'), 'El header debe consumir la identidad comercial pública separada del shell.');
 expect(headerTs.includes('showModal()'), 'El menú móvil debe usar un diálogo modal nativo para contener el foco.');
 expect(headerTs.includes('telefonoWhatsapp'), 'WhatsApp debe normalizarse con la regla compartida del escaparate.');
 expect(headerHtml.includes('role="search"'), 'El buscador debe conservar semántica role=search.');
@@ -38,12 +40,26 @@ expect(headerHtml.includes('[attr.aria-expanded]="menuAbierto()"'), 'El disparad
 expect(headerHtml.includes('[totalUnidades]') === false, 'El header no debe intentar enlazar inputs a sí mismo.');
 expect(headerHtml.includes('{{ totalUnidades }}'), 'El contador visual del carrito debe usar el total real recibido.');
 expect(headerHtml.includes('enlaceWhatsapp()'), 'Debe existir una acción secundaria de WhatsApp cuando esté configurada.');
+expect(!headerHtml.includes('\\n'), 'El header público no debe renderizar escapes literales \\n en navegación o utilidades.');
 expect(headerScss.includes('min-height: 44px'), 'Los controles móviles deben conservar objetivos táctiles de al menos 44px.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(headerScss), 'El header no debe introducir colores hexadecimales fuera del tema.');
+
+const searchButtonRule = headerScss.match(/\.search-box button\s*\{([^}]*)\}/s)?.[1] ?? '';
+expect(searchButtonRule.includes('width: var(--target-min, 44px)'), 'El botón de búsqueda debe garantizar al menos 44px de ancho.');
+expect(searchButtonRule.includes('height: var(--target-min, 44px)'), 'El botón de búsqueda debe garantizar al menos 44px de alto.');
+
+const publicStoreRoute = appRoutes.match(/\{\s*path:\s*'varistorehn'\s*,[\s\S]*?\},/)?.[0] ?? '';
+expect(Boolean(publicStoreRoute), 'Debe existir la ruta pública /varistorehn.');
+expect(publicStoreRoute.includes('VaristorehnComponent'), 'La ruta /varistorehn debe cargar el escaparate público.');
+expect(!publicStoreRoute.includes('canActivate'), 'La ruta pública /varistorehn no debe incorporar guards administrativos.');
+expect(!publicStoreRoute.includes('authGuard'), 'La ruta pública /varistorehn no debe depender de authGuard.');
+expect(!publicStoreRoute.includes('permisoGuard'), 'La ruta pública /varistorehn no debe depender de permisoGuard.');
 expect(storefrontTs.includes('VaristorehnHeaderComponent'), 'El escaparate debe importar el header público reutilizable.');
 expect(storefrontHtml.includes('<app-varistorehn-header'), 'El escaparate debe delegar su cabecera al componente público.');
 expect(!storefrontHtml.includes('<header class="store-header">'), 'La cabecera monolítica anterior debe dejar de vivir en el escaparate.');
-expect(storefrontHtml.includes('(busquedaActualizada)="buscar($event)"'), 'La búsqueda del header debe seguir filtrando el catálogo actual.');
+expect(storefrontHtml.includes('(busquedaActualizada)="actualizarBusqueda($event)"'), 'El home debe recibir la búsqueda desde el header compartido.');
+expect(storefrontHtml.includes('(buscarSolicitado)="buscarCatalogo()"'), 'El home comercial debe enviar la búsqueda al catálogo independiente.');
+expect(storefrontTs.includes('VARISTOREHN_PATHS.productos'), 'La búsqueda del home debe usar la ruta canónica del catálogo.');
 expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El evento de carrito del header debe conservar un manejador explícito.');
 expect(storefrontTs.includes('navigateByUrl(VARISTOREHN_PATHS.carrito'), 'El manejador de carrito del home debe navegar a la ruta canónica global.');
 expect(!storefrontHtml.includes('#carritoDialog') && !storefrontHtml.includes('class="cart-dialog"'), 'El home no debe reintroducir un drawer de carrito paralelo.');
@@ -90,4 +106,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 1 — navegación/header: rutas públicas, carrito canónico y extracción completa de estilos aprobados.');
+console.info('Fase 1 — navegación/header: ruta pública, targets táctiles, carrito canónico y extracción completa de estilos aprobados.');

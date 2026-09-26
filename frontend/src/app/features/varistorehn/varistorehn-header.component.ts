@@ -11,7 +11,8 @@ import {
   inject,
   signal
 } from '@angular/core';
-import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { RouterLink } from '@angular/router';
+import { VaristorehnIdentidadService } from './varistorehn-identidad.service';
 import { telefonoWhatsapp } from './varistorehn.catalog';
 import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { IconoTiendaComponent } from './varistorehn.visual';
@@ -19,13 +20,13 @@ import { IconoTiendaComponent } from './varistorehn.visual';
 @Component({
   selector: 'app-varistorehn-header',
   standalone: true,
-  imports: [CommonModule, IconoTiendaComponent],
+  imports: [CommonModule, RouterLink, IconoTiendaComponent],
   templateUrl: './varistorehn-header.component.html',
   styleUrl: './varistorehn-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VaristorehnHeaderComponent {
-  readonly identidad = inject(EmpresaIdentidadService);
+  readonly identidad = inject(VaristorehnIdentidadService);
 
   @Input() busqueda = '';
   @Input() categorias: readonly string[] = [];
@@ -58,6 +59,7 @@ export class VaristorehnHeaderComponent {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
+    ofertas: VARISTOREHN_PATHS.ofertas,
     categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;

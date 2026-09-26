@@ -133,10 +133,10 @@ public sealed class M1ReconciliarReintentoIntegridadRelacional : Migration
     private static void ExecuteConditional(MigrationBuilder migrationBuilder, string objectCondition, string ddl)
     {
         var escapedDdl = ddl.Replace("'", "''", StringComparison.Ordinal);
-        migrationBuilder.Sql($"SET @variapp_m1_repair_sql = IF(({TargetPendingCondition}) AND ({objectCondition}), '{escapedDdl}', 'SELECT 1');");
-        migrationBuilder.Sql("PREPARE variapp_m1_repair_stmt FROM @variapp_m1_repair_sql;");
-        migrationBuilder.Sql("EXECUTE variapp_m1_repair_stmt;");
-        migrationBuilder.Sql("DEALLOCATE PREPARE variapp_m1_repair_stmt;");
+        migrationBuilder.Sql($"SET @solqaryn_m1_repair_sql = IF(({TargetPendingCondition}) AND ({objectCondition}), '{escapedDdl}', 'SELECT 1');");
+        migrationBuilder.Sql("PREPARE solqaryn_m1_repair_stmt FROM @solqaryn_m1_repair_sql;");
+        migrationBuilder.Sql("EXECUTE solqaryn_m1_repair_stmt;");
+        migrationBuilder.Sql("DEALLOCATE PREPARE solqaryn_m1_repair_stmt;");
     }
 
     private static string Escape(string value) => value.Replace("'", "''", StringComparison.Ordinal);

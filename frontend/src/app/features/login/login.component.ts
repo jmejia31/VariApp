@@ -45,6 +45,8 @@ export class LoginComponent {
   });
 
   constructor() {
+    this.identidad.usarPlataforma();
+
     if (this.authService.isAuthenticated()) {
       if (this.tenantContext.tieneContextoVerificado()) {
         this.redirigirSegunPermisos();
@@ -52,12 +54,10 @@ export class LoginComponent {
         // Sesión válida sin tenant verificado: permanecer en el gate de empresa.
         // No cargar permisos ni navegar al ERP hasta validar la membresía server-side.
         this.permisosRuntime.limpiar();
-        this.identidad.cargar().subscribe();
       }
       return;
     }
 
-    this.identidad.cargar().subscribe();
     const mensaje = this.sessionActivity.tomarMensajePendiente();
     if (mensaje) this.errorMessage.set(mensaje);
   }

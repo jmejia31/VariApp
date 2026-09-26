@@ -82,7 +82,7 @@
   },
   "nonCausalChecksExcluded": [
     "Vercel/deployment checks",
-    "VariApp CI skipped by workflow policy"
+    "Solqaryn CI skipped by workflow policy"
   ],
   "requiredChecksPassed": true,
   "runtime": {

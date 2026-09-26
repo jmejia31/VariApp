@@ -1,11 +1,14 @@
-# PROJECT_INDEX — VariApp
+# PROJECT_INDEX — Solqaryn
 
 Índice operativo del repositorio. Su objetivo es llevar al equipo directamente al área correcta sin reindexar todo el proyecto.
 
 ## Lectura inicial mínima
 
+Regla: navegar por estado y arquitectura vigentes. No abrir planes, fases o documentos no vigentes como requisito de trabajo salvo que el MAESTRO actual los cite expresamente.
+
+
 1. `AGENTS.md` — reglas obligatorias y gate de identidad.
-2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `VARIAPP`.
+2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `SOLQARYN`.
 3. `TASKS.md` — trabajo pendiente/vigente.
 4. última entrada relevante de `CHANGELOG_AI.md` — continuidad entre agentes.
 5. `PROJECT_INDEX.md` — localizar archivos.
@@ -24,8 +27,8 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 - `CHANGELOG_AI.md`: bitácora/evidencia de cada changeset.
 - `README.md`: introducción, stack y operación básica.
 - `CONTRIBUTING.md`: flujo Git y criterios de contribución.
-- `implementation_plan.md`: plan de implementación histórico/específico cuando aplique.
 - `render.yaml`: configuración versionada relacionada con Render; tratar con cautela por separación de entornos.
+- `docs/ENTORNOS_DEV_PROD.md`: fuente canónica para GitHub Environments y topología Aiven DEV/PROD (`DEV`, `PROD`, `solqaryn-mysql`, bases/usuarios aislados).
 
 ## Backend
 
@@ -77,16 +80,13 @@ Pruebas Playwright para flujos críticos.
 
 ### `docs/`
 
-Documentación funcional, técnica, certificaciones, auditorías ERP-N0 y guías complementarias.
+Documentación funcional, técnica y guías complementarias de estado vigente.
 
 Administración colaborativa central:
 
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
-- `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`
-- `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de VariApp; no es fuente de estado actual.
-
-Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
+- `docs/ENTORNOS_DEV_PROD.md`
 
 No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento asociado al punto en ejecución.
 
@@ -95,7 +95,7 @@ No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento aso
 - `scripts/iniciar-sesion-ia.ps1`: gate read-only de identidad, rama, HEAD, divergencia y estado del checkout. Ejecutarlo al inicio de cada conversación/sesión local.
 - `scripts/configurar-colaboracion.ps1`: configuración inicial/sincronización del flujo local y hooks.
 - `.githooks/pre-commit`: bloquea commits locales si repo/rama son incorrectos o falta `CHANGELOG_AI.md` en el changeset.
-- `.githooks/post-commit`: publica commits de `Desarrollo` solo si `origin` pertenece realmente a VariApp.
+- `.githooks/post-commit`: publica commits de `dev` solo si `origin` pertenece realmente a Solqaryn.
 
 ## CI
 
@@ -128,14 +128,14 @@ No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estruc
 | Ruta, menú o permiso visual | `frontend/src/app/app.routes.ts` o `features/**/**.routes.ts` | `core/guards`, `core/navigation` y permiso del endpoint backend |
 | Login, JWT o permisos | `AuthController.cs`, `Program.cs` y servicios Auth/RBAC | `core/auth`, `core/guards`, interceptor y pruebas de acceso |
 | Imagen, PDF, correo o exportación | interfaz en `Application/Interfaces` | implementación en `Infrastructure/Services` y registro DI en `Program.cs` |
-| Variable o entorno | `backend/src/API/appsettings*.json`, `frontend/src/environments`, `frontend/vercel.json`, `render.yaml` | `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`; nunca copiar secretos |
+| Variable o entorno | `backend/src/API/appsettings*.json`, `frontend/src/environments`, `frontend/vercel.json`, `render.yaml` | `docs/ENTORNOS_DEV_PROD.md`; nunca copiar secretos |
 | Prueba localizada | `backend/tests/InventoryApp.Tests` o `frontend/e2e` | workflow específico en `.github/workflows` |
 
 ## Puntos de entrada, API y datos
 
 - Backend: `backend/src/API/Program.cs`; controladores bajo `backend/src/API/Controllers`. La mayoría declara una base con `[Route("...")]`; salud se expone directamente como `/health` y `/health/ready`.
 - Frontend: `frontend/src/main.ts` -> `frontend/src/app/app.config.ts` -> `frontend/src/app/app.routes.ts`. Algunas áreas agregan rutas en archivos `*.routes.ts` dentro de su feature.
-- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Existen migraciones históricas vigentes en `backend/src/Infrastructure/Migrations` y `backend/src/Infrastructure/Persistence/Migrations`; inspeccionar ambas ubicaciones y no moverlas ni consolidarlas desde un cambio local.
+- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Existen migraciones en `backend/src/Infrastructure/Migrations` y `backend/src/Infrastructure/Persistence/Migrations`; inspeccionar ambas ubicaciones y no moverlas ni consolidarlas desde un cambio local.
 - Dependencias: proyectos `backend/src/*/*.csproj`, solución `backend/InventoryApp.sln`, `frontend/package.json` y `frontend/angular.json`.
 
 ## Mapa operativo por capas
@@ -154,7 +154,7 @@ Angular route/component
 - API: `backend/src/API/Controllers`; composición, middleware y DI en `backend/src/API/Program.cs`.
 - Application: `backend/src/Application/{Services,Interfaces,DTOs,Validators}`.
 - Domain: `backend/src/Domain/{Entities,Enums,Common}`.
-- Infrastructure/DB: `backend/src/Infrastructure/{Repositories,Services,Persistence}` y las dos carpetas históricas de migraciones indicadas arriba.
+- Infrastructure/DB: `backend/src/Infrastructure/{Repositories,Services,Persistence}` y las dos carpetas de migraciones indicadas arriba.
 - Integraciones: contratos en `Application/Interfaces`, adaptadores concretos en `Infrastructure/Services` y registro DI en `Program.cs` (Cloudinary, QuestPDF, SMTP y exportaciones).
 
 ## Mapa por dominio
@@ -187,7 +187,7 @@ Los nombres de migración son anclas de búsqueda, no una lista exhaustiva ni au
 - Escritura transaccional: componente -> servicio HTTP -> controlador -> servicio Application -> repositorio/`IUnitOfWork` -> `AppDbContext`.
 - Inventario comercial: compra/recepción o venta/pedido -> servicio funcional -> existencia/reserva/kardex -> movimiento y trazabilidad; revisar ambos dominios solo si el cambio cruza esa frontera.
 - Facturación: venta/documento -> `FacturaService` -> repositorios -> QuestPDF; correo y enlaces públicos pasan por sus interfaces/adaptadores.
-- Multimedia: UI multipart -> controlador/servicio -> interfaz de almacenamiento -> Cloudinary; las reglas de entorno permanecen en `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
+- Multimedia: UI multipart -> controlador/servicio -> interfaz de almacenamiento -> Cloudinary; las reglas de entorno permanecen en `docs/ENTORNOS_DEV_PROD.md`.
 - Errores y observabilidad: `Program.cs` -> `CorrelationIdMiddleware` -> `ExceptionHandlingMiddleware`; filtros y health checks viven en API.
 
 ## Alcance: qué no volver a inspeccionar

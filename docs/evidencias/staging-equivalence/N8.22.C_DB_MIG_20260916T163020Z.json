@@ -19,7 +19,7 @@
     },
     {
       "dimension":"dev_database_runtime",
-      "dev":"Aiven MySQL 8.4.8, service variapp-mysql, plan free-1-1gb",
+      "dev":"Aiven MySQL 8.4.8, service solqaryn-mysql, plan free-1-1gb",
       "prod":"not inferred from DEV service",
       "classification":"EXPECTED_ENV_DIFFERENCE",
       "reason":"DEV runtime is independently proven; a production database must not be assumed to be the same service"

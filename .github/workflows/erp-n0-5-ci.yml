@@ -2,7 +2,7 @@ name: ERP-N0.5 - Certificación MetodoPago histórico
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
     paths:
       - 'backend/src/**/*MetodoPago*.cs'
       - 'backend/src/**/*CompraMetodoPagoResolver*.cs'
@@ -54,8 +54,8 @@ jobs:
       Database__ServerVersion: 8.4.0
       Database__ApplyMigrationsOnStartup: 'false'
       Jwt__Secret: ERP-N0-5-CI-Only-Secret-With-More-Than-32-Characters-2026
-      Jwt__Issuer: VariApp.CI
-      Jwt__Audience: VariApp.CI.Frontend
+      Jwt__Issuer: Solqaryn.CI
+      Jwt__Audience: Solqaryn.CI.Frontend
 
     steps:
       - uses: actions/checkout@v4
@@ -108,10 +108,10 @@ jobs:
                VendedorUsuarioId,VendedorNombreUsuario,ImporteBruto,Subtotal,Descuento,Impuesto,
                CostoEnvio,EnvioExonerado,Total,TotalPagado,SaldoPendiente)
             VALUES
-              (9511,9501,'N05-F-1',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 1',1,'n05.ci',100,100,0,0,0,0,100,100,0),
-              (9512,9502,'N05-F-2',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 2',1,'n05.ci',100,100,0,0,0,0,100,100,0),
-              (9513,9503,'N05-F-3',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 3',1,'n05.ci',100,100,0,0,0,0,100,100,0),
-              (9514,9504,'N05-F-4',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 4',1,'n05.ci',100,100,0,0,0,0,100,100,0);
+              (9511,9501,'N05-F-1',UTC_TIMESTAMP(6),'Emitida','HNL','Solqaryn CI','N05 Cliente 1',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9512,9502,'N05-F-2',UTC_TIMESTAMP(6),'Emitida','HNL','Solqaryn CI','N05 Cliente 2',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9513,9503,'N05-F-3',UTC_TIMESTAMP(6),'Emitida','HNL','Solqaryn CI','N05 Cliente 3',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9514,9504,'N05-F-4',UTC_TIMESTAMP(6),'Emitida','HNL','Solqaryn CI','N05 Cliente 4',1,'n05.ci',100,100,0,0,0,0,100,100,0);
 
             INSERT INTO FacturaPagos
               (Id,FacturaId,FechaPago,Monto,MetodoPago,Anulado,FechaCreacion,FechaActualizacion)

@@ -1,4 +1,4 @@
-# TASKS — VariApp
+# TASKS — Solqaryn
 
 Registro operativo resumido de cierres ERP certificados. La autoridad de ejecución detallada permanece en COLA/CONFIG y el Plan Maestro.
 
@@ -193,7 +193,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] N4.3.A-G — DoD técnico satisfecho sobre baseline funcional certificado `ad0cf70fc6ced126de1878b61fe4ae02c8d41a01`.
 - [x] N4.3.F — RBAC/auditoría/seguridad/observabilidad reconciliado por QA takeover, sin R3.
 - [x] N4.3.H — certificación canónica publicada en `docs/CERTIFICACION_N4_3_CONCILIACION_BANCARIA.md` mediante `3d7b8c776b813c359e373780f1a1039c1baed8b1`.
-- [x] Matriz exact-head de `3d7b8c776b813c359e373780f1a1039c1baed8b1`: gates aplicables terminales `SUCCESS`; `VariApp CI=SKIPPED` excluido como PASS.
+- [x] Matriz exact-head de `3d7b8c776b813c359e373780f1a1039c1baed8b1`: gates aplicables terminales `SUCCESS`; `Solqaryn CI=SKIPPED` excluido como PASS.
 - [x] P0 abiertos=0; P1 abiertos=0.
 - [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup.
 - [ ] `CHANGELOG_AI.md` pendiente de reconciliación aditiva/history-preserving y nueva certificación exact-head; no false `LISTO_REAL`.
@@ -240,7 +240,7 @@ Este rollup es append-only y supersede únicamente el estado operativo stale ant
 - [x] N4.6.D — `LISTO_REAL`; repositorio, servicio, DTOs, API jerárquica y validación de ciclos materializados en `a4392c44` y `9d649bbb`.
 - [x] N4.6.E — `LISTO_REAL`; UI `/plan-cuentas`, árbol, formularios, permisos y estados de interfaz en `9d649bbb`.
 - [x] N4.6.F — `LISTO_REAL`; autorización, RBAC, auditoría y seguridad verificadas por contratos y gates del exact-head.
-- [x] N4.6.G — `LISTO_REAL`; Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034` en `SUCCESS`; `VariApp CI` `SKIPPED` no se cuenta como PASS.
+- [x] N4.6.G — `LISTO_REAL`; Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034` en `SUCCESS`; `Solqaryn CI` `SKIPPED` no se cuenta como PASS.
 - [x] N4.6.H — `LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`, operación/rollback documentados, `P0=0`, `P1=0`.
 - [x] Fase 2 queda registrada como `EXTERNAL_INFRA`: HTTP 503 de `registry.npmjs.org` durante `npm audit`; no es fallo causal del producto.
 
@@ -253,7 +253,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 
 ## Integración AntiG — Reviewer/Fixer automático — 2026-09-03
 
-- [x] Custom Agent de workspace `variapp-reviewer` definido con gobierno VariApp y separación `READY_FOR_VAEP != LISTO_REAL`.
+- [x] Custom Agent de workspace `solqaryn-reviewer` definido con gobierno Solqaryn y separación `READY_FOR_VAEP != LISTO_REAL`.
 - [x] Worker automático Jules -> AntiG -> VAEP implementado fail-closed con mutex, watermark, artifact causal, scope guard y publicación sin force/rebase.
 - [x] Schema estructurado y self-test CI agregados.
 - [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
@@ -289,7 +289,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 - [x] N4.7.A-G — `LISTO_REAL`; baseline funcional certificado `c8d1e373ba8ea008bf773e69afa10f5f18d6de8b`.
 - [x] Certificación canónica de H publicada y REVIEW_FIRST aprobada: `docs/CERTIFICACION_N4_7_ASIENTOS.md`.
-- [x] Exact-head documental previo `6986874048985e4746d21e23254479b391220445`: gates aplicables terminales `SUCCESS`; `VariApp CI=SKIPPED` excluido como PASS; P0=0/P1=0.
+- [x] Exact-head documental previo `6986874048985e4746d21e23254479b391220445`: gates aplicables terminales `SUCCESS`; `Solqaryn CI=SKIPPED` excluido como PASS; P0=0/P1=0.
 - [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup.
 - [ ] `N4.7.H` permanece fail-closed hasta certificar los gates aplicables y P0/P1=0 del exact-head resultante de completar también `CHANGELOG_AI.md`; no false `LISTO_REAL`.
 
@@ -326,7 +326,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Eliminados los literales runtime restantes de `JULES_MAX_ATTEMPTS`, `JULES_REWORK_MAX`, SLA/dwell/budget en self-tests y prompts; retry validation consume valores emitidos por MASTER.
 - [x] `result.json` de worker y timeout incorpora `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
 - [x] Ocho workflows Jules permanecen sin overrides `5400/1080`; `timeout-minutes: 25` queda únicamente como safety-net externo.
-- [x] `VAEP engine lightweight checks` exact-head de la corrección: run `33909740182` = `SUCCESS`. `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] `VAEP engine lightweight checks` exact-head de la corrección: run `33909740182` = `SUCCESS`. `Solqaryn CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
 
 **MIGRATION_PHASE_2=CLOSED/PASS. RUNTIME_POLICY_DUPLICATES=0. PARSER_FAIL_CLOSED=PASS. MASTER_SHA_POLICY_HASH_EVIDENCE=PASS. FASE_3=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD.**
@@ -344,7 +344,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Auxiliares stop/session-health/feedback/diagnostic quedaron MASTER-bound y sin writer de producto/LISTO_REAL.
 - [x] Se corrigió el YAML heredoc preexistente de `vaep-jules-diagnostic.yml`; el workflow volvió a crear jobs y el run PR `33911803009` terminó `SUCCESS`.
 - [x] Gate runtime causal: `VAEP engine lightweight checks` push `33911698939` = `SUCCESS` sobre `b130d044497af09ad81ed33ec4e182bad1a8769f`; cambio posterior `8310372f...` es únicamente reparación del workflow diagnóstico y su check propio quedó SUCCESS.
-- [x] `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] `Solqaryn CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
 
 **MIGRATION_PHASE_3=CLOSED/PASS. NO_OP=PASS. TIMEOUT_SUPERSESSION=PASS. LATE_RESULT_GUARD=PASS. DURABLE_TIMEOUT_EVIDENCE=PASS. FASE_4=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -359,11 +359,11 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
   - `.github/workflows/vaep-n39h-exact-publish.yml`
   - `.github/workflows/vaep-n310h-exact-publish.yml`
   - `.github/workflows/vaep-n311h-exact-changelog-publisher.yml`
-- [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-variapp`.
+- [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-solqaryn`.
 - [x] Auditoría exhaustiva de los 38 workflows restantes: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`.
 - [x] `PRODUCT_CI_PRESERVED=PASS`.
 - [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic` run `33912398627` = `SUCCESS`.
-- [x] `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] `Solqaryn CI=SKIPPED` no se usa como PASS.
 - [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
 
 **MIGRATION_PHASE_4=CLOSED/PASS. HISTORICAL_GIT_WRITERS=0. UNAUTHORIZED_COMMIT_PUSH_RESET=0. PRODUCT_CI_PRESERVED=PASS. FASE_5=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
@@ -402,7 +402,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 ## VAEP Fase 7 — Certificación integral y retorno operativo — 2026-09-04
 
 - [x] REVIEW_FIRST de migración F0-F6 detectó una regresión concreta: el overlay de admisión de Fase 1 había sido retirado anteriormente por no estar definido en MASTER. Fase 7 lo corrigió sin crear autoridad paralela: `docs/VAEP_AUTHORITY.md` ahora define explícitamente `vaep/control/dispatch-admission.json` y `.github/scripts/vaep-jules-master.sh` lo consume fail-closed.
-- [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `VariApp CI=SKIPPED` excluido de PASS.
+- [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `Solqaryn CI=SKIPPED` excluido de PASS.
 - [x] Admisión probada por self-test: `NO_OP`, múltiples manifests fail-closed, `FROZEN`, `OPEN`, valor inválido, clave desconocida y state ausente. `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones ACTIVE_REAL preexistentes.
 - [x] Política MASTER: exactamente un bloque parseable con seis claves; parser fail-closed sin `source`/`eval`; hash determinístico del bloque preservado; runtime emite `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
 - [x] Runtime Jules final: `NO_OP=PASS`, budget interno desde MASTER, safety-net externo 25m, timeout supersession, ownership revoke, lane release, durable evidence y late-result guard.
@@ -422,7 +422,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `TASKS.md` marcado explícitamente como historial/no machine-readable para `CURRENT_PARENT`, `NEXT_ACTION` y estado operativo; consumidores deben leer `CONFIG/COLA/BITACORA` frescos.
 - [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE`, `VAEP_CHECKPOINTS`.
 - [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se eliminó el literal runtime de checkpoints.
-- [x] Gate exact-head de hardening `09ee682712ba29d79d235a62415de20c308db7c9`: `VAEP engine lightweight checks #33920294318=SUCCESS`; `VAEP Jules Diagnostic #33920294338=SUCCESS`; `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] Gate exact-head de hardening `09ee682712ba29d79d235a62415de20c308db7c9`: `VAEP engine lightweight checks #33920294318=SUCCESS`; `VAEP Jules Diagnostic #33920294338=SUCCESS`; `Solqaryn CI=SKIPPED` no se usa como PASS.
 - [x] Existencia/habilitación de `VAEP MASTER 00/15/30/45/55` verificada externamente en el control-plane de automatizaciones; no depende de que existan cinco cron equivalentes en Git.
 - [x] La limitación local de Bash reportada por Codex es de su entorno Windows y no se usa como PASS; la validación causal se tomó de GitHub Actions.
 
@@ -641,7 +641,7 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 
 - [x] N8.6.A-G fueron revalidados contra el estándar vigente con receipts frescos; P0=0 y P1 de producto=0.
 - [x] Functional tested head `51929a108322acf01e5b63cc4274d4c7b2bd78c9`; regresión causal dirigida y suites API/RBAC/auditoría/MySQL/Angular/E2E terminaron `SUCCESS` según `docs/CERTIFICACION_N8_6_WHATSAPP_REAL.md`.
-- [x] Frontera real certificada: handoff de navegador hacia `https://wa.me/<telefono>?text=...`; VariApp no implementa envío server-side por Meta/Twilio ni puede afirmar `sent`, `delivered` o `read`.
+- [x] Frontera real certificada: handoff de navegador hacia `https://wa.me/<telefono>?text=...`; Solqaryn no implementa envío server-side por Meta/Twilio ni puede afirmar `sent`, `delivered` o `read`.
 - [x] Certificación current-standard materializada en `docs/CERTIFICACION_N8_6_WHATSAPP_REAL.md`; no se enviaron mensajes externos durante la revalidación.
 - [x] `main`, Producción, PR #2, secretos, DNS/certificados y datos productivos permanecen intactos.
 - [ ] N8.6.H sólo pasa a `LISTO` después de REVIEW_FIRST final P0=0/P1=0, receipt verificable y write/readback del control-plane; este bloque por sí solo no cierra H.
@@ -723,7 +723,7 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] `N8.13.A-G` fueron revalidados secuencialmente contra el estándar vigente; el histórico se usó sólo como evidencia de apoyo.
 - [x] `N8.13.F` y `N8.13.G` quedaron certificados con REVIEW_FIRST fresco y `P0=0/P1=0`; gates causales `35258962286=SUCCESS` y `35258969104=SUCCESS`.
 - [x] Functional tested head `6fd3e28cbf28164d110d6b83756b9094cec654a6`; árboles equivalentes vigentes: backend `f8db476310130c169ddb5d8c4ea03cfbab9617f6`, frontend `3d7847eb8817b14942746f1e31114e56c15efbdd`.
-- [x] Runtime DEV verificado: `variapp-desarrollo` READY, raíz HTTP 200 y `/api/health/ready` HTTP 200 con base de datos conectada; target backend `variapp-api-desarrollo.onrender.com`.
+- [x] Runtime DEV verificado: `solqaryn-desarrollo` READY, raíz HTTP 200 y `/api/health/ready` HTTP 200 con base de datos conectada; target backend `solqaryn-api-desarrollo.onrender.com`.
 - [x] Comparación con Producción se realizó sólo read-only; no hubo deploy, cambio de variables, secretos, DNS, certificados ni datos productivos.
 - [x] Certificación current-standard: `vaep/evidence/certifications/N8.13_STAGING_CURRENT_STANDARD_CERT_20260917T205649Z_VAEP48.md`.
 - [x] `TASKS_ADDITIVE_STATE_RECONCILIATION` queda materializada por este append preservando íntegramente la historia previa.
@@ -780,3 +780,47 @@ Este bloque es estrictamente aditivo/history-preserving. El estado operativo vig
 - [x] N9.3.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; la certificación `LISTO` sólo se emite después del readback y REVIEW_FIRST final.
 
 **N9.3 no se promueve por este texto aislado: el cierre autoritativo requiere receipt/readback current-standard en COLA/CONFIG. No se tocó main, Producción, PR #2, secretos, DNS ni certificados.**
+
+
+## ERP-N9.4 Migraciones productivas — cierre current-standard 2026-09-18
+
+- [x] N9.4.C: APPLY/postcheck productivo completado con respaldo confirmado previamente por el propietario; Producción quedó LIVE, DB al día y maintenance OFF.
+- [x] Incidente N0.4 de duplicados RBAC legacy recuperado de forma retry-safe sin abrir tráfico durante la migración.
+- [x] Certificación exact-head N0.4 run 35304697573 / job 105474385670 SUCCESS: backend 2328/2328, preflight, APPLY, aislamiento, deduplicación, guards fail-closed y snapshot EF PASS.
+- [x] N9.4.D/E: N/A grounded sin fabricar backend/API ni frontend/UX; no había delta material requerido por el procedimiento.
+- [x] N9.4.F/G: seguridad/observabilidad y CI current-standard PASS, P0=0/P1=0.
+- [x] Commit productivo estabilizado 7f140442d598aaea36b39952bad5ebd9ab4f2613; deploy final dep-damb4lqjnfac73efl1pg LIVE.
+- [x] Última migración observada 20260914232400_N7_10_C_DocumentoFiscalPersistencia; reinicio final indicó database already up to date.
+- [ ] N9.4.H se declara LISTO únicamente tras hard verify de este append y CHANGELOG_AI, retiro del writer temporal, REVIEW_FIRST final, receipt y readback del control-plane.
+
+
+## ERP-N9.5 — Smoke test — cierre current-standard 2026-09-18
+
+- [x] N9.5.A-F preservados/revalidados current-standard en la cadena vigente.
+- [x] N9.5.G QA/regresión/CI certificado con REVIEW_FIRST `P0=0/P1=0` sobre functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+- [x] Admission exact-head `35316302522` SUCCESS.
+- [x] Aceptación integral exact-head `35316302603` SUCCESS: Playwright `100/100`, SMTP/PDF SUCCESS; artifact `10535867520`, digest `sha256:5b073d44217948a3cafd2938d6a1ed24f3c36e5b3234450ec1e1ab09085fd85a`.
+- [x] Certificación canónica materializada en `docs/CERTIFICACION_N9_5_SMOKE_TEST.md`.
+- [x] N9.5.H materializa este registro y la entrada aditiva correspondiente en `CHANGELOG_AI.md` preservando byte por byte el prefijo histórico; su `LISTO` sólo es válido tras REVIEW_FIRST, receipt y readback posteriores a este append.
+
+**El parent N9.5 sólo queda formalmente `LISTO` cuando COLA/CONFIG/PLAN_MAESTRO y el receipt fresco de N9.5.H confirman el cierre; este texto aislado no auto-certifica estado ni autoriza promoción.**
+
+
+## ERP-N9.6 — Hypercare — cierre current-standard 2026-09-18
+
+- [x] N9.6.A–G revalidados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Recovery same-run: retirado el probe temporal que apuntaba a Producción; reemplazado por verificación one-shot estrictamente DEV y luego retirado.
+- [x] Gate Hypercare DEV `35319732966` SUCCESS: backend health/readiness/latencia, frontend shell/latencia y superficies críticas anónimas fail-closed.
+- [x] Functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0` preservado por equivalencia de producto; aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF).
+- [x] Certificación canónica: `docs/CERTIFICACION_N9_6_HYPERCARE.md`.
+- [x] N9.6.H materializa este registro y su bloque correspondiente en `CHANGELOG_AI.md` mediante append byte-safe; `LISTO` sólo se declara tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar el writer temporal, REVIEW_FIRST final, receipt y write/readback.
+
+
+## ERP-N9.7 — Postmortem — cierre current-standard 2026-09-18
+
+- [x] N9.7.A–G revalidados current-standard con REVIEW_FIRST y P0=0/P1=0.
+- [x] Postmortem materializado en `docs/POSTMORTEM_N9_7.md`; certificación en `docs/CERTIFICACION_N9_7_POSTMORTEM.md`.
+- [x] Sin delta causal de producto, contratos, schema, tests o runtime frente al functional/test head `1ac95f51176d8b9240741b2e33ab2bd4c2605dc0`.
+- [x] Aceptación `35316302603` SUCCESS (`100/100` Playwright + SMTP/PDF) y Hypercare DEV `35319732966` SUCCESS conservados como gates causales por equivalencia demostrada.
+- [x] Incidencias internas observadas y recuperadas same-run quedaron documentadas como aprendizaje; no persisten blockers P0/P1.
+- [x] N9.7.H materializa este registro y el bloque correspondiente de `CHANGELOG_AI.md` mediante append byte-safe; LISTO sólo tras verificar prefijo histórico exacto, additions>0/deletions=0, retirar writer temporal, REVIEW_FIRST final, receipt y write/readback.

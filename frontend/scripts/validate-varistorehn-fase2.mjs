@@ -99,7 +99,11 @@ for (const required of [
   'VARISTOREHN_PATHS.categoria',
   'replaceUrl: true',
   'VaristorehnCarritoService',
-  'this.carrito.hidratar(productos'
+  'this.carrito.hidratar(productos',
+  'productosCategoria',
+  'estadoProductos',
+  'precioVenta',
+  'etiquetaDisponibilidad'
 ]) {
   expect(categoryTs.includes(required), `La página por slug debe integrar ${required}.`);
 }
@@ -111,6 +115,11 @@ expect(!categoryTs.includes('CategoriasListComponent'), 'La página canónica no
 expect(!categoryTs.includes('authGuard') && !categoryTs.includes('permisoGuard'), 'La página canónica no debe depender de guards administrativos.');
 expect(categoryHtml.includes("estado() === 'not-found'"), 'La plantilla debe representar explícitamente el estado no encontrado.');
 expect(categoryHtml.includes('[href]="rutaCatalogoCategoria()"'), 'La página canónica debe permitir continuar al catálogo actual filtrado.');
+expect(categoryHtml.includes('category-products-grid') && categoryHtml.includes('productosCategoria()'), 'La categoría debe mostrar productos relacionados directamente, sin obligar a saltar primero al catálogo.');
+for (const state of ['loading', 'error', 'empty']) {
+  expect(categoryHtml.includes(`estadoProductos() === '${state}'`), `Los productos de categoría deben representar el estado ${state}.`);
+}
+expect(categoryHtml.includes('[href]="rutaProducto(producto)"'), 'Cada producto relacionado debe enlazar a su detalle público independiente.');
 expect(categoryHtml.includes('destinoSaltar="#contenido-categoria"'), 'La página canónica debe reutilizar el skip link del header.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(categoryScss), 'La página canónica no debe introducir una paleta hexadecimal paralela.');
 expect(!categoryScss.includes('--color-background'), 'La página canónica debe usar --color-bg, token real del tema, y no --color-background.');
@@ -118,6 +127,8 @@ expect(!categoryScss.includes('--color-text-secondary'), 'La página canónica d
 expect(categoryScss.includes('var(--color-bg)'), 'La página canónica debe heredar explícitamente el fondo canónico del tema.');
 expect(categoryScss.includes('var(--color-text-muted)'), 'La página canónica debe heredar explícitamente el texto secundario canónico del tema.');
 expect(categoryScss.includes('min-height: 44px'), 'La página canónica debe conservar objetivos táctiles de al menos 44px.');
+expect(categoryScss.includes('.category-products-grid'), 'La página canónica debe maquetar los productos relacionados.');
+expect(!/@media\s*\(\s*max-width/i.test(categoryScss), 'La página canónica de categoría debe mantener arquitectura mobile-first real.');
 
 expect(cartStore.includes('restaurarCarrito'), 'La rehidratación contra precio/stock actuales debe vivir en el carrito central.');
 expect(cartStore.includes('referenciasCarrito'), 'El carrito central debe persistir referencias mínimas.');
@@ -125,7 +136,7 @@ expect(storefrontTs.includes('categoriasTienda'), 'El home debe consumir el esta
 expect(storefrontTs.includes('cargarCategorias()'), 'El home debe cargar categorías mediante la fuente pública dedicada.');
 expect(storefrontTs.includes('this.servicio.obtenerCategorias()'), 'El home no debe inferir categorías reales desde productos.');
 expect(!storefrontTs.includes('new Set(this.productos().map(p => p.categoria))'), 'Debe eliminarse la inferencia de categorías basada en texto de producto.');
-expect(storefrontHtml.includes('categoriasTienda()'), 'La sección visual y los filtros del home deben consumir CategoriaTienda.');
+expect(storefrontHtml.includes('categoriasPortada()'), 'La sección visual del home debe consumir una proyección limitada del estado canónico CategoriaTienda.');
 expect(storefrontHtml.includes('estadoCategorias()'), 'La sección de categorías del home debe representar estados explícitos.');
 expect(!storefrontHtml.includes('categoria.producto'), 'La imagen de categoría no debe inventarse tomando un producto representativo.');
 expect(!storefrontHtml.includes('categoria.cantidad'), 'El conteo visual debe provenir de CategoriaTienda, no de un cálculo local de productos.');

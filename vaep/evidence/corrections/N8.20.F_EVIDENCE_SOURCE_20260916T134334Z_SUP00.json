@@ -9,7 +9,7 @@
   "impact": "Source-selection defect in closure metadata only; no runtime, database, deployment, secret, production, main, PR #2, purchase or restore action occurred.",
   "resolution": {
     "authoritative_task_evidence": "docs/evidencias/database-provider/n8-20-f/github-actions/35101887861-1/N8.20.F_AIVEN_CAPABILITIES_EVIDENCE.json",
-    "service": "variapp-mysql",
+    "service": "solqaryn-mysql",
     "engine": "mysql",
     "plan": "free-1-1gb",
     "dev_db_host_sha256": "882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0",

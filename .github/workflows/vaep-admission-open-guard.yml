@@ -2,7 +2,7 @@ name: VAEP OPEN-only admission invariant
 
 on:
   push:
-    branches: [Desarrollo]
+    branches: [dev]
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
-      BRANCH: Desarrollo
+      BRANCH: dev
       ADMISSION_PATH: vaep/control/dispatch-admission.json
       MASTER_PATH: docs/VAEP_AUTHORITY.md
     steps:

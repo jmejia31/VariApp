@@ -1466,6 +1466,185 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("Clientes", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaCuentaCliente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Correo")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("CorreoNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("UltimoAccesoUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_TiendaCuentasCliente_Cliente");
+
+                    b.HasIndex("CorreoNormalizado")
+                        .IsUnique()
+                        .HasDatabaseName("UX_TiendaCuentasCliente_Correo");
+
+                    b.ToTable("TiendaCuentasCliente", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaDireccionCliente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<int>("CuentaClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("Predeterminada")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Recibe")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuentaClienteId", "Predeterminada")
+                        .HasDatabaseName("IX_TiendaDireccionesCliente_Cuenta_Predeterminada");
+
+                    b.ToTable("TiendaDireccionesCliente", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaFavoritoCliente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CuentaClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.HasIndex("CuentaClienteId", "ProductoId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_TiendaFavoritosCliente_Cuenta_Producto");
+
+                    b.ToTable("TiendaFavoritosCliente", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaSesionCliente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CuentaClienteId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiraUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("RevocadaUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<DateTime?>("UltimoUsoUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("UX_TiendaSesionesCliente_TokenHash");
+
+                    b.HasIndex("CuentaClienteId", "ExpiraUtc")
+                        .HasDatabaseName("IX_TiendaSesionesCliente_Cuenta_Expira");
+
+                    b.ToTable("TiendaSesionesCliente", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Color", b =>
                 {
                     b.Property<int>("Id")
@@ -1540,6 +1719,58 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasDatabaseName("IX_Colores_Estado");
 
                     b.ToTable("Colores", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaCuentaCliente", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaDireccionCliente", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.TiendaCuentaCliente", "CuentaCliente")
+                        .WithMany("Direcciones")
+                        .HasForeignKey("CuentaClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CuentaCliente");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaFavoritoCliente", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.TiendaCuentaCliente", "CuentaCliente")
+                        .WithMany("Favoritos")
+                        .HasForeignKey("CuentaClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CuentaCliente");
+
+                    b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaSesionCliente", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.TiendaCuentaCliente", "CuentaCliente")
+                        .WithMany("Sesiones")
+                        .HasForeignKey("CuentaClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CuentaCliente");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
@@ -7031,6 +7262,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<int>("Accion")
                         .HasColumnType("int");
 
+                    b.Property<int>("Ambito")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
@@ -7083,7 +7319,13 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasIndex("Modulo", "Accion")
                         .IsUnique();
 
-                    b.ToTable("Permisos", (string)null);
+                    b.HasIndex("Ambito", "Activo")
+                        .HasDatabaseName("IX_Permisos_Ambito_Activo");
+
+                    b.ToTable("Permisos", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Permisos_Ambito", "`Ambito` IN (1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Plan", b =>
@@ -7603,6 +7845,11 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("EsDestacado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
                     b.Property<int?>("EliminadoPorUsuarioId")
                         .HasColumnType("int");
 
@@ -7653,6 +7900,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
+
+                    b.HasIndex("EsDestacado", "Activo")
+                        .HasDatabaseName("IX_Productos_EsDestacado_Activo");
 
                     b.HasIndex("ColorId")
                         .HasDatabaseName("IX_Productos_ColorId");
@@ -8191,6 +8441,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
 
+                    b.Property<int?>("AmbitoAutoridad")
+                        .HasColumnType("int");
+
                     b.Property<string>("CorrelationId")
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)");
@@ -8203,6 +8456,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<string>("Entidad")
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)");
+
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Error")
                         .HasMaxLength(1000)
@@ -8229,6 +8485,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
+                    b.Property<int?>("OrigenAutorizacion")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ReferenciaId")
                         .HasColumnType("int");
 
@@ -8254,15 +8513,26 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasIndex("CorrelationId");
 
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("IX_RegistrosAuditoria_EmpresaId");
+
                     b.HasIndex("Fecha");
 
                     b.HasIndex("Resultado");
 
                     b.HasIndex("UsuarioId");
 
+                    b.HasIndex("AmbitoAutoridad", "Fecha")
+                        .HasDatabaseName("IX_RegistrosAuditoria_Ambito_Fecha");
+
                     b.HasIndex("Modulo", "ReferenciaId");
 
-                    b.ToTable("RegistrosAuditoria", (string)null);
+                    b.ToTable("RegistrosAuditoria", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_AmbitoAutoridad", "`AmbitoAutoridad` IS NULL OR `AmbitoAutoridad` IN (1, 2)");
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_EmpresaId_Positivo", "`EmpresaId` IS NULL OR `EmpresaId` > 0");
+                            t.HasCheckConstraint("CK_RegistrosAuditoria_OrigenAutorizacion", "`OrigenAutorizacion` IS NULL OR `OrigenAutorizacion` IN (1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
@@ -8507,6 +8777,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("Ambito")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.Property<int?>("ActualizadoPorUsuarioId")
                         .HasColumnType("int");
 
@@ -8538,6 +8813,9 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -8550,10 +8828,21 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("IX_Roles_EmpresaId");
+
                     b.HasIndex("NombreNormalizado")
                         .IsUnique();
 
-                    b.ToTable("Roles", (string)null);
+                    b.HasIndex("Ambito", "Activo")
+                        .HasDatabaseName("IX_Roles_Ambito_Activo");
+
+                    b.ToTable("Roles", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Roles_Ambito", "`Ambito` IN (1, 2)");
+                            t.HasCheckConstraint("CK_Roles_Ambito_Empresa", "(`Ambito` = 2 AND `EmpresaId` IS NULL) OR (`Ambito` = 1)");
+                            t.HasCheckConstraint("CK_Roles_EmpresaId_Positivo", "`EmpresaId` IS NULL OR `EmpresaId` > 0");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.RolPermiso", b =>
@@ -9750,6 +10039,30 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasIndex("RolId");
 
                     b.ToTable("Usuarios", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioRolPlataforma", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<bool>("Activa").ValueGeneratedOnAdd().HasColumnType("tinyint(1)").HasDefaultValue(true);
+                    b.Property<string>("ActualizadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
+                    b.Property<int?>("ActualizadoPorUsuarioId").HasColumnType("int");
+                    b.Property<string>("CreadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
+                    b.Property<int?>("CreadoPorUsuarioId").HasColumnType("int");
+                    b.Property<DateTime>("FechaActualizacion").HasColumnType("datetime(6)");
+                    b.Property<DateTime>("FechaCreacion").HasColumnType("datetime(6)");
+                    b.Property<int>("RolId").HasColumnType("int");
+                    b.Property<int>("UsuarioId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("RolId").HasDatabaseName("IX_UsuarioRolesPlataforma_RolId");
+                    b.HasIndex("UsuarioId", "Activa").HasDatabaseName("IX_UsuarioRolesPlataforma_UsuarioId_Activa");
+                    b.HasIndex("UsuarioId", "RolId").IsUnique().HasDatabaseName("UX_UsuarioRolesPlataforma_UsuarioId_RolId");
+                    b.ToTable("UsuarioRolesPlataforma", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_UsuarioRolesPlataforma_RolId", "`RolId` > 0");
+                            t.HasCheckConstraint("CK_UsuarioRolesPlataforma_UsuarioId", "`UsuarioId` > 0");
+                        });
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
@@ -12322,6 +12635,29 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("RolEntidad");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.RegistroAuditoria", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioRolPlataforma", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Rol", null)
+                        .WithMany()
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
@@ -12502,6 +12838,15 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Ventas");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TiendaCuentaCliente", b =>
+                {
+                    b.Navigation("Direcciones");
+
+                    b.Navigation("Favoritos");
+
+                    b.Navigation("Sesiones");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
                 {
                     b.Navigation("Detalles");
@@ -12643,6 +12988,11 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Rol", b =>
                 {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Permisos");
 
                     b.Navigation("Usuarios");

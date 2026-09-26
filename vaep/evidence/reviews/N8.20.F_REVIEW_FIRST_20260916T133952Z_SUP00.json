@@ -19,8 +19,8 @@
     "git_blob_sha": "4e3ea5a57fdfde6fa460ad7e89e20baee2645e60",
     "source": "GitHub Actions read-only Aiven control-plane proof for the actual Desarrollo DB service",
     "provider": "AIVEN",
-    "project": "variapp",
-    "service": "variapp-mysql",
+    "project": "solqaryn",
+    "service": "solqaryn-mysql",
     "service_type": "mysql",
     "service_plan": "free-1-1gb",
     "cloud": "do-sfo",
@@ -50,7 +50,7 @@
     "reason": "Portable plugin sample targets a different PostgreSQL service and is not the causal DEV DB evidence for N8.20.F. It must not be used to certify this task."
   },
   "review_notes": [
-    "The actual N8.20.F GitHub Actions evidence targets Aiven service variapp-mysql and cryptographically links to the same redacted DEV host hash proven by N8.20.C runtime evidence.",
+    "The actual N8.20.F GitHub Actions evidence targets Aiven service solqaryn-mysql and cryptographically links to the same redacted DEV host hash proven by N8.20.C runtime evidence.",
     "The earlier SUP00 closure artifact accidentally referenced a non-causal portable PostgreSQL sample. This corrected review supersedes that source selection defect before Sheet reconciliation.",
     "No secrets, purchase, plan change, restore execution, production access, main mutation, deploy, or PR #2 mutation occurred."
   ],

@@ -31,7 +31,11 @@
   }
 
   <main id="detalle-producto" class="container product-page" tabindex="-1" [attr.aria-busy]="estado() === 'loading'">
-    <nav class="breadcrumbs" aria-label="Migas de pan">
+    <div class="detail-trail">
+      <button type="button" class="back-button" aria-label="Volver a la pantalla anterior" (click)="volverAlOrigen()">
+        <app-store-icon nombre="volver" />
+      </button>
+      <nav class="breadcrumbs" aria-label="Migas de pan">
       <a [href]="enlaces.inicio">Inicio</a>
       <span aria-hidden="true">/</span>
       <a [href]="enlaces.categorias">Categorías</a>
@@ -45,7 +49,8 @@
         <span aria-hidden="true">/</span>
         <span aria-current="page">{{ producto()!.nombre }}</span>
       }
-    </nav>
+      </nav>
+    </div>
 
     @if (estado() === 'loading') {
       <section class="loading-layout" role="status" aria-live="polite" aria-label="Cargando detalle de producto">
@@ -89,7 +94,7 @@
                   [attr.aria-label]="'Ver imagen ' + (indice + 1) + ' de ' + imagenes().length + ' de ' + detalle.nombre"
                   (click)="seleccionarImagen(indice)">
                   @if (imagenValida(imagen)) {
-                    <img [src]="imagen" alt="" loading="lazy" (error)="errorImagen(imagen)">
+                    <img [src]="imagen" alt="" width="240" height="180" loading="lazy" decoding="async" (error)="errorImagen(imagen)">
                   } @else {
                     <app-store-art [tipo]="detalle.ilustracion || 'paquete'" />
                   }
@@ -111,7 +116,7 @@
                   class="main-image-button"
                   [attr.aria-label]="'Ampliar imagen ' + (imagenActiva() + 1) + ' de ' + imagenes().length + ' de ' + detalle.nombre"
                   (click)="abrirLightbox()">
-                  <img [src]="imagenActual()" [alt]="detalle.nombre + (modelo?.nombre && modelo?.nombre !== 'Modelo general' ? ', ' + modelo?.nombre : '')" fetchpriority="high" (error)="errorImagen(imagenActual())">
+                  <img [src]="imagenActual()" [alt]="detalle.nombre + (modelo?.nombre && modelo?.nombre !== 'Modelo general' ? ', ' + modelo?.nombre : '')" width="800" height="600" fetchpriority="high" (error)="errorImagen(imagenActual())">
                 </button>
               } @else {
                 <div class="image-fallback" aria-label="Imagen del producto no disponible">
@@ -150,11 +155,20 @@
             <strong>{{ textoDisponibilidad() }}</strong>
           </div>
 
+          <button
+            type="button"
+            class="text-button favorite-toggle"
+            [disabled]="favoritoProcesando()"
+            [attr.aria-pressed]="favorito()"
+            (click)="alternarFavorito()">
+            {{ favoritoProcesando() ? 'Actualizando…' : favorito() ? 'Quitar de favoritos' : cuentaCliente.autenticado() ? 'Guardar en favoritos' : 'Inicia sesión para guardar' }}
+          </button>
+
           <div class="price-block" aria-label="Precio del producto">
             @if (tienePromocion()) {
               <span class="previous-price">{{ moneda(precioNormal()) }}</span>
               <strong>{{ moneda(precioActual()) }}</strong>
-              <small>Precio promocional publicado por la tienda</small>
+              <small>{{ ofertaNombre() }} · Ahorras {{ moneda(ahorroActual()) }} ({{ porcentajeAhorroActual() }}%)</small>
             } @else {
               <span>Precio</span>
               <strong>{{ moneda(precioActual()) }}</strong>
@@ -165,7 +179,7 @@
             <label class="model-field" for="modelo-detalle">Modelo o variante
               <select #selectorModelo id="modelo-detalle" [value]="modelo?.clave || ''" (change)="seleccionarModelo(selectorModelo.value)">
                 @for (opcion of detalle.modelos; track opcion.clave) {
-                  <option [value]="opcion.clave">{{ opcion.nombre }} · {{ moneda(opcion.precio) }}{{ opcion.disponible ? '' : ' · agotado' }}</option>
+                  <option [value]="opcion.clave">{{ opcion.nombre }} · {{ moneda(precioModelo(opcion)) }}{{ opcion.disponible ? '' : ' · agotado' }}</option>
                 }
               </select>
             </label>
@@ -240,7 +254,7 @@
               <article class="related-card">
                 <a class="related-media" [href]="rutaProducto(relacionado)" [attr.aria-label]="'Ver ' + relacionado.nombre">
                   @if (imagenValida(imagenRelacionado(relacionado))) {
-                    <img [src]="imagenRelacionado(relacionado)" [alt]="relacionado.nombre" loading="lazy" (error)="errorImagen(imagenRelacionado(relacionado))">
+                    <img [src]="imagenRelacionado(relacionado)" [alt]="relacionado.nombre" width="600" height="450" loading="lazy" decoding="async" (error)="errorImagen(imagenRelacionado(relacionado))">
                   } @else {
                     <app-store-art [tipo]="relacionado.ilustracion || 'paquete'" />
                   }
@@ -271,8 +285,8 @@
   @if (identidad.config().piePaginaActivo) {
     <footer class="store-footer">
       <div class="container footer-grid">
-        <div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
-        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.categorias">Categorías</a></div>
+        <div><strong>{{ (identidad.config().nombreComercial || 'Tienda') }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
+        <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.ofertas">Ofertas</a><a [href]="enlaces.categorias">Categorías</a></div>
         <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a>@if (permiteWhatsapp()) { <span>Compra alternativa por WhatsApp</span> }</div>
       </div>
       <div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div>
@@ -285,7 +299,7 @@
       @if (producto(); as productoLightbox) {
         <div class="lightbox-stage" (pointerdown)="iniciarSwipe($event)" (pointerup)="finalizarSwipe($event)" (pointercancel)="cancelarSwipe()">
           @if (imagenValida(imagenActual())) {
-            <img [src]="imagenActual()" [alt]="productoLightbox.nombre + ', imagen ampliada ' + (imagenActiva() + 1)" (error)="errorImagen(imagenActual())">
+            <img [src]="imagenActual()" [alt]="productoLightbox.nombre + ', imagen ampliada ' + (imagenActiva() + 1)" width="1200" height="900" decoding="async" (error)="errorImagen(imagenActual())">
           }
         </div>
         <div class="lightbox-controls">
@@ -297,5 +311,7 @@
     </div>
   </dialog>
 
-  <div class="sr-only" role="status" aria-live="polite">{{ aviso() }}</div>
+  @if (aviso()) {
+    <div class="feedback-toast" role="status" aria-live="polite" aria-atomic="true">{{ aviso() }}</div>
+  }
 </div>

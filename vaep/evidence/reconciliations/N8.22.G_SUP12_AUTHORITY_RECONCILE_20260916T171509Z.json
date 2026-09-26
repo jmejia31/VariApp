@@ -1,7 +1,7 @@
 {
   "schema": "vaep-supervision-authority-reconcile/v1",
   "authority": "docs/VAEP_AUTHORITY.md",
-  "repo": "jmejia31/VariApp",
+  "repo": "jmejia31/Solqaryn",
   "branch": "Desarrollo",
   "recorded_at_utc": "2026-09-16T17:15:09Z",
   "automation": "Tarea Supervisión :12",

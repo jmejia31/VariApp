@@ -65,6 +65,7 @@ public static class ProductoMapper
             EstaAgotado = agotado,
             EstadoInventario = agotado ? "Agotado" : stockBajo ? "Stock bajo" : "Disponible",
             Activo = p.Activo,
+            EsDestacado = p.EsDestacado,
             CategoriaId = p.CategoriaId,
             CategoriaNombre = p.Categoria?.Nombre,
             ColorId = colorId,

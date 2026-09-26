@@ -1,5 +1,5 @@
 {
-  "schema":"variapp-dr-domain-contract/v1",
+  "schema":"solqaryn-dr-domain-contract/v1",
   "authority":"docs/VAEP_AUTHORITY.md",
   "scope":"N8.10.B",
   "parent":"N8.10",
