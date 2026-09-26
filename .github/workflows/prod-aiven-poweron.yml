@@ -29,8 +29,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          avn --auth-token "$AIVEN_TOKEN" --project solqaryn service update solqaryn-mysql --power-on
-          avn --auth-token "$AIVEN_TOKEN" --project solqaryn service wait solqaryn-mysql
+          avn --auth-token "$AIVEN_TOKEN" service update solqaryn-mysql --project solqaryn --power-on
+          avn --auth-token "$AIVEN_TOKEN" service wait solqaryn-mysql --project solqaryn
 
       - name: Verificar estado sin secretos
         shell: bash
