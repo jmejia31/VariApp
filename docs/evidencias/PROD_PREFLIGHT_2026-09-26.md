@@ -85,3 +85,27 @@ No fusionar PR #3416 hasta que:
 5. se defina el cambio de tráfico/DNS y rollback.
 
 El sistema productivo anterior permanece intacto durante este preflight.
+
+
+## Aiven control-plane read-only — 2026-09-26
+
+Workflow temporal `Aiven - PROD topology read-only`, run `36229036129`: **SUCCESS**.
+
+Readback sin secretos:
+
+- proyecto: `solqaryn`;
+- servicio: `solqaryn-mysql`;
+- tipo: `mysql`;
+- estado: `RUNNING`;
+- cloud: `do-sfo`;
+- plan: `free-1-1gb`;
+- host MySQL: `solqaryn-mysql-solqaryn.h.aivencloud.com`;
+- puerto MySQL: `14402`;
+- usuario `solqaryn_prod_user`: presente;
+- usuario `solqaryn_dev_user`: presente;
+- usuario `avnadmin`: presente;
+- `includeSecrets=false`;
+- operaciones write: 0;
+- datos productivos consultados: 0.
+
+Esta evidencia certifica la topología y la existencia del usuario PROD, pero no certifica aún el contenido de la base `solqaryn_prod`.
