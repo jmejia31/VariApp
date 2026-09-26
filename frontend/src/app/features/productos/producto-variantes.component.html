@@ -206,14 +206,19 @@
                 @if (imagen.productoVarianteId == null) { <span class="image-badge fallback-badge">General · respaldo</span> }
                 @if (imagen.productoVarianteId != null && imagen.esPrincipal) { <span class="image-badge principal-badge">Principal</span> }
               </div>
-              @if (imagen.productoVarianteId != null) {
-                <div class="variant-image-actions">
+              <div class="variant-image-actions">
+                @if (puedeExportar()) {
+                  <button mat-icon-button type="button" title="Descargar imagen" aria-label="Descargar imagen de variante" [disabled]="descargandoImagenId() === imagen.id" (click)="descargarImagenVariante(imagen)">
+                    @if (descargandoImagenId() === imagen.id) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>download</mat-icon> }
+                  </button>
+                }
+                @if (imagen.productoVarianteId != null) {
                   @if (!imagen.esPrincipal) {
                     <button mat-icon-button type="button" title="Marcar como principal de esta variante" aria-label="Marcar como principal" (click)="marcarPrincipalVariante(imagen)"><mat-icon>star</mat-icon></button>
                   }
                   <button mat-icon-button type="button" title="Eliminar imagen de esta variante" aria-label="Eliminar imagen" (click)="eliminarImagenVariante(imagen)"><mat-icon>delete</mat-icon></button>
-                </div>
-              }
+                }
+              </div>
             </article>
           }
         </div>
