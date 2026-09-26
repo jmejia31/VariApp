@@ -1,0 +1,59 @@
+name: PROD - Read-only canonical database inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/prod-readonly-readiness.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: PROD
+    env:
+      DB_HOST: ${{ vars.SOLQARYN_PROD_DB_HOST }}
+      DB_PORT: ${{ vars.SOLQARYN_PROD_DB_PORT }}
+      DB_NAME: ${{ vars.SOLQARYN_PROD_DB_NAME }}
+      DB_USER: ${{ vars.SOLQARYN_PROD_DB_USER }}
+      DB_PASSWORD: ${{ secrets.SOLQARYN_PROD_DB_PASSWORD }}
+    steps:
+      - name: Instalar cliente MySQL
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y mysql-client
+
+      - name: Inventario SQL solo lectura
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$DB_NAME" = "solqaryn_prod"
+          test "$DB_USER" = "solqaryn_prod_user"
+          test -n "$DB_HOST"
+          test -n "$DB_PORT"
+          test -n "$DB_PASSWORD"
+          export MYSQL_PWD="$DB_PASSWORD"
+          mysql_cmd=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED --default-character-set=utf8mb4 "$DB_NAME" --batch --skip-column-names)
+
+          database="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT DATABASE(); COMMIT;")"
+          test "$database" = "solqaryn_prod"
+
+          tables="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE'; COMMIT;")"
+          migrations="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory'),(SELECT COUNT(*) FROM __EFMigrationsHistory),0); COMMIT;")"
+          empresas="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Empresas'),(SELECT COUNT(*) FROM Empresas),0); COMMIT;")"
+          productos="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Productos'),(SELECT COUNT(*) FROM Productos),0); COMMIT;")"
+          usuarios="$("${mysql_cmd[@]}" -e "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY; SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Usuarios'),(SELECT COUNT(*) FROM Usuarios),0); COMMIT;")"
+
+          echo "PROD_DB=solqaryn_prod"
+          echo "PROD_BASE_TABLES=$tables"
+          echo "PROD_EF_MIGRATIONS=$migrations"
+          echo "PROD_EMPRESAS=$empresas"
+          echo "PROD_PRODUCTOS=$productos"
+          echo "PROD_USUARIOS=$usuarios"
+          echo "PROD_READ_ONLY_PREFLIGHT=PASS"
+          echo "PROD_WRITES=0"
