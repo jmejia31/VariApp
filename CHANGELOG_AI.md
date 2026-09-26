@@ -1890,3 +1890,14 @@ MAPA_ARQUITECTURA: SIN_CAMBIO.
 - Las diez automatizaciones conservan el modelo `TASKS_ONLY`, leases, REVIEW_FIRST, recovery, tests/gates causales y cierre `LISTO`.
 - La libertad para rediseñar o reemplazar implementación no elimina seguridad, RBAC, tenancy, integridad de datos, trazabilidad, rollback ni autorización explícita para `main`/PROD.
 - No se reescribió historial Git ni se modificó producto, datos o infraestructura.
+
+
+## 2026-09-26 — Descarga de imágenes y galería por variante
+
+- Corregida la descarga de imágenes de producto desde Cloudinary: el backend ya no devuelve un stream ligado a una conexión HTTP que se cierra al abandonar el método; ahora materializa el contenido antes de responder al navegador.
+- El contrato de descarga compatible con imágenes existentes valida origen HTTPS, host `res.cloudinary.com`, cloud configurado y folder administrado de productos; el ownership continúa comprobándose contra el producto tenant-scoped antes de descargar.
+- Se mantiene el límite general existente de 5 imágenes de producto.
+- Se confirma y conserva el límite de 5 imágenes propias por variante comercial tanto en backend como en frontend.
+- Las variantes sin imágenes propias continúan mostrando la galería general como respaldo.
+- La galería de variantes ahora permite descargar tanto imágenes específicas como imágenes generales mostradas como fallback, respetando el permiso `Productos/Exportar`.
+- Sin cambios de esquema ni migraciones. Sin cambios en `main` ni PROD.
