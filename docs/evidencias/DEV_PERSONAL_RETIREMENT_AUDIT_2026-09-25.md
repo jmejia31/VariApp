@@ -6,7 +6,7 @@
 
 ## Vercel
 
-- `variapp-desarrollo`: eliminado previamente de la cuenta personal.
+- `identidad-retirada-desarrollo`: eliminado previamente de la cuenta personal.
 - Team corporativo `SOLQARYN`: sólo proyecto `solqaryn-dev`.
 - `varistorehn` PROD legacy: fuera de alcance y no tocado.
 
