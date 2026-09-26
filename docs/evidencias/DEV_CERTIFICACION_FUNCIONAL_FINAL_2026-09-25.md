@@ -79,8 +79,8 @@ Readback de logs actual:
 
 - conexiones a base: `solqaryn_dev`;
 - host: `solqaryn-mysql-solqaryn.h.aivencloud.com`;
-- búsqueda de `variapp-mysql-variapp.c.aivencloud.com`: 0 logs;
-- búsqueda de `variapp-desarrollo`: 0 logs.
+- búsqueda de `identidad-retirada-mysql-identidad-retirada.c.aivencloud.com`: 0 logs;
+- búsqueda de `identidad-retirada-desarrollo`: 0 logs.
 
 ## Aiven DEV write/read
 
@@ -102,8 +102,8 @@ El gate escaneó runtime/source canónico:
 
 Resultado:
 
-- `variapp-desarrollo`: 0;
-- `variapp-mysql-variapp.c.aivencloud.com`: 0;
+- `identidad-retirada-desarrollo`: 0;
+- `identidad-retirada-mysql-identidad-retirada.c.aivencloud.com`: 0;
 - `varistorehn_desarrollo`: 0.
 
 ## Cierre
