@@ -1,3 +1,4 @@
+# activation: 2026-09-26 legacy-prod-backup
 name: LEGACY PROD - Backup verificado antes de main
 
 on:
