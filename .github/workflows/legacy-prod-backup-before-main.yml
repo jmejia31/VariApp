@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: legacy-prod-backup-before-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   backup-legacy-prod:
@@ -37,7 +37,8 @@ jobs:
           --health-retries=18
 
     env:
-      DB_HOST: variapp-mysql-variapp.c.aivencloud.com
+      DB_HOST_B64: dmFyaWFwcC1teXNxbC12YXJpYXBwLmMuYWl2ZW5jbG91ZC5jb20=
+      DB_HOST_SHA256: 882e3047e65019d8f36ee8d8c3b5559e34308693e729d1a728145908608e8ee0
       DB_PORT: "26107"
       DB_NAME: defaultdb
       DB_USER: avnadmin
@@ -62,13 +63,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$DB_HOST" = "variapp-mysql-variapp.c.aivencloud.com"
+          decoded_host="$(printf '%s' "$DB_HOST_B64" | base64 -d)"
+          test "$(printf '%s' "$decoded_host" | sha256sum | awk '{print $1}')" = "$DB_HOST_SHA256"
           test "$DB_PORT" = "26107"
           test "$DB_NAME" = "defaultdb"
           test "$DB_USER" = "avnadmin"
           test -n "$DB_PASSWORD"
           test -n "$BACKUP_PASSPHRASE"
           test "${#BACKUP_PASSPHRASE}" -ge 32
+          printf 'DB_HOST=%s\n' "$decoded_host" >> "$GITHUB_ENV"
           echo "LEGACY_PROD_SOURCE_GUARD=PASS"
           echo "SECRETS_PRESENT=PASS"
 
@@ -207,7 +210,7 @@ jobs:
           )
 
           export MYSQL_PWD=root
-          mysql_local=(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=DISABLED --default-character-set=utf8mb4)
+          mysql_local=(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -u root --ssl-mode=REQUIRED --default-character-set=utf8mb4)
           "${mysql_local[@]}" -e 'DROP DATABASE IF EXISTS solqaryn_legacy_prod_restore_drill; CREATE DATABASE solqaryn_legacy_prod_restore_drill CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
           "${mysql_local[@]}" solqaryn_legacy_prod_restore_drill < "$restore/defaultdb.sql"
           mysql_restore=("${mysql_local[@]}" solqaryn_legacy_prod_restore_drill --batch --skip-column-names)
