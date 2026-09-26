@@ -5,6 +5,8 @@
 ## 1. Identidad y repositorio
 
 - PROJECT_ID: `SOLQARYN`
+- PROJECT_SCOPE_LOCK: `STRICT`
+- `PROJECT_SCOPE_LOCK=STRICT`
 - Plataforma: SOLQARYN.
 - Repositorio: `solqaryn/Solqaryn`.
 - Rama ordinaria de trabajo: `dev`.
