@@ -14,10 +14,11 @@ public interface IImageStorageService
     /// que exige <see cref="StorageTenantContext"/>.
     Task DeleteAsync(string publicId);
 
-    /// Descarga el contenido real de una imagen ya almacenada (sección 11:
-    /// "la descarga debe utilizar archivos reales almacenados por el
-    /// sistema", nunca simulados). Devuelve null si el recurso no existe o
-    /// no se pudo obtener — el llamador decide la respuesta HTTP apropiada.
+    /// Descarga una imagen cuyo ownership ya fue verificado por el llamador
+    /// contra una entidad tenant-scoped persistida. La infraestructura debe
+    /// aceptar únicamente locators del origen/cuenta/folder administrados,
+    /// incluyendo imágenes válidas creadas antes del prefijo por Empresa.
+    /// Devuelve null si el recurso ya no existe o no puede obtenerse.
     Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url);
 
     /// <summary>
