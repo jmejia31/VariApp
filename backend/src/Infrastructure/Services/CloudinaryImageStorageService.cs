@@ -189,20 +189,23 @@ public class CloudinaryImageStorageService : IImageStorageService
         string url,
         CancellationToken cancellationToken)
     {
-        // Streaming server-side en vez de redirigir a la URL de Cloudinary
-        // directamente: el backend controla la autorización real de la descarga.
+        // La respuesta de Cloudinary se materializa antes de liberar HttpClient/HttpResponseMessage.
+        // Devolver directamente response.Content.ReadAsStreamAsync() dejaba al controlador con
+        // un stream cuya conexión podía cerrarse al salir de este método.
         using var httpClient = new HttpClient();
         try
         {
-            var response = await httpClient.GetAsync(
+            using var response = await httpClient.GetAsync(
                 url,
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken);
             if (!response.IsSuccessStatusCode) return null;
 
             var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-            var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            return (stream, contentType);
+            var memory = new MemoryStream();
+            await response.Content.CopyToAsync(memory, cancellationToken);
+            memory.Position = 0;
+            return (memory, contentType);
         }
         catch (OperationCanceledException)
         {
