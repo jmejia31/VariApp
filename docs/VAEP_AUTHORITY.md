@@ -4,6 +4,7 @@ Este archivo es la única autoridad operativa vigente de VAEP para SOLQARYN.
 
 ```text
 PROJECT_ID=SOLQARYN
+PROJECT_SCOPE_LOCK=STRICT
 REPOSITORY=solqaryn/Solqaryn
 BRANCH=dev
 AUTOMATION_AUTHORITY=MASTER
