@@ -1,0 +1,103 @@
+name: Aiven - PROD topology read-only
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/aiven-prod-readonly-topology.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  topology:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: DEV
+    env:
+      AIVEN_TOKEN: ${{ secrets.SOLQARYN_AIVEN_TOKEN }}
+    steps:
+      - name: Inspeccionar servicio y usuarios sin secretos
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$AIVEN_TOKEN"
+          mkdir -p evidence
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.error
+
+          root='https://api.aiven.io/v1'
+          token=os.environ['AIVEN_TOKEN'].strip()
+          project='solqaryn'
+          service='solqaryn-mysql'
+
+          def get(path):
+              req=urllib.request.Request(
+                  root+path,
+                  headers={
+                      'Authorization': f'aivenv1 {token}',
+                      'Accept':'application/json',
+                      'User-Agent':'SOLQARYN-PROD-Topology-ReadOnly/1.0'
+                  },
+                  method='GET'
+              )
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  return json.load(resp)
+
+          svc_payload=get(f'/project/{project}/service/{service}')
+          svc=svc_payload.get('service', svc_payload)
+          users_payload=get(f'/project/{project}/service/{service}/user')
+          users=users_payload.get('users', []) if isinstance(users_payload, dict) else []
+
+          components=[]
+          for c in (svc.get('components') or []):
+              components.append({
+                  'component': c.get('component'),
+                  'host': c.get('host'),
+                  'port': c.get('port'),
+                  'route': c.get('route'),
+                  'usage': c.get('usage'),
+              })
+
+          safe_users=[]
+          for u in users:
+              safe_users.append({
+                  'username': u.get('username'),
+                  'type': u.get('type'),
+                  'mysqlGrants': u.get('mysql_grants'),
+              })
+
+          usernames=sorted(x['username'] for x in safe_users if x.get('username'))
+          report={
+              'status':'PASS',
+              'project':project,
+              'serviceName':svc.get('service_name'),
+              'serviceType':svc.get('service_type'),
+              'state':svc.get('state'),
+              'cloudName':svc.get('cloud_name'),
+              'plan':svc.get('plan'),
+              'components':components,
+              'usernames':usernames,
+              'prodAppUserPresent':'solqaryn_prod_user' in usernames,
+              'devAppUserPresent':'solqaryn_dev_user' in usernames,
+              'adminUserPresent':'avnadmin' in usernames,
+              'serviceUsers':safe_users,
+              'includeSecrets':False,
+              'writeOperations':False,
+              'productionDataQueried':False,
+          }
+          print(json.dumps(report,separators=(',',':')))
+          if svc.get('service_name') != service or svc.get('service_type') != 'mysql':
+              raise SystemExit('canonical service mismatch')
+          if 'solqaryn_prod_user' not in usernames:
+              raise SystemExit('solqaryn_prod_user missing')
+          with open('evidence/aiven-prod-topology-readonly.json','w',encoding='utf-8') as f:
+              json.dump(report,f,indent=2); f.write('\n')
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aiven-prod-topology-readonly-${{ github.run_id }}
+          retention-days: 7
+          path: evidence/
