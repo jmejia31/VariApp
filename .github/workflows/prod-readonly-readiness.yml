@@ -1,0 +1,62 @@
+name: PROD - Preflight read-only de infraestructura
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/workflows/prod-readonly-readiness.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prod-readonly:
+    name: Verificar PROD corporativo sin escrituras
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: PROD
+    env:
+      DB_HOST: ${{ vars.SOLQARYN_PROD_DB_HOST }}
+      DB_PORT: ${{ vars.SOLQARYN_PROD_DB_PORT }}
+      DB_NAME: ${{ vars.SOLQARYN_PROD_DB_NAME }}
+      DB_USER: ${{ vars.SOLQARYN_PROD_DB_USER }}
+      DB_PASSWORD: ${{ secrets.SOLQARYN_PROD_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar cliente MySQL
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y mysql-client
+
+      - name: Guardas canónicas PROD
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$DB_NAME" = "solqaryn_prod"
+          test "$DB_USER" = "solqaryn_prod_user"
+          test -n "$DB_HOST"
+          test -n "$DB_PORT"
+          test -n "$DB_PASSWORD"
+          echo "PROD_CANONICAL_ENV=PASS"
+
+      - name: Inventario read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MYSQL_PWD="$DB_PASSWORD"
+          mysql_cmd=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --ssl-mode=REQUIRED --default-character-set=utf8mb4 "$DB_NAME" --batch --skip-column-names)
+          test "$("${mysql_cmd[@]}" -e 'SELECT DATABASE();')" = "solqaryn_prod"
+          tables="$("${mysql_cmd[@]}" -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_TYPE='BASE TABLE';")"
+          migrations="$("${mysql_cmd[@]}" -e "SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='__EFMigrationsHistory'),(SELECT COUNT(*) FROM __EFMigrationsHistory),0);")"
+          empresas="$("${mysql_cmd[@]}" -e "SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Empresas'),(SELECT COUNT(*) FROM Empresas),0);")"
+          productos="$("${mysql_cmd[@]}" -e "SELECT IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Productos'),(SELECT COUNT(*) FROM Productos),0);")"
+          echo "PROD_DB=solqaryn_prod"
+          echo "PROD_BASE_TABLES=$tables"
+          echo "PROD_EF_MIGRATIONS=$migrations"
+          echo "PROD_EMPRESAS=$empresas"
+          echo "PROD_PRODUCTOS=$productos"
+          echo "PROD_READ_ONLY_PREFLIGHT=PASS"
+          echo "PROD_WRITES=0"
